@@ -11,7 +11,7 @@ class Media(
     name: Property[String] = Property(""),
     contentType: Property[String] = Property(""),
     data: Property[String] = Property(""),
-    var thumbnail: Property[Thumbnail] = Property[Thumbnail](null)
+    val thumbnail: Property[Thumbnail] = Property[Thumbnail](null)
 ) extends Thumbnail(id, name, contentType, data) {
 
   override def properties: js.Array[PropertyAccess[Thumbnail, ?]] = Media.properties.asInstanceOf[js.Array[PropertyAccess[Thumbnail, ?]]]

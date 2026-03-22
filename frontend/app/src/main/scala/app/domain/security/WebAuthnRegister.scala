@@ -1,14 +1,14 @@
 package app.domain.security
 
 import app.support.JsonModel
-import jfx.core.macros.property
+import jfx.core.macros.{property, typedProperty}
 import jfx.core.state.{Property, PropertyAccess}
 
 import scala.scalajs.js
 
 class WebAuthnRegister(
-  var email: Property[String] = Property(""),
-  var nickName: Property[String] = Property("")
+  val email: Property[String] = Property(""),
+  val nickName: Property[String] = Property("")
 ) extends JsonModel[WebAuthnRegister] {
 
   override def properties: js.Array[PropertyAccess[WebAuthnRegister, ?]] =
@@ -17,7 +17,7 @@ class WebAuthnRegister(
 
 object WebAuthnRegister {
   val properties: js.Array[PropertyAccess[WebAuthnRegister, ?]] = js.Array(
-    property(_.email),
-    property(_.nickName)
+    typedProperty[WebAuthnRegister, Property[String], String](_.email),
+    typedProperty[WebAuthnRegister, Property[String], String](_.nickName)
   )
 }

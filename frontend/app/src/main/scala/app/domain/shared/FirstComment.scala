@@ -4,7 +4,7 @@ import app.domain.core.{AbstractEntity, Data, Link, Table, User}
 import app.domain.documents.Issue
 import app.domain.timeline.Post
 import app.support.Api
-import jfx.core.macros.property
+import jfx.core.macros.{property, typedProperty}
 import jfx.core.state.{ListProperty, Property, PropertyAccess}
 
 import java.util.UUID
@@ -12,14 +12,14 @@ import scala.concurrent.Future
 import scala.scalajs.js
 
 class FirstComment(
-                    var id: Property[UUID] = Property(null),
-                    var modified: Property[String] = Property(""),
-                    var created: Property[String] = Property(""),
-                    var user: Property[User | Null] = Property(null),
-                    var editor: Property[js.Any | Null] = Property(null),
-                    var likes: ListProperty[Like] = ListProperty(),
-                    var comments: ListProperty[SecondComment] = ListProperty(),
-                    var links: ListProperty[Link] = ListProperty()
+                    val id: Property[UUID] = Property(null),
+                    val modified: Property[String] = Property(""),
+                    val created: Property[String] = Property(""),
+                    val user: Property[User | Null] = Property(null),
+                    val editor: Property[js.Any | Null] = Property(null),
+                    val likes: ListProperty[Like] = ListProperty(),
+                    val comments: ListProperty[SecondComment] = ListProperty(),
+                    val links: ListProperty[Link] = ListProperty()
 ) extends AbstractEntity[FirstComment] with OwnerProvider {
 
   val editable: Property[Boolean] = Property(false)
@@ -60,14 +60,14 @@ class FirstComment(
 
 object FirstComment {
   val properties: js.Array[PropertyAccess[FirstComment, ?]] = js.Array(
-    property(_.id),
-    property(_.modified),
-    property(_.created),
-    property(_.user),
-    property(_.editor),
-    property(_.likes),
-    property(_.comments),
-    property(_.links)
+    typedProperty[FirstComment, Property[UUID], UUID](_.id),
+    typedProperty[FirstComment, Property[String], String](_.modified),
+    typedProperty[FirstComment, Property[String], String](_.created),
+    typedProperty[FirstComment, Property[User | Null], User | Null](_.user),
+    typedProperty[FirstComment, Property[js.Any | Null], js.Any | Null](_.editor),
+    typedProperty[FirstComment, ListProperty[Like], Like](_.likes),
+    typedProperty[FirstComment, ListProperty[SecondComment], SecondComment](_.comments),
+    typedProperty[FirstComment, ListProperty[Link], Link](_.links)
   )
 
   def list(index: Int, limit: Int, post: Post): Future[Table[Data[FirstComment]]] =

@@ -1,6 +1,6 @@
 package jfx.domain
 
-import jfx.core.macros.property
+import jfx.core.macros.{property, typedProperty}
 import jfx.core.state.{Property, PropertyAccess}
 import jfx.form.Model
 
@@ -8,10 +8,10 @@ import java.util.UUID
 import scala.scalajs.js
 
 class Thumbnail(
-    var id : Property[UUID] = Property(null),               
-    var name: Property[String] = Property(""),
-    var contentType: Property[String] = Property(""),
-    var data: Property[String] = Property("")
+    val id : Property[UUID] = Property(null),               
+    val name: Property[String] = Property(""),
+    val contentType: Property[String] = Property(""),
+    val data: Property[String] = Property("")
 ) extends Model[Thumbnail] {
 
   override def properties: js.Array[PropertyAccess[Thumbnail, ?]] = Thumbnail.properties
@@ -19,9 +19,9 @@ class Thumbnail(
 
 object Thumbnail {
   val properties: js.Array[PropertyAccess[Thumbnail, ?]] = js.Array(
-    property(_.id),
-    property(_.name),
-    property(_.contentType),
-    property(_.data)
+    typedProperty[Thumbnail, Property[UUID], UUID](_.id),
+    typedProperty[Thumbnail, Property[String], String](_.name),
+    typedProperty[Thumbnail, Property[String], String](_.contentType),
+    typedProperty[Thumbnail, Property[String], String](_.data)
   )
 }

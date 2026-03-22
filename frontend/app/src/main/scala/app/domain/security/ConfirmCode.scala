@@ -1,13 +1,13 @@
 package app.domain.security
 
 import app.support.JsonModel
-import jfx.core.macros.property
+import jfx.core.macros.{property, typedProperty}
 import jfx.core.state.{Property, PropertyAccess}
 
 import scala.scalajs.js
 
 class ConfirmCode(
-  var confirm: Property[String] = Property("")
+  val confirm: Property[String] = Property("")
 ) extends JsonModel[ConfirmCode] {
 
   override def properties: js.Array[PropertyAccess[ConfirmCode, ?]] =
@@ -16,6 +16,6 @@ class ConfirmCode(
 
 object ConfirmCode {
   val properties: js.Array[PropertyAccess[ConfirmCode, ?]] = js.Array(
-    property(_.confirm)
+    typedProperty[ConfirmCode, Property[String], String](_.confirm)
   )
 }

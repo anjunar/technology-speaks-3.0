@@ -2,7 +2,7 @@ package app.domain.followers
 
 import app.domain.core.{AbstractEntity, Data, Link, Table, User}
 import app.support.Api
-import jfx.core.macros.property
+import jfx.core.macros.{property, typedProperty}
 import jfx.core.state.{ListProperty, Property, PropertyAccess}
 
 import java.util.UUID
@@ -10,13 +10,13 @@ import scala.concurrent.Future
 import scala.scalajs.js
 
 class RelationShip(
-                    var id: Property[UUID] = Property(null),
-                    var modified: Property[String] = Property(""),
-                    var created: Property[String] = Property(""),
-                    var follower: Property[User | Null] = Property(null),
-                    var users: ListProperty[User] = ListProperty(),
-                    var groups: ListProperty[Group] = ListProperty(),
-                    var links: ListProperty[Link] = ListProperty()
+                    val id: Property[UUID] = Property(null),
+                    val modified: Property[String] = Property(""),
+                    val created: Property[String] = Property(""),
+                    val follower: Property[User | Null] = Property(null),
+                    val users: ListProperty[User] = ListProperty(),
+                    val groups: ListProperty[Group] = ListProperty(),
+                    val links: ListProperty[Link] = ListProperty()
 ) extends AbstractEntity[RelationShip] {
 
   override def properties: js.Array[PropertyAccess[RelationShip, ?]] =
@@ -34,13 +34,13 @@ class RelationShip(
 
 object RelationShip {
   val properties: js.Array[PropertyAccess[RelationShip, ?]] = js.Array(
-    property(_.id),
-    property(_.modified),
-    property(_.created),
-    property(_.follower),
-    property(_.users),
-    property(_.groups),
-    property(_.links)
+    typedProperty[RelationShip, Property[UUID], UUID](_.id),
+    typedProperty[RelationShip, Property[String], String](_.modified),
+    typedProperty[RelationShip, Property[String], String](_.created),
+    typedProperty[RelationShip, Property[User | Null], User | Null](_.follower),
+    typedProperty[RelationShip, ListProperty[User], User](_.users),
+    typedProperty[RelationShip, ListProperty[Group], Group](_.groups),
+    typedProperty[RelationShip, ListProperty[Link], Link](_.links)
   )
 
   def read(id: String): Future[Data[RelationShip]] =

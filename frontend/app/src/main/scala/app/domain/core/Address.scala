@@ -1,20 +1,20 @@
 package app.domain.core
 
-import jfx.core.macros.property
+import jfx.core.macros.{property, typedProperty}
 import jfx.core.state.{ListProperty, Property, PropertyAccess}
 
 import java.util.UUID
 import scala.scalajs.js
 
 class Address(
-               var id: Property[UUID] = Property(null),
-               var modified: Property[String] = Property(""),
-               var created: Property[String] = Property(""),
-               var street: Property[String] = Property(""),
-               var number: Property[String] = Property(""),
-               var zipCode: Property[String] = Property(""),
-               var country: Property[String] = Property(""),
-               var links: ListProperty[Link] = ListProperty()
+               val id: Property[UUID] = Property(null),
+               val modified: Property[String] = Property(""),
+               val created: Property[String] = Property(""),
+               val street: Property[String] = Property(""),
+               val number: Property[String] = Property(""),
+               val zipCode: Property[String] = Property(""),
+               val country: Property[String] = Property(""),
+               val links: ListProperty[Link] = ListProperty()
 ) extends AbstractEntity[Address] {
 
   override def properties: js.Array[PropertyAccess[Address, ?]] =
@@ -23,13 +23,13 @@ class Address(
 
 object Address {
   val properties: js.Array[PropertyAccess[Address, ?]] = js.Array(
-    property(_.id),
-    property(_.modified),
-    property(_.created),
-    property(_.street),
-    property(_.number),
-    property(_.zipCode),
-    property(_.country),
-    property(_.links)
+    typedProperty[Address, Property[UUID], UUID](_.id),
+    typedProperty[Address, Property[String], String](_.modified),
+    typedProperty[Address, Property[String], String](_.created),
+    typedProperty[Address, Property[String], String](_.street),
+    typedProperty[Address, Property[String], String](_.number),
+    typedProperty[Address, Property[String], String](_.zipCode),
+    typedProperty[Address, Property[String], String](_.country),
+    typedProperty[Address, ListProperty[Link], Link](_.links)
   )
 }

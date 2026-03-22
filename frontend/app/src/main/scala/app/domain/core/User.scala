@@ -10,15 +10,15 @@ import scala.concurrent.Future
 import scala.scalajs.js
 
 class User(
-            var id: Property[UUID] = Property(null),
-            var modified: Property[String] = Property(""),
-            var created: Property[String] = Property(""),
-            var nickName: Property[String] = Property(""),
-            var image: Property[Media | Null] = Property(null),
-            var info: Property[UserInfo | Null] = Property(null),
-            var address: Property[Address | Null] = Property(null),
-            var emails: ListProperty[Email] = ListProperty(),
-            var links: ListProperty[Link] = ListProperty()
+            val id: Property[UUID] = Property(null),
+            val modified: Property[String] = Property(""),
+            val created: Property[String] = Property(""),
+            val nickName: Property[String] = Property(""),
+            val image: Property[Media | Null] = Property(null),
+            val info: Property[UserInfo | Null] = Property(null),
+            val address: Property[Address | Null] = Property(null),
+            val emails: ListProperty[Email] = ListProperty(),
+            val links: ListProperty[Link] = ListProperty()
 ) extends AbstractEntity[User] {
 
   override def properties: js.Array[PropertyAccess[User, ?]] =
@@ -37,14 +37,14 @@ class User(
 object User {
   val properties: js.Array[PropertyAccess[User, ?]] = js.Array(
     typedProperty[User, Property[UUID], UUID](_.id),
-    property(_.modified),
-    property(_.created),
-    property(_.nickName),
-    property(_.image),
-    property(_.info),
-    property(_.address),
-    property(_.emails),
-    property(_.links)
+    typedProperty[User, Property[String], String](_.modified),
+    typedProperty[User, Property[String], String](_.created),
+    typedProperty[User, Property[String], String](_.nickName),
+    typedProperty[User, Property[Media | Null], Media | Null](_.image),
+    typedProperty[User, Property[UserInfo | Null], UserInfo | Null](_.info),
+    typedProperty[User, Property[Address | Null], Address | Null](_.address),
+    typedProperty[User, ListProperty[Email], Email](_.emails),
+    typedProperty[User, ListProperty[Link], Link](_.links)
   )
 
   def read(id: String): Future[Data[User]] =

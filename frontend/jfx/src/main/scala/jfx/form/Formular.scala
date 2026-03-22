@@ -57,7 +57,6 @@ trait Formular[M <: Model[M], N <: Node] extends NodeComponent[N] {
     }
 
     val observer = valueProperty.observe { model =>
-      console.log(model)
       if (model != null) {
         binding.add(bindNow(control))
       } else {

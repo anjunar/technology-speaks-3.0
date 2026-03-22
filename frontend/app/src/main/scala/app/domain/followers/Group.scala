@@ -2,7 +2,7 @@ package app.domain.followers
 
 import app.domain.core.{AbstractEntity, Data, Link, Table, User}
 import app.support.Api
-import jfx.core.macros.property
+import jfx.core.macros.{property, typedProperty}
 import jfx.core.state.{ListProperty, Property, PropertyAccess}
 
 import java.util.UUID
@@ -10,12 +10,12 @@ import scala.concurrent.Future
 import scala.scalajs.js
 
 class Group(
-             var id: Property[UUID] = Property(null),
-             var name: Property[String] = Property(""),
-             var modified: Property[String] = Property(""),
-             var created: Property[String] = Property(""),
-             var users: ListProperty[User] = ListProperty(),
-             var links: ListProperty[Link] = ListProperty()
+             val id: Property[UUID] = Property(null),
+             val name: Property[String] = Property(""),
+             val modified: Property[String] = Property(""),
+             val created: Property[String] = Property(""),
+             val users: ListProperty[User] = ListProperty(),
+             val links: ListProperty[Link] = ListProperty()
 ) extends AbstractEntity[Group] {
 
   val editable: Property[Boolean] = Property(false)
@@ -35,12 +35,12 @@ class Group(
 
 object Group {
   val properties: js.Array[PropertyAccess[Group, ?]] = js.Array(
-    property(_.id),
-    property(_.name),
-    property(_.modified),
-    property(_.created),
-    property(_.users),
-    property(_.links)
+    typedProperty[Group, Property[UUID], UUID](_.id),
+    typedProperty[Group, Property[String], String](_.name),
+    typedProperty[Group, Property[String], String](_.modified),
+    typedProperty[Group, Property[String], String](_.created),
+    typedProperty[Group, ListProperty[User], User](_.users),
+    typedProperty[Group, ListProperty[Link], Link](_.links)
   )
 
   def read(id: String): Future[Data[Group]] =

@@ -1,17 +1,17 @@
 package app.domain.core
 
-import jfx.core.macros.property
+import jfx.core.macros.{property, typedProperty}
 import jfx.core.state.{ListProperty, Property, PropertyAccess}
 
 import java.util.UUID
 import scala.scalajs.js
 
 class Email(
-             var id: Property[UUID] = Property(null),
-             var modified: Property[String] = Property(""),
-             var created: Property[String] = Property(""),
-             var value: Property[String] = Property(""),
-             var links: ListProperty[Link] = ListProperty()
+             val id: Property[UUID] = Property(null),
+             val modified: Property[String] = Property(""),
+             val created: Property[String] = Property(""),
+             val value: Property[String] = Property(""),
+             val links: ListProperty[Link] = ListProperty()
 ) extends AbstractEntity[Email] {
 
   override def properties: js.Array[PropertyAccess[Email, ?]] =
@@ -20,10 +20,10 @@ class Email(
 
 object Email {
   val properties: js.Array[PropertyAccess[Email, ?]] = js.Array(
-    property(_.id),
-    property(_.modified),
-    property(_.created),
-    property(_.value),
-    property(_.links)
+    typedProperty[Email, Property[UUID], UUID](_.id),
+    typedProperty[Email, Property[String], String](_.modified),
+    typedProperty[Email, Property[String], String](_.created),
+    typedProperty[Email, Property[String], String](_.value),
+    typedProperty[Email, ListProperty[Link], Link](_.links)
   )
 }
