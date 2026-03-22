@@ -8,7 +8,6 @@ import jfx.core.state.PropertyAccess
 import scala.scalajs.js
 
 class ConfirmLink(
-  var id: String = "confirm-confirm",
   var rel: String = "",
   var url: String = "",
   var method: String = "GET"
@@ -24,7 +23,6 @@ class ConfirmLink(
 
 object ConfirmLink {
   val properties: js.Array[PropertyAccess[ConfirmLink, ?]] = js.Array(
-    property(_.id),
     property(_.rel),
     property(_.url),
     property(_.method)

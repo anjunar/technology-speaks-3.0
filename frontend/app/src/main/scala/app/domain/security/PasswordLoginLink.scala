@@ -8,7 +8,6 @@ import jfx.core.state.PropertyAccess
 import scala.scalajs.js
 
 class PasswordLoginLink(
-  var id: String = "password-login-login",
   var rel: String = "",
   var url: String = "",
   var method: String = "GET"
@@ -24,7 +23,6 @@ class PasswordLoginLink(
 
 object PasswordLoginLink {
   val properties: js.Array[PropertyAccess[PasswordLoginLink, ?]] = js.Array(
-    property(_.id),
     property(_.rel),
     property(_.url),
     property(_.method)

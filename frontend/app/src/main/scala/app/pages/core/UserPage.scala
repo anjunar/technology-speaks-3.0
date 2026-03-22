@@ -106,7 +106,7 @@ class UserPage(val model: User) extends PageComposite("User", pageResizable = fa
 
                     factory = () => new UserInfo()
 
-                    addDisposable(infoDisabled.observe(disabled => {
+                    addDisposable(infoDisabled.observeWithoutInitial(disabled => {
                       if (disabled) {
                         SubForm.clearForm()
                       } else {
@@ -152,7 +152,7 @@ class UserPage(val model: User) extends PageComposite("User", pageResizable = fa
 
                     factory = () => new Address()
 
-                    addDisposable(infoDisabled.observe(disabled => {
+                    addDisposable(addressDisabled.observeWithoutInitial(disabled => {
                       if (disabled) {
                         SubForm.clearForm()
                       } else {

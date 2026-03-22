@@ -1,5 +1,6 @@
 package app.components.shared
 
+import app.domain.core.MediaHelper
 import app.domain.shared.OwnerProvider
 import app.support.{Navigation, TimeAgo}
 import app.ui.{CompositeSupport, DivComposite}
@@ -167,7 +168,7 @@ class ComponentHeader extends DivComposite {
           if (avatarImageRef != null && avatarIconRef != null) {
             image match {
               case Some(media) =>
-                avatarImageRef.nn.src = media.thumbnailLink()
+                avatarImageRef.nn.src = MediaHelper.thumbnailLink(media)
                 avatarImageRef.nn.element.style.display = "block"
                 avatarIconRef.nn.element.style.display = "none"
               case None =>

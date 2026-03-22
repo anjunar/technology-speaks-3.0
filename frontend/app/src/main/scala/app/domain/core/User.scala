@@ -1,8 +1,9 @@
 package app.domain.core
 
 import app.support.Api
-import jfx.core.macros.property
+import jfx.core.macros.{property, typedProperty}
 import jfx.core.state.{ListProperty, Property, PropertyAccess}
+import jfx.domain.Media
 
 import java.util.UUID
 import scala.concurrent.Future
@@ -35,7 +36,7 @@ class User(
 
 object User {
   val properties: js.Array[PropertyAccess[User, ?]] = js.Array(
-    property(_.id),
+    typedProperty[User, Property[UUID], UUID](_.id),
     property(_.modified),
     property(_.created),
     property(_.nickName),

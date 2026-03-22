@@ -8,7 +8,6 @@ import jfx.core.state.PropertyAccess
 import scala.scalajs.js
 
 class RelationShipLink(
-  var id: String = "followers-list",
   var rel: String = "",
   var url: String = "",
   var method: String = "GET"
@@ -24,7 +23,6 @@ class RelationShipLink(
 
 object RelationShipLink {
   val properties: js.Array[PropertyAccess[RelationShipLink, ?]] = js.Array(
-    property(_.id),
     property(_.rel),
     property(_.url),
     property(_.method)

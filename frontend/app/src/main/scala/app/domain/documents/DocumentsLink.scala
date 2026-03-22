@@ -8,7 +8,6 @@ import jfx.core.state.PropertyAccess
 import scala.scalajs.js
 
 class DocumentsLink(
-  var id: String = "document-root",
   var rel: String = "",
   var url: String = "",
   var method: String = "GET"
@@ -24,7 +23,6 @@ class DocumentsLink(
 
 object DocumentsLink {
   val properties: js.Array[PropertyAccess[DocumentsLink, ?]] = js.Array(
-    property(_.id),
     property(_.rel),
     property(_.url),
     property(_.method)

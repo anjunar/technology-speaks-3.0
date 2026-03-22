@@ -8,7 +8,6 @@ import jfx.core.state.PropertyAccess
 import scala.scalajs.js
 
 class WebAuthnLoginLink(
-  var id: String = "web-authn-login-options",
   var rel: String = "",
   var url: String = "",
   var method: String = "GET"
@@ -24,7 +23,6 @@ class WebAuthnLoginLink(
 
 object WebAuthnLoginLink {
   val properties: js.Array[PropertyAccess[WebAuthnLoginLink, ?]] = js.Array(
-    property(_.id),
     property(_.rel),
     property(_.url),
     property(_.method)

@@ -65,7 +65,7 @@ class BeanSerializer extends Serializer[Any] {
       val typeProperty = if (subtype != null) {
         new JsonString(subtype.alias())
       } else {
-        new JsonString(input.getClass.getSimpleName)
+        new JsonString(input.getClass.getSimpleName.replace("$HibernateProxy", ""))
       }
       json.value.putIfAbsent("@type", typeProperty)
 

@@ -1,6 +1,6 @@
 package app.pages.core
 
-import app.domain.core.{Data, Media, User}
+import app.domain.core.{Data, MediaHelper, User}
 import app.support.{Navigation, RemotePageQuery, RemoteTableList}
 import app.ui.{CompositeSupport, PageComposite}
 import jfx.control.TableColumn.{cellFactory_=, cellValueFactory_=, column, prefWidth_=}
@@ -8,6 +8,7 @@ import jfx.control.TableView.{fixedCellSize, fixedCellSize_=, items, items_=, ro
 import jfx.control.{TableCell, TableRow, TableView}
 import jfx.core.component.ElementComponent.*
 import jfx.core.state.{Property, RemoteListProperty}
+import jfx.domain.Media
 import jfx.dsl.*
 import jfx.layout.Div.div
 import jfx.layout.VBox.vbox
@@ -130,7 +131,7 @@ private final class UserImageCell extends TableCell[Data[User], Media | Null] {
       icon.style.display = "flex"
     } else {
       element.classList.remove("jfx-table-cell-empty")
-      image.src = item.thumbnailLink()
+      image.src = MediaHelper.thumbnailLink(item)
       image.style.display = "block"
       icon.style.display = "none"
     }

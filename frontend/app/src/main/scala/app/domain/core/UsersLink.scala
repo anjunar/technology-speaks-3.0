@@ -7,7 +7,6 @@ import jfx.core.state.PropertyAccess
 import scala.scalajs.js
 
 class UsersLink(
-  var id: String = "users-list",
   var rel: String = "",
   var url: String = "",
   var method: String = "GET"
@@ -23,7 +22,6 @@ class UsersLink(
 
 object UsersLink {
   val properties: js.Array[PropertyAccess[UsersLink, ?]] = js.Array(
-    property(_.id),
     property(_.rel),
     property(_.url),
     property(_.method)

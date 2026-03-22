@@ -7,6 +7,7 @@ import app.domain.followers.*
 import app.domain.security.*
 import app.domain.shared.*
 import app.domain.timeline.*
+import jfx.domain.{Media, Thumbnail}
 import jfx.json.JsonRegistry
 
 import scala.scalajs.js

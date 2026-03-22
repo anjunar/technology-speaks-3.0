@@ -1,7 +1,7 @@
 package app.pages.followers
 
 import app.components.shared.LoadingCard.loadingCard
-import app.domain.core.Data
+import app.domain.core.{Data, MediaHelper}
 import app.domain.followers.RelationShip
 import app.support.{Navigation, RemotePageQuery, RemoteTableList}
 import app.ui.{CompositeSupport, DivComposite, PageComposite}
@@ -84,7 +84,7 @@ private final class RelationShipListItem(data: Data[RelationShip]) extends DivCo
                 borderRadius = "50%"
               }
             }
-            imageView.src = media.thumbnailLink()
+            imageView.src = MediaHelper.thumbnailLink(media)
           case None =>
             div {
               classes = "material-icons"

@@ -1,5 +1,6 @@
 package app.components.security
 
+import app.domain.core.MediaHelper
 import app.services.ApplicationService
 import app.ui.{CompositeSupport, DivComposite}
 import jfx.control.Image.{image, src}
@@ -38,7 +39,7 @@ class LoggedInUser extends DivComposite {
                 height = "32px"
               }
 
-              src = app.user.image.get.thumbnailLink()
+              src = MediaHelper.thumbnailLink(app.user.image.get)
             }
           } else {
             div {

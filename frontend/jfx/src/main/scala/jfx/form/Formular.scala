@@ -56,11 +56,15 @@ trait Formular[M <: Model[M], N <: Node] extends NodeComponent[N] {
       return
     }
 
-    var observer: jfx.core.state.Disposable = null
-    observer = valueProperty.observe { model =>
+    val observer = valueProperty.observe { model =>
+      console.log(model)
       if (model != null) {
         binding.add(bindNow(control))
-        if (observer != null) observer.dispose()
+      } else {
+        control.valueProperty match {
+          case property : Property[Any] => property.set(null.asInstanceOf[Any])
+          case listProperty : ListProperty[?] => listProperty.clear()
+        }
       }
     }
     binding.add(observer)
