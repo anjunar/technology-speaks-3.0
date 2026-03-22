@@ -5,9 +5,10 @@ import com.anjunar.json.mapper.schema.{EntitySchema, SchemaProvider}
 import com.anjunar.technologyspeaks.SpringContext
 import com.anjunar.technologyspeaks.hibernate.{EntityContext, RepositoryContext}
 import jakarta.json.bind.annotation.JsonbProperty
-import jakarta.persistence._
+import jakarta.persistence.*
 import jakarta.validation.constraints.{NotBlank, Size}
 
+import scala.annotation.meta.field
 import scala.beans.BeanProperty
 
 @Entity
@@ -28,7 +29,7 @@ import scala.beans.BeanProperty
   )
 )
 class User(
-  @JsonbProperty @NotBlank @Size(min = 2, max = 80) @BeanProperty var nickName: String = null
+  @(JsonbProperty @field) @NotBlank @Size(min = 2, max = 80) @BeanProperty var nickName: String = null
 ) extends AbstractEntity with EntityContext[User] with OwnerProvider {
 
   def this() = this(null)

@@ -11,6 +11,8 @@ import scala.beans.BeanProperty
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @Table(name = "Core#Credential")
 class Credential(@BeanProperty var code: String = null) extends AbstractEntity {
+  
+  def this() = this(null)
 
   @ManyToMany
   @Size(min = 1, max = 10)

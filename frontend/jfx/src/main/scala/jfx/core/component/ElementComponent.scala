@@ -3,9 +3,12 @@ package jfx.core.component
 import jfx.core.state.{ListProperty, Property, ReadOnlyProperty}
 import org.scalajs.dom.{CSSStyleDeclaration, HTMLElement, Node, document}
 
+import scala.annotation.targetName
 import scala.collection.mutable
 
 trait ElementComponent[E <: Node] extends NodeComponent[E] {
+
+  given self: ElementComponent[E] = this
 
   val textContentProperty = new Property[String]("")
 
@@ -71,12 +74,6 @@ trait ElementComponent[E <: Node] extends NodeComponent[E] {
   def textContent: String = textContentProperty.get
 
   def textContent_=(value: String): Unit = textContentProperty.set(value)
-  
-/*
-  def classes: ListProperty[String] = classProperty
-  
-  def classes_=(value : Seq[String]) : Unit = classProperty.setAll(value)
-*/
 
 }
 
@@ -109,7 +106,7 @@ object ElementComponent {
     component.classProperty
 
   def classes_=(value: String)(using component: ElementComponent[?]): Unit =
-    classes_=(Seq(value))
+    component.classProperty.setAll(normalizeClassNames(Seq(value)))
 
   def classes_=(value: IterableOnce[String])(using component: ElementComponent[?]): Unit =
     component.classProperty.setAll(normalizeClassNames(value))

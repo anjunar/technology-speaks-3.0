@@ -5,11 +5,12 @@ import com.anjunar.technologyspeaks.rest.EntityGraph
 import com.anjunar.technologyspeaks.rest.types.{Data, Table}
 import com.anjunar.technologyspeaks.security.LinkBuilder
 import jakarta.annotation.security.RolesAllowed
-import jakarta.json.bind.annotation.JsonbProperty
+import jakarta.json.bind.annotation.{JsonbProperty, JsonbSubtype}
 import org.springframework.web.bind.annotation.{GetMapping, RestController}
 
+import scala.annotation.meta.field
 import scala.beans.BeanProperty
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 
 @RestController
 class DocumentsController(val query: HibernateSearch) {
@@ -60,6 +61,7 @@ class DocumentsController(val query: HibernateSearch) {
 
 object DocumentsController {
 
-  class DocumentRow(data: Document, @JsonbProperty @BeanProperty val score: Double) extends Data[Document](data, Document.schema())
+  @JsonbSubtype(alias = "Data", `type` = classOf[Data[?]])
+  class DocumentRow(data: Document, @(JsonbProperty @field) @BeanProperty val score: Double) extends Data[Document](data, Document.schema())
 
 }

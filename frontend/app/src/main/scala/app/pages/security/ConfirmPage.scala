@@ -56,16 +56,16 @@ class ConfirmPage extends PageComposite("Bestaetigen", pageResizable = false) {
         }
 
         div {
-          classes = Seq("button-container")
+          classes = "button-container"
 
           button("Abbrechen") {
             buttonType_=("button")
-            classes = Seq("btn-secondary")
+            classes = "btn-secondary"
             onClick(_ => close())
           }
 
           button("Bestaetigen") {
-            classes = Seq("btn-danger")
+            classes = "btn-danger"
           }
         }
       }

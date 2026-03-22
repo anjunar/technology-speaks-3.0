@@ -7,13 +7,16 @@ import jakarta.json.bind.annotation.JsonbProperty
 import jakarta.persistence.{CascadeType, Column, Entity, ManyToOne, OneToMany, Table}
 import jakarta.validation.constraints.{Email, NotBlank}
 
+import scala.annotation.meta.field
 import scala.beans.BeanProperty
 
 @Entity
 @Table(name = "Core#Email")
 class EMail(
-  @JsonbProperty @Email @NotBlank @Column(unique = true) @BeanProperty var value: String = null
+             @(JsonbProperty @field) @Email @NotBlank @Column(unique = true) @BeanProperty var value: String = null
 ) extends AbstractEntity with OwnerProvider with EntityContext[EMail] {
+  
+  def this() = this(null)
 
   @ManyToOne(optional = false)
   @BeanProperty

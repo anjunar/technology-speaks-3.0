@@ -7,7 +7,7 @@ import com.anjunar.json.mapper.{JavaContext, ObjectMapperProvider}
 import com.anjunar.json.mapper.intermediate.model.{JsonNode, JsonObject, JsonString}
 import com.anjunar.scala.universe.TypeResolver
 import com.anjunar.scala.universe.introspector.{BeanIntrospector, BeanProperty}
-import jakarta.json.bind.annotation.JsonbProperty
+import jakarta.json.bind.annotation.{JsonbProperty, JsonbSubtype}
 import jakarta.persistence.{Entity, EntityGraph, Subgraph}
 
 class BeanSerializer extends Serializer[Any] {
@@ -61,8 +61,14 @@ class BeanSerializer extends Serializer[Any] {
     }
 
     if (! json.value.isEmpty) {
-      val typeProperty = new JsonString(input.getClass.getSimpleName)
+      val subtype = input.getClass.getAnnotation(classOf[JsonbSubtype])
+      val typeProperty = if (subtype != null) {
+        new JsonString(subtype.alias())
+      } else {
+        new JsonString(input.getClass.getSimpleName)
+      }
       json.value.putIfAbsent("@type", typeProperty)
+
     }
 
     json

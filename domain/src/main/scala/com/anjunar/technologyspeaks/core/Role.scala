@@ -5,6 +5,7 @@ import jakarta.json.bind.annotation.JsonbProperty
 import jakarta.persistence.{Column, Entity, Table}
 import jakarta.validation.constraints.{NotBlank, Size}
 
+import scala.annotation.meta.field
 import scala.beans.BeanProperty
 
 @Entity
@@ -13,13 +14,13 @@ class Role(
   @Size(min = 3, max = 80)
   @NotBlank
   @Column(unique = true)
-  @JsonbProperty
+  @(JsonbProperty @field)
   @BeanProperty
   var name: String = null,
 
   @Size(min = 3, max = 80)
   @NotBlank
-  @JsonbProperty
+  @(JsonbProperty @field)
   @BeanProperty
   var description: String = null
 ) extends AbstractEntity with EntityContext[Role] {

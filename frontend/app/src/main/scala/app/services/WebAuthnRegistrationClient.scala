@@ -5,6 +5,7 @@ import app.support.Api
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.scalajs.js
+import scala.scalajs.js.JSConverters.*
 
 object WebAuthnRegistrationClient {
 
@@ -21,9 +22,17 @@ object WebAuthnRegistrationClient {
 
     for {
       optionsJsonText <- Api.postText(optionsUrl, js.JSON.stringify(request))
+      optionsDyn = js.JSON.parse(optionsJsonText)
+      registrationResponse <- SimpleWebAuthnBrowser
+        .startRegistration(
+          js.Dynamic.literal(
+            optionsJSON = optionsDyn
+          )
+        )
+        .toFuture
       finishBody = js.JSON.stringify(
         js.Dynamic.literal(
-          optionsJSON = js.JSON.parse(optionsJsonText),
+          optionsJSON = registrationResponse,
           email = email,
           nickName = nickName
         )

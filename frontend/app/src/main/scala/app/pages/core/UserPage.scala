@@ -172,7 +172,7 @@ private final class UserPageContent(
                     imageView.src = media.thumbnailLink()
                   case None =>
                     div {
-                      classes = Seq("material-icons")
+                      classes = "material-icons"
                       style {
                         fontSize = "96px"
                       }
@@ -245,7 +245,7 @@ private final class UserPageContent(
               }
 
               button("Speichern") {
-                classes = Seq("btn-secondary")
+                classes = "btn-secondary"
               }
             }
           }

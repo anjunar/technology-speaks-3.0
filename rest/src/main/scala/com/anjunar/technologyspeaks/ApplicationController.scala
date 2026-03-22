@@ -20,33 +20,43 @@ class ApplicationController(val identityHolder: IdentityHolder) {
 
     application.addLinks(
       LinkBuilder.create(classOf[DocumentController], "root")
+        .withId(true)
         .withRel("document")
         .build(),
       LinkBuilder.create(classOf[PostsController], "list")
+        .withId(true)
         .withRel("posts")
         .build(),
       LinkBuilder.create(classOf[UsersController], "list")
+        .withId(true)
         .withRel("users")
         .build(),
       LinkBuilder.create(classOf[FollowersController], "list")
+        .withId(true)
         .withRel("followers")
         .build(),
       LinkBuilder.create(classOf[WebAuthnLoginController], "options")
+        .withId(true)
         .withRel("login")
         .build(),
       LinkBuilder.create(classOf[WebAuthnRegisterController], "options")
+        .withId(true)
         .withRel("register")
         .build(),
       LinkBuilder.create(classOf[PasswordLoginController], "login")
+        .withId(true)
         .withRel("login")
         .build(),
       LinkBuilder.create(classOf[PasswordRegisterController], "register")
+        .withId(true)
         .withRel("register")
         .build(),
       LinkBuilder.create(classOf[LogoutController], "logout")
+        .withId(true)
         .withRel("logout")
         .build(),
       LinkBuilder.create(classOf[ConfirmController], "confirm")
+        .withId(true)
         .withRel("confirm")
         .build()
     )

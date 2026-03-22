@@ -5,9 +5,10 @@ import com.anjunar.technologyspeaks.rest.types.{Data, Table}
 import com.anjunar.technologyspeaks.security.{IdentityHolder, LinkBuilder}
 import com.anjunar.technologyspeaks.shared.commentable.FirstComment
 import jakarta.annotation.security.RolesAllowed
+import jakarta.json.bind.annotation.JsonbSubtype
 import org.springframework.web.bind.annotation.{GetMapping, RestController}
 
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 
 @RestController
 class IssueCommentsController(val query: HibernateSearch, val identityHolder: IdentityHolder) {
@@ -80,6 +81,7 @@ class IssueCommentsController(val query: HibernateSearch, val identityHolder: Id
 
 object IssueCommentsController {
 
+  @JsonbSubtype(alias = "Data", `type` = classOf[Data[?]])
   class CommentRow(data: FirstComment) extends Data[FirstComment](data, FirstComment.schema())
 
 }

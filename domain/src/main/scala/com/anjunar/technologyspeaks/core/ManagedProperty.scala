@@ -12,6 +12,8 @@ class ManagedProperty(
   @BeanProperty var visibleForAll: Boolean = false
 ) extends AbstractEntity with EntityContext[ManagedProperty] {
 
+  def this() = this(null, false)
+
   @ManyToMany
   @BeanProperty
   val users: java.util.Set[User] = new java.util.HashSet[User]()

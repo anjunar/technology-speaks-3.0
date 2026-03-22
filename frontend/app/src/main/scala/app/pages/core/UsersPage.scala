@@ -4,7 +4,7 @@ import app.domain.core.{Data, Media, User}
 import app.support.{Navigation, RemotePageQuery, RemoteTableList}
 import app.ui.{CompositeSupport, PageComposite}
 import jfx.control.TableColumn.{cellFactory_=, cellValueFactory_=, column, prefWidth_=}
-import jfx.control.TableView.{fixedCellSize_=, items_=, rowFactory_=, tableView}
+import jfx.control.TableView.{fixedCellSize, fixedCellSize_=, items, items_=, rowFactory, rowFactory_=, tableView}
 import jfx.control.{TableCell, TableRow, TableView}
 import jfx.core.component.ElementComponent.*
 import jfx.core.state.{Property, RemoteListProperty}
@@ -42,9 +42,9 @@ class UsersPage extends PageComposite("Users") {
           }
 
           val table = tableView[Data[User]] {
-            items_=(usersProperty)
-            fixedCellSize_=(64.0)
-            rowFactory_=((_: TableView[Data[User]]) => new UserNavigationRow())
+            items = usersProperty
+            fixedCellSize = 64.0
+            rowFactory = (_: TableView[Data[User]]) => new UserNavigationRow()
 
             column[Data[User], Media | Null]("Bild") {
               val current = summon[jfx.control.TableColumn[Data[User], Media | Null]]
@@ -53,7 +53,7 @@ class UsersPage extends PageComposite("Users") {
               current.setCellFactory(_ => new UserImageCell())
             }
 
-            column[Data[User], String]("Nick Name") {
+            column[Data[User], String]("Nickname") {
               val current = summon[jfx.control.TableColumn[Data[User], String]]
               current.setPrefWidth(220.0)
               current.setCellValueFactory(features => features.value.data.nickName)

@@ -21,6 +21,8 @@ class Media(
   contentType: String = null,
   data: Array[Byte] = null
 ) extends Thumbnail(name, contentType, data) {
+  
+  def this() = this(null, null, null)
 
   @OneToOne(cascade = Array(CascadeType.ALL))
   @JsonbProperty

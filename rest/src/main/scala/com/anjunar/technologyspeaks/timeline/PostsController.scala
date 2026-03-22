@@ -5,9 +5,10 @@ import com.anjunar.technologyspeaks.rest.EntityGraph
 import com.anjunar.technologyspeaks.rest.types.{Data, Table}
 import com.anjunar.technologyspeaks.security.{IdentityHolder, LinkBuilder}
 import jakarta.annotation.security.RolesAllowed
+import jakarta.json.bind.annotation.JsonbSubtype
 import org.springframework.web.bind.annotation.{GetMapping, RestController}
 
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 
 @RestController
 class PostsController(val query: HibernateSearch, val identityHolder: IdentityHolder) {
@@ -54,6 +55,7 @@ class PostsController(val query: HibernateSearch, val identityHolder: IdentityHo
 
 object PostsController {
 
+  @JsonbSubtype(alias = "Data", `type` = classOf[Data[?]])
   class PostRow(data: Post) extends Data[Post](data, Post.schema())
 
 }

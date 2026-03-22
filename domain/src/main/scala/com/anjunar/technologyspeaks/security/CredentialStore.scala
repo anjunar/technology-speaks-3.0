@@ -42,6 +42,7 @@ class CredentialStore {
 
     credential.roles.add(roleAction)
     credential.email = targetEmailFuture
+    targetEmailFuture.credentials.add(credential)
     credential.persist()
   }
 

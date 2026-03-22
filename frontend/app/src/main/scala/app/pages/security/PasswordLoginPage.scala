@@ -73,16 +73,16 @@ class PasswordLoginPage extends PageComposite("Login", pageResizable = false) {
         }
 
         div {
-          classes = Seq("button-container")
+          classes = "button-container"
 
           button("Abbrechen") {
             buttonType_=("button")
-            classes = Seq("btn-secondary")
+            classes = "btn-secondary"
             onClick(_ => close())
           }
 
           button("Anmelden") {
-            classes = Seq("btn-danger")
+            classes = "btn-danger"
           }
         }
       }

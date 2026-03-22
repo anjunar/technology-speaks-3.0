@@ -64,7 +64,7 @@ class ComponentHeader extends DivComposite {
           }
 
           avatarIconRef = div {
-            classes = Seq("material-icons")
+            classes = "material-icons"
             style {
               fontSize = "48px"
             }
@@ -106,7 +106,7 @@ class ComponentHeader extends DivComposite {
 
         readButtonRef = button("open_in_new") {
           buttonType_=("button")
-          classes = Seq("material-icons")
+          classes = "material-icons"
           onClick { _ =>
             valueProperty.get match {
               case null =>
@@ -119,7 +119,7 @@ class ComponentHeader extends DivComposite {
 
         updateButtonRef = button("edit") {
           buttonType_=("button")
-          classes = Seq("material-icons")
+          classes = "material-icons"
           onClick { _ =>
             valueProperty.get match {
               case null =>
@@ -136,7 +136,7 @@ class ComponentHeader extends DivComposite {
 
         deleteButtonRef = button("delete") {
           buttonType_=("button")
-          classes = Seq("material-icons")
+          classes = "material-icons"
           onClick { _ =>
             valueProperty.get match {
               case null =>

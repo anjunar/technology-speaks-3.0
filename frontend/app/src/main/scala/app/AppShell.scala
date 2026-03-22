@@ -19,14 +19,14 @@ import jfx.statement.ForEach.forEach
 class AppShell extends DivComposite {
 
   override protected def compose(using DslContext): Unit = {
-    classProperty.setAll(Seq("app-shell"))
+    classes = "app-shell"
 
     val app = ApplicationService.app.get
 
     withDslContext {
       vbox {
         hbox {
-          classes = Seq("app-header-bar")
+          classes = "app-header-bar"
 
           loggedInUser {
             style {
@@ -36,7 +36,7 @@ class AppShell extends DivComposite {
         }
 
         div {
-          classes = Seq("app-shell-body")
+          classes = "app-shell-body"
 
           viewport {
             div {
@@ -55,7 +55,7 @@ class AppShell extends DivComposite {
                     }
 
                     span {
-                      classes = Seq("app-shell-nav-text")
+                      classes = "app-shell-nav-text"
                       text = currentLink.name
                     }
                   }
@@ -68,15 +68,15 @@ class AppShell extends DivComposite {
         }
 
         hbox {
-          classes = Seq("app-footer-bar")
+          classes = "app-footer-bar"
 
           hbox {
             forEach(Viewport.windows) { window =>
               button(window.title) {
                 buttonType_=("button")
                 classes =
-                  if (Viewport.isActive(window)) Seq("btn-secondary")
-                  else Seq("btn-primary")
+                  if (Viewport.isActive(window)) "btn-secondary"
+                  else "btn-primary"
                 onClick { _ =>
                   Viewport.touchWindow(window)
                 }
@@ -90,7 +90,7 @@ class AppShell extends DivComposite {
             }
 
             button("dark_mode") {
-              classes = Seq("material-icons")
+              classes = "material-icons"
               onClick { _ =>
                 ApplicationService.darkMode.set(!ApplicationService.darkMode.get)
               }

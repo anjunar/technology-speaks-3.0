@@ -6,16 +6,19 @@ import jakarta.json.bind.annotation.JsonbProperty
 import jakarta.persistence.{Entity, OneToOne, Table}
 import jakarta.validation.constraints.{NotBlank, Size}
 
+import scala.annotation.meta.field
 import scala.beans.BeanProperty
 
 @Entity
 @Table(name = "Core#Address")
 class Address(
-  @NotBlank @Size(min = 2, max = 80) @JsonbProperty @BeanProperty var street: String = null,
-  @NotBlank @Size(min = 1, max = 80) @JsonbProperty @BeanProperty var number: String = null,
-  @NotBlank @Size(min = 5, max = 5) @JsonbProperty @BeanProperty var zipCode: String = null,
-  @NotBlank @Size(min = 2, max = 80) @JsonbProperty @BeanProperty var country: String = null
+  @NotBlank @Size(min = 2, max = 80) @(JsonbProperty @field) @BeanProperty var street: String = null,
+  @NotBlank @Size(min = 1, max = 80) @(JsonbProperty @field) @BeanProperty var number: String = null,
+  @NotBlank @Size(min = 5, max = 5) @(JsonbProperty @field) @BeanProperty var zipCode: String = null,
+  @NotBlank @Size(min = 2, max = 80) @(JsonbProperty @field) @BeanProperty var country: String = null
 ) extends AbstractEntity with OwnerProvider {
+  
+  def this() = this(null, null, null, null)
 
   @OneToOne(optional = false, mappedBy = "address")
   @BeanProperty

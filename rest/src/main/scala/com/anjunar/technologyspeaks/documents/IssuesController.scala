@@ -5,10 +5,11 @@ import com.anjunar.technologyspeaks.rest.EntityGraph
 import com.anjunar.technologyspeaks.rest.types.{Data, Table}
 import com.anjunar.technologyspeaks.security.{IdentityHolder, LinkBuilder}
 import jakarta.annotation.security.RolesAllowed
-import jakarta.json.bind.annotation.JsonbProperty
+import jakarta.json.bind.annotation.{JsonbProperty, JsonbSubtype}
 import org.springframework.web.bind.annotation.{GetMapping, RestController}
 
-import scala.jdk.CollectionConverters._
+import scala.annotation.meta.field
+import scala.jdk.CollectionConverters.*
 
 @RestController
 class IssuesController(val query: HibernateSearch, val identityHolder: IdentityHolder) {
@@ -54,6 +55,7 @@ class IssuesController(val query: HibernateSearch, val identityHolder: IdentityH
 
 object IssuesController {
 
-  class IssueRow(@JsonbProperty data: Issue) extends Data[Issue](data, Issue.schema())
+  @JsonbSubtype(alias = "Data", `type` = classOf[Data[?]])
+  class IssueRow(@(JsonbProperty @field) data: Issue) extends Data[Issue](data, Issue.schema())
 
 }

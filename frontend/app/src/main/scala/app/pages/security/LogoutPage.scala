@@ -40,16 +40,16 @@ class LogoutPage extends PageComposite("Abmelden", pageResizable = false) {
         }
 
         div {
-          classes = Seq("button-container")
+          classes = "button-container"
 
           button("Abbrechen") {
             buttonType_=("button")
-            classes = Seq("btn-secondary")
+            classes = "btn-secondary"
             onClick(_ => close())
           }
 
           button("Abmelden") {
-            classes = Seq("btn-danger")
+            classes = "btn-danger"
             onClick { _ =>
               Api
                 .post[app.support.JsonResponse]("/service/security/logout")

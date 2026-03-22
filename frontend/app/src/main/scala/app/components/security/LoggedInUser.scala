@@ -22,7 +22,7 @@ class LoggedInUser extends DivComposite {
       hbox {
         div {
           text = "account_circle"
-          classes = Seq("material-icons")
+          classes = "material-icons"
         }
         div {
           text = label

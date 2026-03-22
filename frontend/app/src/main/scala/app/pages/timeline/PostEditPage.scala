@@ -107,7 +107,7 @@ private final class PostEditContent(
           addDisposable(Property.subscribeBidirectional(data.data.editor, editorField.valueProperty))
 
           button("Senden") {
-            classes = Seq("btn-secondary")
+            classes = "btn-secondary"
             style {
               width = "100%"
             }

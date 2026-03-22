@@ -7,15 +7,18 @@ import jakarta.persistence.{Entity, OneToOne, Table}
 import jakarta.validation.constraints.{NotBlank, NotNull, Size}
 
 import java.time.LocalDate
+import scala.annotation.meta.field
 import scala.beans.BeanProperty
 
 @Entity
 @Table(name = "Core#UserInfo")
 class UserInfo(
-  @NotBlank @Size(min = 2, max = 80) @JsonbProperty @BeanProperty var firstName: String = null,
-  @NotBlank @Size(min = 2, max = 80) @JsonbProperty @BeanProperty var lastName: String = null,
-  @NotNull @JsonbProperty @BeanProperty var birthDate: LocalDate = null
+  @NotBlank @Size(min = 2, max = 80) @(JsonbProperty @field) @BeanProperty var firstName: String = null,
+  @NotBlank @Size(min = 2, max = 80) @(JsonbProperty @field) @BeanProperty var lastName: String = null,
+  @NotNull @(JsonbProperty @field) @BeanProperty var birthDate: LocalDate = null
 ) extends AbstractEntity with OwnerProvider {
+  
+  def this() = this(null, null, null)
 
   @OneToOne(optional = false, mappedBy = "info")
   @BeanProperty

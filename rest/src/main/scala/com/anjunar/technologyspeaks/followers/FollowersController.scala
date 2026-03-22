@@ -6,10 +6,11 @@ import com.anjunar.technologyspeaks.rest.EntityGraph
 import com.anjunar.technologyspeaks.rest.types.{Data, Table}
 import com.anjunar.technologyspeaks.security.{IdentityHolder, LinkBuilder}
 import jakarta.annotation.security.RolesAllowed
-import jakarta.json.bind.annotation.JsonbProperty
+import jakarta.json.bind.annotation.{JsonbProperty, JsonbSubtype}
 import org.springframework.web.bind.annotation.{GetMapping, RestController}
 
-import scala.jdk.CollectionConverters._
+import scala.annotation.meta.field
+import scala.jdk.CollectionConverters.*
 
 @RestController
 class FollowersController(val query: HibernateSearch, val identityHolder: IdentityHolder) {
@@ -49,6 +50,7 @@ class FollowersController(val query: HibernateSearch, val identityHolder: Identi
 
 object FollowersController {
 
-  class RelationShipRow(@JsonbProperty data: RelationShip) extends Data[RelationShip](data, RelationShip.schema())
+  @JsonbSubtype(alias = "Data", `type` = classOf[Data[?]])
+  class RelationShipRow(@(JsonbProperty @field) data: RelationShip) extends Data[RelationShip](data, RelationShip.schema())
 
 }

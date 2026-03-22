@@ -144,9 +144,9 @@ private final class DocumentListPanel(
         }
 
         hbox {
-          classes = Seq("doc-panel-header")
+          classes = "doc-panel-header"
           span {
-            classes = Seq("doc-panel-title")
+            classes = "doc-panel-title"
             text = "Dokumente"
           }
         }
@@ -191,7 +191,7 @@ private final class DocumentListPanel(
 
         button("") {
           buttonType_=("button")
-          classes = Seq("doc-new-btn")
+          classes = "doc-new-btn"
           style {
             display = "flex"
             alignItems = "center"
@@ -200,7 +200,7 @@ private final class DocumentListPanel(
           }
 
           span {
-            classes = Seq("material-icons")
+            classes = "material-icons"
             text = "add"
           }
 
@@ -307,7 +307,7 @@ private final class DocumentEditorPanel(
         }
 
         hbox {
-          classes = Seq("doc-titlebar")
+          classes = "doc-titlebar"
           style {
             alignItems = "center"
             columnGap = "10px"
@@ -336,7 +336,7 @@ private final class DocumentEditorPanel(
         }
 
         val editorField = editor("editor") {
-          classes = Seq("doc-editor")
+          classes = "doc-editor"
           style {
             flex = "1"
             minHeight = "0px"
@@ -381,9 +381,9 @@ private final class IssuesPanel(
         }
 
         hbox {
-          classes = Seq("doc-panel-header")
+          classes = "doc-panel-header"
           span {
-            classes = Seq("doc-panel-title")
+            classes = "doc-panel-title"
             text = "Aufgaben"
           }
         }
@@ -407,7 +407,7 @@ private final class IssuesPanel(
 
         button("") {
           buttonType_=("button")
-          classes = Seq("doc-new-btn")
+          classes = "doc-new-btn"
           style {
             display = "flex"
             alignItems = "center"
@@ -416,7 +416,7 @@ private final class IssuesPanel(
           }
 
           span {
-            classes = Seq("material-icons")
+            classes = "material-icons"
             text = "add"
           }
 

@@ -5,6 +5,7 @@ import jakarta.json.bind.annotation.JsonbProperty
 import jakarta.persistence.{Entity, Lob, NamedAttributeNode, NamedEntityGraph, Table}
 import jakarta.validation.constraints.{NotBlank, Size}
 
+import scala.annotation.meta.field
 import scala.beans.BeanProperty
 
 @Entity
@@ -18,10 +19,12 @@ import scala.beans.BeanProperty
   )
 )
 class Thumbnail(
-  @NotBlank @Size(min = 2, max = 80) @JsonbProperty @BeanProperty var name: String = null,
-  @NotBlank @Size(min = 2, max = 80) @JsonbProperty @BeanProperty var contentType: String = null,
-  @Lob @JsonbProperty @BeanProperty var data: Array[Byte] = null
-) extends AbstractEntity
+  @NotBlank @Size(min = 2, max = 80) @(JsonbProperty @field) @BeanProperty var name: String = null,
+  @NotBlank @Size(min = 2, max = 80) @(JsonbProperty @field) @BeanProperty var contentType: String = null,
+  @Lob @(JsonbProperty @field) @BeanProperty var data: Array[Byte] = null
+) extends AbstractEntity {
+  def this() = this(null, null, null)
+}
 
 object Thumbnail extends SchemaProvider {
 

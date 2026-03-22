@@ -233,7 +233,7 @@ private final class IssueEditorCard(
 
             val editButton = button("edit") {
               buttonType_=("button")
-              classes = Seq("material-icons")
+              classes = "material-icons"
               onClick { _ =>
                 issue.editable.set(!issue.editable.get)
               }

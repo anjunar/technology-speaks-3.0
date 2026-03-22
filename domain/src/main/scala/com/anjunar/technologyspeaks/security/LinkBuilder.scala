@@ -15,6 +15,8 @@ class LinkBuilder(
   val function: Method
 ) {
 
+  var withId: Boolean = false
+
   val variables: java.util.Map[String, Any] = new java.util.HashMap[String, Any]()
 
   def withVariable(name: String, value: Any): LinkBuilder = {
@@ -24,6 +26,11 @@ class LinkBuilder(
 
   def withRel(rel: String): LinkBuilder = {
     this.rel = rel
+    this
+  }
+
+  def withId(value : Boolean): LinkBuilder = {
+    withId = value
     this
   }
 
@@ -42,7 +49,7 @@ class LinkBuilder(
       if (function == null) null
       else function.getDeclaringClass.getSimpleName.toKebabCase().replace("-controller", "") + "-" + function.getName
 
-    new Link(rel, uriString, method, linkId)
+    new Link(rel, uriString, method, if withId then linkId else null)
   }
 
 }

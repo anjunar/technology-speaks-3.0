@@ -87,7 +87,7 @@ private final class RelationShipListItem(data: Data[RelationShip]) extends DivCo
             imageView.src = media.thumbnailLink()
           case None =>
             div {
-              classes = Seq("material-icons")
+              classes = "material-icons"
               style {
                 fontSize = "64px"
               }

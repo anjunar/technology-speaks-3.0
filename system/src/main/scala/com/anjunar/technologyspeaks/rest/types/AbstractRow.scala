@@ -4,10 +4,11 @@ import com.anjunar.json.mapper.schema.{EntitySchema, SchemaProvider}
 import com.anjunar.scala.universe.TypeResolver
 import jakarta.json.bind.annotation.JsonbProperty
 
+import scala.annotation.meta.field
 import scala.beans.BeanProperty
 
 abstract class AbstractRow[E](
-  @JsonbProperty @BeanProperty val data: E,
+  @(JsonbProperty @field) @BeanProperty val data: E,
   clazz: Class[E]
 ) extends LinksContainer.Trait {
 

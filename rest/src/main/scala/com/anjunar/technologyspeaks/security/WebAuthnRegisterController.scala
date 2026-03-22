@@ -109,9 +109,8 @@ class WebAuthnRegisterController(val store: CredentialStore, val registerService
       val n = secure.nextInt(1000000)
       val code = String.format(s"$n%06d", Int.box(n))
 
-      registerService.register(username, code, nickName)
-
       store.saveRecord(username, nickName, code, webAuthnCredentialRecord)
+      registerService.register(username, code, nickName)
 
       new JsonObject()
         .put("status", "success")
