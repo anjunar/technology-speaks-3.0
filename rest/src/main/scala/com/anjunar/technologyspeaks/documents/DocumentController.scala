@@ -1,0 +1,143 @@
+package com.anjunar.technologyspeaks.documents
+
+import com.anjunar.technologyspeaks.rest.EntityGraph
+import com.anjunar.technologyspeaks.rest.types.Data
+import com.anjunar.technologyspeaks.security.{IdentityHolder, LinkBuilder}
+import com.anjunar.technologyspeaks.shared.editor.Node
+import jakarta.annotation.security.RolesAllowed
+import org.springframework.web.bind.annotation.{GetMapping, PathVariable, PostMapping, PutMapping, RequestBody, RestController}
+
+@RestController
+class DocumentController(val identityHolder: IdentityHolder) {
+
+  @GetMapping(value = Array("/document/documents/document"), produces = Array("application/json"))
+  @RolesAllowed(Array("User", "Administrator"))
+  @EntityGraph("Document.full")
+  def create(): Data[Document] = {
+    val entity = new Document("Arbeitsblatt")
+    entity.user = identityHolder.user
+    val node = new Node
+    node.nodeType = "doc"
+    entity.editor = node
+
+    val form = new Data(entity, Document.schema())
+
+    entity.addLinks(
+      LinkBuilder.create(classOf[DocumentController], "save")
+        .build()
+    )
+
+    form
+  }
+
+  @PostMapping(value = Array("/document/documents/document/root"), produces = Array("application/json"))
+  @RolesAllowed(Array("Anonymous", "Guest", "User", "Administrator"))
+  @EntityGraph("Document.full")
+  def root(): Data[Document] = {
+    var entity = Document.query("title" -> "Technology Speaks")
+
+    if (entity == null) {
+      entity = new Document("Technology Speaks")
+      entity.user = identityHolder.user
+      val node = new Node
+      node.nodeType = "doc"
+      entity.editor = node
+      entity.persist()
+    }
+
+    val form = new Data(entity, Document.schema())
+
+    entity.addLinks(
+      LinkBuilder.create(classOf[DocumentController], "create")
+        .withRel("create-document")
+        .build(),
+      LinkBuilder.create(classOf[IssuesController], "list")
+        .withVariable("id", entity.id)
+        .build(),
+      LinkBuilder.create(classOf[IssueController], "create")
+        .withRel("create-issue")
+        .withVariable("id", entity.id)
+        .build()
+    )
+
+    if (identityHolder.user == entity.user) {
+      entity.addLinks(
+        LinkBuilder.create(classOf[DocumentController], "update")
+          .build()
+      )
+    }
+
+    form
+  }
+
+  @GetMapping(value = Array("/document/documents/document/{id}"), produces = Array("application/json"))
+  @RolesAllowed(Array("User", "Administrator"))
+  @EntityGraph("Document.full")
+  def read(@PathVariable("id") entity: Document): Data[Document] = {
+    val form = new Data(entity, Document.schema())
+
+    entity.addLinks(
+      LinkBuilder.create(classOf[IssuesController], "list")
+        .withVariable("id", entity.id)
+        .build(),
+      LinkBuilder.create(classOf[IssueController], "create")
+        .withVariable("id", entity.id)
+        .build()
+    )
+
+    if (identityHolder.user == entity.user) {
+      entity.addLinks(
+        LinkBuilder.create(classOf[DocumentController], "update")
+          .build()
+      )
+    }
+
+    form
+  }
+
+  @PostMapping(value = Array("/document/documents/document"), produces = Array("application/json"), consumes = Array("application/json"))
+  @RolesAllowed(Array("User", "Administrator"))
+  @EntityGraph("Document.full")
+  def save(@RequestBody entity: Document): Data[Document] = {
+    entity.user = identityHolder.user
+    entity.persist()
+
+    val form = new Data(entity, Document.schema())
+
+    entity.addLinks(
+      LinkBuilder.create(classOf[DocumentController], "update")
+        .build(),
+      LinkBuilder.create(classOf[IssuesController], "list")
+        .withVariable("id", entity.id)
+        .build(),
+      LinkBuilder.create(classOf[IssueController], "create")
+        .withVariable("id", entity.id)
+        .build()
+    )
+
+    form
+  }
+
+  @PutMapping(value = Array("/document/documents/document"), produces = Array("application/json"), consumes = Array("application/json"))
+  @RolesAllowed(Array("User", "Administrator"))
+  @EntityGraph("Document.full")
+  def update(@RequestBody entity: Document): Data[Document] = {
+    entity.user = identityHolder.user
+
+    val form = new Data(entity, Document.schema())
+
+    entity.addLinks(
+      LinkBuilder.create(classOf[DocumentController], "update")
+        .build(),
+      LinkBuilder.create(classOf[IssuesController], "list")
+        .withVariable("id", entity.id)
+        .build(),
+      LinkBuilder.create(classOf[IssueController], "create")
+        .withVariable("id", entity.id)
+        .build()
+    )
+
+    form
+  }
+
+}

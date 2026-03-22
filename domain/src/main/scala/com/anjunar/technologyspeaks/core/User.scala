@@ -1,0 +1,88 @@
+package com.anjunar.technologyspeaks.core
+
+import com.anjunar.json.mapper.provider.{EntityProvider, OwnerProvider}
+import com.anjunar.json.mapper.schema.{EntitySchema, SchemaProvider}
+import com.anjunar.technologyspeaks.SpringContext
+import com.anjunar.technologyspeaks.hibernate.{EntityContext, RepositoryContext}
+import jakarta.json.bind.annotation.JsonbProperty
+import jakarta.persistence._
+import jakarta.validation.constraints.{NotBlank, Size}
+
+import scala.beans.BeanProperty
+
+@Entity
+@Table(name = "Core#User")
+@NamedEntityGraphs(
+  value = Array(
+    new NamedEntityGraph(
+      name = "User.full",
+      attributeNodes = Array(
+        new NamedAttributeNode("id"),
+        new NamedAttributeNode("nickName"),
+        new NamedAttributeNode("image"),
+        new NamedAttributeNode("info"),
+        new NamedAttributeNode("address"),
+        new NamedAttributeNode("emails")
+      )
+    )
+  )
+)
+class User(
+  @JsonbProperty @NotBlank @Size(min = 2, max = 80) @BeanProperty var nickName: String = null
+) extends AbstractEntity with EntityContext[User] with OwnerProvider {
+
+  def this() = this(null)
+
+  @ManyToOne(cascade = Array(CascadeType.ALL), fetch = FetchType.LAZY)
+  @JsonbProperty
+  @BeanProperty
+  var image: Media = null
+
+  @OneToOne(cascade = Array(CascadeType.ALL))
+  @JsonbProperty
+  @BeanProperty
+  var info: UserInfo = null
+
+  @OneToOne(cascade = Array(CascadeType.ALL))
+  @JsonbProperty
+  @BeanProperty
+  var address: Address = null
+
+  @OneToMany(cascade = Array(CascadeType.ALL), orphanRemoval = true, mappedBy = "user")
+  @JsonbProperty
+  @BeanProperty
+  val emails: java.util.Set[EMail] = new java.util.HashSet[EMail]()
+
+  override def owner(): EntityProvider = this
+
+}
+
+object User extends RepositoryContext[User] with SchemaProvider {
+
+  override def schema(): EntitySchema[?] = new Schema
+
+  open class Schema extends AbstractEntitySchema[User] {
+    @JsonbProperty val nickName = property[String]("nickName", classOf[String], new OwnerRule[User]())
+    @JsonbProperty val image = property[Media]("image", classOf[Media], new OwnerRule[User]())
+    @JsonbProperty val info = property[UserInfo]("info", classOf[UserInfo], new OwnerRule[User]())
+    @JsonbProperty val address = property[Address]("address", classOf[Address], new OwnerRule[User]())
+    @JsonbProperty val emails = property[java.util.Set[EMail]]("emails", classOf[java.util.Set[?]], new ManagedRule[User](), classOf[EMail])
+  }
+
+  @Entity(name = "UserView")
+  class View extends EntityView
+
+  def findViewByUser(user: User): EntityView = {
+    val entityManager = SpringContext.entityManager()
+
+    try {
+      entityManager
+        .createQuery("select v from UserView v left join fetch v.properties where v.user = :user", classOf[View])
+        .setParameter("user", user)
+        .getSingleResult
+    } catch {
+      case _: NoResultException => null
+    }
+  }
+
+}
