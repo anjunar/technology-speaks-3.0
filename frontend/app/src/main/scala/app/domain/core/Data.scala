@@ -5,8 +5,9 @@ import jfx.core.macros.property
 import jfx.core.state.PropertyAccess
 
 import scala.scalajs.js
+import scala.reflect.ClassTag
 
-class Data[E](
+class Data[E: ClassTag](
   var data: E = null.asInstanceOf[E]
 ) extends JsonModel[Data[E]] {
 
@@ -15,7 +16,7 @@ class Data[E](
 }
 
 object Data {
-  def properties[E]: js.Array[PropertyAccess[Data[E], ?]] = js.Array(
+  def properties[E: ClassTag]: js.Array[PropertyAccess[Data[E], ?]] = js.Array(
     property(_.data)
   )
 }

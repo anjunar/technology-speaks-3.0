@@ -3,16 +3,17 @@ package app.domain.core
 import jfx.core.macros.property
 import jfx.core.state.{ListProperty, Property, PropertyAccess}
 
+import java.util.UUID
 import scala.scalajs.js
 
 class Thumbnail(
-  var id: Property[String] = Property(""),
-  var modified: Property[String] = Property(""),
-  var created: Property[String] = Property(""),
-  var name: Property[String] = Property(""),
-  var contentType: Property[String] = Property(""),
-  var data: Property[String] = Property(""),
-  var links: ListProperty[Link] = ListProperty()
+                 var id: Property[UUID] = Property(null),
+                 var modified: Property[String] = Property(""),
+                 var created: Property[String] = Property(""),
+                 var name: Property[String] = Property(""),
+                 var contentType: Property[String] = Property(""),
+                 var data: Property[String] = Property(""),
+                 var links: ListProperty[Link] = ListProperty()
 ) extends AbstractEntity[Thumbnail] {
 
   override def properties: js.Array[PropertyAccess[Thumbnail, ?]] =

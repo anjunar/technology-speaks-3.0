@@ -17,7 +17,8 @@ import jfx.core.component.NodeComponent
 import jfx.core.state.{ListProperty, Property, RemoteListProperty}
 import jfx.dsl.*
 import jfx.form.Editor.editor
-import jfx.form.Form.{form, onSubmit_=}
+import jfx.form.Form
+import jfx.form.Form.{form, onSubmit, onSubmit_=}
 import jfx.form.Input.input
 import jfx.form.editor.plugins.*
 import jfx.layout.Div.div
@@ -44,7 +45,7 @@ class DocumentPage extends PageComposite("Dokument") {
   private val issuesProperty: RemoteListProperty[Issue, RemotePageQuery] =
     RemoteTableList.createMapped[Data[Issue], Issue](pageSize = issuesPageSize) { (index, limit) =>
       val document = currentDocumentProperty.get
-      if (Option(document.id.get).exists(_.trim.nonEmpty)) {
+      if (document.id.get != null) {
         Issue.list(index, limit, document)
       } else {
         Future.successful(new Table[Data[Issue]]())
@@ -114,7 +115,7 @@ class DocumentPage extends PageComposite("Dokument") {
   }
 
   private def reloadIssues(): Unit =
-    if (Option(currentDocumentProperty.get.id.get).exists(_.trim.nonEmpty)) {
+    if (currentDocumentProperty.get.id.get != null) {
       RemoteTableList.reloadFirstPage(issuesProperty, pageSize = issuesPageSize)
     } else {
       issuesProperty.clear()
@@ -292,9 +293,9 @@ private final class DocumentEditorPanel(
 
     withDslContext {
       form(document) {
-        onSubmit_= { _ =>
+        onSubmit = { (event : Form[Document]) =>
           val request =
-            if (Option(document.id.get).exists(_.trim.nonEmpty)) document.update()
+            if (document.id.get != null) document.update()
             else document.save()
 
           request.foreach(onSaved)
@@ -332,7 +333,7 @@ private final class DocumentEditorPanel(
           }
 
           editButton.element.style.display =
-            if (Option(document.id.get).exists(_.trim.nonEmpty)) "inline-flex" else "none"
+            if (document.id.get != null) "inline-flex" else "none"
         }
 
         val editorField = editor("editor") {
@@ -426,7 +427,7 @@ private final class IssuesPanel(
 
           onClick { _ =>
             val document = currentDocument.get
-            if (Option(document.id.get).exists(_.trim.nonEmpty)) {
+            if (document.id.get != null) {
               Navigation.navigate(s"/document/documents/document/${document.id.get}/issues/issue")
             }
           }
@@ -482,7 +483,7 @@ private final class IssueListItem(
       addDisposable(Property.subscribeBidirectional(issue.editor, editorFieldRef.nn.valueProperty))
       element.onclick = _ => {
         val documentId = currentDocument.get.id.get
-        if (Option(documentId).exists(_.trim.nonEmpty) && Option(issue.id.get).exists(_.trim.nonEmpty)) {
+        if (documentId != null && issue.id.get != null) {
           Navigation.navigate(s"/document/documents/document/$documentId/issues/issue/${issue.id.get}")
         }
       }

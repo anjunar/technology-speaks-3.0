@@ -56,7 +56,7 @@ class HomePage extends PageComposite("Home") {
 
         addDisposable(
           selector.selectedItemProperty.observe { selected =>
-            if (selected != null && Option(selected.data.id.get).exists(_.trim.nonEmpty)) {
+            if (selected != null && selected.data.id.get != null) {
               Navigation.navigate(s"/core/users/user/${selected.data.id.get}")
             }
           }

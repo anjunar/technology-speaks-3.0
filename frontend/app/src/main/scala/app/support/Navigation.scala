@@ -4,6 +4,7 @@ import app.domain.core.Link
 import org.scalajs.dom.{Event, URLSearchParams, window}
 
 import scala.scalajs.js
+import scala.scalajs.js.URIUtils.encodeURIComponent
 
 object Navigation {
 
@@ -34,15 +35,23 @@ object Navigation {
     val redirect = js.URIUtils.encodeURIComponent(window.location.pathname)
     
     val platformAvailable = js.Dynamic.global.eval("PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();")
-      .asInstanceOf[Boolean]
+      .asInstanceOf[js.Promise[Boolean]]
 
-    if (!platformAvailable) {
-      navigate("/security/login?redirect=${encodeURIComponent(window.location.pathname)}")
-    } else {
-      navigate("/security/login/options?redirect=${encodeURIComponent(window.location.pathname)}")
-    }
+    platformAvailable.`then`(available => {
+      if (!available) {
+        navigate(s"/security/login?redirect=${encodeURIComponent(window.location.pathname)}")
+      } else {
+        navigate(s"/security/login/options?redirect=${encodeURIComponent(window.location.pathname)}")
+      }
+    })
+
   }
 
+  def renderByRel(rel: String, links: IterableOnce[Link])(callback : () => Unit) : Unit =
+    linkByRel(rel, links)
+      .foreach(_ => callback())
+    
+  
   def linkByRel(rel: String, links: IterableOnce[Link]): Option[Link] =
     links.iterator.find(_.rel == rel)
 }

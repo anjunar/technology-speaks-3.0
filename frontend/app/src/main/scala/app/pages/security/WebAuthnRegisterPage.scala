@@ -1,5 +1,6 @@
 package app.pages.security
 
+import app.domain.documents.Document
 import app.domain.security.WebAuthnRegister
 import app.services.WebAuthnRegistrationClient
 import app.ui.{CompositeSupport, PageComposite}
@@ -8,6 +9,7 @@ import jfx.control.Heading.heading
 import jfx.control.Image.{image, src_=}
 import jfx.core.component.ElementComponent.*
 import jfx.dsl.*
+import jfx.form.Form
 import jfx.form.Form.{form, onSubmit_=}
 import jfx.form.Input.{input, inputType_=}
 import jfx.form.InputContainer.inputContainer
@@ -27,7 +29,7 @@ class WebAuthnRegisterPage extends PageComposite("Register mit WebAuthn", pageRe
 
     withDslContext {
       form(registerForm) {
-        onSubmit_= { _ =>
+        onSubmit_= { (event : Form[WebAuthnRegister])  =>
           WebAuthnRegistrationClient
             .register(registerForm.email.get, registerForm.nickName.get)
             .foreach(_ => close())

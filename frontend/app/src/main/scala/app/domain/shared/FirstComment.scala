@@ -7,18 +7,19 @@ import app.support.Api
 import jfx.core.macros.property
 import jfx.core.state.{ListProperty, Property, PropertyAccess}
 
+import java.util.UUID
 import scala.concurrent.Future
 import scala.scalajs.js
 
 class FirstComment(
-  var id: Property[String] = Property(""),
-  var modified: Property[String] = Property(""),
-  var created: Property[String] = Property(""),
-  var user: Property[User | Null] = Property(null),
-  var editor: Property[js.Any | Null] = Property(null),
-  var likes: ListProperty[Like] = ListProperty(),
-  var comments: ListProperty[SecondComment] = ListProperty(),
-  var links: ListProperty[Link] = ListProperty()
+                    var id: Property[UUID] = Property(null),
+                    var modified: Property[String] = Property(""),
+                    var created: Property[String] = Property(""),
+                    var user: Property[User | Null] = Property(null),
+                    var editor: Property[js.Any | Null] = Property(null),
+                    var likes: ListProperty[Like] = ListProperty(),
+                    var comments: ListProperty[SecondComment] = ListProperty(),
+                    var links: ListProperty[Link] = ListProperty()
 ) extends AbstractEntity[FirstComment] with OwnerProvider {
 
   val editable: Property[Boolean] = Property(false)

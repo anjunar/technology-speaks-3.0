@@ -4,6 +4,7 @@ import app.components.likeable.LikeButton.likeButton
 import app.components.commentable.CommentsSection.commentsSection
 import app.components.shared.ComponentHeader.componentHeader
 import app.domain.core.AbstractEntity
+import app.domain.documents.Document
 import app.domain.shared.FirstComment
 import app.services.ApplicationService
 import app.ui.{CompositeSupport, DivComposite}
@@ -12,6 +13,7 @@ import jfx.core.component.ElementComponent.*
 import jfx.core.state.Property
 import jfx.dsl.*
 import jfx.form.Editor.editor
+import jfx.form.Form
 import jfx.form.Form.{form, onSubmit_=}
 import jfx.form.editor.plugins.*
 
@@ -31,11 +33,11 @@ class FirstCommentCard(
 
     withDslContext {
       form(comment) {
-        onSubmit_= { _ =>
+        onSubmit_= { (event : Form[FirstComment])  =>
           comment.user.set(ApplicationService.app.get.user)
 
           val request =
-            if (Option(comment.id.get).exists(_.trim.nonEmpty)) comment.update(owner)
+            if (comment.id.get != null) comment.update(owner)
             else comment.save(owner)
 
           request.foreach { saved =>
@@ -48,7 +50,7 @@ class FirstCommentCard(
         header.model(comment)
         header.onDelete { () =>
           val request =
-            if (Option(comment.id.get).exists(_.trim.nonEmpty)) comment.delete(owner)
+            if (comment.id.get != null) comment.delete(owner)
             else scala.concurrent.Future.successful(())
 
           request.foreach(_ => onDeleteCompleted(comment))

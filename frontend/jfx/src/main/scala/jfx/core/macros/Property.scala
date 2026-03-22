@@ -1,12 +1,13 @@
 package jfx.core.macros
 
 import jfx.core.state.PropertyAccess
+import scala.reflect.ClassTag
 import scala.quoted.*
 
-inline def property[T, V](inline selector: T => V): PropertyAccess[T, V] =
-  ${ propertyImpl[T, V]('selector) }
+inline def property[T, V](inline selector: T => V)(using ClassTag[V]): PropertyAccess[T, V] =
+  ${ propertyImpl[T, V]('selector, '{ summon[ClassTag[V]] }) }
 
-def propertyImpl[T: Type, V: Type](selector: Expr[T => V])(using Quotes): Expr[PropertyAccess[T, V]] = {
+def propertyImpl[T: Type, V: Type](selector: Expr[T => V], classTagExpr: Expr[ClassTag[V]])(using Quotes): Expr[PropertyAccess[T, V]] = {
   import quotes.reflect.*
   
   selector.asTerm match {
@@ -15,6 +16,7 @@ def propertyImpl[T: Type, V: Type](selector: Expr[T => V])(using Quotes): Expr[P
       '{
         new PropertyAccess[T, V] {
           val name: String = ${ Expr(fieldName) }
+          val classTag: ClassTag[V] = ${ classTagExpr }
 
           def get(obj: T): Option[V] =
             Some($selector(obj))

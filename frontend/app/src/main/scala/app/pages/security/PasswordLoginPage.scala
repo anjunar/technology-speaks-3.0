@@ -1,5 +1,6 @@
 package app.pages.security
 
+import app.domain.documents.Document
 import app.domain.security.PasswordLogin
 import app.services.ApplicationService
 import app.support.{Api, Navigation}
@@ -9,6 +10,7 @@ import jfx.control.Heading.heading
 import jfx.control.Image.{image, src_=}
 import jfx.core.component.ElementComponent.*
 import jfx.dsl.*
+import jfx.form.Form
 import jfx.form.Form.{form, onSubmit_=}
 import jfx.form.Input.{input, inputType_=}
 import jfx.form.InputContainer.inputContainer
@@ -28,7 +30,7 @@ class PasswordLoginPage extends PageComposite("Login", pageResizable = false) {
 
     withDslContext {
       form(loginForm) {
-        onSubmit_= { _ =>
+        onSubmit_= { (event : Form[PasswordLogin])  =>
           loginForm
             .save()
             .flatMap(_ => ApplicationService.invoke())

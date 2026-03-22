@@ -1,5 +1,6 @@
 package app.pages.security
 
+import app.domain.documents.Document
 import app.domain.security.WebAuthnLogin
 import app.services.{ApplicationService, WebAuthnLoginClient}
 import app.support.Navigation
@@ -9,6 +10,7 @@ import jfx.control.Heading.heading
 import jfx.control.Image.{image, src, src_=}
 import jfx.core.component.ElementComponent.*
 import jfx.dsl.*
+import jfx.form.Form
 import jfx.form.Form.{form, onSubmit_=}
 import jfx.form.Input.{input, inputType_=}
 import jfx.form.InputContainer.inputContainer
@@ -28,7 +30,7 @@ class WebAuthnLoginPage extends PageComposite("Login mit WebAuthn", pageResizabl
 
     withDslContext {
       form(loginForm) {
-        onSubmit_= { _ =>
+        onSubmit_= { (event : Form[WebAuthnLogin])  =>
           WebAuthnLoginClient
             .login(loginForm.email.get)
             .flatMap(_ => ApplicationService.invoke())

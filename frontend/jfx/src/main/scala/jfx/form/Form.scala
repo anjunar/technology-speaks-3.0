@@ -11,20 +11,20 @@ class Form[M <: Model[M]](model : M) extends NativeComponent[HTMLFormElement], F
   
   valueProperty.asInstanceOf[Property[M]].set(model)
 
-  private var submitHandler: Event => Unit = _ => ()
+  private var submitHandler: Form[M] => Unit = _ => ()
   
   override val element: HTMLFormElement = {
     val formElement = newElement("form")
     formElement.onsubmit = event => {
       event.preventDefault()
-      submitHandler(event)
+      submitHandler(this)
     }
     formElement
   }
 
-  def onSubmit: Event => Unit = submitHandler
+  def onSubmit: Form[M] => Unit = submitHandler
 
-  def onSubmit_=(listener: Event => Unit): Unit =
+  def onSubmit_=(listener: Form[M] => Unit): Unit =
     submitHandler = if (listener == null) _ => () else listener
   
 }
@@ -44,9 +44,9 @@ object Form {
       component
     }
 
-  def onSubmit(using form: Form[?]): Event => Unit =
+  def onSubmit[M <: Model[M]](using form: Form[M]): Form[M] => Unit =
     form.onSubmit
-
-  def onSubmit_=(listener: Event => Unit)(using form: Form[?]): Unit =
+    
+  def onSubmit_=[M <: Model[M]](listener: Form[M] => Unit)(using form: Form[M]): Unit =
     form.onSubmit = listener
 }

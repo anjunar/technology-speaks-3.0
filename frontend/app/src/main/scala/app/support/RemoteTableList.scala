@@ -6,6 +6,7 @@ import jfx.core.state.{ListProperty, RemoteListProperty}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.scalajs.js.JSConverters.*
+import scala.reflect.ClassTag
 
 object RemoteTableList {
 
@@ -40,7 +41,7 @@ object RemoteTableList {
     )
   }
 
-  def createMapped[A, B](
+  def createMapped[A, B: ClassTag](
     pageSize: Int = 50
   )(
     fetch: (Int, Int) => Future[Table[A]]

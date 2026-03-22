@@ -3,7 +3,7 @@ package app.pages.documents
 import app.components.commentable.FirstCommentCard.firstCommentCard
 import app.components.shared.LoadingCard.loadingCard
 import app.domain.core.{Data, Table}
-import app.domain.documents.{Issue, IssueCreated, IssueUpdated}
+import app.domain.documents.{Document, Issue, IssueCreated, IssueUpdated}
 import app.domain.shared.FirstComment
 import app.services.ApplicationService
 import app.support.{Api, RemotePageQuery, RemoteTableList}
@@ -15,6 +15,7 @@ import jfx.core.component.NodeComponent
 import jfx.core.state.{ListProperty, Property, RemoteListProperty}
 import jfx.dsl.*
 import jfx.form.Editor.editor
+import jfx.form.Form
 import jfx.form.Form.{form, onSubmit_=}
 import jfx.form.Input.input
 import jfx.form.InputContainer.inputContainer
@@ -38,7 +39,7 @@ class IssuePage extends PageComposite("Aufgabe") {
   private val commentsProperty: RemoteListProperty[FirstComment, RemotePageQuery] =
     RemoteTableList.createMapped[Data[FirstComment], FirstComment](pageSize = pageSize) { (index, limit) =>
       val issue = modelProperty.get.data
-      if (Option(issue.id.get).exists(_.trim.nonEmpty)) {
+      if (issue.id.get != null) {
         FirstComment.list(index, limit, issue)
       } else {
         Future.successful(new Table[Data[FirstComment]]())
@@ -47,7 +48,7 @@ class IssuePage extends PageComposite("Aufgabe") {
   private val contentProperty: Property[NodeComponent[? <: Node] | Null] = Property(null)
 
   def model(value: Data[Issue]): Unit = {
-    if (Option(value).exists(_.data != null) && Option(value.data.id.get).forall(_.trim.isEmpty)) {
+    if (Option(value).exists(_.data != null) && value.data.id.get == null) {
       value.data.editable.set(true)
     }
 
@@ -73,7 +74,7 @@ class IssuePage extends PageComposite("Aufgabe") {
   }
 
   private def reloadComments(): Unit =
-    if (Option(modelProperty.get.data.id.get).exists(_.trim.nonEmpty)) {
+    if (modelProperty.get.data.id.get != null) {
       RemoteTableList.reloadFirstPage(commentsProperty, pageSize = pageSize)
     } else {
       commentsProperty.clear()
@@ -173,7 +174,7 @@ private final class IssuePageContent(
         prompt.element.readOnly = true
         prompt.element.onclick = _ => appendNewComment()
         prompt.element.style.display =
-          if (Option(issue.id.get).exists(_.trim.nonEmpty)) "block" else "none"
+          if (issue.id.get != null) "block" else "none"
       }
     }
   }
@@ -203,7 +204,7 @@ private final class IssueEditorCard(
 
     withDslContext {
       form(issue) {
-        onSubmit_= { _ =>
+        onSubmit_= { (event : Form[Issue])  =>
           issue.links.find(link => link.rel == "update" || link.rel == "save").foreach { link =>
             Api.invokeLink[Data[Issue]](link, issue).foreach(saved => onIssueSaved(link.rel, saved))
           }

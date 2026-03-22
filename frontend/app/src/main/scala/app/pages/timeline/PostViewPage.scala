@@ -34,7 +34,7 @@ class PostViewPage extends PageComposite("Post") {
   private val commentsProperty: RemoteListProperty[FirstComment, RemotePageQuery] =
     RemoteTableList.createMapped[Data[FirstComment], FirstComment](pageSize = pageSize) { (index, limit) =>
       val post = modelProperty.get.data
-      if (Option(post.id.get).exists(_.trim.nonEmpty)) {
+      if (post.id.get != null) {
         FirstComment.list(index, limit, post)
       } else {
         Future.successful(new Table[Data[FirstComment]]())
@@ -61,7 +61,7 @@ class PostViewPage extends PageComposite("Post") {
   }
 
   private def reloadComments(): Unit =
-    if (Option(modelProperty.get.data.id.get).exists(_.trim.nonEmpty)) {
+    if (modelProperty.get.data.id.get != null) {
       RemoteTableList.reloadFirstPage(commentsProperty, pageSize = pageSize)
     } else {
       commentsProperty.clear()

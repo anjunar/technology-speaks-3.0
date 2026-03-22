@@ -3,6 +3,7 @@ package app.components.commentable
 import app.components.likeable.LikeButton.likeButton
 import app.components.shared.ComponentHeader.componentHeader
 import app.domain.core.AbstractEntity
+import app.domain.documents.Document
 import app.domain.shared.{FirstComment, SecondComment}
 import app.services.ApplicationService
 import app.support.Navigation
@@ -14,6 +15,7 @@ import jfx.core.component.NodeComponent
 import jfx.core.state.Property
 import jfx.dsl.*
 import jfx.form.Editor.editor
+import jfx.form.Form
 import jfx.form.Form.{form, onSubmit_=}
 import jfx.form.editor.plugins.*
 import jfx.layout.HBox.hbox
@@ -128,7 +130,7 @@ private final class CommentReplyCard(
 
     withDslContext {
       form(comment) {
-        onSubmit_= { _ =>
+        onSubmit_= { (event : Form[SecondComment])  =>
           comment.user.set(ApplicationService.app.get.user)
           firstComment
             .update(owner)

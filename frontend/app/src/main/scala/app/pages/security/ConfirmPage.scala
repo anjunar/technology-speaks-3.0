@@ -1,5 +1,6 @@
 package app.pages.security
 
+import app.domain.documents.Document
 import app.domain.security.ConfirmCode
 import app.services.ApplicationService
 import app.support.Api
@@ -9,6 +10,7 @@ import jfx.control.Heading.heading
 import jfx.control.Image.{image, src_=}
 import jfx.core.component.ElementComponent.*
 import jfx.dsl.*
+import jfx.form.Form
 import jfx.form.Form.{form, onSubmit_=}
 import jfx.form.Input.input
 import jfx.form.InputContainer.inputContainer
@@ -28,7 +30,7 @@ class ConfirmPage extends PageComposite("Bestaetigen", pageResizable = false) {
 
     withDslContext {
       form(confirmForm) {
-        onSubmit_= { _ =>
+        onSubmit_= { (event : Form[ConfirmCode])  =>
           Api
             .post[app.support.JsonResponse](s"/service/security/confirm?code=${confirmForm.confirm.get}")
             .flatMap(_ => ApplicationService.invoke())

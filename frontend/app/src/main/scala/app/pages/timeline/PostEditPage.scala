@@ -2,6 +2,7 @@ package app.pages.timeline
 
 import app.components.shared.ComponentHeader.componentHeader
 import app.domain.core.Data
+import app.domain.documents.Document
 import app.domain.timeline.{Post, PostCreated, PostUpdated}
 import app.services.ApplicationService
 import app.ui.{CompositeSupport, DivComposite, PageComposite}
@@ -11,6 +12,7 @@ import jfx.core.component.NodeComponent
 import jfx.core.state.Property
 import jfx.dsl.*
 import jfx.form.Editor.editor
+import jfx.form.Form
 import jfx.form.Form.{form, onSubmit_=}
 import jfx.form.editor.plugins.*
 import jfx.layout.VBox.vbox
@@ -39,7 +41,7 @@ class PostEditPage extends PageComposite("Posts") {
   }
 
   private def handleSaved(saved: Data[Post]): Unit = {
-    if (Option(saved.data.id.get).exists(_.trim.nonEmpty) && Option(modelProperty.get.data.id.get).exists(_.trim.nonEmpty)) {
+    if (saved.data.id.get != null && modelProperty.get.data.id.get != null) {
       ApplicationService.messageBus.publish(new PostUpdated(saved))
     } else {
       ApplicationService.messageBus.publish(new PostCreated(saved))
@@ -64,8 +66,8 @@ private final class PostEditContent(
   override protected def compose(using DslContext): Unit = {
     withDslContext {
       form(data.data) {
-        onSubmit_= { _ =>
-          val isExisting = Option(data.data.id.get).exists(_.trim.nonEmpty)
+        onSubmit_= { (event : Form[Post])  =>
+          val isExisting = data.data.id.get != null
           val request =
             if (isExisting) data.data.update()
             else data.data.save()

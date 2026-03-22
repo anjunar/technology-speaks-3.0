@@ -94,7 +94,7 @@ private final class UserNavigationRow extends TableRow[Data[User]] {
 
   element.ondblclick = _ => {
     val item = getItem
-    if (item != null && Option(item.data.id.get).exists(_.trim.nonEmpty)) {
+    if (item != null && item.data.id.get != null) {
       Navigation.navigate(s"/core/users/user/${item.data.id.get}")
     }
   }

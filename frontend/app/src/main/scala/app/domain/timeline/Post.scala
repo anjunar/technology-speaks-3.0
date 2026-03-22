@@ -6,17 +6,18 @@ import app.support.Api
 import jfx.core.macros.property
 import jfx.core.state.{ListProperty, Property, PropertyAccess}
 
+import java.util.UUID
 import scala.concurrent.Future
 import scala.scalajs.js
 
 class Post(
-  var id: Property[String] = Property(""),
-  var modified: Property[String] = Property(""),
-  var created: Property[String] = Property(""),
-  var user: Property[User | Null] = Property(null),
-  var editor: Property[js.Any | Null] = Property(null),
-  var likes: ListProperty[Like] = ListProperty(),
-  var links: ListProperty[Link] = ListProperty()
+            var id: Property[UUID] = Property(null),
+            var modified: Property[String] = Property(""),
+            var created: Property[String] = Property(""),
+            var user: Property[User | Null] = Property(null),
+            var editor: Property[js.Any | Null] = Property(null),
+            var likes: ListProperty[Like] = ListProperty(),
+            var links: ListProperty[Link] = ListProperty()
 ) extends AbstractEntity[Post] with OwnerProvider {
 
   override def properties: js.Array[PropertyAccess[Post, ?]] =

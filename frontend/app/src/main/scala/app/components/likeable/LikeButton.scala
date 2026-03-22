@@ -101,7 +101,7 @@ class LikeButton extends DivComposite {
 
   private def recomputeState(): Unit = {
     val likes = likesProperty.get
-    val currentUserId = Option(ApplicationService.app.get.user.id.get).filter(_.trim.nonEmpty)
+    val currentUserId = Option(ApplicationService.app.get.user.id.get)
     countProperty.set(likes.length)
     likedProperty.set(currentUserId.exists(id => likes.exists(like => like.user != null && like.user.id.get == id)))
   }

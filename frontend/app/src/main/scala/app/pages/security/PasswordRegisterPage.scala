@@ -1,5 +1,6 @@
 package app.pages.security
 
+import app.domain.documents.Document
 import app.domain.security.PasswordRegister
 import app.ui.{CompositeSupport, PageComposite}
 import jfx.action.Button.{button, buttonType_=, onClick}
@@ -7,6 +8,7 @@ import jfx.control.Heading.heading
 import jfx.control.Image.{image, src_=}
 import jfx.core.component.ElementComponent.*
 import jfx.dsl.*
+import jfx.form.Form
 import jfx.form.Form.{form, onSubmit_=}
 import jfx.form.Input.{input, inputType_=}
 import jfx.form.InputContainer.inputContainer
@@ -26,7 +28,7 @@ class PasswordRegisterPage extends PageComposite("Register", pageResizable = fal
 
     withDslContext {
       form(registerForm) {
-        onSubmit_= { _ =>
+        onSubmit_= { (event : Form[PasswordRegister])  =>
           registerForm
             .save()
             .foreach(_ => close())

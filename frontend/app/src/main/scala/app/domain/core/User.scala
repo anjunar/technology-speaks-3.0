@@ -4,19 +4,20 @@ import app.support.Api
 import jfx.core.macros.property
 import jfx.core.state.{ListProperty, Property, PropertyAccess}
 
+import java.util.UUID
 import scala.concurrent.Future
 import scala.scalajs.js
 
 class User(
-  var id: Property[String] = Property(""),
-  var modified: Property[String] = Property(""),
-  var created: Property[String] = Property(""),
-  var nickName: Property[String] = Property(""),
-  var image: Property[Media | Null] = Property(null),
-  var info: Property[UserInfo | Null] = Property(null),
-  var address: Property[Address | Null] = Property(null),
-  var emails: ListProperty[Email] = ListProperty(),
-  var links: ListProperty[Link] = ListProperty()
+            var id: Property[UUID] = Property(null),
+            var modified: Property[String] = Property(""),
+            var created: Property[String] = Property(""),
+            var nickName: Property[String] = Property(""),
+            var image: Property[Media | Null] = Property(null),
+            var info: Property[UserInfo | Null] = Property(null),
+            var address: Property[Address | Null] = Property(null),
+            var emails: ListProperty[Email] = ListProperty(),
+            var links: ListProperty[Link] = ListProperty()
 ) extends AbstractEntity[User] {
 
   override def properties: js.Array[PropertyAccess[User, ?]] =

@@ -60,11 +60,11 @@ class JsonMapper(val registry : JsonRegistry) {
           case array: js.Array[?] =>
             list.setAll(array.asInstanceOf[js.Array[Any]])
           case iterable: IterableOnce[?] =>
-            list.setAll(iterable.iterator.asInstanceOf[Iterator[Any]])
+            list.setAll(iterable.iterator)
           case null =>
             list.clear()
           case other =>
-            list.setAll(Seq(other.asInstanceOf[Any]))
+            list.setAll(Seq(other))
         }
 
       case _ =>

@@ -155,7 +155,7 @@ class ComponentHeader extends DivComposite {
       addDisposable(
         valueProperty.observe { owner =>
           val user = Option(owner).flatMap(value => Option(value.user.get))
-          val userId = user.flatMap(current => Option(current.id.get)).filter(_.trim.nonEmpty)
+          val userId = user.flatMap(current => Option(current.id.get))
           val image = user.flatMap(current => Option(current.image.get))
           val userName = user.map(_.nickName.get).filter(_.trim.nonEmpty).getOrElse("User")
           val links = Option(owner).map(_.links).getOrElse(jfx.core.state.ListProperty())

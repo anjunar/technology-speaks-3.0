@@ -5,16 +5,17 @@ import app.support.Api
 import jfx.core.macros.property
 import jfx.core.state.{ListProperty, Property, PropertyAccess}
 
+import java.util.UUID
 import scala.concurrent.Future
 import scala.scalajs.js
 
 class Group(
-  var id: Property[String] = Property(""),
-  var name: Property[String] = Property(""),
-  var modified: Property[String] = Property(""),
-  var created: Property[String] = Property(""),
-  var users: ListProperty[User] = ListProperty(),
-  var links: ListProperty[Link] = ListProperty()
+             var id: Property[UUID] = Property(null),
+             var name: Property[String] = Property(""),
+             var modified: Property[String] = Property(""),
+             var created: Property[String] = Property(""),
+             var users: ListProperty[User] = ListProperty(),
+             var links: ListProperty[Link] = ListProperty()
 ) extends AbstractEntity[Group] {
 
   val editable: Property[Boolean] = Property(false)
