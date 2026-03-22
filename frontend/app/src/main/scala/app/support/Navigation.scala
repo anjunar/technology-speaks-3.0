@@ -1,7 +1,7 @@
 package app.support
 
 import app.domain.core.Link
-import org.scalajs.dom.{Event, window}
+import org.scalajs.dom.{Event, URLSearchParams, window}
 
 import scala.scalajs.js
 
@@ -21,7 +21,7 @@ object Navigation {
   }
 
   def queryParam(name: String): Option[String] = {
-    val params = new org.scalajs.dom.URLSearchParams(window.location.search)
+    val params = new URLSearchParams(window.location.search)
     Option(params.get(name))
   }
 
@@ -32,7 +32,15 @@ object Navigation {
 
   def redirectToLogin(): Unit = {
     val redirect = js.URIUtils.encodeURIComponent(window.location.pathname)
-    navigate(s"/security/login?redirect=$redirect")
+    
+    val platformAvailable = js.Dynamic.global.eval("PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();")
+      .asInstanceOf[Boolean]
+
+    if (!platformAvailable) {
+      navigate("/security/login?redirect=${encodeURIComponent(window.location.pathname)}")
+    } else {
+      navigate("/security/login/options?redirect=${encodeURIComponent(window.location.pathname)}")
+    }
   }
 
   def linkByRel(rel: String, links: IterableOnce[Link]): Option[Link] =

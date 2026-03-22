@@ -11,17 +11,16 @@ import jfx.layout.Div.div
 import jfx.layout.HBox.hbox
 import jfx.layout.Span.span
 import jfx.layout.VBox.vbox
-import jfx.layout.Viewport.viewport
+import jfx.layout.Viewport.{viewport, windows}
 import jfx.layout.Viewport
 import jfx.router.WindowRouter.windowRouter
 import jfx.statement.ForEach.forEach
+import jfx.statement.ObserveRender.observeRender
 
 class AppShell extends DivComposite {
 
   override protected def compose(using DslContext): Unit = {
     classes = "app-shell"
-
-    val app = ApplicationService.app.get
 
     withDslContext {
       vbox {
@@ -40,27 +39,36 @@ class AppShell extends DivComposite {
 
           viewport {
             div {
-              classes = Seq("glass", "app-shell-nav", "app-shell-nav-center")
+              addDisposable(Viewport.windows.observe(windows => {
+                if (windows.nonEmpty) {
+                  classes = Seq("glass", "app-shell-nav", "app-shell-nav-left")
+                } else {
+                  classes = Seq("glass", "app-shell-nav", "app-shell-nav-center")
+                }
+              }))
 
-              app.links.foreach { currentLink =>
-                link(currentLink.url) {
-                  vbox {
-                    style {
-                      alignItems = "center"
-                    }
+              observeRender(ApplicationService.app) { app =>
+                app.links.foreach { currentLink =>
+                  link(currentLink.url) {
+                    vbox {
+                      style {
+                        alignItems = "center"
+                      }
 
-                    span {
-                      classes = Seq("material-icons", "icon")
-                      text = currentLink.icon
-                    }
+                      span {
+                        classes = Seq("material-icons", "icon")
+                        text = currentLink.icon
+                      }
 
-                    span {
-                      classes = "app-shell-nav-text"
-                      text = currentLink.name
+                      span {
+                        classes = "app-shell-nav-text"
+                        text = currentLink.name
+                      }
                     }
                   }
                 }
               }
+              
             }
 
             windowRouter(Routes.routes) {}
