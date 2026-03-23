@@ -45,20 +45,15 @@ object Routes {
     asyncRoute("/document/documents/document/:documentId/issues/issue") {
       val docId = pathParam("documentId")
       Issue.read(docId).map { issue =>
-        val page = IssuePage.issuePage()
-        page.documentId(docId)
-        page.model(issue)
-        page
+        issue.data.editable.set(true)
+        IssuePage.issuePage(issue.data)
       }
     },
     asyncRoute("/document/documents/document/:documentId/issues/issue/:id") {
       val docId = pathParam("documentId")
       val issueId = pathParam("id")
       Issue.read(docId, issueId).map { issue =>
-        val page = IssuePage.issuePage()
-        page.documentId(docId)
-        page.model(issue)
-        page
+        IssuePage.issuePage(issue.data)
       }
     },
     route("/followers/relationships") {

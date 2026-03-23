@@ -14,6 +14,9 @@ class LoadingCard extends DivComposite {
   def minHeight(value: String): Unit =
     minHeightValue = Option(value).filter(_.trim.nonEmpty).getOrElse("200px")
 
+  def cardMinHeight(value: String): Unit =
+    minHeight(value)
+
   def label(value: String): Unit =
     labelValue = Option(value).filter(_.trim.nonEmpty).getOrElse("Laden...")
 
@@ -39,4 +42,22 @@ class LoadingCard extends DivComposite {
 object LoadingCard {
   def loadingCard(init: LoadingCard ?=> Unit = {}): LoadingCard =
     CompositeSupport.buildComposite(new LoadingCard)(init)
+
+  def minHeight(using component: LoadingCard): String =
+    component.minHeightValue
+
+  def minHeight_=(value: String)(using component: LoadingCard): Unit =
+    component.minHeight(value)
+
+  def cardMinHeight(using component: LoadingCard): String =
+    component.minHeightValue
+
+  def cardMinHeight_=(value: String)(using component: LoadingCard): Unit =
+    component.cardMinHeight(value)
+
+  def label(using component: LoadingCard): String =
+    component.labelValue
+
+  def label_=(value: String)(using component: LoadingCard): Unit =
+    component.label(value)
 }

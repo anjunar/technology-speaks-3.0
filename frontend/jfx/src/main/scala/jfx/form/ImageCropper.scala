@@ -31,7 +31,6 @@ class ImageCropper(val name: String, override val standalone: Boolean = false) e
   val sourceProperty: Property[Media] = Property(null)
   val fileProperty: Property[File] = Property(null)
   val validatorsProperty: ListProperty[ImageCropper.Validator] = ListProperty()
-  val editableProperty: Property[Boolean] = Property(true)
 
   var aspectRatio: Option[Double] = None
   var previewMaxWidth: Int = 480

@@ -17,8 +17,6 @@ class Editor(val name: String, override val standalone: Boolean = false)
 
   override val valueProperty: Property[js.Any | Null] = Property(null)
 
-  val editableProperty: Property[Boolean] = Property(true)
-
   override val element: HTMLDivElement = {
     val divElement = newElement("div")
     divElement.classList.add("editor")
@@ -481,10 +479,4 @@ object Editor {
       DslRuntime.attach(component, currentContext)
       component
     }
-
-  def editable(using editor: Editor): Boolean =
-    editor.editableProperty.get
-
-  def editable_=(value: Boolean)(using editor: Editor): Unit =
-    editor.editableProperty.set(value)
 }
