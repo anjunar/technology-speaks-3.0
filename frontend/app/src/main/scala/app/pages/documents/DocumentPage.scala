@@ -468,7 +468,7 @@ private final class IssueListItem(
           text = Option(issue.title.get).filter(_.trim.nonEmpty).getOrElse("(Ohne Titel)")
         }
 
-        editorFieldRef = editor("editor") {
+        editorFieldRef = editor("editor", true) {
           basePlugin {}
           headingPlugin {}
           listPlugin {}

@@ -116,7 +116,7 @@ object PostsPage {
           val header = componentHeader {}
           header.model(data.data)
 
-          val editorField = editor("editor") {
+          val editorField = editor("editor", true) {
             style {
               width = "100%"
             }

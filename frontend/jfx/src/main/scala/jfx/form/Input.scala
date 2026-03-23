@@ -70,15 +70,30 @@ class Input(val name: String, override val standalone: Boolean = false) extends 
 object Input {
 
   def input(name: String): Input =
-    input(name, false)({})
+    input(name)({})
 
-  def input(name: String, standalone: Boolean = false)(init: Input ?=> Unit): Input =
+  def input(name: String)(init: Input ?=> Unit): Input =
     DslRuntime.currentScope { currentScope =>
       val currentContext = DslRuntime.currentComponentContext()
-      val component = new Input(name, standalone)
+      val component = new Input(name)
       DslRuntime.withComponentContext(ComponentContext(None, currentContext.enclosingForm)) {
         given Scope = currentScope
         given Input = component
+        init
+      }
+      DslRuntime.attach(component, currentContext)
+      component
+    }
+
+  def standaloneInput(name: String)(init: Input ?=> Unit): Input =
+    DslRuntime.currentScope { currentScope =>
+      val currentContext = DslRuntime.currentComponentContext()
+      val component = new Input(name, true)
+      DslRuntime.withComponentContext(ComponentContext(None, currentContext.enclosingForm)) {
+        given Scope = currentScope
+
+        given Input = component
+
         init
       }
       DslRuntime.attach(component, currentContext)

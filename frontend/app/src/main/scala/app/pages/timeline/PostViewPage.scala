@@ -157,7 +157,7 @@ object PostViewPage {
           val header = componentHeader {}
           header.model(post)
 
-          val editorField = editor("editor") {
+          val editorField = editor("editor", true) {
             basePlugin {}
             headingPlugin {}
             listPlugin {}
