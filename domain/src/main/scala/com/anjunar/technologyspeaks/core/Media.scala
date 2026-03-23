@@ -26,8 +26,7 @@ class Media(
 
   @OneToOne(cascade = Array(CascadeType.ALL))
   @JsonbProperty
-  @BeanProperty
-  var thumbnail: Thumbnail = null
+    var thumbnail: Thumbnail = null
 
 }
 

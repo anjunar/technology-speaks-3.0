@@ -15,8 +15,7 @@ import scala.beans.BeanProperty
 class PostCommentSearch(
                          @(JsonbProperty @field)
                          @(RestPredicate @field)(classOf[PostCommentSearch.PostPredicate])
-                         @BeanProperty
-                         val post: Post = null,
+                                                  val post: Post = null,
                          sort: java.util.List[String],
                          index: Int = 0,
                          limit: Int = 5

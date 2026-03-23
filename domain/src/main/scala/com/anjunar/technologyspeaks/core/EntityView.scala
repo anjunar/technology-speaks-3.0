@@ -11,11 +11,9 @@ import scala.beans.BeanProperty
 class EntityView extends AbstractEntity with EntityContext[EntityView] {
 
   @ManyToOne(optional = false)
-  @BeanProperty
-  var user: User = null
+    var user: User = null
 
   @OneToMany
-  @BeanProperty
-  val properties: java.util.Set[ManagedProperty] = new java.util.HashSet[ManagedProperty]()
+    val properties: java.util.Set[ManagedProperty] = new java.util.HashSet[ManagedProperty]()
 
 }

@@ -14,14 +14,12 @@ abstract class AbstractComment extends AbstractEntity with OwnerProvider {
 
   @ManyToOne(optional = false)
   @JsonbProperty
-  @BeanProperty
-  var user: User = null
+    var user: User = null
 
   @Column(columnDefinition = "jsonb")
   @Type(value = classOf[NodeType])
   @JsonbProperty
-  @BeanProperty
-  var editor: Node = null
+    var editor: Node = null
 
   override def owner(): EntityProvider = user
 

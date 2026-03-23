@@ -54,7 +54,8 @@ lazy val jsonMapper2 = (project in file("library/json-mapper"))
       "jakarta.json.bind" % "jakarta.json.bind-api" % "3.0.0",
       "jakarta.persistence" % "jakarta.persistence-api" % "3.2.0",
       "jakarta.validation" % "jakarta.validation-api" % "3.1.1",
-      "tools.jackson.core" % "jackson-databind" % "3.0.3"
+      "tools.jackson.core" % "jackson-databind" % "3.1.0",
+      "tools.jackson.module" %% "jackson-module-scala" % "3.1.0"
     )
   )
 

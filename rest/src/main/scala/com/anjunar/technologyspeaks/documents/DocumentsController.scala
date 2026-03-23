@@ -62,6 +62,6 @@ class DocumentsController(val query: HibernateSearch) {
 object DocumentsController {
 
   @JsonbSubtype(alias = "Data", `type` = classOf[Data[?]])
-  class DocumentRow(data: Document, @(JsonbProperty @field) @BeanProperty val score: Double) extends Data[Document](data, Document.schema())
+  class DocumentRow(data: Document, @(JsonbProperty @field) val score: Double) extends Data[Document](data, Document.schema())
 
 }

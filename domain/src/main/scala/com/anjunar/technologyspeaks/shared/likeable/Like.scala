@@ -12,7 +12,6 @@ class Like extends AbstractEntity {
 
   @ManyToOne(optional = false)
   @JsonbProperty
-  @BeanProperty
-  var user: User = null
+    var user: User = null
 
 }

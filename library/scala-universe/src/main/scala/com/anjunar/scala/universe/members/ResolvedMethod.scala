@@ -4,7 +4,7 @@ import com.anjunar.scala.universe.{ResolvedClass, TypeResolver}
 import com.google.common.reflect.TypeToken
 
 import java.lang.annotation.Annotation
-import java.lang.reflect.Method
+import java.lang.reflect.{Method, ParameterizedType}
 
 class ResolvedMethod(override val underlying : Method, owner : ResolvedClass) extends ResolvedExecutable(underlying, owner) {
 
@@ -18,7 +18,18 @@ class ResolvedMethod(override val underlying : Method, owner : ResolvedClass) ex
     )
     .map(aClass => aClass.findMethod(name, underlying.getParameterTypes*))
   
-  lazy val returnType : ResolvedClass = TypeResolver.resolve(TypeToken.of(owner.underlying).resolveType(underlying.getGenericReturnType).getType)
+  lazy val returnType : ResolvedClass = {
+    if (underlying.getGenericReturnType.isInstanceOf[Class[?]]) {
+      val genericInfo = overrides.find(method => method.returnType.underlying.isInstanceOf[ParameterizedType]).orNull
+      if (genericInfo != null) {
+        genericInfo.returnType 
+      } else {
+        TypeResolver.resolve(TypeToken.of(owner.underlying).resolveType(underlying.getGenericReturnType).getType)
+      }
+    } else {
+      TypeResolver.resolve(TypeToken.of(owner.underlying).resolveType(underlying.getGenericReturnType).getType)  
+    }
+  }
   
   def invoke(instance : AnyRef, args : Any*) : Any = {
     underlying.setAccessible(true)

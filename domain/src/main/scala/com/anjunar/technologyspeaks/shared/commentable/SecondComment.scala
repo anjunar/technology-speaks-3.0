@@ -15,8 +15,7 @@ class SecondComment extends AbstractComment with EntityContext[SecondComment] wi
 
   @OneToMany(cascade = Array(CascadeType.ALL), orphanRemoval = true)
   @JsonbProperty
-  @BeanProperty
-  override val likes: java.util.Set[Like] = new java.util.HashSet[Like]()
+    override val likes: java.util.Set[Like] = new java.util.HashSet[Like]()
 
 }
 

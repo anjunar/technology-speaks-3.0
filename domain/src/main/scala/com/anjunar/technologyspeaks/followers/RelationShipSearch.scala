@@ -13,8 +13,7 @@ class RelationShipSearch(
 ) extends AbstractSearch(sort, index, limit) {
 
   @RestPredicate(classOf[RelationShipSearch.UserPredicate])
-  @BeanProperty
-  var user: User = null
+    var user: User = null
 
 }
 

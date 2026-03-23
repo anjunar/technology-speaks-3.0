@@ -10,25 +10,21 @@ import java.util.UUID
 import scala.beans.BeanProperty
 
 @MappedSuperclass
-abstract class AbstractEntity extends EntityProvider with DTO with LinksContainer.Trait {
+abstract class AbstractEntity extends EntityProvider with DTO with LinksContainer {
 
   @Id
   @JsonbProperty
-  @BeanProperty
-  override val id: UUID = UUID.randomUUID()
+    override val id: UUID = UUID.randomUUID()
 
   @Version
   @JsonbProperty
-  @BeanProperty
-  var version: Long = -1L
+    var version: Long = -1L
 
   @JsonbProperty
-  @BeanProperty
-  var created: LocalDateTime = null
+    var created: LocalDateTime = null
 
   @JsonbProperty
-  @BeanProperty
-  var modified: LocalDateTime = null
+    var modified: LocalDateTime = null
 
   @PreUpdate
   def preUpdate(): Unit = {

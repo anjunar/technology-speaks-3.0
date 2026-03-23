@@ -16,13 +16,11 @@ class FirstComment extends AbstractComment with EntityContext[FirstComment] with
 
   @OneToMany(cascade = Array(CascadeType.ALL), orphanRemoval = true)
   @JsonbProperty
-  @BeanProperty
-  val comments: java.util.List[SecondComment] = new java.util.ArrayList[SecondComment]()
+    val comments: java.util.List[SecondComment] = new java.util.ArrayList[SecondComment]()
 
   @OneToMany(cascade = Array(CascadeType.ALL), orphanRemoval = true)
   @JsonbProperty
-  @BeanProperty
-  override val likes: java.util.Set[Like] = new java.util.HashSet[Like]()
+    override val likes: java.util.Set[Like] = new java.util.HashSet[Like]()
 
   override def owner(): EntityProvider = user
 

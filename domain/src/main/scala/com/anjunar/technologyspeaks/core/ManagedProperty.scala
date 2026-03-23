@@ -8,18 +8,16 @@ import scala.beans.BeanProperty
 @Entity
 @Table(name = "Core#ManagedProperty")
 class ManagedProperty(
-  @BeanProperty var name: String = null,
-  @BeanProperty var visibleForAll: Boolean = false
+  var name: String = null,
+  var visibleForAll: Boolean = false
 ) extends AbstractEntity with EntityContext[ManagedProperty] {
 
   def this() = this(null, false)
 
   @ManyToMany
-  @BeanProperty
-  val users: java.util.Set[User] = new java.util.HashSet[User]()
+    val users: java.util.Set[User] = new java.util.HashSet[User]()
 
   @ManyToOne(optional = false)
-  @BeanProperty
-  var view: EntityView = null
+    var view: EntityView = null
 
 }

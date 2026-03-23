@@ -5,14 +5,13 @@ import com.anjunar.scala.universe.TypeResolver
 import jakarta.json.bind.annotation.JsonbProperty
 
 import scala.annotation.meta.field
-import scala.beans.BeanProperty
 
 abstract class AbstractRow[E](
-  @(JsonbProperty @field) @BeanProperty val data: E,
+  @(JsonbProperty @field) val data: E,
   clazz: Class[E]
-) extends LinksContainer.Trait {
+) extends LinksContainer {
 
-  @JsonbProperty @BeanProperty
+  @JsonbProperty
   val schema: EntitySchema[?] =
     TypeResolver.companionInstance(clazz).asInstanceOf[SchemaProvider].schema()
 

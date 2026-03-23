@@ -10,19 +10,17 @@ import scala.beans.BeanProperty
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @Table(name = "Core#Credential")
-class Credential(@BeanProperty var code: String = null) extends AbstractEntity {
+class Credential(var code: String = null) extends AbstractEntity {
   
   def this() = this(null)
 
   @ManyToMany
   @Size(min = 1, max = 10)
   @JsonbProperty
-  @BeanProperty
-  val roles: java.util.Set[Role] = new java.util.HashSet[Role]()
+    val roles: java.util.Set[Role] = new java.util.HashSet[Role]()
 
   @ManyToOne(optional = false)
-  @BeanProperty
-  var email: EMail = null
+    var email: EMail = null
 
 }
 

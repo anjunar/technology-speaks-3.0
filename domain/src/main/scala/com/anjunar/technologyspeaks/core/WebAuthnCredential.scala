@@ -9,11 +9,11 @@ import scala.beans.BeanProperty
 
 @Entity
 class WebAuthnCredential(
-  @BeanProperty var credentialId: String = null,
-  @BeanProperty var publicKey: Array[Byte] = null,
-  @BeanProperty var publicKeyAlgorithm: Long = 0L,
-  @BeanProperty var counter: Long = 0L,
-  @BeanProperty var aaguid: UUID = null,
+  var credentialId: String = null,
+  var publicKey: Array[Byte] = null,
+  var publicKeyAlgorithm: Long = 0L,
+  var counter: Long = 0L,
+  var aaguid: UUID = null,
   code: String = null
 ) extends Credential(code) with EntityContext[WebAuthnCredential] {
 

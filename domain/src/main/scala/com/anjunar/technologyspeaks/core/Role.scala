@@ -15,14 +15,12 @@ class Role(
   @NotBlank
   @Column(unique = true)
   @(JsonbProperty @field)
-  @BeanProperty
-  var name: String = null,
+    var name: String = null,
 
   @Size(min = 3, max = 80)
   @NotBlank
   @(JsonbProperty @field)
-  @BeanProperty
-  var description: String = null
+    var description: String = null
 ) extends AbstractEntity with EntityContext[Role] {
   def this() = this(null, null)
 }

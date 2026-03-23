@@ -13,18 +13,16 @@ import scala.beans.BeanProperty
 @Entity
 @Table(name = "Core#Email")
 class EMail(
-             @(JsonbProperty @field) @Email @NotBlank @Column(unique = true) @BeanProperty var value: String = null
+             @(JsonbProperty @field) @Email @NotBlank @Column(unique = true) var value: String = null
 ) extends AbstractEntity with OwnerProvider with EntityContext[EMail] {
   
   def this() = this(null)
 
   @ManyToOne(optional = false)
-  @BeanProperty
-  var user: User = null
+    var user: User = null
 
   @OneToMany(cascade = Array(CascadeType.ALL), orphanRemoval = true, mappedBy = "email")
-  @BeanProperty
-  val credentials: java.util.Set[Credential] = new java.util.HashSet[Credential]()
+    val credentials: java.util.Set[Credential] = new java.util.HashSet[Credential]()
 
   override def owner(): EntityProvider = user.owner()
 

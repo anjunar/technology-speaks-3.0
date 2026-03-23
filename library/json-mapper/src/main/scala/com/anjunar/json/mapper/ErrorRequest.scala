@@ -5,6 +5,6 @@ import scala.annotation.meta.field
 import scala.beans.BeanProperty
 
 class ErrorRequest(
-  @(JsonbProperty @field) @BeanProperty val path: java.util.List[Any],
-  @(JsonbProperty @field) @BeanProperty val message: String
+  @(JsonbProperty @field) val path: java.util.List[Any],
+  @(JsonbProperty @field) val message: String
 )

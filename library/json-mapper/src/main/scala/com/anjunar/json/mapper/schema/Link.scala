@@ -6,10 +6,10 @@ import scala.annotation.meta.field
 import scala.beans.BeanProperty
 
 class Link(
-  @(JsonbProperty @field) @BeanProperty val rel: String = null,
-  @(JsonbProperty @field) @BeanProperty val url: String = null,
-  @(JsonbProperty @field) @BeanProperty val method: String = null,
-  @(JsonbProperty @field)("@type") @BeanProperty val id: String = null
+  @(JsonbProperty @field) val rel: String = null,
+  @(JsonbProperty @field) val url: String = null,
+  @(JsonbProperty @field) val method: String = null,
+  @(JsonbProperty @field)("@type") val id: String = null
 )
 
 object Link extends SchemaProvider {

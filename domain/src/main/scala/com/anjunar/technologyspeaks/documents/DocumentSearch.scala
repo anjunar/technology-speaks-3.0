@@ -18,8 +18,7 @@ class DocumentSearch(
   @JsonbProperty
   @RequestParam
   @RestPredicate(classOf[DocumentSearch.DocumentPredicate])
-  @BeanProperty
-  val name: String = nameValue
+    val name: String = nameValue
 
 }
 

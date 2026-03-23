@@ -10,11 +10,9 @@ class Property[T, V](
   var rule: VisibilityRule[T]
 ) {
 
-  @JsonbProperty("type") @BeanProperty
-  val typeName: String = propertyType.getSimpleName
+  @JsonbProperty("type")   val typeName: String = propertyType.getSimpleName
 
-  @JsonbProperty @BeanProperty
-  val schema: EntitySchema[?] =
+  @JsonbProperty   val schema: EntitySchema[?] =
     if (classOf[java.util.Collection[?]].isAssignableFrom(propertyType) && collectionType != null) {
       fetchCompanionSchema(collectionType)
     } else {

@@ -15,8 +15,7 @@ class IssueSearch(
 ) extends AbstractSearch(sort, index, limit) {
 
   @RestPredicate(classOf[IssueSearch.DocumentPredicate])
-  @BeanProperty
-  val id: Document = idValue
+    val id: Document = idValue
 
 }
 

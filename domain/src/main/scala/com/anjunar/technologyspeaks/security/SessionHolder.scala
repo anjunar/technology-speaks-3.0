@@ -10,11 +10,9 @@ import scala.beans.BeanProperty
 @SessionScope
 class SessionHolder {
 
-  @BeanProperty
-  var user: UUID = null
+    var user: UUID = null
 
-  @BeanProperty
-  var credentials: UUID = null
+    var credentials: UUID = null
 
   def invalidate(): Unit = {
     user = null

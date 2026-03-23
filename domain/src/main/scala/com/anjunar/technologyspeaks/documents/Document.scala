@@ -58,21 +58,19 @@ import scala.beans.BeanProperty
   )
 )
 class Document(
-  @Column(nullable = false) @(JsonbProperty @field) @BeanProperty var title: String = null
+  @Column(nullable = false) @(JsonbProperty @field) var title: String = null
 ) extends AbstractEntity with EntityContext[Document] with OwnerProvider {
 
   def this() = this(null)
 
   @ManyToOne(optional = false)
   @JsonbProperty
-  @BeanProperty
-  var user: User = null
+    var user: User = null
 
   @Column(columnDefinition = "jsonb")
   @Type(value = classOf[NodeType])
   @JsonbProperty
-  @BeanProperty
-  var editor: Node = null
+    var editor: Node = null
 
   override def owner(): EntityProvider = user
 

@@ -12,15 +12,14 @@ import scala.beans.BeanProperty
 @Entity
 @Table(name = "Followers#Group")
 class Group(
-  @JsonbProperty @BeanProperty var name: String = null
+  @JsonbProperty var name: String = null
 ) extends AbstractEntity with OwnerProvider with EntityContext[Group] {
 
   def this() = this(null)
 
   @ManyToOne(optional = false)
   @JsonbProperty
-  @BeanProperty
-  var user: User = null
+    var user: User = null
 
   override def owner(): User = user
 

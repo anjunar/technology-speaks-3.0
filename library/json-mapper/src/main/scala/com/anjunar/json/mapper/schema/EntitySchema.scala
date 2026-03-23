@@ -4,7 +4,7 @@ import scala.beans.BeanProperty
 
 abstract class EntitySchema[T] {
 
-  @BeanProperty val properties: java.util.LinkedHashMap[String, Property[T, Any]] =
+  val properties: java.util.LinkedHashMap[String, Property[T, Any]] =
     new java.util.LinkedHashMap[String, Property[T, Any]]()
 
   def property[V](

@@ -15,7 +15,6 @@ class UserSearch(
 
   @JsonbProperty
   @RequestParam
-  @BeanProperty
-  val name: String = nameValue
+    val name: String = nameValue
 
 }

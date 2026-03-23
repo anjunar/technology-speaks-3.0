@@ -21,8 +21,7 @@ class IssueCommentSearch(
   @JsonbProperty
   @PathVariable("issue")
   @RestPredicate(classOf[IssueCommentSearch.IssuePredicate])
-  @BeanProperty
-  val issue: Issue = issueValue
+    val issue: Issue = issueValue
 
 }
 

@@ -6,14 +6,14 @@ import com.anjunar.json.mapper.schema.{SchemaProvider, VisibilityRule}
 import com.anjunar.json.mapper.{JavaContext, ObjectMapperProvider}
 import com.anjunar.json.mapper.intermediate.model.{JsonNode, JsonObject, JsonString}
 import com.anjunar.scala.universe.TypeResolver
-import com.anjunar.scala.universe.introspector.{BeanIntrospector, BeanProperty}
+import com.anjunar.scala.universe.introspector.{AbstractProperty, AnnotationIntrospector, AnnotationProperty}
 import jakarta.json.bind.annotation.{JsonbProperty, JsonbSubtype}
 import jakarta.persistence.{Entity, EntityGraph, Subgraph}
 
 class BeanSerializer extends Serializer[Any] {
 
   override def serialize(input: Any, context: JavaContext): JsonNode = {
-    val beanModel = BeanIntrospector.create(context.resolvedClass)
+    val beanModel = AnnotationIntrospector.create(context.resolvedClass, classOf[JsonbProperty])
     val nodes = new java.util.LinkedHashMap[String, JsonNode]()
     val json = new JsonObject(nodes)
 
@@ -32,9 +32,9 @@ class BeanSerializer extends Serializer[Any] {
 
       if (
         property.name != "links" &&
-        classOf[EntityProvider].isAssignableFrom(context.resolvedClass.raw) &&
-        context.graph != null &&
-        !isSelectedByGraph(context, property)
+          classOf[EntityProvider].isAssignableFrom(context.resolvedClass.raw) &&
+          context.graph != null &&
+          !isSelectedByGraph(context, property)
       ) {
         index += 1
       } else {
@@ -60,7 +60,7 @@ class BeanSerializer extends Serializer[Any] {
       }
     }
 
-    if (! json.value.isEmpty) {
+    if (!json.value.isEmpty) {
       val subtype = input.getClass.getAnnotation(classOf[JsonbSubtype])
       val typeProperty = if (subtype != null) {
         new JsonString(subtype.alias())
@@ -75,11 +75,11 @@ class BeanSerializer extends Serializer[Any] {
   }
 
   private def serializeProperty(
-    input: Any,
-    context: JavaContext,
-    nodes: java.util.LinkedHashMap[String, JsonNode],
-    property: BeanProperty
-  ): Unit = {
+                                 input: Any,
+                                 context: JavaContext,
+                                 nodes: java.util.LinkedHashMap[String, JsonNode],
+                                 property: AnnotationProperty
+                               ): Unit = {
     val value =
       try {
         property.get(input.asInstanceOf[AnyRef])
@@ -111,12 +111,10 @@ class BeanSerializer extends Serializer[Any] {
     }
   }
 
-  private def convertToJsonNode(
-    property: BeanProperty,
-    nodes: java.util.LinkedHashMap[String, JsonNode],
-    value: Any,
-    context: JavaContext
-  ): Unit = {
+  private def convertToJsonNode(property: AbstractProperty,
+                                nodes: java.util.LinkedHashMap[String, JsonNode],
+                                value: Any,
+                                context: JavaContext): Unit = {
     val jsonbProperty = property.findAnnotation(classOf[JsonbProperty])
     if (jsonbProperty == null) {
       return
@@ -128,7 +126,7 @@ class BeanSerializer extends Serializer[Any] {
     val propertyType =
       if (
         classOf[java.util.Collection[?]].isAssignableFrom(property.propertyType.raw) ||
-        classOf[java.util.Map[?, ?]].isAssignableFrom(property.propertyType.raw)
+          classOf[java.util.Map[?, ?]].isAssignableFrom(property.propertyType.raw)
       ) {
         property.propertyType
       } else {
@@ -165,7 +163,7 @@ class BeanSerializer extends Serializer[Any] {
     }
   }
 
-  private def isSelectedByGraph(context: JavaContext, property: BeanProperty): Boolean = {
+  private def isSelectedByGraph(context: JavaContext, property: AnnotationProperty): Boolean = {
     val currentContainer = resolveContainer(context)
 
     if (currentContainer != null) {
@@ -195,7 +193,7 @@ class BeanSerializer extends Serializer[Any] {
 
     if (
       classOf[java.util.Collection[?]].isAssignableFrom(context.parent.resolvedClass.raw) ||
-      context.parent.resolvedClass.raw.isArray
+        context.parent.resolvedClass.raw.isArray
     ) {
       return resolveContainer(context.parent)
     }

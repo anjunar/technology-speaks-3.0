@@ -19,9 +19,9 @@ import scala.beans.BeanProperty
   )
 )
 class Thumbnail(
-  @NotBlank @Size(min = 2, max = 80) @(JsonbProperty @field) @BeanProperty var name: String = null,
-  @NotBlank @Size(min = 2, max = 80) @(JsonbProperty @field) @BeanProperty var contentType: String = null,
-  @Lob @(JsonbProperty @field) @BeanProperty var data: Array[Byte] = null
+  @NotBlank @Size(min = 2, max = 80) @(JsonbProperty @field) var name: String = null,
+  @NotBlank @Size(min = 2, max = 80) @(JsonbProperty @field) var contentType: String = null,
+  @Lob @(JsonbProperty @field) var data: Array[Byte] = null
 ) extends AbstractEntity {
   def this() = this(null, null, null)
 }

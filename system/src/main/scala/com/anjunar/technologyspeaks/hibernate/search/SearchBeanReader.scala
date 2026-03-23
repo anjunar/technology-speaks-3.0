@@ -1,6 +1,7 @@
 package com.anjunar.technologyspeaks.hibernate.search
 
-import com.anjunar.scala.universe.introspector.BeanIntrospector
+import com.anjunar.scala.universe.introspector.AnnotationIntrospector
+import jakarta.json.bind.annotation.JsonbProperty
 import com.anjunar.technologyspeaks.hibernate.search.annotations.{RestPredicate, RestSort}
 import jakarta.persistence.criteria.{Expression, Order, Predicate}
 import org.hibernate.Session
@@ -17,7 +18,7 @@ object SearchBeanReader {
     query: JpaCriteriaQuery[?],
     instances: ObjectProvider[PredicateProvider[Any, E]]
   ): HibernateSearchContextResult = {
-    val beanModel = BeanIntrospector.createWithType(searchBean.getClass)
+    val beanModel = AnnotationIntrospector.createWithType(searchBean.getClass, classOf[JsonbProperty])
     val predicates = new java.util.ArrayList[Predicate]()
     val selection = new java.util.ArrayList[Expression[?]]()
     val parameters = new java.util.HashMap[String, Any]()
@@ -69,7 +70,7 @@ object SearchBeanReader {
     selection: java.util.List[Expression[?]],
     instances: ObjectProvider[SortProvider[Any, E]]
   ): java.util.List[Order] = {
-    val beanModel = BeanIntrospector.createWithType(searchBean.getClass)
+    val beanModel = AnnotationIntrospector.createWithType(searchBean.getClass, classOf[JsonbProperty])
 
     for (property <- beanModel.properties) {
       val restSort = property.findAnnotation(classOf[RestSort])

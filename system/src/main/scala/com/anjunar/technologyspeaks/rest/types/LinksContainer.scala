@@ -3,25 +3,16 @@ package com.anjunar.technologyspeaks.rest.types
 import com.anjunar.json.mapper.schema.Link
 import jakarta.json.bind.annotation.JsonbProperty
 import jakarta.persistence.Transient
+import java.util
 
-import scala.beans.BeanProperty
+trait LinksContainer {
 
-object LinksContainer {
+  @JsonbProperty("$links")
+  @Transient
+  val links: util.List[Link] = new util.ArrayList[Link]()
 
-  trait Interface {
-
-    def getLinks(): java.util.List[Link]
-
-    def addLinks(value: Link*): Unit = {
-      value.filter(_ != null).foreach(link => getLinks().add(link))
-    }
-  }
-
-  trait Trait extends Interface {
-
-    @JsonbProperty("$links")
-    @Transient
-    @BeanProperty val links: java.util.List[Link] = new java.util.ArrayList[Link]()
+  def addLinks(value: Link*): Unit = {
+    value.filter(_ != null).foreach(link => links.add(link))
   }
 
 }

@@ -62,18 +62,15 @@ import scala.beans.BeanProperty
 class RelationShip extends AbstractEntity with OwnerProvider with EntityContext[RelationShip] {
 
   @ManyToOne(optional = false)
-  @BeanProperty
-  var user: User = null
+    var user: User = null
 
   @ManyToOne(optional = false)
   @JsonbProperty
-  @BeanProperty
-  var follower: User = null
+    var follower: User = null
 
   @ManyToMany
   @JsonbProperty
-  @BeanProperty
-  val groups: java.util.Set[Group] = new java.util.HashSet[Group]()
+    val groups: java.util.Set[Group] = new java.util.HashSet[Group]()
 
   override def owner(): User = user
 

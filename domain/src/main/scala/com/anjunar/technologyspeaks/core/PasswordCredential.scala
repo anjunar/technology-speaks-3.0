@@ -7,7 +7,7 @@ import scala.beans.BeanProperty
 
 @Entity
 class PasswordCredential(
-  @BeanProperty var password: String = null,
+  var password: String = null,
   code: String = null
 ) extends Credential(code) with EntityContext[PasswordCredential] {
   def this() = this(null, null)
