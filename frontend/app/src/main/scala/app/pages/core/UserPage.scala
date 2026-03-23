@@ -8,6 +8,7 @@ import app.support.{Api, AppJson, ErrorResponseException, Navigation, RemotePage
 import app.ui.{CompositeSupport, DivComposite, PageComposite}
 import jfx.action.Button.{button, buttonType, buttonType_=, onClick}
 import jfx.control.Image.image
+import jfx.control.virtualList
 import jfx.core.component.ElementComponent.*
 import jfx.core.component.NodeComponent
 import jfx.core.state.{ListProperty, Property, RemoteListProperty}
@@ -23,7 +24,6 @@ import jfx.layout.HBox.hbox
 import jfx.layout.VBox.vbox
 import jfx.layout.Viewport
 import jfx.statement.DynamicOutlet.dynamicOutlet
-import jfx.virtual.virtualList
 
 import scala.concurrent.ExecutionContext
 import scala.scalajs.js

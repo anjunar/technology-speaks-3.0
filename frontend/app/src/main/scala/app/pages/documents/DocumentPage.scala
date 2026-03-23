@@ -11,7 +11,7 @@ import jfx.action.Button.button
 import jfx.action.Button.{buttonType_=, onClick}
 import jfx.control.TableColumn.{cellFactory_=, cellValueFactory_=, column, prefWidth_=}
 import jfx.control.TableView.{fixedCellSize_=, items_=, showHeader_=, tableView}
-import jfx.control.{TableCell, TableView}
+import jfx.control.{TableCell, TableView, virtualList}
 import jfx.core.component.ElementComponent.*
 import jfx.core.component.NodeComponent
 import jfx.core.state.{ListProperty, Property, RemoteListProperty}
@@ -26,7 +26,6 @@ import jfx.layout.HBox.hbox
 import jfx.layout.Span.span
 import jfx.layout.VBox.vbox
 import jfx.statement.DynamicOutlet.dynamicOutlet
-import jfx.virtual.virtualList
 import org.scalajs.dom.Node
 
 import scala.concurrent.{ExecutionContext, Future}

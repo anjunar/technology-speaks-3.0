@@ -88,6 +88,9 @@ class BasePlugin extends AbstractEditorPlugin("base-plugin") {
   override protected def onViewChanged(nextView: EditorView | Null): Unit =
     updateUiFromState()
 
+  override protected def onEditorStateUpdated(): Unit =
+    updateUiFromState()
+
   private def toggleMarkCommand(markName: String): Unit = {
     val markType = selectMarkType(view.state.schema.marks, markName)
     markType.foreach { resolvedMarkType =>
@@ -108,29 +111,16 @@ class BasePlugin extends AbstractEditorPlugin("base-plugin") {
 
     markType.exists { resolvedMarkType =>
       if (selection.empty) {
-        val storedMarks = state.storedMarks
-        if (storedMarks != null) {
-          resolvedMarkType.isInSet(storedMarks) != null
-        } else {
-          resolvedMarkType.isInSet(selection.fromResolved.marks()) != null
-        }
+        isMarkInSet(
+          resolvedMarkType,
+          activeMarksForEmptySelection(state, selection)
+        )
       } else {
-        var found = false
-
-        state.doc.nodesBetween(
+        state.doc.rangeHasMark(
           selection.from,
           selection.to,
-          { (node, _, _, _) =>
-            if (resolvedMarkType.isInSet(node.marks) != null) {
-              found = true
-              false
-            } else {
-              true
-            }
-          }
+          resolvedMarkType
         )
-
-        found
       }
     }
   }
@@ -171,6 +161,23 @@ class BasePlugin extends AbstractEditorPlugin("base-plugin") {
     val value = source.selectDynamic(key).asInstanceOf[js.Any]
     if (value == null || js.isUndefined(value)) scala.None
     else scala.Some(value.asInstanceOf[MarkType])
+  }
+
+  private def activeMarksForEmptySelection(state: EditorState, selection: Selection): js.Array[Mark] = {
+    val storedMarks = state.storedMarks.asInstanceOf[js.Any]
+    if (storedMarks != null && !js.isUndefined(storedMarks)) {
+      state.storedMarks.asInstanceOf[js.Array[Mark]]
+    } else {
+      selection.fromResolved.marks()
+    }
+  }
+
+  private def isMarkInSet(markType: MarkType, marks: js.Array[Mark] | Null): Boolean = {
+    val found =
+      if (marks == null || js.isUndefined(marks.asInstanceOf[js.Any])) null
+      else markType.isInSet(marks)
+
+    found != null && !js.isUndefined(found.asInstanceOf[js.Any])
   }
 
   private def dispatch(editorView: EditorView): DispatchFn =

@@ -130,6 +130,9 @@ class LinkPlugin extends AbstractEditorPlugin("link-plugin") {
   override protected def onViewChanged(nextView: EditorView | Null): Unit =
     updateUiFromState()
 
+  override protected def onEditorStateUpdated(): Unit =
+    updateUiFromState()
+
   private def insertLink(href: String, title: String | Null): Unit =
     selectMarkType(view.state.schema.marks, "link").foreach { linkType =>
       Commands.toggleMark(
@@ -166,29 +169,16 @@ class LinkPlugin extends AbstractEditorPlugin("link-plugin") {
 
     markType.exists { resolvedMarkType =>
       if (selection.empty) {
-        val storedMarks = state.storedMarks
-        if (storedMarks != null) {
-          resolvedMarkType.isInSet(storedMarks) != null
-        } else {
-          resolvedMarkType.isInSet(selection.fromResolved.marks()) != null
-        }
+        isMarkInSet(
+          resolvedMarkType,
+          activeMarksForEmptySelection(state, selection)
+        )
       } else {
-        var found = false
-
-        state.doc.nodesBetween(
+        state.doc.rangeHasMark(
           selection.from,
           selection.to,
-          { (node, _, _, _) =>
-            if (resolvedMarkType.isInSet(node.marks) != null) {
-              found = true
-              false
-            } else {
-              true
-            }
-          }
+          resolvedMarkType
         )
-
-        found
       }
     }
   }
@@ -203,12 +193,10 @@ class LinkPlugin extends AbstractEditorPlugin("link-plugin") {
     } else {
       val mark =
         if (selection.empty) {
-          val storedMarks = state.storedMarks
-          if (storedMarks != null) {
-            linkType.isInSet(storedMarks)
-          } else {
-            linkType.isInSet(selection.fromResolved.marks())
-          }
+          activeMarkInSet(
+            linkType,
+            activeMarksForEmptySelection(state, selection)
+          )
         } else {
           var found: Mark | Null = null
 
@@ -259,6 +247,27 @@ class LinkPlugin extends AbstractEditorPlugin("link-plugin") {
     if (value == null || js.isUndefined(value)) scala.None
     else scala.Some(value.asInstanceOf[MarkType])
   }
+
+  private def activeMarksForEmptySelection(state: EditorState, selection: Selection): js.Array[Mark] = {
+    val storedMarks = state.storedMarks.asInstanceOf[js.Any]
+    if (storedMarks != null && !js.isUndefined(storedMarks)) {
+      state.storedMarks.asInstanceOf[js.Array[Mark]]
+    } else {
+      selection.fromResolved.marks()
+    }
+  }
+
+  private def isMarkInSet(markType: MarkType, marks: js.Array[Mark] | Null): Boolean =
+    activeMarkInSet(markType, marks) != null
+
+  private def activeMarkInSet(markType: MarkType, marks: js.Array[Mark] | Null): Mark | Null =
+    if (marks == null || js.isUndefined(marks.asInstanceOf[js.Any])) {
+      null
+    } else {
+      val found = markType.isInSet(marks)
+      if (found == null || js.isUndefined(found.asInstanceOf[js.Any])) null
+      else found
+    }
 
   private def dispatch(editorView: EditorView): DispatchFn =
     (transaction: Transaction) => editorView.dispatch(transaction)

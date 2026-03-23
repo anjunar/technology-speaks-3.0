@@ -25,6 +25,7 @@ class Editor(val name: String)
     divElement
   }
 
+
   private val pluginComponents = mutable.ArrayBuffer.empty[EditorPlugin]
   private val auxiliaryComponents = mutable.ArrayBuffer.empty[NodeComponent[? <: Node]]
 
@@ -116,8 +117,10 @@ class Editor(val name: String)
             }
           }
 
+
           contentHost = Div.div {
             style {
+              display = "flex"
               flex = "1"
               minHeight = "0px"
             }
@@ -194,26 +197,36 @@ class Editor(val name: String)
 
     lastSeenValue = initialValue
 
-    lazy val view: EditorView =
+    var viewRef: EditorView | Null = null
+
+    val view =
       new EditorView(
         mount,
         directEditorProps(
           initialState,
           (tr: Transaction) => {
-            val newState = view.state.apply(tr)
-            view.updateState(newState)
+            val currentView = viewRef
 
-            if (tr.docChanged) {
-              val next = serializeDoc(newState.doc)
-              lastSeenValue = next
-              dirtyProperty.set(true)
-              valueProperty.set(next)
+            if (currentView != null) {
+              val newState = currentView.nn.state.applyTransaction(tr)
+              currentView.nn.updateState(newState)
+              notifyPluginsStateUpdated()
+
+              if (tr.docChanged) {
+                val next = serializeDoc(newState.doc)
+                lastSeenValue = next
+                dirtyProperty.set(true)
+                valueProperty.set(next)
+              }
             }
           }
         )
       )
 
+    viewRef = view
+
     editorView = view
+    attachBufferedChildren()
     bindPlugins(view)
 
     if (initialValue == null) {
@@ -254,6 +267,9 @@ class Editor(val name: String)
   private def bindPlugins(view: EditorView | Null): Unit =
     pluginComponents.foreach(_.bindView(view))
 
+  private def notifyPluginsStateUpdated(): Unit =
+    pluginComponents.foreach(_.notifyEditorStateUpdated())
+
   private def syncExternalValue(value: js.Any | Null): Unit = {
     if (!structureInitialized) {
       return
@@ -275,6 +291,7 @@ class Editor(val name: String)
             )
           )
         )
+        notifyPluginsStateUpdated()
         lastSeenValue = value
       }
     } else if (readOnlyMount != null) {

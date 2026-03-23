@@ -30,7 +30,12 @@ trait EditorPlugin { self: NodeComponent[? <: Node] =>
     onViewChanged(nextView)
   }
 
+  private[jfx] final def notifyEditorStateUpdated(): Unit =
+    onEditorStateUpdated()
+
   private[jfx] def captureScope(scope: Scope): Unit
 
   protected def onViewChanged(nextView: EditorView | Null): Unit = ()
+
+  protected def onEditorStateUpdated(): Unit = ()
 }

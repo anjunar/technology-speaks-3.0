@@ -2,77 +2,52 @@ package app.pages.timeline
 
 import app.components.shared.ComponentHeader.componentHeader
 import app.domain.core.Data
-import app.domain.documents.Document
 import app.domain.timeline.{Post, PostCreated, PostUpdated}
 import app.services.ApplicationService
-import app.ui.{CompositeSupport, DivComposite, PageComposite}
+import app.support.ErrorResponseException
+import app.ui.{CompositeSupport, PageComposite}
 import jfx.action.Button.button
-import jfx.core.component.ElementComponent.*
-import jfx.core.component.NodeComponent
-import jfx.core.state.Property
+import jfx.core.component.ElementComponent.classes
 import jfx.dsl.*
 import jfx.form.Editor.editor
 import jfx.form.Form
-import jfx.form.Form.{form, onSubmit_=}
+import jfx.form.Form.form
 import jfx.form.editor.plugins.*
 import jfx.layout.VBox.vbox
-import jfx.statement.DynamicOutlet.dynamicOutlet
-import org.scalajs.dom.Node
+import jfx.layout.Viewport
 
 import scala.concurrent.ExecutionContext
 
-class PostEditPage extends PageComposite("Posts") {
-
-  private val modelProperty: Property[Data[Post]] =
-    Property(new Data[Post](new Post(user = Property(ApplicationService.app.get.user))))
-  private val contentProperty: Property[NodeComponent[? <: Node] | Null] = Property(null)
-
-  def model(value: Data[Post]): Unit =
-    modelProperty.set(value)
-
-  override protected def compose(using DslContext): Unit = {
-    classProperty.setAll(Seq("post-edit-page", "container"))
-
-    addDisposable(modelProperty.observe(value => contentProperty.set(PostEditContent.content(value, handleSaved))))
-
-    withDslContext {
-      dynamicOutlet(contentProperty)
-    }
-  }
-
-  private def handleSaved(saved: Data[Post]): Unit = {
-    if (saved.data.id.get != null && modelProperty.get.data.id.get != null) {
-      ApplicationService.messageBus.publish(new PostUpdated(saved))
-    } else {
-      ApplicationService.messageBus.publish(new PostCreated(saved))
-    }
-
-    close()
-  }
-}
-
-object PostEditPage {
-  def postEditPage(init: PostEditPage ?=> Unit = {}): PostEditPage =
-    CompositeSupport.buildPage(new PostEditPage)(init)
-}
-
-private final class PostEditContent(
-  data: Data[Post],
-  onSaved: Data[Post] => Unit
-) extends DivComposite {
+class PostEditPage(val data: Post) extends PageComposite("Posts") {
 
   private given ExecutionContext = ExecutionContext.global
 
   override protected def compose(using DslContext): Unit = {
-    withDslContext {
-      form(data.data) {
-        onSubmit_= { (event : Form[Post])  =>
-          val isExisting = data.data.id.get != null
-          val request =
-            if (isExisting) data.data.update()
-            else data.data.save()
+    classProperty.setAll(Seq("post-edit-page", "container"))
 
-          request.foreach(onSaved)
+    withDslContext {
+      form(data) {
+        Form.onSubmit = { (event : Form[Post])  =>
+          val isExisting = data.id.get != null
+          val request =
+            if (isExisting) data.update()
+            else data.save()
+
+          request.foreach { saved =>
+            if (isExisting) {
+              ApplicationService.messageBus.publish(new PostUpdated(saved))
+            } else {
+              ApplicationService.messageBus.publish(new PostCreated(saved))
+            }
+            close()
+          }
+
+          request.failed.foreach {
+            case e: ErrorResponseException =>
+              Viewport.notify("Fehler beim Speichern", Viewport.NotificationKind.Error)
+            case _ =>
+              Viewport.notify("Ein unerwarteter Fehler ist aufgetreten", Viewport.NotificationKind.Error)
+          }
         }
 
         style {
@@ -86,10 +61,9 @@ private final class PostEditContent(
             height = "100%"
           }
 
-          val header = componentHeader {}
-          header.model(data.data)
+          componentHeader {}.model(data)
 
-          val editorField = editor("editor") {
+          editor("editor") {
             style {
               flex = "1"
               minHeight = "0px"
@@ -100,13 +74,7 @@ private final class PostEditContent(
             listPlugin {}
             linkPlugin {}
             imagePlugin {}
-
-            button("save") {
-              classes = Seq("material-icons", "hover")
-            }
           }
-
-          addDisposable(Property.subscribeBidirectional(data.data.editor, editorField.valueProperty))
 
           button("Senden") {
             classes = "btn-secondary"
@@ -120,7 +88,7 @@ private final class PostEditContent(
   }
 }
 
-private object PostEditContent {
-  def content(data: Data[Post], onSaved: Data[Post] => Unit): PostEditContent =
-    CompositeSupport.buildComposite(new PostEditContent(data, onSaved))
+object PostEditPage {
+  def postEditPage(data: Post, init: PostEditPage ?=> Unit = {}): PostEditPage =
+    CompositeSupport.buildPage(new PostEditPage(data))(init)
 }

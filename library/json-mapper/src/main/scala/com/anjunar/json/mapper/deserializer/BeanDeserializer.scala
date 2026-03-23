@@ -7,6 +7,7 @@ import com.anjunar.json.mapper.{JsonContext, ObjectMapperProvider}
 import com.anjunar.json.mapper.intermediate.model.{JsonNode, JsonNull, JsonObject}
 import com.anjunar.scala.universe.{ResolvedClass, TypeResolver}
 import com.anjunar.scala.universe.introspector.{BeanIntrospector, BeanProperty}
+import jakarta.json.bind.annotation.JsonbProperty
 import jakarta.persistence.{EntityGraph, ManyToMany, ManyToOne, OneToMany, OneToOne, Subgraph}
 
 import java.lang.reflect.InvocationTargetException
@@ -94,7 +95,13 @@ class BeanDeserializer extends Deserializer[Any] {
           }
       }
 
-    val node = json.value.get(property.name)
+    val jsonbProperty = property.findAnnotation(classOf[JsonbProperty])
+
+    val node = if (jsonbProperty != null && jsonbProperty.value().nonEmpty) {
+      json.value.get(jsonbProperty.value())
+    } else {
+      json.value.get(property.name)
+    }
 
     if (classOf[DTO].isAssignableFrom(propertyType)) {
       handleEntityProperty(node, property, context, oldValue, propertyType)

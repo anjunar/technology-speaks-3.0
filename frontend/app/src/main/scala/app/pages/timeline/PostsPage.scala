@@ -8,6 +8,7 @@ import app.domain.timeline.{Post, PostCreated, PostUpdated}
 import app.services.ApplicationService
 import app.support.{Navigation, RemotePageQuery, RemoteTableList}
 import app.ui.{CompositeSupport, DivComposite, PageComposite}
+import jfx.control.virtualList
 import jfx.core.component.ElementComponent.*
 import jfx.core.state.{Property, RemoteListProperty}
 import jfx.dsl.*
@@ -17,7 +18,6 @@ import jfx.form.editor.plugins.*
 import jfx.layout.Div.div
 import jfx.layout.HBox.hbox
 import jfx.layout.VBox.vbox
-import jfx.virtual.virtualList
 
 import scala.concurrent.ExecutionContext
 
@@ -31,7 +31,11 @@ class PostsPage extends PageComposite("Posts") {
     }
 
   override protected def compose(using DslContext): Unit = {
-    classProperty += "posts-page"
+    classes = "posts-page"
+
+    style {
+      height = "100%"
+    }
 
     addDisposable(
       ApplicationService.messageBus.subscribe {
@@ -47,8 +51,8 @@ class PostsPage extends PageComposite("Posts") {
     withDslContext {
       vbox {
         style {
-          setProperty("height", "100%")
-          setProperty("width", "100%")
+          height = "100%"
+          width = "100%"
         }
 
         div {
@@ -103,7 +107,7 @@ object PostsPage {
 private final class PostFeedCard(data: Data[Post]) extends DivComposite {
 
   override protected def compose(using DslContext): Unit = {
-    classProperty += "glass-border"
+    classes = "glass-border"
 
     withDslContext {
       vbox {

@@ -9,6 +9,7 @@ import app.domain.timeline.Post
 import app.services.ApplicationService
 import app.support.{Navigation, RemotePageQuery, RemoteTableList}
 import app.ui.{CompositeSupport, DivComposite, PageComposite}
+import jfx.control.virtualList
 import jfx.core.component.ElementComponent.*
 import jfx.core.component.NodeComponent
 import jfx.core.state.{ListProperty, Property, RemoteListProperty}
@@ -19,7 +20,6 @@ import jfx.form.editor.plugins.*
 import jfx.layout.Div.div
 import jfx.layout.VBox.vbox
 import jfx.statement.DynamicOutlet.dynamicOutlet
-import jfx.virtual.virtualList
 import org.scalajs.dom.Node
 
 import scala.concurrent.{ExecutionContext, Future}

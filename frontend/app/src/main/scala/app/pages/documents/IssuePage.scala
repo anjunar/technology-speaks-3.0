@@ -10,6 +10,7 @@ import app.support.{Api, RemotePageQuery, RemoteTableList}
 import app.ui.{CompositeSupport, DivComposite, PageComposite}
 import jfx.action.Button.button
 import jfx.action.Button.{buttonType_=, onClick}
+import jfx.control.virtualList
 import jfx.core.component.ElementComponent.*
 import jfx.core.component.NodeComponent
 import jfx.core.state.{ListProperty, Property, RemoteListProperty}
@@ -24,7 +25,6 @@ import jfx.layout.Div.div
 import jfx.layout.HBox.hbox
 import jfx.layout.VBox.vbox
 import jfx.statement.DynamicOutlet.dynamicOutlet
-import jfx.virtual.virtualList
 import org.scalajs.dom.Node
 
 import scala.concurrent.{ExecutionContext, Future}

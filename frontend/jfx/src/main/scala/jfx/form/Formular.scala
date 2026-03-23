@@ -1,7 +1,7 @@
 package jfx.form
 
 import jfx.core.component.{ChildrenComponent, NodeComponent}
-import jfx.core.state.{CompositeDisposable, ListProperty, Property, ReadOnlyProperty}
+import jfx.core.state.{CompositeDisposable, Disposable, ListProperty, Property, ReadOnlyProperty}
 import jfx.core.state.ListProperty.{Clear, Patch, RemoveAt, RemoveRange, UpdateAt}
 import org.scalajs.dom.{HTMLElement, Node, console}
 
@@ -72,16 +72,29 @@ trait Formular[M <: Model[M], N <: Node] extends NodeComponent[N] {
   private def bindNow(control: AnyControl): jfx.core.state.Disposable = {
     val controlName = control.name
 
-    val modelProperty: Any = control match {
-      case subForm : SubForm[?] =>
+    val modelPropertyOption: Option[Any] = control match {
+      case subForm: SubForm[?] =>
         if (subForm.index > -1) {
           val parent = control.findParentForm().name
-          Property(valueProperty.get.findProperty(parent).asInstanceOf[ListProperty[?]].get(subForm.index))
+          valueProperty.get
+            .findPropertyOption[ListProperty[?]](parent)
+            .flatMap(list => Option(list.get(subForm.index)))
+            .map(Property(_))
         } else {
-          valueProperty.get.findProperty(controlName)
+          valueProperty.get.findPropertyOption[Any](controlName)
         }
-      case _=> valueProperty.get.findProperty[Any](controlName)
+      case _ =>
+        valueProperty.get.findPropertyOption[Any](controlName)
     }
+
+    if (modelPropertyOption.isEmpty) {
+      console.warn(s"Skipping form binding for control '$controlName' because no matching model property was found.")
+      return new Disposable {
+        override def dispose(): Unit = ()
+      }
+    }
+
+    val modelProperty: Any = modelPropertyOption.get
 
     val controlProperty: Any = control.valueProperty
 

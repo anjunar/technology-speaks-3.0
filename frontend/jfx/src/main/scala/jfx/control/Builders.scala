@@ -1,4 +1,4 @@
-package jfx.virtual
+package jfx.control
 
 import jfx.core.component.NodeComponent
 import jfx.core.state.ListProperty

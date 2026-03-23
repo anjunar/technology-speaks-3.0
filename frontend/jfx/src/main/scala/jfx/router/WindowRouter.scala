@@ -91,7 +91,10 @@ final class WindowRouter(val routes: js.Array[Route])
               )
 
               if (pageInfo != null) {
-                pageInfo.close = () => Viewport.closeWindow(conf)
+                pageInfo.close = () => {
+                  windowsByUrl.remove(url)
+                  Viewport.closeWindow(conf)
+                }
               }
 
               windowsByUrl.put(url, conf)

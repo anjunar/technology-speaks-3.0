@@ -23,7 +23,8 @@ class EditorState extends js.Object {
   val tr: Transaction = js.native
   val storedMarks: js.Array[Mark] | Null = js.native
 
-  def apply(tr: Transaction): EditorState = js.native
+  @JSName("apply")
+  def applyTransaction(tr: Transaction): EditorState = js.native
 }
 
 @js.native

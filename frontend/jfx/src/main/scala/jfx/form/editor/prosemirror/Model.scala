@@ -32,6 +32,7 @@ class PMNode extends js.Object {
   val content: Fragment = js.native
 
   def nodeAt(pos: Int): PMNode | Null = js.native
+  def rangeHasMark(from: Int, to: Int, markType: MarkType): Boolean = js.native
 
   def nodesBetween(
     from: Int,

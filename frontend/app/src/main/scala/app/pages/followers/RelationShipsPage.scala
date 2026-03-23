@@ -6,13 +6,13 @@ import app.domain.followers.RelationShip
 import app.support.{Navigation, RemotePageQuery, RemoteTableList}
 import app.ui.{CompositeSupport, DivComposite, PageComposite}
 import jfx.control.Image.image
+import jfx.control.virtualList
 import jfx.core.component.ElementComponent.*
 import jfx.core.state.RemoteListProperty
 import jfx.dsl.*
 import jfx.layout.Div.div
 import jfx.layout.HBox.hbox
 import jfx.layout.VBox.vbox
-import jfx.virtual.virtualList
 
 import scala.concurrent.ExecutionContext
 

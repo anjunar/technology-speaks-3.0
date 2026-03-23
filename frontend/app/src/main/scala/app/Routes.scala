@@ -2,6 +2,7 @@ package app
 
 import app.domain.core.User
 import app.domain.documents.{Document, Issue}
+import app.domain.timeline.Post
 import app.pages.HomePage.homePage
 import app.pages.core.{UserPage, UsersPage}
 import app.pages.documents.{DocumentPage, IssuePage}
@@ -69,14 +70,12 @@ object Routes {
       PostsPage.postsPage()
     },
     route("/timeline/posts/post") {
-      PostEditPage.postEditPage()
+      PostEditPage.postEditPage(new Post())
     },
     asyncRoute("/timeline/posts/post/:id") {
       val id = pathParam("id")
       app.domain.timeline.Post.read(id).map { post =>
-        val page = PostEditPage.postEditPage()
-        page.model(post)
-        page
+        PostEditPage.postEditPage(post.data)
       }
     },
     asyncRoute("/timeline/posts/post/:id/view") {

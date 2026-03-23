@@ -1,8 +1,8 @@
-package jfx.virtual
+package jfx.control
 
 import jfx.core.component.{ElementComponent, FormSubtreeRegistration, ManagedElementComponent, NodeComponent}
-import jfx.core.state.{CompositeDisposable, Disposable, ListProperty, Property, RemoteListProperty}
-import jfx.core.state.ListProperty.{Add, Change, Clear, Insert, InsertAll, Patch, RemoveAt, RemoveRange, Reset, UpdateAt}
+import jfx.core.state.ListProperty.*
+import jfx.core.state.*
 import jfx.dsl.{ComponentContext, DslRuntime, Scope}
 import jfx.form.Formular
 import org.scalajs.dom.{Event, HTMLDivElement, Node, window}
@@ -400,7 +400,7 @@ class VirtualListView[T](
 
     if (remote.supportsRangeLoading) {
       val requestFrom = math.max(0, visibleStartIndex - prefetchItems)
-      val requestToExclusive = visibleEndExclusive + prefetchItems
+      val requestToExclusive = visibleEndExclusive
 
       if (!remote.isRangeLoaded(requestFrom, requestToExclusive)) {
         discardPromise(remote.ensureRangeLoaded(requestFrom, requestToExclusive))
@@ -443,7 +443,10 @@ class VirtualListView[T](
     }
 
   private def maxRenderableCount: Int =
-    knownItemCount.getOrElse(math.max(1, getItems.length + tailPaddingItems))
+    knownItemCount.getOrElse {
+      if (shouldRenderUnloadedPlaceholders) getItems.length + tailPaddingItems
+      else 0
+    }
 
   private def resetMeasurements(): Unit = {
     heights.clear()
@@ -527,8 +530,16 @@ class VirtualListView[T](
     if (index >= 0 && index < heights.length) heights(index)
     else estimateHeightPx
 
+  private def shouldRenderUnloadedPlaceholders: Boolean =
+    getItems.length > 0 || knownItemCount.exists(_ > 0)
+
   private def updateContentHeight(): Unit = {
     rebuildPrefixIfDirty()
+
+    if (!shouldRenderUnloadedPlaceholders) {
+      content.style.height = "0px"
+      return
+    }
 
     val base = prefix.lastOption.getOrElse(0)
     val extra =
@@ -639,7 +650,7 @@ object VirtualListView {
 
   type Renderer[T] = (T | Null, Int) => NodeComponent[? <: Node] | Null
 
-  private[virtual] val noopDisposable: Disposable = () => ()
+  private[control] val noopDisposable: Disposable = () => ()
 
   def virtualList[T](
     items: ListProperty[T],

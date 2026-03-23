@@ -294,8 +294,16 @@ class VirtualListView<T : Data<out AbstractEntity>>(
     private fun heightFor(index: Int): Int =
         if (index in heights.indices) heights[index] else estimateHeightPx
 
+    private fun shouldRenderUnloadedPlaceholders(knownCount: Int?): Boolean =
+        dataProvider.loadedCount > 0 || (knownCount != null && knownCount > 0)
+
     private fun updateContentHeight() {
         val knownCount = if (dataProvider.hasKnownCount) dataProvider.knownCount else null
+        if (!shouldRenderUnloadedPlaceholders(knownCount)) {
+            content.style.height = "0px"
+            return
+        }
+
         val base = prefix.last()
 
         val extra = when {
@@ -407,9 +415,11 @@ class VirtualListView<T : Data<out AbstractEntity>>(
         val endOffset = scrollTop + viewportH + overscanPx
 
         val knownCount = if (dataProvider.hasKnownCount) dataProvider.knownCount else null
+        val allowUnloadedPlaceholders = shouldRenderUnloadedPlaceholders(knownCount)
         val maxCount = when {
             knownCount != null -> knownCount
             dataProvider.endReached -> dataProvider.loadedCount
+            !allowUnloadedPlaceholders -> dataProvider.loadedCount
             else -> Int.MAX_VALUE
         }
 

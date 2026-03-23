@@ -52,6 +52,9 @@ class ListPlugin extends AbstractEditorPlugin("list-plugin") {
   override protected def onViewChanged(nextView: EditorView | Null): Unit =
     updateUiFromState()
 
+  override protected def onEditorStateUpdated(): Unit =
+    updateUiFromState()
+
   private def isBulletListActive(): Boolean = {
     val state = view.state
     val selection = state.selection

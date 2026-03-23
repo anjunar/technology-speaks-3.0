@@ -69,6 +69,9 @@ class HeadingPlugin extends AbstractEditorPlugin("heading-plugin") {
   override protected def onViewChanged(nextView: EditorView | Null): Unit =
     syncSelection()
 
+  override protected def onEditorStateUpdated(): Unit =
+    syncSelection()
+
   private def syncSelection(): Unit =
     if (selectComponent != null && viewIsReady) {
       syncingSelection = true

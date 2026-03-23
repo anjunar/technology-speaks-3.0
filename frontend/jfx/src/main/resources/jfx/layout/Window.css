@@ -44,13 +44,18 @@
 
     .jfx-window__header {
         display: flex;
+        align-items: center;
         justify-content: space-between;
         background-color : var(--color-background-secondary);
         cursor: move;
+        flex: 0 0 32px;
         height: 32px;
+        min-height: 32px;
+        max-height: 32px;
         line-height: 32px;
         vertical-align: center;
         width: 100%;
+        box-sizing: border-box;
         overflow: hidden;
 
         .jfx-window__title {
