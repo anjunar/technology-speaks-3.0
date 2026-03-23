@@ -8,6 +8,8 @@ trait Control[V, E <: HTMLElement] extends ElementComponent[E] {
   
   val name : String
   
+  val standalone : Boolean
+  
   val placeholderProperty: Property[String] = Property("")
 
   val focusedProperty: Property[Boolean] = Property(false)

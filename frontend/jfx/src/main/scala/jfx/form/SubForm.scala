@@ -9,6 +9,8 @@ import scala.compiletime.uninitialized
 
 class SubForm[V <: Model[V]](val name: String = "", val index : Int = -1) extends NativeComponent[HTMLFieldSetElement], Control[V, HTMLFieldSetElement], Formular[V, HTMLFieldSetElement] {
 
+  override val standalone: Boolean = false
+  
   override val element: HTMLFieldSetElement = newElement("fieldset")
   
   var factoryHandler : () => V = uninitialized

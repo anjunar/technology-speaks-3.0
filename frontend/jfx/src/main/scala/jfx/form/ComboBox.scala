@@ -11,7 +11,7 @@ import org.scalajs.dom.{Event, HTMLDivElement, HTMLSpanElement, KeyboardEvent, N
 import scala.scalajs.js
 import scala.scalajs.js.timers.{SetTimeoutHandle, clearTimeout, setTimeout}
 
-class ComboBox[S](val name: String)
+class ComboBox[S](val name: String, override val standalone: Boolean = false)
     extends ManagedElementComponent[HTMLDivElement], Control[js.Array[S], HTMLDivElement] {
 
   override val valueProperty: ListProperty[S] = ListProperty()
@@ -598,13 +598,10 @@ object ComboBox {
     component
   }
 
-  def comboBox[S](name: String): ComboBox[S] =
-    comboBox(name)({})
-
-  def comboBox[S](name: String)(init: ComboBox[S] ?=> Unit): ComboBox[S] =
+  def comboBox[S](name: String, standalone: Boolean = false)(init: ComboBox[S] ?=> Unit): ComboBox[S] =
     DslRuntime.currentScope { currentScope =>
       val currentContext = DslRuntime.currentComponentContext()
-      val component = new ComboBox[S](name)
+      val component = new ComboBox[S](name, standalone)
 
       DslRuntime.withComponentContext(ComponentContext(None, currentContext.enclosingForm)) {
         given Scope = currentScope

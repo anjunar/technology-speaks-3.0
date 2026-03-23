@@ -24,7 +24,7 @@ import org.scalajs.dom.{
 import scala.math.{abs, max, min}
 import scala.util.control.NonFatal
 
-class ImageCropper(val name: String) extends Control[Media, HTMLDivElement] {
+class ImageCropper(val name: String, override val standalone: Boolean = false) extends Control[Media, HTMLDivElement] {
 
   override val valueProperty: Property[Media] = Property(null)
 
@@ -979,13 +979,10 @@ object ImageCropper {
       }
   }
 
-  def imageCropper(name: String): ImageCropper =
-    imageCropper(name)({})
-
-  def imageCropper(name: String)(init: ImageCropper ?=> Unit): ImageCropper =
+  def imageCropper(name: String, standalone: Boolean = false)(init: ImageCropper ?=> Unit): ImageCropper =
     DslRuntime.currentScope { currentScope =>
       val currentContext = DslRuntime.currentComponentContext()
-      val component = new ImageCropper(name)
+      val component = new ImageCropper(name, standalone)
 
       DslRuntime.withComponentContext(ComponentContext(None, currentContext.enclosingForm)) {
         given Scope = currentScope

@@ -81,9 +81,7 @@ object Routes {
     asyncRoute("/timeline/posts/post/:id/view") {
       val id = pathParam("id")
       app.domain.timeline.Post.read(id).map { post =>
-        val page = PostViewPage.postViewPage()
-        page.model(post)
-        page
+        PostViewPage.postViewPage(post.data)
       }
     },
     route("/security/login") {

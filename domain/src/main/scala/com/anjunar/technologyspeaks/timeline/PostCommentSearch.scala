@@ -9,22 +9,18 @@ import org.springframework.stereotype.Component
 import org.springframework.web.bind.annotation.PathVariable
 
 import java.util.UUID
+import scala.annotation.meta.field
 import scala.beans.BeanProperty
 
 class PostCommentSearch(
-  postValue: Post = null,
-  sort: java.util.List[String],
-  index: Int = 0,
-  limit: Int = 5
-) extends AbstractSearch(sort, index, limit) {
-
-  @JsonbProperty
-  @PathVariable("post")
-  @RestPredicate(classOf[PostCommentSearch.PostPredicate])
-  @BeanProperty
-  val post: Post = postValue
-
-}
+                         @(JsonbProperty @field)
+                         @(RestPredicate @field)(classOf[PostCommentSearch.PostPredicate])
+                         @BeanProperty
+                         val post: Post = null,
+                         sort: java.util.List[String],
+                         index: Int = 0,
+                         limit: Int = 5
+                       ) extends AbstractSearch(sort, index, limit)
 
 object PostCommentSearch {
 
@@ -39,7 +35,7 @@ object PostCommentSearch {
 
       postQuery
         .select(commentsJoin)
-        .where(Array(condition)*)
+        .where(Array(condition) *)
 
       context.predicates.add(context.root.in(postQuery))
     }

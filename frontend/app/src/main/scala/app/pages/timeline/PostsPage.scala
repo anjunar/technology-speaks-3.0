@@ -5,6 +5,7 @@ import app.components.shared.ComponentHeader.componentHeader
 import app.components.shared.LoadingCard.loadingCard
 import app.domain.core.Data
 import app.domain.timeline.{Post, PostCreated, PostUpdated}
+import app.pages.timeline.PostsPage.PostFeedCard
 import app.services.ApplicationService
 import app.support.{Navigation, RemotePageQuery, RemoteTableList}
 import app.ui.{CompositeSupport, DivComposite, PageComposite}
@@ -100,68 +101,70 @@ class PostsPage extends PageComposite("Posts") {
 }
 
 object PostsPage {
-  def postsPage(init: PostsPage ?=> Unit = {}): PostsPage =
-    CompositeSupport.buildPage(new PostsPage)(init)
-}
 
-private final class PostFeedCard(data: Data[Post]) extends DivComposite {
+  final class PostFeedCard(data: Data[Post]) extends DivComposite {
 
-  override protected def compose(using DslContext): Unit = {
-    classes = "glass-border"
+    override protected def compose(using DslContext): Unit = {
+      classes = "glass-border"
 
-    withDslContext {
-      vbox {
-        style {
-          rowGap = "10px"
-        }
-
-        val header = componentHeader {}
-        header.model(data.data)
-
-        val editorField = editor("editor") {
+      withDslContext {
+        vbox {
           style {
-            width = "100%"
+            rowGap = "10px"
           }
 
-          basePlugin {}
-          headingPlugin {}
-          listPlugin {}
-          linkPlugin {}
-          imagePlugin {}
-        }
+          val header = componentHeader {}
+          header.model(data.data)
 
-        editorField.editableProperty.set(false)
-        addDisposable(Property.subscribeBidirectional(data.data.editor, editorField.valueProperty))
-
-        hbox {
-          style {
-            columnGap = "8px"
-            alignItems = "center"
-          }
-
-          val likes = likeButton {}
-          likes.model(data.data.likes, data.data.links)
-
-          val commentPrompt = input("comment") {
+          val editorField = editor("editor") {
             style {
-              flex = "1"
-              padding = "8px"
-              borderRadius = "6px"
-              backgroundColor = "var(--color-background-secondary)"
-              border = "1px solid var(--color-background-primary)"
+              width = "100%"
             }
+
+            basePlugin {}
+            headingPlugin {}
+            listPlugin {}
+            linkPlugin {}
+            imagePlugin {}
           }
 
-          commentPrompt.placeholder = "Kommentar schreiben..."
-          commentPrompt.element.readOnly = true
-          commentPrompt.element.onclick = _ => Navigation.navigate(s"/timeline/posts/post/${data.data.id.get}/view")
+          editorField.editableProperty.set(false)
+          addDisposable(Property.subscribeBidirectional(data.data.editor, editorField.valueProperty))
+
+          hbox {
+            style {
+              columnGap = "8px"
+              alignItems = "center"
+            }
+
+            val likes = likeButton {}
+            likes.model(data.data.likes, data.data.links)
+
+            val commentPrompt = input("comment") {
+              style {
+                flex = "1"
+                padding = "8px"
+                borderRadius = "6px"
+                backgroundColor = "var(--color-background-secondary)"
+                border = "1px solid var(--color-background-primary)"
+              }
+            }
+
+            commentPrompt.placeholder = "Kommentar schreiben..."
+            commentPrompt.element.readOnly = true
+            commentPrompt.element.onclick = _ => Navigation.navigate(s"/timeline/posts/post/${data.data.id.get}/view")
+          }
         }
       }
     }
   }
-}
 
-private object PostFeedCard {
-  def card(data: Data[Post]): PostFeedCard =
-    CompositeSupport.buildComposite(new PostFeedCard(data))
+  object PostFeedCard {
+    def card(data: Data[Post]): PostFeedCard =
+      CompositeSupport.buildComposite(new PostFeedCard(data))
+  }
+
+
+  def postsPage(init: PostsPage ?=> Unit = {}): PostsPage =
+    CompositeSupport.buildPage(new PostsPage)(init)
 }

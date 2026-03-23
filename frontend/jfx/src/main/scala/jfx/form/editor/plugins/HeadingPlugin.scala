@@ -22,7 +22,7 @@ class HeadingPlugin extends AbstractEditorPlugin("heading-plugin") {
       structureInitialized = true
 
       withPluginContext {
-        selectComponent = Select.select("heading") {
+        selectComponent = Select.select("heading", true) {
           summon[Select].valueProperty.observe { value =>
             if (!syncingSelection && viewIsReady) {
               value match {

@@ -5,7 +5,7 @@ import jfx.core.state.Property
 import jfx.dsl.{ComponentContext, DslRuntime, Scope}
 import org.scalajs.dom.HTMLSelectElement
 
-class Select(val name: String)
+class Select(val name: String, override val standalone: Boolean = false)
     extends ManagedElementComponent[HTMLSelectElement]
     with Control[String | Null, HTMLSelectElement] {
 
@@ -38,10 +38,10 @@ class Select(val name: String)
 
 object Select {
 
-  def select(name: String)(init: Select ?=> Unit = {}): Select =
+  def select(name: String, standalone: Boolean = false)(init: Select ?=> Unit = {}): Select =
     DslRuntime.currentScope { currentScope =>
       val currentContext = DslRuntime.currentComponentContext()
-      val component = new Select(name)
+      val component = new Select(name, standalone)
 
       DslRuntime.withComponentContext(ComponentContext(Some(component), currentContext.enclosingForm)) {
         given Scope = currentScope

@@ -11,7 +11,7 @@ import org.scalajs.dom.{HTMLDivElement, HTMLElement, Node}
 import scala.collection.mutable
 import scala.scalajs.js
 
-class Editor(val name: String)
+class Editor(val name: String, override val standalone: Boolean = false)
     extends ManagedElementComponent[HTMLDivElement]
     with Control[js.Any | Null, HTMLDivElement] {
 
@@ -460,10 +460,10 @@ class Editor(val name: String)
 
 object Editor {
 
-  def editor(name: String)(init: Editor ?=> Unit = {}): Editor =
+  def editor(name: String, standalone: Boolean = false)(init: Editor ?=> Unit = {}): Editor =
     DslRuntime.currentScope { currentScope =>
       val currentContext = DslRuntime.currentComponentContext()
-      val component = new Editor(name)
+      val component = new Editor(name, standalone)
       component.captureScope(currentScope)
 
       DslRuntime.withComponentContext(

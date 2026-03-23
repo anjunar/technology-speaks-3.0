@@ -32,7 +32,7 @@ class FirstComment(
       case issue: Issue =>
         Api.post(s"/service/document/documents/document/issues/issue/${issue.id.get}/comment", this)
       case post: Post =>
-        Api.post(s"/service//timeline/posts/post/${post.id.get}/comment", this)
+        Api.post(s"/service/timeline/posts/post/${post.id.get}/comment", this)
       case _ =>
         Future.failed(RuntimeException("Unknown document type"))
     }
@@ -42,7 +42,7 @@ class FirstComment(
       case issue: Issue =>
         Api.put(s"/service/document/documents/document/issues/issue/${issue.id.get}/comment", this)
       case post: Post =>
-        Api.put(s"/service//timeline/posts/post/${post.id.get}/comment", this)
+        Api.put(s"/service/timeline/posts/post/${post.id.get}/comment", this)
       case _ =>
         Future.failed(RuntimeException("Unknown document type"))
     }
@@ -52,7 +52,7 @@ class FirstComment(
       case issue: Issue =>
         Api.delete(s"/service/document/documents/document/issues/issue/${issue.id.get}/comment", this)
       case post: Post =>
-        Api.delete(s"/service//timeline/posts/post/${post.id.get}/comment", this)
+        Api.delete(s"/service/timeline/posts/post/${post.id.get}/comment", this)
       case _ =>
         Future.failed(RuntimeException("Unknown document type"))
     }

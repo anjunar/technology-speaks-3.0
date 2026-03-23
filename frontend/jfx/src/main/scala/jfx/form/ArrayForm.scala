@@ -13,6 +13,8 @@ class ArrayForm[V <: Model[V]](val name: String)
     extends NativeComponent[HTMLFieldSetElement],
       Control[js.Array[V], HTMLFieldSetElement] {
 
+  override val standalone: Boolean = false
+  
   override val element: HTMLFieldSetElement = newElement("fieldset")
 
   override val valueProperty: ListProperty[V] = new ListProperty[V]()
