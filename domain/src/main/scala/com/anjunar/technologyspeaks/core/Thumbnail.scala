@@ -2,11 +2,12 @@ package com.anjunar.technologyspeaks.core
 
 import com.anjunar.json.mapper.schema.{DefaultWritableRule, EntitySchema, SchemaProvider}
 import jakarta.json.bind.annotation.JsonbProperty
-import jakarta.persistence.{Entity, Lob, NamedAttributeNode, NamedEntityGraph, Table}
+import jakarta.persistence.*
 import jakarta.validation.constraints.{NotBlank, Size}
 
 import scala.annotation.meta.field
 import scala.beans.BeanProperty
+import scala.compiletime.uninitialized
 
 @Entity
 @Table(name = "Core#Media")
@@ -18,12 +19,21 @@ import scala.beans.BeanProperty
     new NamedAttributeNode("data")
   )
 )
-class Thumbnail(
-  @NotBlank @Size(min = 2, max = 80) @(JsonbProperty @field) var name: String = null,
-  @NotBlank @Size(min = 2, max = 80) @(JsonbProperty @field) var contentType: String = null,
-  @Lob @(JsonbProperty @field) var data: Array[Byte] = null
-) extends AbstractEntity {
+class Thumbnail(@(NotBlank @field) 
+                @(Size @field)(min = 2, max = 80)
+                @(JsonbProperty @field)
+                var name: String,
+
+                @NotBlank @Size(min = 2, max = 80)
+                @(JsonbProperty @field)
+                var contentType: String,
+
+                @Lob 
+                @(JsonbProperty @field) var data: Array[Byte])
+  extends AbstractEntity {
+
   def this() = this(null, null, null)
+  
 }
 
 object Thumbnail extends SchemaProvider {

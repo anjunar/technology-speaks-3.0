@@ -8,18 +8,19 @@ import jakarta.persistence.{Column, ManyToOne, MappedSuperclass}
 import org.hibernate.annotations.Type
 
 import scala.beans.BeanProperty
+import scala.compiletime.uninitialized
 
 @MappedSuperclass
-abstract class AbstractComment extends AbstractEntity with OwnerProvider {
+abstract class AbstractComment extends AbstractEntity, OwnerProvider {
 
   @ManyToOne(optional = false)
   @JsonbProperty
-    var user: User = null
+  var user: User = uninitialized
 
   @Column(columnDefinition = "jsonb")
   @Type(value = classOf[NodeType])
   @JsonbProperty
-    var editor: Node = null
+  var editor: Node = uninitialized
 
   override def owner(): EntityProvider = user
 

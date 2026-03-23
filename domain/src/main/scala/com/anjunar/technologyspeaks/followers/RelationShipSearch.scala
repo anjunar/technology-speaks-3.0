@@ -5,15 +5,15 @@ import com.anjunar.technologyspeaks.hibernate.search.annotations.RestPredicate
 import com.anjunar.technologyspeaks.hibernate.search.{AbstractSearch, Context, PredicateProvider}
 
 import scala.beans.BeanProperty
+import scala.compiletime.uninitialized
 
-class RelationShipSearch(
-  sort: java.util.List[String],
-  index: Int,
-  limit: Int
-) extends AbstractSearch(sort, index, limit) {
+class RelationShipSearch(sort: java.util.List[String],
+                         index: Int,
+                         limit: Int) 
+  extends AbstractSearch(sort, index, limit) {
 
   @RestPredicate(classOf[RelationShipSearch.UserPredicate])
-    var user: User = null
+  var user: User = uninitialized
 
 }
 

@@ -2,9 +2,10 @@ package com.anjunar.technologyspeaks.core
 
 import com.anjunar.json.mapper.schema.{DefaultWritableRule, EntitySchema, SchemaProvider}
 import jakarta.json.bind.annotation.JsonbProperty
-import jakarta.persistence.{CascadeType, Entity, NamedAttributeNode, NamedEntityGraph, OneToOne}
+import jakarta.persistence.*
 
 import scala.beans.BeanProperty
+import scala.compiletime.uninitialized
 
 @Entity
 @NamedEntityGraph(
@@ -16,17 +17,14 @@ import scala.beans.BeanProperty
     new NamedAttributeNode("thumbnail")
   )
 )
-class Media(
-  name: String = null,
-  contentType: String = null,
-  data: Array[Byte] = null
-) extends Thumbnail(name, contentType, data) {
-  
+class Media(name: String, contentType: String, data: Array[Byte])
+  extends Thumbnail(name, contentType, data) {
+
   def this() = this(null, null, null)
 
   @OneToOne(cascade = Array(CascadeType.ALL))
   @JsonbProperty
-    var thumbnail: Thumbnail = null
+  var thumbnail: Thumbnail = uninitialized
 
 }
 

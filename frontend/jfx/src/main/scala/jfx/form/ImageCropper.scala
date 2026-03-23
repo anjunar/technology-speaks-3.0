@@ -5,22 +5,9 @@ import jfx.core.state.{Disposable, ListProperty, Property}
 import jfx.domain.{Media, Thumbnail}
 import jfx.dsl.{ComponentContext, DslRuntime, Scope}
 import jfx.layout.Viewport
-import org.scalajs.dom.{
-  CanvasRenderingContext2D,
-  Event,
-  File,
-  FileReader,
-  HTMLButtonElement,
-  HTMLCanvasElement,
-  HTMLDivElement,
-  HTMLImageElement,
-  HTMLInputElement,
-  Node,
-  PointerEvent,
-  document,
-  window
-}
+import org.scalajs.dom.{CanvasRenderingContext2D, Event, File, FileReader, HTMLButtonElement, HTMLCanvasElement, HTMLDivElement, HTMLImageElement, HTMLInputElement, Node, PointerEvent, document, window}
 
+import scala.compiletime.uninitialized
 import scala.math.{abs, max, min}
 import scala.util.control.NonFatal
 
@@ -47,13 +34,14 @@ class ImageCropper(val name: String, override val standalone: Boolean = false) e
 
   private var structureInitialized = false
 
-  private var fileInput: HTMLInputElement = null
-  private var uploadButton: HTMLButtonElement = null
-  private var cropButton: HTMLButtonElement = null
-  private var clearButton: HTMLButtonElement = null
-  private var previewFrame: HTMLDivElement = null
-  private var previewImg: HTMLImageElement = null
-  private var previewPlaceholder: HTMLDivElement = null
+  private var fileInput: HTMLInputElement = uninitialized
+  private var uploadButton: HTMLButtonElement = uninitialized
+  private var cropButton: HTMLButtonElement = uninitialized
+  private var clearButton: HTMLButtonElement = uninitialized
+  private var previewFrame: HTMLDivElement = uninitialized
+  private var previewImg: HTMLImageElement = uninitialized
+  private var previewPlaceholder: HTMLDivElement = uninitialized
+
 
   override val element: HTMLDivElement = {
     val div = newElement("div")
@@ -383,7 +371,7 @@ private final class ImageCropperDialog(
 
   private var structureInitialized = false
   private var previewScale = 1.0
-  private var loadedImage: HTMLImageElement = null
+  private var loadedImage: HTMLImageElement = uninitialized
   private var crop: ImageCropperDialog.CropRect = null
   private var drag: ImageCropperDialog.DragState = null
   private var livePending = false

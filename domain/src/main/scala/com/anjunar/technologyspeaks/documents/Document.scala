@@ -11,6 +11,7 @@ import org.hibernate.annotations.Type
 
 import scala.annotation.meta.field
 import scala.beans.BeanProperty
+import scala.compiletime.uninitialized
 
 @Entity
 @Table(name = "Documents#Document")
@@ -57,20 +58,19 @@ import scala.beans.BeanProperty
     )
   )
 )
-class Document(
-  @Column(nullable = false) @(JsonbProperty @field) var title: String = null
-) extends AbstractEntity with EntityContext[Document] with OwnerProvider {
+class Document(@Column(nullable = false) @(JsonbProperty @field) var title: String) 
+  extends AbstractEntity, EntityContext[Document], OwnerProvider {
 
   def this() = this(null)
 
   @ManyToOne(optional = false)
   @JsonbProperty
-    var user: User = null
+  var user: User = uninitialized
 
   @Column(columnDefinition = "jsonb")
   @Type(value = classOf[NodeType])
   @JsonbProperty
-    var editor: Node = null
+  var editor: Node = uninitialized
 
   override def owner(): EntityProvider = user
 

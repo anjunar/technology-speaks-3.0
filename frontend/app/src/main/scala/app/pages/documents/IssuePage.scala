@@ -148,8 +148,21 @@ class IssuePage(val model: Issue) extends PageComposite("Aufgabe", pageResizable
 
             }
 
+            hbox {
+              style {
+                justifyContent = "flex-end"
+                columnGap = "10px"
+              }
+              renderByRel("update", model.links) { () =>
+                button("Aktualisieren")
+              }
+              renderByRel("save", model.links) { () =>
+                button("Speichern")
+              }
+            }
+          }
 
-            div {
+          div {
               style {
                 flex = "1"
                 minHeight = "0px"
@@ -186,18 +199,7 @@ class IssuePage(val model: Issue) extends PageComposite("Aufgabe", pageResizable
               commentInput.readOnly = true
               commentInput.onClick(_ => appendNewComment())
             }
-
-            hbox {
-              style {
-                justifyContent = "flex-end"
-                columnGap = "10px"
-              }
-              renderByRel("update", model.links) { () =>
-                button("Speichern")
-              }
-            }
           }
-        }
       }
   }
 }

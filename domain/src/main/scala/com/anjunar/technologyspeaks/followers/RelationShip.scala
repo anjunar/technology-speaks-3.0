@@ -2,12 +2,13 @@ package com.anjunar.technologyspeaks.followers
 
 import com.anjunar.json.mapper.provider.OwnerProvider
 import com.anjunar.json.mapper.schema.{EntitySchema, SchemaProvider}
-import com.anjunar.technologyspeaks.core._
+import com.anjunar.technologyspeaks.core.*
 import com.anjunar.technologyspeaks.hibernate.{EntityContext, RepositoryContext}
 import jakarta.json.bind.annotation.JsonbProperty
-import jakarta.persistence._
+import jakarta.persistence.*
 
 import scala.beans.BeanProperty
+import scala.compiletime.uninitialized
 
 @Entity
 @Table(name = "Followers#RelationShip")
@@ -59,18 +60,18 @@ import scala.beans.BeanProperty
     )
   )
 )
-class RelationShip extends AbstractEntity with OwnerProvider with EntityContext[RelationShip] {
+class RelationShip extends AbstractEntity, OwnerProvider, EntityContext[RelationShip] {
 
   @ManyToOne(optional = false)
-    var user: User = null
+  var user: User = uninitialized
 
   @ManyToOne(optional = false)
   @JsonbProperty
-    var follower: User = null
+  var follower: User = uninitialized
 
   @ManyToMany
   @JsonbProperty
-    val groups: java.util.Set[Group] = new java.util.HashSet[Group]()
+  val groups: java.util.Set[Group] = new java.util.HashSet[Group]()
 
   override def owner(): User = user
 

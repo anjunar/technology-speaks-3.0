@@ -6,15 +6,17 @@ import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Component
 import org.springframework.web.context.annotation.RequestScope
 
+import scala.compiletime.uninitialized
+
 @Component
 @RequestScope
 class IdentityHolder(val sessionHolder: SessionHolder, val entityManager: EntityManager) {
 
-  var user: User = null
+  var user: User = uninitialized
 
   var roles: java.util.List[String] = null
 
-  var credential: Credential = null
+  var credential: Credential = uninitialized
 
   def isAuthenticated(): Boolean = sessionHolder.user != null
 

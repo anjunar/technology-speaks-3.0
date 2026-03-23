@@ -1,9 +1,10 @@
 package com.anjunar.technologyspeaks.core
 
 import com.anjunar.technologyspeaks.hibernate.EntityContext
-import jakarta.persistence.{Entity, Inheritance, InheritanceType, ManyToOne, OneToMany, Table}
+import jakarta.persistence.*
 
 import scala.beans.BeanProperty
+import scala.compiletime.uninitialized
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
@@ -11,9 +12,9 @@ import scala.beans.BeanProperty
 class EntityView extends AbstractEntity with EntityContext[EntityView] {
 
   @ManyToOne(optional = false)
-    var user: User = null
+  var user: User = uninitialized
 
   @OneToMany
-    val properties: java.util.Set[ManagedProperty] = new java.util.HashSet[ManagedProperty]()
+  val properties: java.util.Set[ManagedProperty] = new java.util.HashSet[ManagedProperty]()
 
 }

@@ -8,20 +8,20 @@ import jakarta.validation.constraints.{NotBlank, Size}
 
 import scala.annotation.meta.field
 import scala.beans.BeanProperty
+import scala.compiletime.uninitialized
 
 @Entity
 @Table(name = "Core#Address")
-class Address(
-  @NotBlank @Size(min = 2, max = 80) @(JsonbProperty @field) var street: String = null,
-  @NotBlank @Size(min = 1, max = 80) @(JsonbProperty @field) var number: String = null,
-  @NotBlank @Size(min = 5, max = 5) @(JsonbProperty @field) var zipCode: String = null,
-  @NotBlank @Size(min = 2, max = 80) @(JsonbProperty @field) var country: String = null
-) extends AbstractEntity with OwnerProvider {
-  
-  def this() = this(null, null, null, null)
+class Address(@NotBlank @Size(min = 2, max = 80) @(JsonbProperty @field) var street: String,
+              @NotBlank @Size(min = 1, max = 80) @(JsonbProperty @field) var number: String,
+              @NotBlank @Size(min = 5, max = 5) @(JsonbProperty @field) var zipCode: String,
+              @NotBlank @Size(min = 2, max = 80) @(JsonbProperty @field) var country: String)
+  extends AbstractEntity,  OwnerProvider {
 
   @OneToOne(optional = false, mappedBy = "address")
-    var user: User = null
+  var user: User = uninitialized
+
+  def this() = this(null, null, null, null)
 
   override def owner(): EntityProvider = user.owner()
 

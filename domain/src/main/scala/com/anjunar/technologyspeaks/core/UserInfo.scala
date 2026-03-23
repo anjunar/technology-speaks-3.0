@@ -9,19 +9,19 @@ import jakarta.validation.constraints.{NotBlank, NotNull, Size}
 import java.time.LocalDate
 import scala.annotation.meta.field
 import scala.beans.BeanProperty
+import scala.compiletime.uninitialized
 
 @Entity
 @Table(name = "Core#UserInfo")
-class UserInfo(
-  @NotBlank @Size(min = 2, max = 80) @(JsonbProperty @field) var firstName: String = null,
-  @NotBlank @Size(min = 2, max = 80) @(JsonbProperty @field) var lastName: String = null,
-  @NotNull @(JsonbProperty @field) var birthDate: LocalDate = null
-) extends AbstractEntity with OwnerProvider {
-  
+class UserInfo(@NotBlank @Size(min = 2, max = 80) @(JsonbProperty @field) var firstName: String,
+               @NotBlank @Size(min = 2, max = 80) @(JsonbProperty @field) var lastName: String,
+               @NotNull @(JsonbProperty @field) var birthDate: LocalDate)
+  extends AbstractEntity, OwnerProvider {
+
   def this() = this(null, null, null)
 
   @OneToOne(optional = false, mappedBy = "info")
-    var user: User = null
+  var user: User = uninitialized
 
   override def owner(): EntityProvider = user.owner()
 

@@ -7,19 +7,20 @@ import com.anjunar.technologyspeaks.hibernate.{EntityContext, RepositoryContext}
 import jakarta.json.bind.annotation.JsonbProperty
 import jakarta.persistence.{Entity, ManyToOne, Table}
 
+import scala.annotation.meta.field
 import scala.beans.BeanProperty
+import scala.compiletime.uninitialized
 
 @Entity
 @Table(name = "Followers#Group")
-class Group(
-  @JsonbProperty var name: String = null
-) extends AbstractEntity with OwnerProvider with EntityContext[Group] {
+class Group(@(JsonbProperty @field) var name: String)
+  extends AbstractEntity, OwnerProvider, EntityContext[Group] {
 
   def this() = this(null)
 
   @ManyToOne(optional = false)
   @JsonbProperty
-    var user: User = null
+  var user: User = uninitialized
 
   override def owner(): User = user
 

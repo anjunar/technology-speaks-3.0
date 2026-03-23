@@ -5,6 +5,7 @@ import com.anjunar.technologyspeaks.hibernate.search.annotations.RestPredicate
 import com.anjunar.technologyspeaks.hibernate.search.{AbstractSearch, Context, PredicateProvider}
 
 import scala.beans.BeanProperty
+import scala.compiletime.uninitialized
 
 class GroupSearch(
   sort: java.util.List[String],
@@ -13,7 +14,7 @@ class GroupSearch(
 ) extends AbstractSearch(sort, index, limit) {
 
   @RestPredicate(classOf[GroupSearch.UserPredicate])
-    var user: User = null
+  var user: User = uninitialized
 
 }
 

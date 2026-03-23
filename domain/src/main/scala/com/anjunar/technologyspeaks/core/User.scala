@@ -10,6 +10,8 @@ import jakarta.validation.constraints.{NotBlank, Size}
 
 import scala.annotation.meta.field
 import scala.beans.BeanProperty
+import java.util
+import scala.compiletime.uninitialized
 
 @Entity
 @Table(name = "Core#User")
@@ -28,27 +30,26 @@ import scala.beans.BeanProperty
     )
   )
 )
-class User(
-  @(JsonbProperty @field) @NotBlank @Size(min = 2, max = 80) var nickName: String = null
-) extends AbstractEntity with EntityContext[User] with OwnerProvider {
+class User(@(JsonbProperty @field) @NotBlank @Size(min = 2, max = 80) var nickName: String)
+  extends AbstractEntity, EntityContext[User], OwnerProvider {
 
   def this() = this(null)
 
   @ManyToOne(cascade = Array(CascadeType.ALL), fetch = FetchType.LAZY)
   @JsonbProperty
-    var image: Media = null
+  var image: Media = uninitialized
 
   @OneToOne(cascade = Array(CascadeType.ALL))
   @JsonbProperty
-    var info: UserInfo = null
+  var info: UserInfo = uninitialized
 
   @OneToOne(cascade = Array(CascadeType.ALL))
   @JsonbProperty
-    var address: Address = null
+  var address: Address = uninitialized
 
   @OneToMany(cascade = Array(CascadeType.ALL), orphanRemoval = true, mappedBy = "user")
   @JsonbProperty
-    val emails: java.util.Set[EMail] = new java.util.HashSet[EMail]()
+  val emails: util.Set[EMail] = new util.HashSet[EMail]()
 
   override def owner(): EntityProvider = this
 

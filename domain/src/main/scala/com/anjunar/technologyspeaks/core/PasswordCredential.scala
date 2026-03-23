@@ -4,11 +4,12 @@ import com.anjunar.technologyspeaks.hibernate.EntityContext
 import jakarta.persistence.Entity
 
 import scala.beans.BeanProperty
+import scala.compiletime.uninitialized
 
 @Entity
-class PasswordCredential(
-  var password: String = null,
-  code: String = null
-) extends Credential(code) with EntityContext[PasswordCredential] {
+class PasswordCredential(var password: String, code: String) 
+  extends Credential(code), EntityContext[PasswordCredential] {
+  
   def this() = this(null, null)
+  
 }

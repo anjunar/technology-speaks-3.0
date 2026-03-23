@@ -4,26 +4,26 @@ import com.anjunar.json.mapper.provider.{EntityProvider, OwnerProvider}
 import com.anjunar.json.mapper.schema.{EntitySchema, SchemaProvider}
 import com.anjunar.technologyspeaks.hibernate.{EntityContext, RepositoryContext}
 import jakarta.json.bind.annotation.JsonbProperty
-import jakarta.persistence.{CascadeType, Column, Entity, ManyToOne, OneToMany, Table}
+import jakarta.persistence.*
 import jakarta.validation.constraints.{Email, NotBlank}
 
 import scala.annotation.meta.field
 import scala.beans.BeanProperty
+import scala.compiletime.uninitialized
 
 @Entity
 @Table(name = "Core#Email")
-class EMail(
-             @(JsonbProperty @field) @Email @NotBlank @Column(unique = true) var value: String = null
-) extends AbstractEntity with OwnerProvider with EntityContext[EMail] {
-  
+class EMail(@(JsonbProperty @field) @Email @NotBlank @Column(unique = true) var value: String)
+  extends AbstractEntity, OwnerProvider, EntityContext[EMail] {
+
   def this() = this(null)
 
   @ManyToOne(optional = false)
-    var user: User = null
+  var user: User = uninitialized
 
   @OneToMany(cascade = Array(CascadeType.ALL), orphanRemoval = true, mappedBy = "email")
-    val credentials: java.util.Set[Credential] = new java.util.HashSet[Credential]()
-
+  val credentials: java.util.Set[Credential] = new java.util.HashSet[Credential]()
+  
   override def owner(): EntityProvider = user.owner()
 
 }

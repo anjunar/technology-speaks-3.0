@@ -1,2 +1,3 @@
 @import "Main.css";
-@import "./document/Document.css";
+@import "document/DocumentPage.css";
+@import "document/IssuePage.css";

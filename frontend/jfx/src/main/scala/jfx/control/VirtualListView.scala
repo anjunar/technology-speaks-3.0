@@ -11,6 +11,8 @@ import scala.collection.mutable
 import scala.concurrent.ExecutionContext
 import scala.scalajs.js
 import scala.scalajs.js.JSConverters.*
+import scala.compiletime.uninitialized
+
 
 class VirtualListView[T](
   initialItems: ListProperty[T] = ListProperty(),
@@ -622,7 +624,7 @@ class VirtualListView[T](
 
     var boundIndex: Int = -1
     var loaded: Boolean = false
-    var renderedItem: Any = null
+    var renderedItem: Any = uninitialized
 
     override val element: HTMLDivElement = {
       val divElement = newElement("div")

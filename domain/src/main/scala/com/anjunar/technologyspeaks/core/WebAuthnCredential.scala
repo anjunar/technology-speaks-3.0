@@ -6,16 +6,16 @@ import jakarta.persistence.{Entity, NoResultException}
 
 import java.util.UUID
 import scala.beans.BeanProperty
+import scala.compiletime.uninitialized
 
 @Entity
-class WebAuthnCredential(
-  var credentialId: String = null,
-  var publicKey: Array[Byte] = null,
-  var publicKeyAlgorithm: Long = 0L,
-  var counter: Long = 0L,
-  var aaguid: UUID = null,
-  code: String = null
-) extends Credential(code) with EntityContext[WebAuthnCredential] {
+class WebAuthnCredential(var credentialId: String,
+                         var publicKey: Array[Byte] = null,
+                         var publicKeyAlgorithm: Long = 0L,
+                         var counter: Long = 0L,
+                         var aaguid: UUID,
+                         code: String = null)
+  extends Credential(code), EntityContext[WebAuthnCredential] {
 
   def this() = this(null, null, 0L, 0L, null, null)
 

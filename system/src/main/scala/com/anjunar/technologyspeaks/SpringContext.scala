@@ -3,6 +3,8 @@ package com.anjunar.technologyspeaks
 import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext
 
+import scala.compiletime.uninitialized
+
 object SpringContext {
 
   def entityManager(): EntityManager =
@@ -11,6 +13,6 @@ object SpringContext {
   def getBean[C](clazz: Class[C]): C =
     context.getBean(clazz)
 
-  var context: ApplicationContext = null
+  var context: ApplicationContext = uninitialized
 
 }

@@ -2,16 +2,17 @@ package com.anjunar.technologyspeaks.documents
 
 import com.anjunar.json.mapper.provider.{EntityProvider, OwnerProvider}
 import com.anjunar.json.mapper.schema.{EntitySchema, SchemaProvider}
-import com.anjunar.technologyspeaks.core._
+import com.anjunar.technologyspeaks.core.*
 import com.anjunar.technologyspeaks.hibernate.{EntityContext, RepositoryContext}
 import com.anjunar.technologyspeaks.shared.commentable.{CommentContainer, FirstComment}
 import com.anjunar.technologyspeaks.shared.editor.{Node, NodeType}
 import com.anjunar.technologyspeaks.shared.likeable.{Like, LikeContainer}
 import jakarta.json.bind.annotation.JsonbProperty
-import jakarta.persistence._
+import jakarta.persistence.*
 import org.hibernate.annotations.Type
 
-import scala.beans.BeanProperty
+import scala.annotation.meta.field
+import scala.compiletime.uninitialized
 
 @Entity
 @Table(name = "Documents#Issue")
@@ -58,32 +59,31 @@ import scala.beans.BeanProperty
     )
   )
 )
-class Issue(
-  @Column(nullable = false) @JsonbProperty var title: String = null
-) extends AbstractEntity with OwnerProvider with EntityContext[Issue] with LikeContainer.Interface with CommentContainer.Interface {
+class Issue(@Column(nullable = false) @(JsonbProperty @field) var title: String)
+  extends AbstractEntity, OwnerProvider, EntityContext[Issue], LikeContainer.Interface, CommentContainer.Interface {
 
   def this() = this(null)
 
   @ManyToOne(optional = false)
   @JsonbProperty
-    var document: Document = null
+  var document: Document = uninitialized
 
   @ManyToOne(optional = false)
   @JsonbProperty
-    var user: User = null
+  var user: User = uninitialized
 
   @Column(columnDefinition = "jsonb")
   @Type(value = classOf[NodeType])
   @JsonbProperty
-    var editor: Node = null
+  var editor: Node = uninitialized
 
   @OneToMany(cascade = Array(CascadeType.ALL), orphanRemoval = true)
   @JsonbProperty
-    override val likes: java.util.Set[Like] = new java.util.HashSet[Like]()
+  override val likes: java.util.Set[Like] = new java.util.HashSet[Like]()
 
   @OneToMany(cascade = Array(CascadeType.ALL), orphanRemoval = true)
   @JsonbProperty
-    override val comments: java.util.Set[FirstComment] = new java.util.HashSet[FirstComment]()
+  override val comments: java.util.Set[FirstComment] = new java.util.HashSet[FirstComment]()
 
   override def owner(): EntityProvider = user
 

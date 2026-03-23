@@ -34,6 +34,11 @@ lazy val root = (project in file("."))
     publish / skip := true
   )
 
+lazy val scalaEnterprise = (project in file("library/scala-enterprise"))
+  .settings(
+    libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.19" % Test
+  )
+
 lazy val scalaUniverse2 = (project in file("library/scala-universe"))
   .settings(
     libraryDependencies ++= Seq(
@@ -60,7 +65,7 @@ lazy val jsonMapper2 = (project in file("library/json-mapper"))
   )
 
 lazy val system = (project in file("system"))
-  .dependsOn(jsonMapper2)
+  .dependsOn(jsonMapper2, scalaEnterprise)
   .settings(
     libraryDependencies ++= Seq(
       "org.springframework.boot" % "spring-boot-starter-web" % "4.0.1",
