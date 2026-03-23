@@ -2,6 +2,7 @@ package jfx.layout
 
 import java.util.UUID
 import jfx.core.component.{ElementComponent, ManagedElementComponent, NodeComponent}
+import jfx.core.state.Property.subscribeBidirectional
 import jfx.core.state.{Disposable, ListProperty, Property}
 import jfx.dsl.{ComponentContext, DslRuntime, Scope}
 import jfx.statement.ForEach
@@ -61,8 +62,8 @@ final class Viewport extends ManagedElementComponent[HTMLDivElement] {
       Viewport.touchWindow(conf)
     }
 
-    component.addDisposable(Property.subscribeBidirectional(component.zIndex, conf.zIndex))
-    component.addDisposable(Property.subscribeBidirectional(component.maximized, conf.maximized))
+    subscribeBidirectional(component.zIndex, conf.zIndex)
+    subscribeBidirectional(component.maximized, conf.maximized)
     component.addDisposable(conf.zIndex.observe(_ => component.active = Viewport.isActive(conf)))
     component.setContentFactory(() => {
       val contentComponent = conf.component()

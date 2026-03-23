@@ -11,6 +11,7 @@ import app.support.{Navigation, RemotePageQuery, RemoteTableList}
 import app.ui.{CompositeSupport, DivComposite, PageComposite}
 import jfx.control.virtualList
 import jfx.core.component.ElementComponent.*
+import jfx.core.state.Property.subscribeBidirectional
 import jfx.core.state.{Property, RemoteListProperty}
 import jfx.dsl.*
 import jfx.form.Editor.editor
@@ -129,7 +130,7 @@ object PostsPage {
           }
 
           editorField.editableProperty.set(false)
-          addDisposable(Property.subscribeBidirectional(data.data.editor, editorField.valueProperty))
+          subscribeBidirectional(data.data.editor, editorField.valueProperty)
 
           hbox {
             style {

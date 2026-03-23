@@ -13,8 +13,22 @@ class ListProperty[V](val underlying: js.Array[V] = js.Array[V]()) extends ReadO
 
   private val listeners = js.Array[js.Array[V] => Unit]()
   private val changeListeners = js.Array[ListProperty.Change[V] => Unit]()
+  private var disposableOwner: CompositeDisposable | Null = null
 
   override def get: js.Array[V] = underlying
+
+  def registerDisposableOwner(owner: CompositeDisposable): this.type = {
+    disposableOwner = owner
+    this
+  }
+
+  private[state] def autoRegister(disposable: Disposable): Unit =
+    if (disposableOwner != null) {
+      disposableOwner.add(disposable)
+    }
+
+  private[state] def hasSameDisposableOwnerAs(other: ListProperty[?]): Boolean =
+    disposableOwner != null && disposableOwner.eq(other.disposableOwner)
 
   private def notifyListeners(): Unit =
     listeners.toList.foreach(listener => listener(get))
@@ -165,6 +179,9 @@ object ListProperty {
   def apply[V](underlying: js.Array[V] = js.Array[V]()): ListProperty[V] =
     new ListProperty[V](underlying)
 
+  def owned[V](owner: CompositeDisposable, underlying: js.Array[V] = js.Array[V]()): ListProperty[V] =
+    new ListProperty[V](underlying).registerDisposableOwner(owner)
+
   def remote[V, Query](
     loader: RemoteLoader[V, Query],
     initialQuery: Query,
@@ -202,6 +219,10 @@ object ListProperty {
     val composite = new CompositeDisposable()
     composite.add(da)
     composite.add(db)
+    a.autoRegister(composite)
+    if ((b ne a) && !a.hasSameDisposableOwnerAs(b)) {
+      b.autoRegister(composite)
+    }
     composite
   }
 

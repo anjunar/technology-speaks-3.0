@@ -12,8 +12,8 @@ import scala.util.control.NonFatal
 
 final class Window extends ManagedElementComponent[HTMLDivElement] {
 
-  val maximized: Property[Boolean] = Property(false)
-  val zIndex: Property[Int] = Property(0)
+  val maximized: Property[Boolean] = Property.owned(disposable, false)
+  val zIndex: Property[Int] = Property.owned(disposable, 0)
 
   var draggable: Boolean = true
 

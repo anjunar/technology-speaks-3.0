@@ -14,6 +14,7 @@ import jfx.control.TableView.{fixedCellSize_=, items_=, showHeader_=, tableView}
 import jfx.control.{TableCell, TableView, virtualList}
 import jfx.core.component.ElementComponent.*
 import jfx.core.component.NodeComponent
+import jfx.core.state.Property.subscribeBidirectional
 import jfx.core.state.{ListProperty, Property, RemoteListProperty}
 import jfx.dsl.*
 import jfx.form.Editor.editor
@@ -353,7 +354,7 @@ private final class DocumentEditorPanel(
           }
         }
 
-        addDisposable(Property.subscribeBidirectional(document.editable, editorField.editableProperty))
+        subscribeBidirectional(document.editable, editorField.editableProperty)
       }
     }
   }
@@ -479,7 +480,7 @@ private final class IssueListItem(
         editorFieldRef.nn.editableProperty.set(false)
       }
 
-      addDisposable(Property.subscribeBidirectional(issue.editor, editorFieldRef.nn.valueProperty))
+      subscribeBidirectional(issue.editor, editorFieldRef.nn.valueProperty)
       element.onclick = _ => {
         val documentId = currentDocument.get.id.get
         if (documentId != null && issue.id.get != null) {

@@ -13,6 +13,7 @@ import app.support.{RemotePageQuery, RemoteTableList}
 import app.ui.{CompositeSupport, DivComposite, PageComposite}
 import jfx.control.virtualList
 import jfx.core.component.ElementComponent.*
+import jfx.core.state.Property.subscribeBidirectional
 import jfx.core.state.{ListProperty, Property, RemoteListProperty}
 import jfx.dsl.*
 import jfx.form.Editor.editor
@@ -166,7 +167,7 @@ object PostViewPage {
           }
 
           editorField.editableProperty.set(false)
-          addDisposable(Property.subscribeBidirectional(post.editor, editorField.valueProperty))
+          subscribeBidirectional(post.editor, editorField.valueProperty)
 
           val likes = likeButton {}
           likes.model(post.likes, post.links)

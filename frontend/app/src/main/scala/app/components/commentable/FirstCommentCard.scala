@@ -11,6 +11,7 @@ import app.ui.{CompositeSupport, DivComposite}
 import jfx.action.Button.button
 import jfx.core.component.ElementComponent.*
 import jfx.core.state.Property
+import jfx.core.state.Property.subscribeBidirectional
 import jfx.dsl.*
 import jfx.form.Editor.editor
 import jfx.form.Form
@@ -76,8 +77,8 @@ class FirstCommentCard(
           }
         }
 
-        addDisposable(Property.subscribeBidirectional(comment.editor, editorField.valueProperty))
-        addDisposable(Property.subscribeBidirectional(comment.editable, editorField.editableProperty))
+        subscribeBidirectional(comment.editor, editorField.valueProperty)
+        subscribeBidirectional(comment.editable, editorField.editableProperty)
 
         val likes = likeButton {}
         likes.model(comment.likes, comment.links)

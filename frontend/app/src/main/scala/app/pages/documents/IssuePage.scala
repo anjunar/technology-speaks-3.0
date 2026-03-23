@@ -13,6 +13,7 @@ import jfx.action.Button.{buttonType_=, onClick}
 import jfx.control.virtualList
 import jfx.core.component.ElementComponent.*
 import jfx.core.component.NodeComponent
+import jfx.core.state.Property.subscribeBidirectional
 import jfx.core.state.{ListProperty, Property, RemoteListProperty}
 import jfx.dsl.*
 import jfx.form.Editor.editor
@@ -261,7 +262,7 @@ private final class IssueEditorCard(
             }
           }
 
-          addDisposable(Property.subscribeBidirectional(issue.editable, editorField.editableProperty))
+          subscribeBidirectional(issue.editable, editorField.editableProperty)
         }
       }
     }
