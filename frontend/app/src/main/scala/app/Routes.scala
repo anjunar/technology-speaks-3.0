@@ -39,9 +39,7 @@ object Routes {
     },
     asyncRoute("/document/documents/document/root") {
       Document.root().map { root =>
-        val page = DocumentPage.documentPage()
-        page.model(root)
-        page
+        DocumentPage.documentPage(root.data)
       }
     },
     asyncRoute("/document/documents/document/:documentId/issues/issue") {

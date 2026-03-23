@@ -7,40 +7,40 @@ import app.domain.documents.{Document, Issue, IssueCreated, IssueUpdated}
 import app.services.ApplicationService
 import app.support.{Navigation, RemotePageQuery, RemoteTableList, TimeAgo}
 import app.ui.{CompositeSupport, DivComposite, PageComposite}
-import jfx.action.Button.button
-import jfx.action.Button.{buttonType_=, onClick}
+import jfx.action.Button.{button, buttonType, buttonType_=, onClick}
 import jfx.control.TableColumn.{cellFactory_=, cellValueFactory_=, column, prefWidth_=}
 import jfx.control.TableView.{fixedCellSize_=, items_=, showHeader_=, tableView}
-import jfx.control.{TableCell, TableView, virtualList}
+import jfx.control.{TableCell, virtualList}
 import jfx.core.component.ElementComponent.*
-import jfx.core.component.NodeComponent
 import jfx.core.state.Property.subscribeBidirectional
 import jfx.core.state.{ListProperty, Property, RemoteListProperty}
 import jfx.dsl.*
 import jfx.form.Editor.editor
 import jfx.form.Form
-import jfx.form.Form.{form, onSubmit, onSubmit_=}
-import jfx.form.Input.input
+import jfx.form.Form.{form, onSubmit_=}
+import jfx.form.Input.{input, inputType_=}
 import jfx.form.editor.plugins.*
 import jfx.layout.Div.div
 import jfx.layout.HBox.hbox
 import jfx.layout.Span.span
 import jfx.layout.VBox.vbox
-import jfx.statement.DynamicOutlet.dynamicOutlet
-import org.scalajs.dom.Node
+import jfx.statement.ObserveRender.observeRender
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.scalajs.js.timers.{SetTimeoutHandle, clearTimeout, setTimeout}
 
-class DocumentPage extends PageComposite("Dokument") {
+class DocumentPage(val model: Document) extends PageComposite("Dokument") {
 
   private given ExecutionContext = ExecutionContext.global
+
   private val documentsPageSize = 50
   private val issuesPageSize = 50
 
-  private val currentDocumentProperty: Property[Document] = Property(new Document())
+  private val currentDocumentProperty: Property[Document] = Property(model)
+  private val searchQueryProperty: Property[String] = Property("")
   private val documentsProperty: RemoteListProperty[Data[Document], RemotePageQuery] =
     RemoteTableList.create[Data[Document]](pageSize = documentsPageSize) { (index, limit) =>
-      Document.list(index, limit)
+      Document.list(index, limit, searchQueryProperty.get)
     }
   private val issuesProperty: RemoteListProperty[Issue, RemotePageQuery] =
     RemoteTableList.createMapped[Data[Issue], Issue](pageSize = issuesPageSize) { (index, limit) =>
@@ -51,18 +51,18 @@ class DocumentPage extends PageComposite("Dokument") {
         Future.successful(new Table[Data[Issue]]())
       }
     }(_.data)
-  private val editorPanelProperty: Property[NodeComponent[? <: Node] | Null] = Property(null)
-
-  def model(root: Data[Document]): Unit =
-    currentDocumentProperty.set(root.data)
 
   override protected def compose(using DslContext): Unit = {
     classProperty += "document-page"
 
     addDisposable(
       currentDocumentProperty.observe { document =>
-        editorPanelProperty.set(DocumentEditorPanel.panel(document, handleDocumentSaved))
         reloadIssues()
+      }
+    )
+    addDisposable(
+      searchQueryProperty.observeWithoutInitial { _ =>
+        scheduleDocumentReload()
       }
     )
     addDisposable(
@@ -75,32 +75,50 @@ class DocumentPage extends PageComposite("Dokument") {
           ()
       }
     )
+    addDisposable(() => cancelScheduledReload())
 
     withDslContext {
       hbox {
+        classes = "documents-layout"
         style {
-          setProperty("height", "100%")
-          setProperty("width", "100%")
-          columnGap = "12px"
+          height = "100%"
+          width = "100%"
           overflow = "hidden"
         }
 
-        DocumentListPanel.panel(documentsProperty, currentDocumentProperty, createNewDocument)
+        DocumentListPanel.panel(documentsProperty, currentDocumentProperty, searchQueryProperty, createNewDocument)
 
         div {
           style {
             flex = "1"
             minWidth = "0px"
-            setProperty("height", "100%")
+            height = "100%"
           }
 
-          dynamicOutlet(editorPanelProperty)
+          observeRender(currentDocumentProperty) { document =>
+            DocumentEditorPanel.panel(document, handleDocumentSaved)
+          }
         }
 
         IssuesPanel.panel(currentDocumentProperty, issuesProperty)
       }
     }
   }
+
+  private var pendingDocumentReload: SetTimeoutHandle | Null = null
+
+  private def scheduleDocumentReload(): Unit = {
+    cancelScheduledReload()
+    pendingDocumentReload = setTimeout(250) {
+      RemoteTableList.reloadFirstPage(documentsProperty, pageSize = documentsPageSize)
+    }
+  }
+
+  private def cancelScheduledReload(): Unit =
+    if (pendingDocumentReload != null) {
+      clearTimeout(pendingDocumentReload.nn)
+      pendingDocumentReload = null
+    }
 
   private def createNewDocument(): Unit = {
     val document = new Document()
@@ -123,13 +141,14 @@ class DocumentPage extends PageComposite("Dokument") {
 }
 
 object DocumentPage {
-  def documentPage(init: DocumentPage ?=> Unit = {}): DocumentPage =
-    CompositeSupport.buildPage(new DocumentPage)(init)
+  def documentPage(model: Document, init: DocumentPage ?=> Unit = {}): DocumentPage =
+    CompositeSupport.buildPage(new DocumentPage(model))(init)
 }
 
 private final class DocumentListPanel(
   documents: ListProperty[Data[Document]],
   currentDocument: Property[Document],
+  searchQuery: Property[String],
   createNewDocument: () => Unit
 ) extends DivComposite {
 
@@ -140,16 +159,30 @@ private final class DocumentListPanel(
       vbox {
         style {
           width = "420px"
-          rowGap = "12px"
           height = "100%"
         }
 
         hbox {
           classes = "doc-panel-header"
+
           span {
             classes = "doc-panel-title"
             text = "Dokumente"
           }
+        }
+
+        div {
+          classes = "doc-search"
+
+          span {
+            classes = "material-icons"
+            text = "search"
+          }
+
+          val searchInput = input("search") {}
+          searchInput.placeholder = "Suche..."
+          inputType_=("search")(using searchInput)
+          subscribeBidirectional(searchQuery, searchInput.valueProperty.asInstanceOf[Property[String]])
         }
 
         div {
@@ -163,7 +196,7 @@ private final class DocumentListPanel(
             fixedCellSize_=(64.0)
             showHeader_=(false)
 
-            column[Data[Document], String]("Dokumente") {
+            column[Data[Document], String]("Titel") {
               val current = summon[jfx.control.TableColumn[Data[Document], String]]
               current.setPrefWidth(400.0)
               current.setCellValueFactory(features => features.value.data.title)
@@ -184,14 +217,17 @@ private final class DocumentListPanel(
           addDisposable(
             currentDocument.observe { active =>
               val index = documents.indexWhere(_.data.id.get == active.id.get)
-              if (index >= 0) table.getSelectionModel.select(index)
-              else table.getSelectionModel.clearSelection()
+              if (index >= 0) {
+                table.getSelectionModel.select(index)
+              } else {
+                table.getSelectionModel.clearSelection()
+              }
             }
           )
         }
 
-        button("") {
-          buttonType_=("button")
+        button("Neues Dokument") {
+          buttonType = "button"
           classes = "doc-new-btn"
           style {
             display = "flex"
@@ -220,9 +256,10 @@ private object DocumentListPanel {
   def panel(
     documents: ListProperty[Data[Document]],
     currentDocument: Property[Document],
+    searchQuery: Property[String],
     createNewDocument: () => Unit
   ): DocumentListPanel =
-    CompositeSupport.buildComposite(new DocumentListPanel(documents, currentDocument, createNewDocument))
+    CompositeSupport.buildComposite(new DocumentListPanel(documents, currentDocument, searchQuery, createNewDocument))
 }
 
 private final class DocumentSummaryCell extends TableCell[Data[Document], String] {
@@ -243,10 +280,10 @@ private final class DocumentSummaryCell extends TableCell[Data[Document], String
   icon.style.fontSize = "18px"
   icon.style.opacity = "0.75"
 
-  textColumn.style.overflow = "hidden"
-  textColumn.style.minWidth = "0"
   textColumn.style.display = "flex"
   textColumn.style.setProperty("flex-direction", "column")
+  textColumn.style.overflow = "hidden"
+  textColumn.style.minWidth = "0"
 
   title.style.fontWeight = "600"
   title.style.overflow = "hidden"
@@ -264,9 +301,7 @@ private final class DocumentSummaryCell extends TableCell[Data[Document], String
 
   override protected def updateItem(item: String | Null, empty: Boolean): Unit = {
     val rowValue = Option(getTableRow).flatMap(row => Option(row.getItem))
-    val isEmptyCell = empty || rowValue.isEmpty
-
-    if (isEmptyCell) {
+    if (empty || rowValue.isEmpty) {
       element.classList.add("jfx-table-cell-empty")
       title.textContent = ""
       subtitle.textContent = ""
@@ -293,7 +328,7 @@ private final class DocumentEditorPanel(
 
     withDslContext {
       form(document) {
-        onSubmit = { (event : Form[Document]) =>
+        onSubmit_= { (_ : Form[Document]) =>
           val request =
             if (document.id.get != null) document.update()
             else document.save()
@@ -304,15 +339,13 @@ private final class DocumentEditorPanel(
         style {
           display = "flex"
           flexDirection = "column"
+          flex = "1"
+          minWidth = "0px"
           height = "100%"
         }
 
         hbox {
           classes = "doc-titlebar"
-          style {
-            alignItems = "center"
-            columnGap = "10px"
-          }
 
           val titleInput = input("title") {
             style {
@@ -324,16 +357,23 @@ private final class DocumentEditorPanel(
           titleInput.placeholder = "Titel"
           addDisposable(document.editable.observe(editable => titleInput.element.disabled = !editable))
 
-          val editButton = button("edit") {
-            buttonType_=("button")
-            classes = Seq("material-icons", "doc-icon-btn")
-            onClick { _ =>
-              document.editable.set(!document.editable.get)
+          Navigation.renderByRel("update", document.links) { () =>
+            val editButton = button("edit") {
+              buttonType_=("button")
+              classes = Seq("material-icons", "doc-icon-btn")
+              onClick { _ =>
+                document.editable.set(!document.editable.get)
+              }
             }
-          }
 
-          editButton.element.style.display =
-            if (document.id.get != null) "inline-flex" else "none"
+            addDisposable(
+              document.editable.observe { editable =>
+                editButton.element.textContent = if (editable) "done" else "edit"
+                if (editable) editButton.element.classList.add("active")
+                else editButton.element.classList.remove("active")
+              }
+            )
+          }
         }
 
         val editorField = editor("editor") {
@@ -377,12 +417,13 @@ private final class IssuesPanel(
       vbox {
         style {
           width = "420px"
-          rowGap = "12px"
           height = "100%"
+          rowGap = "12px"
         }
 
         hbox {
           classes = "doc-panel-header"
+
           span {
             classes = "doc-panel-title"
             text = "Aufgaben"
@@ -406,8 +447,8 @@ private final class IssuesPanel(
           }
         }
 
-        button("") {
-          buttonType_=("button")
+        button("Neue Aufgabe") {
+          buttonType = "button"
           classes = "doc-new-btn"
           style {
             display = "flex"
@@ -466,6 +507,7 @@ private final class IssueListItem(
           style {
             fontWeight = "600"
           }
+
           text = Option(issue.title.get).filter(_.trim.nonEmpty).getOrElse("(Ohne Titel)")
         }
 

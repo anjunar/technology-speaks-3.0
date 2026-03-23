@@ -2,13 +2,14 @@ package com.anjunar.technologyspeaks.documents
 
 import com.anjunar.json.mapper.provider.{EntityProvider, OwnerProvider}
 import com.anjunar.json.mapper.schema.{EntitySchema, SchemaProvider}
-import com.anjunar.technologyspeaks.core._
+import com.anjunar.technologyspeaks.core.*
 import com.anjunar.technologyspeaks.hibernate.{EntityContext, RepositoryContext}
 import com.anjunar.technologyspeaks.shared.editor.{Node, NodeType}
 import jakarta.json.bind.annotation.JsonbProperty
-import jakarta.persistence._
+import jakarta.persistence.*
 import org.hibernate.annotations.Type
 
+import scala.annotation.meta.field
 import scala.beans.BeanProperty
 
 @Entity
@@ -57,7 +58,7 @@ import scala.beans.BeanProperty
   )
 )
 class Document(
-  @Column(nullable = false) @JsonbProperty @BeanProperty var title: String = null
+  @Column(nullable = false) @(JsonbProperty @field) @BeanProperty var title: String = null
 ) extends AbstractEntity with EntityContext[Document] with OwnerProvider {
 
   def this() = this(null)

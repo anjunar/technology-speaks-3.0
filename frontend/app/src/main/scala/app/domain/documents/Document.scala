@@ -9,6 +9,7 @@ import jfx.core.state.{ListProperty, Property, PropertyAccess}
 import java.util.UUID
 import scala.concurrent.Future
 import scala.scalajs.js
+import scala.scalajs.js.URIUtils.encodeURIComponent
 
 class Document(
                 val id: Property[UUID] = Property(null),
@@ -49,6 +50,12 @@ object Document {
   def root(): Future[Data[Document]] =
     Api.post("/service/document/documents/document/root")
 
-  def list(index: Int, limit: Int): Future[Table[Data[Document]]] =
-    Api.get(s"/service/document/documents?index=$index&limit=$limit&sort=created:desc")
+  def list(index: Int, limit: Int, query: String = ""): Future[Table[Data[Document]]] = {
+    val normalizedQuery = Option(query).map(_.trim).getOrElse("")
+    val queryParameter =
+      if (normalizedQuery.isEmpty) ""
+      else s"&name=${encodeURIComponent(normalizedQuery)}"
+
+    Api.get(s"/service/document/documents?index=$index&limit=$limit&sort=created:desc$queryParameter")
+  }
 }
