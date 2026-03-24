@@ -1,6 +1,6 @@
 package app
 
-import app.domain.core.User
+import app.domain.core.{Data, User}
 import app.domain.documents.{Document, Issue}
 import app.domain.timeline.Post
 import app.pages.HomePage.homePage
@@ -9,6 +9,8 @@ import app.pages.documents.{DocumentPage, IssuePage}
 import app.pages.followers.RelationShipsPage.relationShipsPage
 import app.pages.security.*
 import app.pages.timeline.{PostEditPage, PostViewPage, PostsPage}
+import app.support.{RemotePageQuery, RemoteTableList}
+import jfx.core.state.RemoteListProperty
 import jfx.dsl.Scope
 import jfx.router.{Route, RouteContext}
 
@@ -95,8 +97,15 @@ object Routes {
     route("/security/confirm") {
       ConfirmPage.confirmPage()
     },
-    route("/core/users") {
-      UsersPage.usersPage()
+    asyncRoute("/core/users") {
+      val usersProperty: RemoteListProperty[Data[User], RemotePageQuery] =
+        RemoteTableList.create[Data[User]]() { (index, limit) =>
+          User.list(index, limit)
+        }
+
+      usersProperty.reload(RemotePageQuery.first(50)).toFuture.map(_ => {
+        UsersPage.usersPage(usersProperty)
+      })
     },
     asyncRoute("/core/users/user/:id") {
       val id = pathParam("id")

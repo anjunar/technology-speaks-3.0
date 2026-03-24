@@ -7,7 +7,7 @@ import jfx.control.TableColumn.{cellFactory_=, cellValueFactory_=, column, prefW
 import jfx.control.TableView.{fixedCellSize, fixedCellSize_=, items, items_=, rowFactory, rowFactory_=, tableView}
 import jfx.control.{TableCell, TableRow, TableView}
 import jfx.core.component.ElementComponent.*
-import jfx.core.state.{Property, RemoteListProperty}
+import jfx.core.state.{ListProperty, Property, RemoteListProperty}
 import jfx.domain.Media
 import jfx.dsl.*
 import jfx.layout.Div.div
@@ -16,14 +16,7 @@ import org.scalajs.dom.HTMLImageElement
 
 import scala.concurrent.ExecutionContext
 
-class UsersPage extends PageComposite("Users") {
-
-  private given ExecutionContext = ExecutionContext.global
-  private val pageSize = 50
-  private val usersProperty: RemoteListProperty[Data[User], RemotePageQuery] =
-    RemoteTableList.create[Data[User]](pageSize = pageSize) { (index, limit) =>
-      User.list(index, limit)
-    }
+class UsersPage(usersProperty: ListProperty[Data[User]]) extends PageComposite("Users") {
 
   override protected def compose(using DslContext): Unit = {
     classProperty += "users-page"
@@ -87,8 +80,8 @@ class UsersPage extends PageComposite("Users") {
 }
 
 object UsersPage {
-  def usersPage(init: UsersPage ?=> Unit = {}): UsersPage =
-    CompositeSupport.buildPage(new UsersPage)(init)
+  def usersPage(list : ListProperty[Data[User]]): UsersPage =
+    CompositeSupport.buildPage(new UsersPage(list))({})
 }
 
 private final class UserNavigationRow extends TableRow[Data[User]] {

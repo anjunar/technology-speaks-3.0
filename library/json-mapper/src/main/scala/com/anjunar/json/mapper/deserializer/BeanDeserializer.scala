@@ -402,7 +402,7 @@ class BeanDeserializer extends Deserializer[Any] {
   }
 
   private def resolveInverseOneToOne(target: Any, mappedBy: String, expectedType: Class[?]): AnnotationProperty = {
-    val targetModel = AnnotationIntrospector.createWithType(target.getClass, classOf[JsonbProperty])
+    val targetModel = AnnotationIntrospector.createWithType(target.getClass, classOf[OneToOne])
     targetModel.properties.find { candidate =>
       val annotation = candidate.findAnnotation(classOf[OneToOne])
       annotation != null &&
@@ -412,7 +412,7 @@ class BeanDeserializer extends Deserializer[Any] {
   }
 
   private def resolveInverseOneToMany(target: Any, mappedBy: String, expectedElementType: Class[?]): AnnotationProperty = {
-    val targetModel = AnnotationIntrospector.createWithType(target.getClass, classOf[JsonbProperty])
+    val targetModel = AnnotationIntrospector.createWithType(target.getClass, classOf[OneToMany])
     targetModel.properties.find { candidate =>
       val annotation = candidate.findAnnotation(classOf[OneToMany])
       val elementType = candidate.propertyType.typeArguments.headOption.map(_.raw).orNull
@@ -423,7 +423,7 @@ class BeanDeserializer extends Deserializer[Any] {
   }
 
   private def resolveInverseManyToMany(target: Any, mappedBy: String, expectedElementType: Class[?]): AnnotationProperty = {
-    val targetModel = AnnotationIntrospector.createWithType(target.getClass, classOf[JsonbProperty])
+    val targetModel = AnnotationIntrospector.createWithType(target.getClass, classOf[ManyToMany])
     targetModel.properties.find { candidate =>
       val annotation = candidate.findAnnotation(classOf[ManyToMany])
       val elementType = candidate.propertyType.typeArguments.headOption.map(_.raw).orNull
