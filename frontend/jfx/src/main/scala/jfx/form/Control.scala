@@ -5,25 +5,33 @@ import jfx.core.state.{ListProperty, Property, ReadOnlyProperty}
 import org.scalajs.dom.HTMLElement
 
 trait Control[V, E <: HTMLElement] extends ElementComponent[E], Editable {
-  
-  val name : String
-  
-  val standalone : Boolean
-  
+
+  val name: String
+
+  val standalone: Boolean
+
   val placeholderProperty: Property[String] = Property("")
 
   val focusedProperty: Property[Boolean] = Property(false)
 
   val dirtyProperty: Property[Boolean] = Property(false)
 
-  val errorsProperty: ListProperty[String] = new ListProperty[String]() 
+  val errorsProperty: ListProperty[String] = new ListProperty[String]()
 
   val invalidProperty: ReadOnlyProperty[Boolean] =
     errorsProperty.map(_.length > 0)
 
-  val valueProperty : ReadOnlyProperty[V]
+  val valueProperty: ReadOnlyProperty[V]
+
+  private val editableObserver = editableProperty.observe { editable =>
+    if (!editable) {
+      errorsProperty.clear()
+    }
+  }
+  addDisposable(editableObserver)
 
   def placeholder: String = placeholderProperty.get
+
   def placeholder_=(value: String): Unit = placeholderProperty.set(value)
 
   def setFocused(value: Boolean): Unit =

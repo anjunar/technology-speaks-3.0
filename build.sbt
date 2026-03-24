@@ -44,7 +44,7 @@ lazy val scalaUniverse2 = (project in file("library/scala-universe"))
     libraryDependencies ++= Seq(
       "com.google.guava" % "guava" % "33.5.0-jre",
       "jakarta.enterprise" % "jakarta.enterprise.cdi-api" % "4.1.0",
-      "ch.qos.logback" % "logback-classic" % "1.5.20",
+      "ch.qos.logback" % "logback-classic" % "1.5.32",
       "org.slf4j" % "slf4j-api" % "2.0.17",
       "org.slf4j" % "jul-to-slf4j" % "2.0.17",
       "com.typesafe.scala-logging" %% "scala-logging" % "3.9.6"
@@ -56,7 +56,7 @@ lazy val jsonMapper2 = (project in file("library/json-mapper"))
   .settings(
     libraryDependencies ++= Seq(
       "com.google.guava" % "guava" % "33.5.0-jre",
-      "jakarta.json.bind" % "jakarta.json.bind-api" % "3.0.0",
+      "jakarta.json.bind" % "jakarta.json.bind-api" % "3.0.1",
       "jakarta.persistence" % "jakarta.persistence-api" % "3.2.0",
       "jakarta.validation" % "jakarta.validation-api" % "3.1.1",
       "tools.jackson.core" % "jackson-databind" % "3.1.0",
@@ -68,15 +68,15 @@ lazy val system = (project in file("system"))
   .dependsOn(jsonMapper2, scalaEnterprise)
   .settings(
     libraryDependencies ++= Seq(
-      "org.springframework.boot" % "spring-boot-starter-web" % "4.0.1",
-      "org.springframework.boot" % "spring-boot-starter-mail" % "4.0.1",
-      "org.springframework.boot" % "spring-boot-starter-thymeleaf" % "4.0.1",
-      "org.springframework.boot" % "spring-boot-starter-data-jpa" % "4.0.1",
-      "org.springframework.boot" % "spring-boot-starter-validation" % "4.0.1",
-      "org.springframework.boot" % "spring-boot-starter-json" % "4.0.1",
-      "org.springframework.boot" % "spring-boot-starter-actuator" % "4.0.1",
-      "com.fasterxml.jackson.core" % "jackson-databind" % "2.21.0",
-      "com.fasterxml.jackson.core" % "jackson-core" % "2.21.0",
+      "org.springframework.boot" % "spring-boot-starter-web" % "4.0.4",
+      "org.springframework.boot" % "spring-boot-starter-mail" % "4.0.4",
+      "org.springframework.boot" % "spring-boot-starter-thymeleaf" % "4.0.4",
+      "org.springframework.boot" % "spring-boot-starter-data-jpa" % "4.0.4",
+      "org.springframework.boot" % "spring-boot-starter-validation" % "4.0.4",
+      "org.springframework.boot" % "spring-boot-starter-json" % "4.0.4",
+      "org.springframework.boot" % "spring-boot-starter-actuator" % "4.0.4",
+      "com.fasterxml.jackson.core" % "jackson-databind" % "2.21.2",
+      "com.fasterxml.jackson.core" % "jackson-core" % "2.21.2",
       "org.thymeleaf" % "thymeleaf" % "3.1.3.RELEASE",
       "org.hibernate.orm" % "hibernate-core" % "7.2.6.Final",
       "org.hibernate.validator" % "hibernate-validator" % "9.1.0.Final",

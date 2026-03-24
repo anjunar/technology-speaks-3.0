@@ -13,7 +13,7 @@ import jfx.core.component.ElementComponent.*
 import jfx.core.component.NodeComponent
 import jfx.core.state.{ListProperty, Property, RemoteListProperty}
 import jfx.dsl.*
-import jfx.form.Editable.editable
+import jfx.form.Editable.{editable, editable_=}
 import jfx.form.{ErrorResponseException, Form, SubForm}
 import jfx.form.Form.{form, onSubmit}
 import jfx.form.ImageCropper.{aspectRatio, imageCropper, outputMaxHeight, outputMaxWidth, outputQuality, outputType}
@@ -29,7 +29,7 @@ import jfx.statement.DynamicOutlet.dynamicOutlet
 import scala.concurrent.ExecutionContext
 import scala.scalajs.js
 import scala.scalajs.js.JSConverters.*
-import scala.util.{Success, Failure}
+import scala.util.{Failure, Success}
 
 class UserPage(val model: User) extends PageComposite("User", pageResizable = false) {
 
@@ -108,6 +108,7 @@ class UserPage(val model: User) extends PageComposite("User", pageResizable = fa
                     factory = () => new UserInfo()
 
                     addDisposable(infoDisabled.observeWithoutInitial(disabled => {
+                      editable = ! disabled
                       if (disabled) {
                         SubForm.clearForm()
                       } else {
@@ -128,6 +129,10 @@ class UserPage(val model: User) extends PageComposite("User", pageResizable = fa
                         inputType = "date"
                       }
                     }
+
+                    editable = !infoDisabled.get
+
+
                   }
 
                   renderByRel("update", model.links) { () =>
@@ -154,6 +159,8 @@ class UserPage(val model: User) extends PageComposite("User", pageResizable = fa
                     factory = () => new Address()
 
                     addDisposable(addressDisabled.observeWithoutInitial(disabled => {
+                      editable = ! disabled
+
                       if (disabled) {
                         SubForm.clearForm()
                       } else {
@@ -176,6 +183,8 @@ class UserPage(val model: User) extends PageComposite("User", pageResizable = fa
                     inputContainer("Land") {
                       input("country")
                     }
+
+                    editable = !addressDisabled.get
 
                   }
 
