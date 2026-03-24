@@ -24,12 +24,12 @@ object Routes {
   private def route(path: String)(factory: Route.ScopedFactory): Route =
     Route.scoped(path, factory)
 
-  private def asyncRoute(path: String)(factory: (RouteContext, Scope) => Future[Route.Component]): Route =
+  private def asyncRoute(path: String)(factory: (RouteContext, Scope) ?=> Future[Route.Component]): Route =
     Route.scopedPromise(
       path,
       (context: RouteContext) ?=>
         (scope: Scope) ?=>
-          factory(context, scope).toJSPromise
+          factory(using context, scope).toJSPromise
     )
 
   private def pathParam(name: String)(using context: RouteContext): String =
@@ -39,24 +39,19 @@ object Routes {
     route("/") {
       homePage()
     },
-    asyncRoute("/document/documents/document/root") { (context, scope) =>
-      given Scope = scope
+    asyncRoute("/document/documents/document/root") {
       Document.root().map { root =>
         DocumentPage.documentPage(root.data)
       }
     },
-    asyncRoute("/document/documents/document/:documentId/issues/issue") { (context, scope) =>
-      given Scope = scope
-      given RouteContext = context
+    asyncRoute("/document/documents/document/:documentId/issues/issue") {
       val docId = pathParam("documentId")
       Issue.read(docId).map { issue =>
         issue.data.editable.set(true)
         IssuePage.issuePage(issue.data)
       }
     },
-    asyncRoute("/document/documents/document/:documentId/issues/issue/:id") { (context, scope) =>
-      given Scope = scope
-      given RouteContext = context
+    asyncRoute("/document/documents/document/:documentId/issues/issue/:id") {
       val docId = pathParam("documentId")
       val issueId = pathParam("id")
       Issue.read(docId, issueId).map { issue =>
@@ -66,8 +61,7 @@ object Routes {
     route("/followers/relationships") {
       relationShipsPage()
     },
-    asyncRoute("/timeline/posts") { (context, scope) =>
-      given Scope = scope
+    asyncRoute("/timeline/posts") {
       val postsProperty: RemoteListProperty[Data[Post], RemotePageQuery] =
         RemoteTableList.create[Data[Post]](pageSize = 50) { (index, limit) =>
           Post.list(index, limit)
@@ -80,17 +74,13 @@ object Routes {
     route("/timeline/posts/post") {
       PostEditPage.postEditPage(new Post())
     },
-    asyncRoute("/timeline/posts/post/:id") { (context, scope) =>
-      given Scope = scope
-      given RouteContext = context
+    asyncRoute("/timeline/posts/post/:id") {
       val id = pathParam("id")
       app.domain.timeline.Post.read(id).map { post =>
         PostEditPage.postEditPage(post.data)
       }
     },
-    asyncRoute("/timeline/posts/post/:id/view") { (context, scope) =>
-      given Scope = scope
-      given RouteContext = context
+    asyncRoute("/timeline/posts/post/:id/view") {
       val id = pathParam("id")
       app.domain.timeline.Post.read(id).map { post =>
         PostViewPage.postViewPage(post.data)
@@ -114,8 +104,7 @@ object Routes {
     route("/security/confirm") {
       ConfirmPage.confirmPage()
     },
-    asyncRoute("/core/users") { (context, scope) =>
-      given Scope = scope
+    asyncRoute("/core/users") {
       val usersProperty: RemoteListProperty[Data[User], RemotePageQuery] =
         RemoteTableList.create[Data[User]]() { (index, limit) =>
           User.list(index, limit)
@@ -125,9 +114,7 @@ object Routes {
         UsersPage.usersPage(usersProperty)
       })
     },
-    asyncRoute("/core/users/user/:id") { (context, scope) =>
-      given Scope = scope
-      given RouteContext = context
+    asyncRoute("/core/users/user/:id") {
       val id = pathParam("id")
       User.read(id).map { user =>
         UserPage.userPage(user.data)
