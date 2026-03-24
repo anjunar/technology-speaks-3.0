@@ -43,9 +43,6 @@ class ComponentHeader(val owner : OwnerProvider) extends DivComposite {
     val userName = user.map(_.nickName.get).filter(_.trim.nonEmpty).getOrElse("User")
     val links = Option(owner).map(_.links).getOrElse(ListProperty())
 
-    println(s"userId: $userId")
-    println(s"links: $links")
-
     withDslContext {
       hbox {
         style {
