@@ -86,6 +86,6 @@ class WebAuthnRegisterPage extends PageComposite("Register mit WebAuthn", pageRe
 }
 
 object WebAuthnRegisterPage {
-  def webAuthnRegisterPage(init: WebAuthnRegisterPage ?=> Unit = {}): WebAuthnRegisterPage =
+  def webAuthnRegisterPage(init: WebAuthnRegisterPage ?=> Unit = {})(using Scope): WebAuthnRegisterPage =
     CompositeSupport.buildPage(new WebAuthnRegisterPage)(init)
 }

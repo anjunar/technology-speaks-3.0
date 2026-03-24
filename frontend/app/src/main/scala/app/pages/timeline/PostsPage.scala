@@ -159,11 +159,11 @@ object PostsPage {
   }
 
   object PostFeedCard {
-    def card(data: Data[Post]): PostFeedCard =
+    def card(data: Data[Post])(using Scope): PostFeedCard =
       CompositeSupport.buildComposite(new PostFeedCard(data))
   }
 
 
-  def postsPage(postsProperty : RemoteListProperty[Data[Post], RemotePageQuery]): PostsPage =
-    CompositeSupport.buildPage(new PostsPage(postsProperty))({})
+  def postsPage(postsProperty : RemoteListProperty[Data[Post], RemotePageQuery])(using Scope)(init: PostsPage ?=> Unit = {}): PostsPage =
+    CompositeSupport.buildPage(new PostsPage(postsProperty))(init)
 }

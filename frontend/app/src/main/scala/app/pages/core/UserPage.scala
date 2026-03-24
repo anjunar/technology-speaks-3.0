@@ -232,6 +232,6 @@ class UserPage(val model: User) extends PageComposite("User", pageResizable = fa
 }
 
 object UserPage {
-  def userPage(model: User, init: UserPage ?=> Unit = {}): UserPage =
+  def userPage(model: User, init: UserPage ?=> Unit = {})(using Scope): UserPage =
     CompositeSupport.buildPage(new UserPage(model))(init)
 }

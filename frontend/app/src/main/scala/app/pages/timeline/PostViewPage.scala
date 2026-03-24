@@ -180,10 +180,10 @@ object PostViewPage {
   }
 
   object PostViewPostCard {
-    def card(post: Post): PostViewPostCard =
+    def card(post: Post)(using Scope): PostViewPostCard =
       CompositeSupport.buildComposite(new PostViewPostCard(post))
   }
 
-  def postViewPage(model: Post, init: PostViewPage ?=> Unit = {}): PostViewPage =
+  def postViewPage(model: Post, init: PostViewPage ?=> Unit = {})(using Scope): PostViewPage =
     CompositeSupport.buildPage(new PostViewPage(model))(init)
 }

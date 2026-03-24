@@ -80,6 +80,6 @@ class ConfirmPage extends PageComposite("Bestaetigen", pageResizable = false) {
 }
 
 object ConfirmPage {
-  def confirmPage(init: ConfirmPage ?=> Unit = {}): ConfirmPage =
+  def confirmPage(init: ConfirmPage ?=> Unit = {})(using Scope): ConfirmPage =
     CompositeSupport.buildPage(new ConfirmPage)(init)
 }

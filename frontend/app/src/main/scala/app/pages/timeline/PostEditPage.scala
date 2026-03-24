@@ -94,6 +94,6 @@ class PostEditPage(val data: Post) extends PageComposite("Posts") {
 }
 
 object PostEditPage {
-  def postEditPage(data: Post, init: PostEditPage ?=> Unit = {}): PostEditPage =
+  def postEditPage(data: Post, init: PostEditPage ?=> Unit = {})(using Scope): PostEditPage =
     CompositeSupport.buildPage(new PostEditPage(data))(init)
 }

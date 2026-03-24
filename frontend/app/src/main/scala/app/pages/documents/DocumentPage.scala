@@ -144,7 +144,7 @@ class DocumentPage(val model: Document) extends PageComposite("Dokument") {
 }
 
 object DocumentPage {
-  def documentPage(model: Document, init: DocumentPage ?=> Unit = {}): DocumentPage =
+  def documentPage(model: Document, init: DocumentPage ?=> Unit = {})(using Scope): DocumentPage =
     CompositeSupport.buildPage(new DocumentPage(model))(init)
 }
 
@@ -261,7 +261,7 @@ private object DocumentListPanel {
     currentDocument: Property[Document],
     searchQuery: Property[String],
     createNewDocument: () => Unit
-  ): DocumentListPanel =
+  )(using Scope): DocumentListPanel =
     CompositeSupport.buildComposite(new DocumentListPanel(documents, currentDocument, searchQuery, createNewDocument))
 }
 
@@ -404,7 +404,7 @@ private final class DocumentEditorPanel(
 }
 
 private object DocumentEditorPanel {
-  def panel(document: Document, onSaved: Data[Document] => Unit): DocumentEditorPanel =
+  def panel(document: Document, onSaved: Data[Document] => Unit)(using Scope): DocumentEditorPanel =
     CompositeSupport.buildComposite(new DocumentEditorPanel(document, onSaved))
 }
 
@@ -482,7 +482,7 @@ private final class IssuesPanel(
 }
 
 private object IssuesPanel {
-  def panel(currentDocument: Property[Document], issues: ListProperty[Issue]): IssuesPanel =
+  def panel(currentDocument: Property[Document], issues: ListProperty[Issue])(using Scope): IssuesPanel =
     CompositeSupport.buildComposite(new IssuesPanel(currentDocument, issues))
 }
 
@@ -536,6 +536,6 @@ private final class IssueListItem(
 }
 
 private object IssueListItem {
-  def item(currentDocument: Property[Document], issue: Issue): IssueListItem =
+  def item(currentDocument: Property[Document], issue: Issue)(using Scope): IssueListItem =
     CompositeSupport.buildComposite(new IssueListItem(currentDocument, issue))
 }

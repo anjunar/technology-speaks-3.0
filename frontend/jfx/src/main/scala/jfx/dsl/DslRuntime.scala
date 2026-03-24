@@ -17,7 +17,7 @@ private[jfx] object ComponentContext {
   val root: ComponentContext = ComponentContext(None, None)
 }
 
-private[jfx] object DslRuntime {
+object DslRuntime {
 
   private val componentContextStack: mutable.ArrayBuffer[ComponentContext] =
     mutable.ArrayBuffer(ComponentContext.root)
@@ -30,7 +30,10 @@ private[jfx] object DslRuntime {
         block(summon[Scope])
       case _ =>
         if (scopeStack.nonEmpty) block(scopeStack.last)
-        else block(Scope.root())
+        else {
+          println("WARNING: No current scope found. Using root scope.")
+          block(Scope.root())
+        }
     }
 
   def currentComponentContext(): ComponentContext =

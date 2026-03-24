@@ -58,7 +58,7 @@ class RelationShipsPage extends PageComposite("Following") {
 }
 
 object RelationShipsPage {
-  def relationShipsPage(init: RelationShipsPage ?=> Unit = {}): RelationShipsPage =
+  def relationShipsPage(init: RelationShipsPage ?=> Unit = {})(using Scope): RelationShipsPage =
     CompositeSupport.buildPage(new RelationShipsPage)(init)
 }
 
@@ -130,6 +130,6 @@ private final class RelationShipListItem(data: Data[RelationShip]) extends DivCo
 }
 
 private object RelationShipListItem {
-  def item(data: Data[RelationShip]): RelationShipListItem =
+  def item(data: Data[RelationShip])(using Scope): RelationShipListItem =
     CompositeSupport.buildComposite(new RelationShipListItem(data))
 }

@@ -97,6 +97,6 @@ object FirstCommentCard {
     owner: AbstractEntity[?],
     onPersist: FirstComment => Unit = _ => (),
     onDeleteCompleted: FirstComment => Unit = _ => ()
-  ): FirstCommentCard =
+  )(using Scope): FirstCommentCard =
     CompositeSupport.buildComposite(new FirstCommentCard(comment, owner, onPersist, onDeleteCompleted))
 }

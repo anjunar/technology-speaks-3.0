@@ -76,7 +76,7 @@ class CommentsSection(val firstComment: FirstComment, val owner: AbstractEntity[
 }
 
 object CommentsSection {
-  def commentsSection(firstComment: FirstComment, owner: AbstractEntity[?])(init: CommentsSection ?=> Unit = {}): CommentsSection =
+  def commentsSection(firstComment: FirstComment, owner: AbstractEntity[?])(init: CommentsSection ?=> Unit = {})(using Scope): CommentsSection =
     CompositeSupport.buildComposite(new CommentsSection(firstComment, owner))(init)
 
   final class CommentReplyCard(firstComment: FirstComment,
@@ -140,7 +140,7 @@ object CommentsSection {
   object CommentReplyCard {
     def card(firstComment: FirstComment,
              comment: SecondComment,
-             owner: AbstractEntity[?]): CommentReplyCard =
+             owner: AbstractEntity[?])(using Scope): CommentReplyCard =
       CompositeSupport.buildComposite(new CommentReplyCard(firstComment, comment, owner))
   }
 

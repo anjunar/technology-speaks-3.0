@@ -113,6 +113,6 @@ class LikeButton(val likes: ListProperty[Like], val links: ListProperty[Link], v
 }
 
 object LikeButton {
-  def likeButton(likes: ListProperty[Like], links: ListProperty[Link], rel: String = "like")(init: LikeButton ?=> Unit = {}): LikeButton =
+  def likeButton(likes: ListProperty[Like], links: ListProperty[Link], rel: String = "like")(init: LikeButton ?=> Unit = {})(using Scope): LikeButton =
     CompositeSupport.buildComposite(new LikeButton(likes, links, rel))(init)
 }

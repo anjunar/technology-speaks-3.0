@@ -69,6 +69,6 @@ class LogoutPage extends PageComposite("Abmelden", pageResizable = false) {
 }
 
 object LogoutPage {
-  def logoutPage(init: LogoutPage ?=> Unit = {}): LogoutPage =
+  def logoutPage(init: LogoutPage ?=> Unit = {})(using Scope): LogoutPage =
     CompositeSupport.buildPage(new LogoutPage)(init)
 }

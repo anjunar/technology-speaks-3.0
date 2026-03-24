@@ -20,18 +20,18 @@ abstract class PageComposite(pageTitle: String, pageResizable: Boolean = true)
 
 object CompositeSupport {
 
-  def buildComposite[C <: DivComposite](component: C): C =
+  inline def buildComposite[C <: DivComposite](component: C): C =
     CompositeComponent.composite(component)
 
-  def buildComposite[C <: DivComposite](component: C)(init: C ?=> Unit): C = {
+  inline def buildComposite[C <: DivComposite](component: C)(init: C ?=> Unit): C = {
     given C = component
     init
     CompositeComponent.composite(component)
   }
 
-  def buildPage[C <: PageComposite](component: C): C =
+  inline def buildPage[C <: PageComposite](component: C): C =
     buildComposite(component)
 
-  def buildPage[C <: PageComposite](component: C)(init: C ?=> Unit): C =
+  inline def buildPage[C <: PageComposite](component: C)(init: C ?=> Unit): C =
     buildComposite(component)(init)
 }

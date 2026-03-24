@@ -2,7 +2,7 @@ package app
 
 import app.services.ApplicationService
 import app.support.Api
-import jfx.dsl.Scope
+import jfx.dsl.{DslRuntime, Scope}
 import org.scalajs.dom.{HTMLDivElement, document}
 
 import scala.concurrent.ExecutionContext
@@ -20,6 +20,7 @@ object Main {
     fontLoader.`then`(_ => {
       val root = document.getElementById("root").asInstanceOf[HTMLDivElement | Null]
       val service = new ApplicationService()
+
       if (root == null) {
         ()
       } else {
@@ -38,12 +39,16 @@ object Main {
             service.app.get
           }
           .foreach { _ =>
-            given Scope = Scope.root()
+            val scope = Scope.root()
+            scope.singleton(service)
 
-            val shell = AppShell.appShell(service)
-            root.innerHTML = ""
-            root.appendChild(shell.element)
-            shell.onMount()
+            DslRuntime.withScope(scope) {
+              
+              val shell = AppShell.appShell()(using scope)
+              root.innerHTML = ""
+              root.appendChild(shell.element)
+              shell.onMount()
+            }
           }
       }
     })

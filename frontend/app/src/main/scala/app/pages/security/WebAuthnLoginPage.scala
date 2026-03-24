@@ -91,6 +91,6 @@ class WebAuthnLoginPage extends PageComposite("Login mit WebAuthn", pageResizabl
 }
 
 object WebAuthnLoginPage {
-  def webAuthnLoginPage(init: WebAuthnLoginPage ?=> Unit = {}): WebAuthnLoginPage =
+  def webAuthnLoginPage(init: WebAuthnLoginPage ?=> Unit = {})(using Scope): WebAuthnLoginPage =
     CompositeSupport.buildPage(new WebAuthnLoginPage)(init)
 }

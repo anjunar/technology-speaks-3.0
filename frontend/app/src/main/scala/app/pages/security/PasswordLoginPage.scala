@@ -97,6 +97,6 @@ class PasswordLoginPage extends PageComposite("Login", pageResizable = false) {
 }
 
 object PasswordLoginPage {
-  def passwordLoginPage(init: PasswordLoginPage ?=> Unit = {}): PasswordLoginPage =
+  def passwordLoginPage(init: PasswordLoginPage ?=> Unit = {})(using Scope): PasswordLoginPage =
     CompositeSupport.buildPage(new PasswordLoginPage)(init)
 }

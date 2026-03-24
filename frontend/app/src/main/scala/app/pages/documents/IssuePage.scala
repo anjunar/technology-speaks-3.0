@@ -209,6 +209,6 @@ class IssuePage(val model: Issue) extends PageComposite("Aufgabe", pageResizable
 }
 
 object IssuePage {
-  def issuePage(model: Issue, init: IssuePage ?=> Unit = {}): IssuePage =
+  def issuePage(model: Issue, init: IssuePage ?=> Unit = {})(using Scope): IssuePage =
     CompositeSupport.buildPage(new IssuePage(model))(init)
 }

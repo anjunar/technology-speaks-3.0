@@ -64,6 +64,6 @@ class LoggedInUser extends DivComposite {
 }
 
 object LoggedInUser {
-  def loggedInUser(init: LoggedInUser ?=> Unit = {}): LoggedInUser =
+  def loggedInUser(init: LoggedInUser ?=> Unit = {})(using Scope): LoggedInUser =
     CompositeSupport.buildComposite(new LoggedInUser)(init)
 }

@@ -80,7 +80,7 @@ class UsersPage(usersProperty: ListProperty[Data[User]]) extends PageComposite("
 }
 
 object UsersPage {
-  def usersPage(list : ListProperty[Data[User]]): UsersPage =
+  def usersPage(list : ListProperty[Data[User]])(using Scope): UsersPage =
     CompositeSupport.buildPage(new UsersPage(list))({})
 }
 

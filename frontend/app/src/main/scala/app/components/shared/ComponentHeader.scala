@@ -156,7 +156,7 @@ class ComponentHeader(val owner : OwnerProvider) extends DivComposite {
 }
 
 object ComponentHeader {
-  def componentHeader(owner : OwnerProvider)(init: ComponentHeader ?=> Unit = {}): ComponentHeader =
+  def componentHeader(owner : OwnerProvider)(init: ComponentHeader ?=> Unit = {})(using Scope): ComponentHeader =
     CompositeSupport.buildComposite(new ComponentHeader(owner))(init)
 
   def onUpdate(value : () => Unit)(using component: ComponentHeader): Unit =

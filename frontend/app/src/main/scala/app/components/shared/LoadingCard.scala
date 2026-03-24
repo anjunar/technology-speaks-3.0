@@ -40,7 +40,7 @@ class LoadingCard extends DivComposite {
 }
 
 object LoadingCard {
-  def loadingCard(init: LoadingCard ?=> Unit = {}): LoadingCard =
+  def loadingCard(init: LoadingCard ?=> Unit = {})(using Scope): LoadingCard =
     CompositeSupport.buildComposite(new LoadingCard)(init)
 
   def minHeight(using component: LoadingCard): String =

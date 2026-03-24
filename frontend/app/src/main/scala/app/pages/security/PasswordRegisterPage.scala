@@ -91,6 +91,6 @@ class PasswordRegisterPage extends PageComposite("Register", pageResizable = fal
 }
 
 object PasswordRegisterPage {
-  def passwordRegisterPage(init: PasswordRegisterPage ?=> Unit = {}): PasswordRegisterPage =
+  def passwordRegisterPage(init: PasswordRegisterPage ?=> Unit = {})(using Scope): PasswordRegisterPage =
     CompositeSupport.buildPage(new PasswordRegisterPage)(init)
 }

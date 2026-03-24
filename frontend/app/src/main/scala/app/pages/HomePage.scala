@@ -67,6 +67,6 @@ class HomePage extends PageComposite("Home") {
 }
 
 object HomePage {
-  def homePage(init: HomePage ?=> Unit = {}): HomePage =
+  def homePage(init: HomePage ?=> Unit = {})(using Scope): HomePage =
     CompositeSupport.buildPage(new HomePage)(init)
 }
