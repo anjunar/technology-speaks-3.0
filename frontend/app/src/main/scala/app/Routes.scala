@@ -61,8 +61,15 @@ object Routes {
     route("/followers/relationships") {
       relationShipsPage()
     },
-    route("/timeline/posts") {
-      PostsPage.postsPage()
+    asyncRoute("/timeline/posts") {
+      val postsProperty: RemoteListProperty[Data[Post], RemotePageQuery] =
+        RemoteTableList.create[Data[Post]](pageSize = 50) { (index, limit) =>
+          Post.list(index, limit)
+        }
+
+      postsProperty.reload(RemotePageQuery.first(50)).toFuture.map(_ => {
+        PostsPage.postsPage(postsProperty)
+      })
     },
     route("/timeline/posts/post") {
       PostEditPage.postEditPage(new Post())

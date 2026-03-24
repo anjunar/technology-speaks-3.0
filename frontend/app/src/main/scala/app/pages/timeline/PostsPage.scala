@@ -12,7 +12,7 @@ import app.ui.{CompositeSupport, DivComposite, PageComposite}
 import jfx.control.virtualList
 import jfx.core.component.ElementComponent.*
 import jfx.core.state.Property.subscribeBidirectional
-import jfx.core.state.{Property, RemoteListProperty}
+import jfx.core.state.{ListProperty, Property, RemoteListProperty}
 import jfx.dsl.*
 import jfx.form.Editor.editor
 import jfx.form.Input.input
@@ -23,17 +23,12 @@ import jfx.layout.VBox.vbox
 
 import scala.concurrent.ExecutionContext
 
-class PostsPage extends PageComposite("Posts") {
+class PostsPage(postsProperty : RemoteListProperty[Data[Post], RemotePageQuery]) extends PageComposite("Posts") {
 
   override def pageWidth: Int = 360
   override def pageHeight: Int = 600
 
-  private given ExecutionContext = ExecutionContext.global
   private val pageSize = 50
-  private val postsProperty: RemoteListProperty[Data[Post], RemotePageQuery] =
-    RemoteTableList.create[Data[Post]](pageSize = pageSize) { (index, limit) =>
-      Post.list(index, limit)
-    }
 
   override protected def compose(using DslContext): Unit = {
     classes = "posts-page"
@@ -167,6 +162,6 @@ object PostsPage {
   }
 
 
-  def postsPage(init: PostsPage ?=> Unit = {}): PostsPage =
-    CompositeSupport.buildPage(new PostsPage)(init)
+  def postsPage(postsProperty : RemoteListProperty[Data[Post], RemotePageQuery]): PostsPage =
+    CompositeSupport.buildPage(new PostsPage(postsProperty))({})
 }
