@@ -16,6 +16,7 @@ import jfx.layout.Div.div
 import jfx.layout.HBox.hbox
 import jfx.layout.Span.span
 import jfx.layout.VBox.vbox
+import jfx.statement.Conditional.{conditional, thenDo, elseDo}
 
 class ComponentHeader(val owner : OwnerProvider) extends DivComposite {
 
@@ -58,26 +59,28 @@ class ComponentHeader(val owner : OwnerProvider) extends DivComposite {
             justifyContent = "center"
           }
 
-          div {
-            classes = "material-icons"
-            style {
-              fontSize = "48px"
-              display = media.map(value => if (value != null) "none" else "inline-flex").getOrElse("inline-flex")
+
+          if (media.isDefined) {
+            image {
+              style {
+                width = "48px"
+                height = "48px"
+                borderRadius = "50%"
+                setProperty("object-fit", "cover")
+              }
+
+              src = MediaHelper.thumbnailLink(media.get)
             }
-            text = "account_circle"
+          } else {
+            div {
+              classes = "material-icons"
+              style {
+                fontSize = "48px"
+              }
+              text = "account_circle"
+            }
           }
 
-          image {
-            style {
-              width = "48px"
-              height = "48px"
-              borderRadius = "50%"
-              setProperty("object-fit", "cover")
-              display = media.map(value => if (value != null) "inline-flex" else "none").getOrElse("none")
-            }
-
-            src = MediaHelper.thumbnailLink(media.get)
-          }
         }
 
         vbox {

@@ -1,9 +1,9 @@
 package jfx.statement
 
 import jfx.core.component.{ElementComponent, FormSubtreeRegistration, NodeComponent}
-import jfx.dsl.{DslRuntime, Scope}
 import jfx.core.state.{ListProperty, ReadOnlyProperty}
-import org.scalajs.dom.{Comment, Node, console, window}
+import jfx.dsl.{DslRuntime, Scope}
+import org.scalajs.dom.{Comment, Node, console}
 
 
 class Conditional(val condition: ReadOnlyProperty[Boolean]) extends NodeComponent[Comment], FormSubtreeRegistration {
@@ -212,44 +212,42 @@ class Conditional(val condition: ReadOnlyProperty[Boolean]) extends NodeComponen
 
 object Conditional {
 
-  def when(condition: ReadOnlyProperty[Boolean])(init: Conditional ?=> Unit): Conditional =
+  def conditional(condition: ReadOnlyProperty[Boolean])(init: Conditional ?=> Unit): Conditional =
     DslRuntime.currentScope { currentScope =>
       val currentContext = DslRuntime.currentComponentContext()
       val component = new Conditional(condition)
       DslRuntime.withComponentContext(DslRuntime.branchContext(currentContext, "when", component.thenAdd)) {
         given Scope = currentScope
+
         given Conditional = component
+
         init
       }
       DslRuntime.attach(component, currentContext)
       component
     }
 
-  def conditional(condition: ReadOnlyProperty[Boolean])(init: Conditional ?=> Unit): Conditional =
-    when(condition)(init)
+  def thenDo(init: Conditional ?=> Unit)(using conditional: Conditional): Conditional =
+    appendConditionalBranch(conditional, "then", conditional.thenAdd)(init)
 
-  def otherwise(init: Conditional ?=> Unit)(using conditional: Conditional): Conditional =
-    appendConditionalBranch(conditional, "otherwise", conditional.elseAdd)(init)
+  def elseDo(init: Conditional ?=> Unit)(using conditional: Conditional): Conditional =
+    appendConditionalBranch(conditional, "else", conditional.elseAdd)(init)
 
-  extension (conditional: Conditional)
-    def otherwise(init: Conditional ?=> Unit): Conditional =
-      appendConditionalBranch(conditional, "otherwise", conditional.elseAdd)(init)
 
-  def conditionalCondition(using conditional: Conditional): ReadOnlyProperty[Boolean] =
-    conditional.condition
-
-  private def appendConditionalBranch(
-    conditional: Conditional,
-    branchName: String,
-    attachChild: ElementComponent[? <: Node] => Unit
-  )(init: Conditional ?=> Unit): Conditional =
+  private def appendConditionalBranch(conditional: Conditional,
+                                      branchName: String,
+                                      attachChild: ElementComponent[? <: Node] => Unit
+                                     )(init: Conditional ?=> Unit): Conditional =
     DslRuntime.currentScope { currentScope =>
       val currentContext = DslRuntime.currentComponentContext()
       DslRuntime.withComponentContext(DslRuntime.branchContext(currentContext, branchName, attachChild)) {
         given Scope = currentScope
+
         given Conditional = conditional
+
         init
       }
       conditional
     }
+
 }
