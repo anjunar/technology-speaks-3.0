@@ -5,7 +5,6 @@ import jfx.core.state.{ListProperty, ReadOnlyProperty}
 import jfx.dsl.{DslRuntime, Scope}
 import org.scalajs.dom.{Comment, Node, console}
 
-
 class Conditional(val condition: ReadOnlyProperty[Boolean]) extends NodeComponent[Comment], FormSubtreeRegistration {
 
   val thenChildrenProperty: ListProperty[ElementComponent[? <: Node]] =
@@ -25,6 +24,11 @@ class Conditional(val condition: ReadOnlyProperty[Boolean]) extends NodeComponen
 
   private var disposed: Boolean = false
   private var lastParent: Node | Null = null
+
+  private var thenBuilder: (() => Unit) | Null = null
+  private var elseBuilder: (() => Unit) | Null = null
+  private var thenBuilt: Boolean = false
+  private var elseBuilt: Boolean = false
 
   private val conditionObserver = condition.observe { showThen =>
     render(showThen)
@@ -60,22 +64,52 @@ class Conditional(val condition: ReadOnlyProperty[Boolean]) extends NodeComponen
   def elseAdd(child: ElementComponent[? <: Node]): Unit =
     elseChildrenProperty += child
 
+  def registerThenBuilder(builder: () => Unit): Unit = {
+    thenBuilder = builder
+    thenBuilt = false
+
+    val oldChildren = thenChildrenProperty.toList
+    unmountThen()
+    oldChildren.foreach(_.dispose())
+    thenChildrenProperty.clear()
+
+    if (condition.get && ifAnchor.parentNode != null) {
+      renderThen(show = true)
+    }
+  }
+
+  def registerElseBuilder(builder: () => Unit): Unit = {
+    elseBuilder = builder
+    elseBuilt = false
+
+    val oldChildren = elseChildrenProperty.toList
+    unmountElse()
+    oldChildren.foreach(_.dispose())
+    elseChildrenProperty.clear()
+
+    if (!condition.get && ifAnchor.parentNode != null) {
+      renderElse(show = true)
+    }
+  }
+
   override def dispose(): Unit = {
     disposed = true
 
-    // detach from DOM & form first (without disposing branch components yet)
     forceDetachMounted()
     removeDomNode(elseAnchor)
     removeDomNode(endAnchor)
 
-    // dispose unique children from both branches
     val all = (thenChildrenProperty.toList ++ elseChildrenProperty.toList).distinct
     all.foreach(_.dispose())
 
-    // stop observers and clean up
     disposable.dispose()
     thenChildrenProperty.clear()
     elseChildrenProperty.clear()
+
+    thenBuilder = null
+    elseBuilder = null
+    thenBuilt = false
+    elseBuilt = false
   }
 
   private def render(showThen: Boolean): Unit = {
@@ -83,7 +117,6 @@ class Conditional(val condition: ReadOnlyProperty[Boolean]) extends NodeComponen
     renderThen(show = showThen)
     renderElse(show = !showThen)
   }
-
 
   private def ensureScaffold(): Unit = {
     val parent = ifAnchor.parentNode
@@ -118,6 +151,8 @@ class Conditional(val condition: ReadOnlyProperty[Boolean]) extends NodeComponen
     clearBetween(ifAnchor, elseAnchor, parent)
     if (!show) return
 
+    ensureThenBuilt()
+
     val children = thenChildrenProperty.toList
     mount(children, parent, before = elseAnchor)
     mountedThen = children
@@ -131,9 +166,23 @@ class Conditional(val condition: ReadOnlyProperty[Boolean]) extends NodeComponen
     clearBetween(elseAnchor, endAnchor, parent)
     if (!show) return
 
+    ensureElseBuilt()
+
     val children = elseChildrenProperty.toList
     mount(children, parent, before = endAnchor)
     mountedElse = children
+  }
+
+  private def ensureThenBuilt(): Unit = {
+    if (thenBuilt || thenBuilder == null || disposed) return
+    thenBuilt = true
+    thenBuilder.asInstanceOf[() => Unit].apply()
+  }
+
+  private def ensureElseBuilt(): Unit = {
+    if (elseBuilt || elseBuilder == null || disposed) return
+    elseBuilt = true
+    elseBuilder.asInstanceOf[() => Unit].apply()
   }
 
   private def mount(children: List[ElementComponent[? <: Node]], parent: Node, before: Node): Unit = {
@@ -216,37 +265,47 @@ object Conditional {
     DslRuntime.currentScope { currentScope =>
       val currentContext = DslRuntime.currentComponentContext()
       val component = new Conditional(condition)
-      DslRuntime.withComponentContext(DslRuntime.branchContext(currentContext, "when", component.thenAdd)) {
-        given Scope = currentScope
 
-        given Conditional = component
+      given Scope = currentScope
+      given Conditional = component
 
-        init
-      }
+      init
+
       DslRuntime.attach(component, currentContext)
       component
     }
 
   def thenDo(init: Conditional ?=> Unit)(using conditional: Conditional): Conditional =
-    appendConditionalBranch(conditional, "then", conditional.thenAdd)(init)
-
-  def elseDo(init: Conditional ?=> Unit)(using conditional: Conditional): Conditional =
-    appendConditionalBranch(conditional, "else", conditional.elseAdd)(init)
-
-
-  private def appendConditionalBranch(conditional: Conditional,
-                                      branchName: String,
-                                      attachChild: ElementComponent[? <: Node] => Unit
-                                     )(init: Conditional ?=> Unit): Conditional =
     DslRuntime.currentScope { currentScope =>
       val currentContext = DslRuntime.currentComponentContext()
-      DslRuntime.withComponentContext(DslRuntime.branchContext(currentContext, branchName, attachChild)) {
-        given Scope = currentScope
 
-        given Conditional = conditional
+      conditional.registerThenBuilder(() =>
+        DslRuntime.withComponentContext(
+          DslRuntime.branchContext(currentContext, "then", conditional.thenAdd)
+        ) {
+          given Scope = currentScope
+          given Conditional = conditional
+          init
+        }
+      )
 
-        init
-      }
+      conditional
+    }
+
+  def elseDo(init: Conditional ?=> Unit)(using conditional: Conditional): Conditional =
+    DslRuntime.currentScope { currentScope =>
+      val currentContext = DslRuntime.currentComponentContext()
+
+      conditional.registerElseBuilder(() =>
+        DslRuntime.withComponentContext(
+          DslRuntime.branchContext(currentContext, "else", conditional.elseAdd)
+        ) {
+          given Scope = currentScope
+          given Conditional = conditional
+          init
+        }
+      )
+
       conditional
     }
 
