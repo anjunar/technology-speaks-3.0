@@ -31,6 +31,7 @@ class LikeButton(val likes: ListProperty[Like], val links: ListProperty[Link], v
     classes = "like-button"
 
     withDslContext {
+      val service = injectFromDsl[ApplicationService]
       var iconButtonRef: jfx.action.Button | Null = null
       var countRef: jfx.layout.Div | Null = null
 
@@ -69,11 +70,11 @@ class LikeButton(val likes: ListProperty[Like], val links: ListProperty[Link], v
 
       addDisposable(
         likes.observe(likes =>
-          recomputeState()
+          recomputeState(service)
         )
       )
 
-      addDisposable(ApplicationService.app.observe(_ => recomputeState()))
+      addDisposable(service.app.observe(_ => recomputeState(service)))
       addDisposable(
         likedProperty.observe { liked =>
           if (iconButtonRef != null) {
@@ -88,8 +89,8 @@ class LikeButton(val likes: ListProperty[Like], val links: ListProperty[Link], v
     }
   }
 
-  private def recomputeState(): Unit = {
-    val currentUserId = Option(ApplicationService.app.get.user.id.get)
+  private def recomputeState(service: ApplicationService): Unit = {
+    val currentUserId = Option(service.app.get.user.id.get)
     countProperty.set(likes.length)
     likedProperty.set(currentUserId.exists(id => likes.exists(like => like.user != null && like.user.id.get == id)))
   }

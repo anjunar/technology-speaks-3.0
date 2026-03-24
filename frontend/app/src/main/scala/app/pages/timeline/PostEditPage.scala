@@ -8,6 +8,7 @@ import app.ui.{CompositeSupport, PageComposite}
 import jfx.action.Button.button
 import jfx.core.component.ElementComponent.classes
 import jfx.dsl.*
+import jfx.dsl.Scope.{inject, scope}
 import jfx.form.Editor.editor
 import jfx.form.{ErrorResponseException, Form}
 import jfx.form.Form.form
@@ -28,60 +29,64 @@ class PostEditPage(val data: Post) extends PageComposite("Posts") {
     classProperty.setAll(Seq("post-edit-page", "container"))
 
     withDslContext {
-      form(data) {
-        Form.onSubmit = { (event : Form[Post])  =>
-          val isExisting = data.id.get != null
-          val request =
-            if (isExisting) data.update()
-            else data.save()
+      scope {
+        val service = inject[ApplicationService]
 
-          request.foreach { saved =>
-            if (isExisting) {
-              ApplicationService.messageBus.publish(new PostUpdated(saved))
-            } else {
-              ApplicationService.messageBus.publish(new PostCreated(saved))
+        form(data) {
+          Form.onSubmit = { (event: Form[Post]) =>
+            val isExisting = data.id.get != null
+            val request =
+              if (isExisting) data.update()
+              else data.save()
+
+            request.foreach { saved =>
+              if (isExisting) {
+                service.messageBus.publish(new PostUpdated(saved))
+              } else {
+                service.messageBus.publish(new PostCreated(saved))
+              }
+              close()
             }
-            close()
+
+            request.failed.foreach {
+              case e: ErrorResponseException =>
+                Viewport.notify("Fehler beim Speichern", Viewport.NotificationKind.Error)
+              case _ =>
+                Viewport.notify("Ein unerwarteter Fehler ist aufgetreten", Viewport.NotificationKind.Error)
+            }
           }
 
-          request.failed.foreach {
-            case e: ErrorResponseException =>
-              Viewport.notify("Fehler beim Speichern", Viewport.NotificationKind.Error)
-            case _ =>
-              Viewport.notify("Ein unerwarteter Fehler ist aufgetreten", Viewport.NotificationKind.Error)
-          }
-        }
-
-        style {
-          padding = "10px"
-          height = "calc(100% - 20px)"
-        }
-
-        vbox {
           style {
-            rowGap = "10px"
-            height = "100%"
+            padding = "10px"
+            height = "calc(100% - 20px)"
           }
 
-          componentHeader(data) {}
-
-          editor("editor") {
+          vbox {
             style {
-              flex = "1"
-              minHeight = "0px"
+              rowGap = "10px"
+              height = "100%"
             }
 
-            basePlugin {}
-            headingPlugin {}
-            listPlugin {}
-            linkPlugin {}
-            imagePlugin {}
-          }
+            componentHeader(data) {}
 
-          button("Senden") {
-            classes = "btn-secondary"
-            style {
-              width = "100%"
+            editor("editor") {
+              style {
+                flex = "1"
+                minHeight = "0px"
+              }
+
+              basePlugin {}
+              headingPlugin {}
+              listPlugin {}
+              linkPlugin {}
+              imagePlugin {}
+            }
+
+            button("Senden") {
+              classes = "btn-secondary"
+              style {
+                width = "100%"
+              }
             }
           }
         }

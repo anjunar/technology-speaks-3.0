@@ -32,6 +32,8 @@ class CommentsSection(val firstComment: FirstComment, val owner: AbstractEntity[
     classes = "comments-section"
 
     withDslContext {
+      val service = injectFromDsl[ApplicationService]
+
       vbox {
         style {
           rowGap = "10px"
@@ -51,7 +53,7 @@ class CommentsSection(val firstComment: FirstComment, val owner: AbstractEntity[
               if (!firstComment.comments.lastOption.exists(_.editable.get)) {
                 val reply = new SecondComment()
                 reply.editable.set(true)
-                reply.user.set(ApplicationService.app.get.user)
+                reply.user.set(service.app.get.user)
                 firstComment.comments += reply
               }
             }
@@ -88,9 +90,11 @@ object CommentsSection {
       classes = "glass-border"
 
       withDslContext {
+        val service = injectFromDsl[ApplicationService]
+
         form(comment) {
           onSubmit_= { (event: Form[SecondComment]) =>
-            comment.user.set(ApplicationService.app.get.user)
+            comment.user.set(service.app.get.user)
             firstComment
               .update(owner)
               .foreach(_ => comment.editable.set(false))

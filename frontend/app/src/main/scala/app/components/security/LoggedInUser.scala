@@ -17,8 +17,9 @@ class LoggedInUser extends DivComposite {
 
 
     withDslContext {
+      val service = injectFromDsl[ApplicationService]
 
-      observeRender(ApplicationService.app) { app =>
+      observeRender(service.app) { app =>
         val label =
           Option(app.user.info.get)
             .map(info => s"${info.firstName.get} ${info.lastName.get}".trim)

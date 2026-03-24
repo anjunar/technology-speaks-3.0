@@ -29,11 +29,15 @@ class ConfirmPage extends PageComposite("Bestaetigen", pageResizable = false) {
     classProperty += "confirm-page"
 
     withDslContext {
+      val service = injectFromDsl[ApplicationService]
+
       form(confirmForm) {
         onSubmit_= { (event : Form[ConfirmCode])  =>
           Api
             .post[app.support.JsonResponse](s"/service/security/confirm?code=${confirmForm.confirm.get}")
-            .flatMap(_ => ApplicationService.invoke())
+            .flatMap(_ => {
+              service.invoke()
+            })
             .foreach(_ => close())
         }
 

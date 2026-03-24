@@ -19,7 +19,6 @@ trait CompositeComponent[N <: Node]
   private[jfx] final def renderComposite(using context: DslContext): Unit =
     compose
 
-  // Runs nested DSL code with this composite as the current parent and the current DI scope available.
   protected final def withDslContext[A](block: => A)(using context: DslContext): A =
     DslRuntime.withCompositeContext(this, context) {
       given Scope = context.scope

@@ -1,12 +1,13 @@
 package app.services
 
 import app.domain.Application
+import app.services.ApplicationService.MessageBus
 import jfx.core.state.{Disposable, Property}
 
 import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, Future}
 
-object ApplicationService {
+class ApplicationService {
 
   private given ExecutionContext = ExecutionContext.global
 
@@ -14,6 +15,16 @@ object ApplicationService {
 
   val darkMode: Property[Boolean] = Property(true)
 
+  val messageBus: MessageBus = new MessageBus
+
+  def invoke(): Future[Application] =
+    Application.read().map { value =>
+      app.set(value)
+      value
+    }
+}
+
+object ApplicationService {
   trait Message
 
   class MessageBus {
@@ -33,11 +44,4 @@ object ApplicationService {
     }
   }
 
-  val messageBus: MessageBus = new MessageBus
-
-  def invoke(): Future[Application] =
-    Application.read().map { value =>
-      app.set(value)
-      value
-    }
 }

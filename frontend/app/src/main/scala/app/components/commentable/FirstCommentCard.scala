@@ -33,9 +33,11 @@ class FirstCommentCard(
     classes = "glass-border"
 
     withDslContext {
+      val service = injectFromDsl[ApplicationService]
+
       form(comment) {
         onSubmit_= { (event : Form[FirstComment])  =>
-          comment.user.set(ApplicationService.app.get.user)
+          comment.user.set(service.app.get.user)
 
           val request =
             if (comment.id.get != null) comment.update(owner)

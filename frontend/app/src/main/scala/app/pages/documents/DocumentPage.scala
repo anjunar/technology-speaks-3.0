@@ -65,19 +65,22 @@ class DocumentPage(val model: Document) extends PageComposite("Dokument") {
         scheduleDocumentReload()
       }
     )
-    addDisposable(
-      ApplicationService.messageBus.subscribe {
-        case _: IssueCreated =>
-          reloadIssues()
-        case _: IssueUpdated =>
-          reloadIssues()
-        case _ =>
-          ()
-      }
-    )
     addDisposable(() => cancelScheduledReload())
 
     withDslContext {
+      val service = injectFromDsl[ApplicationService]
+
+      addDisposable(
+        service.messageBus.subscribe {
+          case _: IssueCreated =>
+            reloadIssues()
+          case _: IssueUpdated =>
+            reloadIssues()
+          case _ =>
+            ()
+        }
+      )
+
       hbox {
         classes = "documents-layout"
         style {

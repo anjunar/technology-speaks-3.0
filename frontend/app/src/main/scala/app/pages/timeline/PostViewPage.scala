@@ -55,6 +55,8 @@ class PostViewPage(val model: Post) extends PageComposite("Post") {
     }
 
     withDslContext {
+      val service = injectFromDsl[ApplicationService]
+
       vbox {
         style {
           height = "100%"
@@ -105,18 +107,18 @@ class PostViewPage(val model: Post) extends PageComposite("Post") {
 
         prompt.placeholder = "Neuer Kommentar..."
         prompt.element.readOnly = true
-        prompt.element.onclick = _ => appendNewComment()
+        prompt.element.onclick = _ => appendNewComment(service)
         prompt.element.style.display =
           if (model.id.get != null) "block" else "none"
       }
     }
   }
 
-  private def appendNewComment(): Unit =
+  private def appendNewComment(service : ApplicationService): Unit =
     if (!commentsProperty.lastOption.exists(_.editable.get)) {
       val comment = new FirstComment()
       comment.editable.set(true)
-      comment.user.set(ApplicationService.app.get.user)
+      comment.user.set(service.app.get.user)
       commentsProperty += comment
       syncItems()
     }

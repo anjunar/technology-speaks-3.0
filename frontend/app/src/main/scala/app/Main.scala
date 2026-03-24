@@ -19,11 +19,11 @@ object Main {
 
     fontLoader.`then`(_ => {
       val root = document.getElementById("root").asInstanceOf[HTMLDivElement | Null]
-
+      val service = new ApplicationService()
       if (root == null) {
         ()
       } else {
-        ApplicationService.darkMode.observe { enabled =>
+        service.darkMode.observe { enabled =>
           if (enabled) {
             document.documentElement.setAttribute("data-theme", "dark")
           } else {
@@ -31,16 +31,16 @@ object Main {
           }
         }
 
-        ApplicationService
+        service
           .invoke()
           .recover { case error =>
             Api.logFailure("ApplicationService.invoke", error)
-            ApplicationService.app.get
+            service.app.get
           }
           .foreach { _ =>
             given Scope = Scope.root()
 
-            val shell = AppShell.appShell()
+            val shell = AppShell.appShell(service)
             root.innerHTML = ""
             root.appendChild(shell.element)
             shell.onMount()

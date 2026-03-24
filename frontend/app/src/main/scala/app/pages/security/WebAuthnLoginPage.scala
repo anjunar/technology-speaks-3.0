@@ -29,11 +29,15 @@ class WebAuthnLoginPage extends PageComposite("Login mit WebAuthn", pageResizabl
     classProperty += "webauthn-login-page"
 
     withDslContext {
+      val service = injectFromDsl[ApplicationService]
+
       form(loginForm) {
         onSubmit_= { (event : Form[WebAuthnLogin])  =>
           WebAuthnLoginClient
             .login(loginForm.email.get)
-            .flatMap(_ => ApplicationService.invoke())
+            .flatMap(_ => {
+              service.invoke()
+            })
             .foreach { _ =>
               close()
               Navigation.queryParam("redirect").foreach(path => Navigation.navigate(path, replace = true))

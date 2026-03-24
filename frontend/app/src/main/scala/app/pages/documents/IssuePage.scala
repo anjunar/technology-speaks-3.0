@@ -44,14 +44,14 @@ class IssuePage(val model: Issue) extends PageComposite("Aufgabe", pageResizable
       }
     }(_.data)
 
-  private def persistIssue(): Unit = {
+  private def persistIssue(service: ApplicationService): Unit = {
     try {
       model.links.find(link => link.rel == "update" || link.rel == "save").foreach { link =>
         Api.invokeLink[Data[Issue]](link, model).foreach { saved =>
           if (link.rel == "update") {
-            ApplicationService.messageBus.publish(new IssueUpdated(saved))
+            service.messageBus.publish(new IssueUpdated(saved))
           } else {
-            ApplicationService.messageBus.publish(new IssueCreated(saved))
+            service.messageBus.publish(new IssueCreated(saved))
           }
 
           Viewport.notify("Aufgabe gespeichert!", Viewport.NotificationKind.Success)
@@ -76,11 +76,11 @@ class IssuePage(val model: Issue) extends PageComposite("Aufgabe", pageResizable
     if (index >= 0) commentsProperty.remove(index)
   }
 
-  private def appendNewComment(): Unit = {
+  private def appendNewComment(service: ApplicationService): Unit = {
     if (!commentsProperty.lastOption.exists(_.editable.get)) {
       val comment = new FirstComment()
       comment.editable.set(true)
-      comment.user.set(ApplicationService.app.get.user)
+      comment.user.set(service.app.get.user)
       commentsProperty += comment
     }
   }
@@ -89,9 +89,12 @@ class IssuePage(val model: Issue) extends PageComposite("Aufgabe", pageResizable
     classProperty += "issue-page"
 
     withDslContext {
-        form(model) {
+
+      val service = injectFromDsl[ApplicationService]
+
+      form(model) {
           onSubmit = { (_: Form[Issue]) =>
-            persistIssue()
+            persistIssue(service)
           }
 
           vbox {
@@ -198,7 +201,7 @@ class IssuePage(val model: Issue) extends PageComposite("Aufgabe", pageResizable
               }
               commentInput.placeholder = "Neuer Kommentar..."
               commentInput.readOnly = true
-              commentInput.onClick(_ => appendNewComment())
+              commentInput.onClick(_ => appendNewComment(service))
             }
           }
       }

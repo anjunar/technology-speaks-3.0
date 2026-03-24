@@ -22,6 +22,9 @@ class LogoutPage extends PageComposite("Abmelden", pageResizable = false) {
     classProperty += "logout-page"
 
     withDslContext {
+
+      val service = injectFromDsl[ApplicationService]
+
       vbox {
         image {
           style {
@@ -53,7 +56,9 @@ class LogoutPage extends PageComposite("Abmelden", pageResizable = false) {
             onClick { _ =>
               Api
                 .post[app.support.JsonResponse]("/service/security/logout")
-                .flatMap(_ => ApplicationService.invoke())
+                .flatMap(_ => {
+                  service.invoke()
+                })
                 .foreach(_ => close())
             }
           }

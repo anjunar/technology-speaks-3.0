@@ -37,18 +37,20 @@ class PostsPage(postsProperty : RemoteListProperty[Data[Post], RemotePageQuery])
       height = "100%"
     }
 
-    addDisposable(
-      ApplicationService.messageBus.subscribe {
-        case _: PostCreated =>
-          reloadPosts()
-        case _: PostUpdated =>
-          reloadPosts()
-        case _ =>
-          ()
-      }
-    )
-
     withDslContext {
+      val service = injectFromDsl[ApplicationService]
+
+      addDisposable(
+        service.messageBus.subscribe {
+          case _: PostCreated =>
+            reloadPosts()
+          case _: PostUpdated =>
+            reloadPosts()
+          case _ =>
+            ()
+        }
+      )
+
       vbox {
         style {
           height = "100%"

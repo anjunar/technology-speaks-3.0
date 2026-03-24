@@ -29,11 +29,15 @@ class PasswordLoginPage extends PageComposite("Login", pageResizable = false) {
     classProperty += "password-login-page"
 
     withDslContext {
+      val service = injectFromDsl[ApplicationService]
+
       form(loginForm) {
         onSubmit_= { (event : Form[PasswordLogin])  =>
           loginForm
             .save()
-            .flatMap(_ => ApplicationService.invoke())
+            .flatMap(_ => {
+              service.invoke()
+            })
             .foreach { _ =>
               close()
               Navigation.queryParam("redirect").foreach(path => Navigation.navigate(path, replace = true))
