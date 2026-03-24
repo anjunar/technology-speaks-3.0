@@ -46,12 +46,12 @@ input {
         opacity: 1;
     }
 
-    &[disabled]::placeholder {
+    &[readonly]::placeholder {
         opacity: 0.5;
     }
 
     &[type=date] {
-        &[disabled] {
+        &[readonly] {
             opacity: 0.5;
         }
     }

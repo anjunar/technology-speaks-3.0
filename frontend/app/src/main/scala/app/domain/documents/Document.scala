@@ -11,15 +11,11 @@ import scala.concurrent.Future
 import scala.scalajs.js
 import scala.scalajs.js.URIUtils.encodeURIComponent
 
-class Document(
-                val id: Property[UUID] = Property(null),
-                val modified: Property[String] = Property(""),
-                val created: Property[String] = Property(""),
-                val title: Property[String] = Property(""),
-                val user: Property[User | Null] = Property(null),
-                val editor: Property[js.Any | Null] = Property(null),
-                val links: ListProperty[Link] = ListProperty()
-) extends AbstractEntity[Document] with OwnerProvider {
+class Document extends AbstractEntity[Document] with OwnerProvider {
+
+  val title: Property[String] = Property("")
+  val user: Property[User | Null] = Property(null)
+  val editor: Property[js.Any | Null] = Property(null)
 
   val editable: Property[Boolean] = Property(false)
 

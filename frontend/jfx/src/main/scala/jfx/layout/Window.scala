@@ -115,7 +115,7 @@ final class Window extends ManagedElementComponent[HTMLDivElement] {
   def onClickWindow(block: Window => Unit): Unit =
     clickHandler = Some(block)
 
-  def restoreSizeFromStorage(force: Boolean = false): Boolean = {
+  def restoreSizeFromStorage(force: Boolean = true): Boolean = {
     (for {
       key <- resolvedSizeStorageKey()
       raw <- storageGet(key)

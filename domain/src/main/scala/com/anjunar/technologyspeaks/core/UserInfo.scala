@@ -13,9 +13,18 @@ import scala.compiletime.uninitialized
 
 @Entity
 @Table(name = "Core#UserInfo")
-class UserInfo(@NotBlank @Size(min = 2, max = 80) @(JsonbProperty @field) var firstName: String,
-               @NotBlank @Size(min = 2, max = 80) @(JsonbProperty @field) var lastName: String,
-               @NotNull @(JsonbProperty @field) var birthDate: LocalDate)
+class UserInfo(@(NotBlank @field) 
+               @(Size @field)(min = 2, max = 80) 
+               @(JsonbProperty @field) 
+               var firstName: String,
+              
+               @(NotBlank @field) 
+               @(Size @field)(min = 2, max = 80)
+               @(JsonbProperty @field) var lastName: String,
+              
+               @(NotNull @field) 
+               @(JsonbProperty @field) 
+               var birthDate: LocalDate)
   extends AbstractEntity, OwnerProvider {
 
   def this() = this(null, null, null)

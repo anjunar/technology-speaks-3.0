@@ -59,7 +59,7 @@ import scala.compiletime.uninitialized
     )
   )
 )
-class Issue(@Column(nullable = false) @(JsonbProperty @field) var title: String)
+class Issue(@(Column @field)(nullable = false) @(JsonbProperty @field) var title: String)
   extends AbstractEntity, OwnerProvider, EntityContext[Issue], LikeContainer.Interface, CommentContainer.Interface {
 
   def this() = this(null)

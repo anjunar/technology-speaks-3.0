@@ -7,7 +7,7 @@ import app.domain.documents.{Issue, IssueCreated, IssueUpdated}
 import app.domain.shared.FirstComment
 import app.services.ApplicationService
 import app.support.Navigation.renderByRel
-import app.support.{Api, ErrorResponseException, RemotePageQuery, RemoteTableList}
+import app.support.{Api, RemotePageQuery, RemoteTableList}
 import app.ui.{CompositeSupport, PageComposite}
 import jfx.action.Button.{button, buttonType, buttonType_=, onClick}
 import jfx.control.virtualList
@@ -15,9 +15,10 @@ import jfx.core.component.ElementComponent.*
 import jfx.core.state.Property.subscribeBidirectional
 import jfx.core.state.{Property, RemoteListProperty}
 import jfx.dsl.*
-import jfx.form.Control.{editableProperty, valueProperty}
+import jfx.form.Control.valueProperty
+import jfx.form.Editable.editableProperty
 import jfx.form.Editor.editor
-import jfx.form.Form
+import jfx.form.{ErrorResponseException, Form}
 import jfx.form.Form.{form, onSubmit, onSubmit_=}
 import jfx.form.Input.{disabled, input, stringValueProperty}
 import jfx.form.InputContainer.inputContainer

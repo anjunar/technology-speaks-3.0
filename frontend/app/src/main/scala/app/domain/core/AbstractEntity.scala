@@ -5,9 +5,9 @@ import jfx.core.state.{ListProperty, Property}
 
 import java.util.UUID
 
-trait AbstractEntity[M] extends JsonModel[M] { self: M =>
-  def id: Property[UUID]
-  def modified: Property[String]
-  def created: Property[String]
-  def links: ListProperty[Link]
+abstract class AbstractEntity[M] extends JsonModel[M] { self: M =>
+  val id: Property[UUID] = Property(null)
+  val modified: Property[String] = Property("")
+  val created: Property[String] = Property("")
+  val links: ListProperty[Link] = ListProperty()
 }

@@ -1,6 +1,7 @@
 package jfx.core.component
 
 import jfx.core.state.{ListProperty, Property, ReadOnlyProperty}
+import jfx.dsl.StyleTarget
 import org.scalajs.dom.{CSSStyleDeclaration, HTMLElement, Node, document}
 
 import scala.annotation.targetName
@@ -72,8 +73,12 @@ trait ElementComponent[E <: Node] extends NodeComponent[E] {
   }
 
   def textContent: String = textContentProperty.get
-
   def textContent_=(value: String): Unit = textContentProperty.set(value)
+
+  def addStyle(init: StyleTarget ?=> Unit): Unit = {
+    given StyleTarget = StyleTarget(this, this.css)
+    init
+  }
 
 }
 

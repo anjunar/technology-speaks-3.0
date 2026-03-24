@@ -26,6 +26,9 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class PostViewPage(val model: Post) extends PageComposite("Post") {
 
+  override def pageWidth: Int = 360 
+  override def pageHeight: Int = 600
+
   private given ExecutionContext = ExecutionContext.global
   private val pageSize = 40
 
@@ -155,8 +158,7 @@ object PostViewPage {
             padding = "10px"
           }
 
-          val header = componentHeader {}
-          header.model(post)
+          componentHeader(post) {}
 
           val editorField = editor("editor", true) {
             basePlugin {}
@@ -169,8 +171,7 @@ object PostViewPage {
           editorField.editableProperty.set(false)
           subscribeBidirectional(post.editor, editorField.valueProperty)
 
-          val likes = likeButton {}
-          likes.model(post.likes, post.links)
+          likeButton(post.likes, post.links) {}
         }
       }
     }

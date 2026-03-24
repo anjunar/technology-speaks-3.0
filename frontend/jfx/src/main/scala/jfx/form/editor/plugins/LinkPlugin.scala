@@ -24,8 +24,9 @@ class LinkPlugin extends AbstractEditorPlugin("link-plugin") {
 
       Viewport.addWindow(
         new Viewport.WindowConf(
-          "Add Link",
-          Viewport.captureComponent {
+          title = "Add Link",
+          component = Viewport.captureComponent {
+            
             Form.form(new LinkDescriptor()) {
               val formComponent = summon[Form[LinkDescriptor]]
 

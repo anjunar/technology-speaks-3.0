@@ -3,7 +3,7 @@ package app
 import app.components.security.LoggedInUser.loggedInUser
 import app.services.ApplicationService
 import app.ui.{CompositeSupport, DivComposite}
-import jfx.action.Button.{button, buttonType_=, onClick}
+import jfx.action.Button.{button, buttonType, buttonType_=, onClick}
 import jfx.control.Link.link
 import jfx.core.component.ElementComponent.*
 import jfx.dsl.*
@@ -81,7 +81,7 @@ class AppShell extends DivComposite {
           hbox {
             forEach(Viewport.windows) { window =>
               button(window.title) {
-                buttonType_=("button")
+                buttonType = "button"
                 classes =
                   if (Viewport.isActive(window)) "btn-secondary"
                   else "btn-primary"
@@ -95,6 +95,7 @@ class AppShell extends DivComposite {
           hbox {
             style {
               justifyContent = "flex-end"
+              flex = "1"
             }
 
             button("dark_mode") {

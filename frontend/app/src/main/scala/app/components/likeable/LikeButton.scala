@@ -17,27 +17,18 @@ import scala.concurrent.ExecutionContext
 import scala.scalajs.js
 import scala.util.{Failure, Success}
 
-class LikeButton extends DivComposite {
+class LikeButton(val likes: ListProperty[Like], val links: ListProperty[Link], val rel: String = "like") extends DivComposite {
 
   private given ExecutionContext = ExecutionContext.global
 
-  private val likesProperty: Property[ListProperty[Like]] = Property(ListProperty())
-  private val linksProperty: Property[ListProperty[Link]] = Property(ListProperty())
-  private val relProperty: Property[String] = Property("like")
   private val likedProperty: Property[Boolean] = Property(false)
   private val countProperty: Property[Int] = Property(0)
   private val busyProperty: Property[Boolean] = Property(false)
 
   private var likesObserver: Disposable = () => ()
 
-  def model(likes: ListProperty[Like], links: ListProperty[Link], rel: String = "like"): Unit = {
-    likesProperty.set(if (likes == null) ListProperty() else likes)
-    linksProperty.set(if (links == null) ListProperty() else links)
-    relProperty.set(Option(rel).map(_.trim).filter(_.nonEmpty).getOrElse("like"))
-  }
-
   override protected def compose(using DslContext): Unit = {
-    classProperty += "like-button"
+    classes = "like-button"
 
     withDslContext {
       var iconButtonRef: jfx.action.Button | Null = null
@@ -54,13 +45,13 @@ class LikeButton extends DivComposite {
           classes = Seq("material-icons", "hover")
           onClick { _ =>
             if (!busyProperty.get) {
-              Navigation.linkByRel(relProperty.get, linksProperty.get).foreach { link =>
+              Navigation.linkByRel(rel, links).foreach { link =>
                 busyProperty.set(true)
                 Api
                   .requestJson(link.method, Navigation.prefixedServiceUrl(link.url))
                   .onComplete {
                     case Success(raw) =>
-                      likesProperty.get.setAll(deserializeLikes(raw))
+                      likes.setAll(deserializeLikes(raw))
                       busyProperty.set(false)
                     case Failure(error) =>
                       Api.logFailure("Like", error)
@@ -77,11 +68,9 @@ class LikeButton extends DivComposite {
       }
 
       addDisposable(
-        likesProperty.observe { likes =>
-          likesObserver.dispose()
-          likesObserver = likes.observe(_ => recomputeState())
+        likes.observe(likes =>
           recomputeState()
-        }
+        )
       )
 
       addDisposable(ApplicationService.app.observe(_ => recomputeState()))
@@ -100,7 +89,6 @@ class LikeButton extends DivComposite {
   }
 
   private def recomputeState(): Unit = {
-    val likes = likesProperty.get
     val currentUserId = Option(ApplicationService.app.get.user.id.get)
     countProperty.set(likes.length)
     likedProperty.set(currentUserId.exists(id => likes.exists(like => like.user != null && like.user.id.get == id)))
@@ -124,6 +112,6 @@ class LikeButton extends DivComposite {
 }
 
 object LikeButton {
-  def likeButton(init: LikeButton ?=> Unit = {}): LikeButton =
-    CompositeSupport.buildComposite(new LikeButton)(init)
+  def likeButton(likes: ListProperty[Like], links: ListProperty[Link], rel: String = "like")(init: LikeButton ?=> Unit = {}): LikeButton =
+    CompositeSupport.buildComposite(new LikeButton(likes, links, rel))(init)
 }

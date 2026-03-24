@@ -317,10 +317,12 @@ class ImageCropper(val name: String, override val standalone: Boolean = false) e
     val hasValue = valueProperty.get != null
     val hasSource = currentSource().nonEmpty
 
-    fileInput.disabled = !editable
-    uploadButton.disabled = !editable
-    cropButton.disabled = !editable || !hasSource
-    clearButton.disabled = !editable || !hasValue
+    fileInput.style.display = if editable then "block" else "none"
+    uploadButton.style.display = if editable then "block" else "none"
+    cropButton.style.display = if editable then "block" else "none"
+    clearButton.style.display = if editable then "block" else "none"
+    cropButton.disabled = !hasSource
+    clearButton.disabled = !hasValue
     uploadButton.textContent = if (hasValue) "Bild ersetzen" else "Bild waehlen"
   }
 
@@ -992,12 +994,6 @@ object ImageCropper {
 
   def placeholder_=(value: String)(using cropper: ImageCropper): Unit =
     cropper.placeholder = value
-
-  def editable(using cropper: ImageCropper): Boolean =
-    cropper.editableProperty.get
-
-  def editable_=(value: Boolean)(using cropper: ImageCropper): Unit =
-    cropper.editableProperty.set(value)
 
   def disabled(using cropper: ImageCropper): Boolean =
     cropper.disabled

@@ -6,16 +6,12 @@ import jfx.core.state.{ListProperty, Property, PropertyAccess}
 import java.util.UUID
 import scala.scalajs.js
 
-class Address(
-               val id: Property[UUID] = Property(null),
-               val modified: Property[String] = Property(""),
-               val created: Property[String] = Property(""),
-               val street: Property[String] = Property(""),
-               val number: Property[String] = Property(""),
-               val zipCode: Property[String] = Property(""),
-               val country: Property[String] = Property(""),
-               val links: ListProperty[Link] = ListProperty()
-) extends AbstractEntity[Address] {
+class Address extends AbstractEntity[Address] {
+
+  val street: Property[String] = Property("")
+  val number: Property[String] = Property("")
+  val zipCode: Property[String] = Property("")
+  val country: Property[String] = Property("")
 
   override def properties: js.Array[PropertyAccess[Address, ?]] =
     Address.properties

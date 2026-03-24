@@ -6,7 +6,7 @@ import jfx.core.state.PropertyAccess
 
 import scala.scalajs.js
 
-class Link(
+case class Link(
   var rel: String = "",
   var url: String = "",
   var method: String = "GET",

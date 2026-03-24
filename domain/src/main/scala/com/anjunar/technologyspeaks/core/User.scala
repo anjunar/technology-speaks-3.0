@@ -30,7 +30,7 @@ import scala.compiletime.uninitialized
     )
   )
 )
-class User(@(JsonbProperty @field) @NotBlank @Size(min = 2, max = 80) var nickName: String)
+class User(@(JsonbProperty @field) @(NotBlank @field) @(Size @field)(min = 2, max = 80) var nickName: String)
   extends AbstractEntity, EntityContext[User], OwnerProvider {
 
   def this() = this(null)

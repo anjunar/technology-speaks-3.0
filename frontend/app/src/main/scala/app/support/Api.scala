@@ -1,8 +1,8 @@
 package app.support
 
 import app.domain.core.Link
-import jfx.form.Model
-import org.scalajs.dom.window
+import jfx.form.{ErrorResponse, ErrorResponseException, Model}
+import org.scalajs.dom.{RequestInit, fetch, window}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.scalajs.js
@@ -81,7 +81,7 @@ object Api {
       init.updateDynamic("body")(payload)
     }
 
-    org.scalajs.dom.fetch(url, init.asInstanceOf[org.scalajs.dom.RequestInit]).toFuture.flatMap { response =>
+    fetch(url, init.asInstanceOf[RequestInit]).toFuture.flatMap { response =>
       response.text().toFuture.flatMap { text =>
         if (response.ok) {
           Future.successful(text)
@@ -109,7 +109,7 @@ object Api {
           val message =
             entry.selectDynamic("message").asInstanceOf[js.UndefOr[String]].getOrElse("")
           val path =
-            entry.selectDynamic("path").asInstanceOf[js.UndefOr[js.Array[js.Any]]].getOrElse(js.Array())
+            entry.selectDynamic("path").asInstanceOf[js.UndefOr[js.Array[Any]]].getOrElse(js.Array())
 
           new ErrorResponse(message, path)
         }

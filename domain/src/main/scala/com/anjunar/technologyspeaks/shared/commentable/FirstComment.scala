@@ -8,19 +8,17 @@ import com.anjunar.technologyspeaks.shared.likeable.{Like, LikeContainer}
 import jakarta.json.bind.annotation.JsonbProperty
 import jakarta.persistence.{CascadeType, Entity, OneToMany, Table}
 
-import scala.beans.BeanProperty
-
 @Entity
 @Table(name = "Shared#FirstComment")
-class FirstComment extends AbstractComment with EntityContext[FirstComment] with LikeContainer.Interface {
+class FirstComment extends AbstractComment, EntityContext[FirstComment], LikeContainer.Interface {
 
   @OneToMany(cascade = Array(CascadeType.ALL), orphanRemoval = true)
   @JsonbProperty
-    val comments: java.util.List[SecondComment] = new java.util.ArrayList[SecondComment]()
+  val comments: java.util.List[SecondComment] = new java.util.ArrayList[SecondComment]()
 
   @OneToMany(cascade = Array(CascadeType.ALL), orphanRemoval = true)
   @JsonbProperty
-    override val likes: java.util.Set[Like] = new java.util.HashSet[Like]()
+  override val likes: java.util.Set[Like] = new java.util.HashSet[Like]()
 
   override def owner(): EntityProvider = user
 

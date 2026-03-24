@@ -25,6 +25,9 @@ import scala.concurrent.ExecutionContext
 
 class PostsPage extends PageComposite("Posts") {
 
+  override def pageWidth: Int = 360
+  override def pageHeight: Int = 600
+
   private given ExecutionContext = ExecutionContext.global
   private val pageSize = 50
   private val postsProperty: RemoteListProperty[Data[Post], RemotePageQuery] =
@@ -114,8 +117,7 @@ object PostsPage {
             rowGap = "10px"
           }
 
-          val header = componentHeader {}
-          header.model(data.data)
+          componentHeader(data.data) {}
 
           val editorField = editor("editor", true) {
             style {
@@ -138,8 +140,7 @@ object PostsPage {
               alignItems = "center"
             }
 
-            val likes = likeButton {}
-            likes.model(data.data.likes, data.data.links)
+            likeButton(data.data.likes, data.data.links) {}
 
             val commentPrompt = input("comment") {
               style {

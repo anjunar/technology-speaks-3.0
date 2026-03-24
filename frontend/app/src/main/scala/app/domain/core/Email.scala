@@ -6,13 +6,9 @@ import jfx.core.state.{ListProperty, Property, PropertyAccess}
 import java.util.UUID
 import scala.scalajs.js
 
-class Email(
-             val id: Property[UUID] = Property(null),
-             val modified: Property[String] = Property(""),
-             val created: Property[String] = Property(""),
-             val value: Property[String] = Property(""),
-             val links: ListProperty[Link] = ListProperty()
-) extends AbstractEntity[Email] {
+class Email extends AbstractEntity[Email] {
+
+  val value: Property[String] = Property("")
 
   override def properties: js.Array[PropertyAccess[Email, ?]] =
     Email.properties

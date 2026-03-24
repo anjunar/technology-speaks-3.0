@@ -75,6 +75,8 @@ final class WindowRouter(val routes: js.Array[Route])
 
               val conf = new Viewport.WindowConf(
                 title = Option(pageInfo).map(_.name).getOrElse(routeMatch.fullPath),
+                width = Option(pageInfo).map(_.pageWidth).getOrElse(-1),
+                height = Option(pageInfo).map(_.pageHeight).getOrElse(-1),
                 component = () => component,
                 onClose = Some { _ =>
                   windowsByUrl.remove(url)

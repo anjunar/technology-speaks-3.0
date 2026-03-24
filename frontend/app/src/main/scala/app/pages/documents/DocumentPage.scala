@@ -500,8 +500,7 @@ private final class IssueListItem(
           cursor = "pointer"
         }
 
-        val header = componentHeader {}
-        header.model(issue)
+        componentHeader(issue) {}
 
         div {
           style {

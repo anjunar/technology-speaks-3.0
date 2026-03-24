@@ -29,16 +29,4 @@ class WebConfig(val securityInterceptor: SecurityInterceptor, val entityConverte
       .order(Ordered.HIGHEST_PRECEDENCE + 10)
   }
 
-  @Bean
-  def openEntityManagerInViewFilter(): FilterRegistrationBean[OpenEntityManagerInViewFilter] = {
-    val filter = new OpenEntityManagerInViewFilter()
-
-    filter.setEntityManagerFactoryBeanName("entityManagerFactory")
-
-    val registration = new FilterRegistrationBean[OpenEntityManagerInViewFilter](filter)
-    registration.setOrder(0)
-    registration.addUrlPatterns("/service/*")
-    registration
-  }
-
 }

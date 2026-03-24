@@ -12,10 +12,23 @@ import scala.compiletime.uninitialized
 
 @Entity
 @Table(name = "Core#Address")
-class Address(@NotBlank @Size(min = 2, max = 80) @(JsonbProperty @field) var street: String,
-              @NotBlank @Size(min = 1, max = 80) @(JsonbProperty @field) var number: String,
-              @NotBlank @Size(min = 5, max = 5) @(JsonbProperty @field) var zipCode: String,
-              @NotBlank @Size(min = 2, max = 80) @(JsonbProperty @field) var country: String)
+class Address(@(NotBlank @field)
+              @(Size @field)(min = 2, max = 80)
+              @(JsonbProperty @field)
+              var street: String,
+
+              @(NotBlank @field)
+              @(Size @field)(min = 1, max = 80)
+              @(JsonbProperty @field) var number: String,
+
+              @(NotBlank @field)
+              @(Size @field)(min = 5, max = 5)
+              @(JsonbProperty @field) var zipCode: String,
+
+              @(NotBlank @field)
+              @(Size @field)(min = 2, max = 80)
+              @(JsonbProperty @field)
+              var country: String)
   extends AbstractEntity,  OwnerProvider {
 
   @OneToOne(optional = false, mappedBy = "address")

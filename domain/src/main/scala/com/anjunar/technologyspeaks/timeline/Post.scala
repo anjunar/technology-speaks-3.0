@@ -1,7 +1,7 @@
 package com.anjunar.technologyspeaks.timeline
 
 import com.anjunar.json.mapper.provider.{EntityProvider, OwnerProvider}
-import com.anjunar.json.mapper.schema.{EntitySchema, SchemaProvider}
+import com.anjunar.json.mapper.schema.{EntitySchema, Property, SchemaProvider}
 import com.anjunar.technologyspeaks.core.*
 import com.anjunar.technologyspeaks.hibernate.{EntityContext, RepositoryContext}
 import com.anjunar.technologyspeaks.shared.commentable.{CommentContainer, FirstComment}
@@ -11,8 +11,10 @@ import jakarta.json.bind.annotation.JsonbProperty
 import jakarta.persistence.*
 import org.hibernate.annotations.Type
 
+import java.util
 import scala.beans.BeanProperty
 import scala.compiletime.uninitialized
+import java.util
 
 @Entity
 @Table(name = "Timeline#Post")
@@ -34,7 +36,7 @@ import scala.compiletime.uninitialized
           attributeNodes = Array(
             new NamedAttributeNode("id"),
             new NamedAttributeNode("nickName"),
-            new NamedAttributeNode(value = "image", subgraph = "image"),
+            new NamedAttributeNode("image", subgraph = "image"),
             new NamedAttributeNode("info")
           )
         ),
@@ -43,15 +45,17 @@ import scala.compiletime.uninitialized
           `type` = classOf[Like],
           attributeNodes = Array(
             new NamedAttributeNode("id"),
-            new NamedAttributeNode(value = "user", subgraph = "user")
+            new NamedAttributeNode("user", subgraph = "user")
           )
         )
       ),
       attributeNodes = Array(
         new NamedAttributeNode("id"),
-        new NamedAttributeNode(value = "user", subgraph = "user"),
+        new NamedAttributeNode("created"),
+        new NamedAttributeNode("modified"),
+        new NamedAttributeNode("user", subgraph = "user"),
         new NamedAttributeNode("editor"),
-        new NamedAttributeNode(value = "likes", subgraph = "likes")
+        new NamedAttributeNode("likes", subgraph = "likes")
       )
     )
   )
@@ -84,9 +88,14 @@ object Post extends RepositoryContext[Post] with SchemaProvider {
   override def schema(): EntitySchema[?] = new Schema
 
   class Schema extends AbstractEntitySchema[Post] {
-    @JsonbProperty val user = property[User]("user", classOf[User], new OwnerRule[Post]())
-    @JsonbProperty val editor = property[Node]("editor", classOf[Node], new OwnerRule[Post]())
-    @JsonbProperty val likes = property[java.util.Set[Like]]("likes", classOf[java.util.Set[?]], new OwnerRule[Post](), classOf[Like])
+    @JsonbProperty
+    val user: Property[Post, User] = property[User]("user", classOf[User], new OwnerRule[Post]())
+
+    @JsonbProperty
+    val editor: Property[Post, Node] = property[Node]("editor", classOf[Node], new OwnerRule[Post]())
+
+    @JsonbProperty
+    val likes: Property[Post, util.Set[Like]] = property[util.Set[Like]]("likes", classOf[util.Set[?]], new OwnerRule[Post](), classOf[Like])
   }
 
 }

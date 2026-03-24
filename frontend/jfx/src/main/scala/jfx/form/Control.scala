@@ -4,7 +4,7 @@ import jfx.core.component.ElementComponent
 import jfx.core.state.{ListProperty, Property, ReadOnlyProperty}
 import org.scalajs.dom.HTMLElement
 
-trait Control[V, E <: HTMLElement] extends ElementComponent[E] {
+trait Control[V, E <: HTMLElement] extends ElementComponent[E], Editable {
   
   val name : String
   
@@ -12,13 +12,11 @@ trait Control[V, E <: HTMLElement] extends ElementComponent[E] {
   
   val placeholderProperty: Property[String] = Property("")
 
-  val editableProperty: Property[Boolean] = Property(true)
-
   val focusedProperty: Property[Boolean] = Property(false)
 
   val dirtyProperty: Property[Boolean] = Property(false)
 
-  val errorsProperty: ListProperty[String] = new ListProperty[String]()
+  val errorsProperty: ListProperty[String] = new ListProperty[String]() 
 
   val invalidProperty: ReadOnlyProperty[Boolean] =
     errorsProperty.map(_.length > 0)
@@ -27,9 +25,6 @@ trait Control[V, E <: HTMLElement] extends ElementComponent[E] {
 
   def placeholder: String = placeholderProperty.get
   def placeholder_=(value: String): Unit = placeholderProperty.set(value)
-
-  def editable: Boolean = editableProperty.get
-  def editable_=(value: Boolean): Unit = editableProperty.set(value)
 
   def setFocused(value: Boolean): Unit =
     focusedProperty.set(value)
@@ -59,12 +54,4 @@ object Control {
   def valueProperty[V, E <: HTMLElement](using control: Control[V, E]): Property[V] =
     control.valueProperty.asInstanceOf[Property[V]]
 
-  def editable[V, E <: HTMLElement](using control: Control[V, E]): Boolean =
-    control.editable
-
-  def editable_=[V, E <: HTMLElement](value: Boolean)(using control: Control[V, E]): Unit =
-    control.editable = value
-
-  def editableProperty[V, E <: HTMLElement](using control: Control[V, E]): Property[Boolean] =
-    control.editableProperty
 }

@@ -9,17 +9,13 @@ import java.util.UUID
 import scala.concurrent.Future
 import scala.scalajs.js
 
-class User(
-            val id: Property[UUID] = Property(null),
-            val modified: Property[String] = Property(""),
-            val created: Property[String] = Property(""),
-            val nickName: Property[String] = Property(""),
-            val image: Property[Media | Null] = Property(null),
-            val info: Property[UserInfo | Null] = Property(null),
-            val address: Property[Address | Null] = Property(null),
-            val emails: ListProperty[Email] = ListProperty(),
-            val links: ListProperty[Link] = ListProperty()
-) extends AbstractEntity[User] {
+class User extends AbstractEntity[User] {
+
+  val nickName: Property[String] = Property("")
+  val image: Property[Media | Null] = Property(null)
+  val info: Property[UserInfo | Null] = Property(null)
+  val address: Property[Address | Null] = Property(null)
+  val emails: ListProperty[Email] = ListProperty()
 
   override def properties: js.Array[PropertyAccess[User, ?]] =
     User.properties

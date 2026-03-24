@@ -15,8 +15,6 @@ class BasePlugin extends AbstractEditorPlugin("base-plugin") {
   private var structureInitialized = false
   private var boldButton: Button | Null = null
   private var italicButton: Button | Null = null
-  private var undoButton: Button | Null = null
-  private var redoButton: Button | Null = null
 
   override protected def mountContent(): Unit =
     if (!structureInitialized) {
@@ -42,26 +40,6 @@ class BasePlugin extends AbstractEditorPlugin("base-plugin") {
               toggleMarkCommand("em")
             }
             italicButton = current
-          }
-
-          Button.button("undo") {
-            val current = summon[Button]
-            current.buttonType = "button"
-            current.classProperty += "material-icons"
-            current.addClick { _ =>
-              undoCommand()
-            }
-            undoButton = current
-          }
-
-          Button.button("redo") {
-            val current = summon[Button]
-            current.buttonType = "button"
-            current.classProperty += "material-icons"
-            current.addClick { _ =>
-              redoCommand()
-            }
-            redoButton = current
           }
         }
       }
@@ -141,14 +119,6 @@ class BasePlugin extends AbstractEditorPlugin("base-plugin") {
     if (viewIsReady && boldButton != null && italicButton != null) {
       setActive(boldButton, isMarkActive("strong") || isMarkActive("bold"))
       setActive(italicButton, isMarkActive("em") || isMarkActive("italic"))
-
-      if (undoButton != null) {
-        undoButton.nn.element.disabled = false
-      }
-
-      if (redoButton != null) {
-        redoButton.nn.element.disabled = false
-      }
     }
 
   private def setActive(button: Button | Null, active: Boolean): Unit =

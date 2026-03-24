@@ -7,26 +7,22 @@ import app.ui.{CompositeSupport, DivComposite}
 import jfx.action.Button.button
 import jfx.action.Button.{buttonType_=, onClick}
 import jfx.control.Heading.heading
-import jfx.control.Image.image
+import jfx.control.Image.{image, src}
 import jfx.control.Link.link
 import jfx.core.component.ElementComponent.*
-import jfx.core.state.Property
+import jfx.core.state.{ListProperty, Property}
 import jfx.dsl.*
 import jfx.layout.Div.div
 import jfx.layout.HBox.hbox
 import jfx.layout.Span.span
 import jfx.layout.VBox.vbox
 
-class ComponentHeader extends DivComposite {
+class ComponentHeader(val owner : OwnerProvider) extends DivComposite {
 
-  private val valueProperty: Property[OwnerProvider | Null] = Property(null)
   private var onDeleteHandler: () => Unit = () => ()
   private var onUpdateHandler: () => Unit = () => ()
   private var customDeleteHandler = false
   private var customUpdateHandler = false
-
-  def model(next: OwnerProvider): Unit =
-    valueProperty.set(next)
 
   def onDelete(fn: () => Unit): Unit = {
     customDeleteHandler = true
@@ -39,47 +35,51 @@ class ComponentHeader extends DivComposite {
   }
 
   override protected def compose(using DslContext): Unit = {
-    classProperty += "component-header"
+    classes = "component-header"
+
+    val user = Option(owner).flatMap(value => Option(value.user.get))
+    val userId = user.flatMap(current => Option(current.id.get))
+    val media = user.flatMap(current => Option(current.image.get))
+    val userName = user.map(_.nickName.get).filter(_.trim.nonEmpty).getOrElse("User")
+    val links = Option(owner).map(_.links).getOrElse(ListProperty())
+
+    println(s"userId: $userId")
+    println(s"links: $links")
 
     withDslContext {
-      var avatarIconRef: jfx.layout.Div | Null = null
-      var avatarImageRef: jfx.control.Image | Null = null
-      var nameHeadingRef: jfx.control.Heading | Null = null
-      var createdRef: jfx.layout.Span | Null = null
-      var userLinkRef: jfx.control.Link | Null = null
-      var readButtonRef: jfx.action.Button | Null = null
-      var updateButtonRef: jfx.action.Button | Null = null
-      var deleteButtonRef: jfx.action.Button | Null = null
-
       hbox {
         style {
           alignItems = "center"
           columnGap = "10px"
         }
 
-        userLinkRef = link("/core/users") {
+        link(userId.map(id => s"/core/users/user/$id").getOrElse("/core/users")) {
+
           style {
             display = "inline-flex"
             alignItems = "center"
             justifyContent = "center"
           }
 
-          avatarIconRef = div {
+          div {
             classes = "material-icons"
             style {
               fontSize = "48px"
+              display = media.map(value => if (value != null) "none" else "inline-flex").getOrElse("inline-flex")
             }
             text = "account_circle"
           }
 
-          avatarImageRef = image {
+          image {
             style {
               width = "48px"
               height = "48px"
               borderRadius = "50%"
               setProperty("object-fit", "cover")
-              display = "none"
+              display = media.map(value => if (value != null) "inline-flex" else "none").getOrElse("none")
             }
+
+            src = MediaHelper.thumbnailLink(media.get)
           }
         }
 
@@ -88,14 +88,18 @@ class ComponentHeader extends DivComposite {
             justifyContent = "center"
           }
 
-          nameHeadingRef = heading(3) {
-            text = "User"
+          heading(3) {
+            text = userName
+            style {
+              margin = "0"
+            }
           }
 
-          createdRef = span {
+          span {
             style {
               fontSize = "10px"
             }
+            text = Option(owner).map(value => TimeAgo.format(value.created.get)).getOrElse("")
           }
         }
 
@@ -105,108 +109,61 @@ class ComponentHeader extends DivComposite {
           }
         }
 
-        readButtonRef = button("open_in_new") {
-          buttonType_=("button")
-          classes = "material-icons"
-          onClick { _ =>
-            valueProperty.get match {
-              case null =>
-                ()
-              case owner =>
-                Navigation.linkByRel("read", owner.links).foreach(link => Navigation.navigate(link.url))
+        Navigation.linkByRel("read", links).foreach { link =>
+          button("open_in_new") {
+            buttonType_=("button")
+            classes = "material-icons"
+            onClick { _ =>
+              Navigation.navigate(link.url)
             }
           }
         }
 
-        updateButtonRef = button("edit") {
-          buttonType_=("button")
-          classes = "material-icons"
-          onClick { _ =>
-            valueProperty.get match {
-              case null =>
-                ()
-              case owner =>
+        Navigation.linkByRel("update", owner.links).foreach(link => {
+          if (customUpdateHandler) {
+            button("edit") {
+              buttonType_=("button")
+              classes = "material-icons"
+              onClick { _ =>
                 if (customUpdateHandler) {
                   onUpdateHandler()
                 } else {
-                  Navigation.linkByRel("update", owner.links).foreach(link => Navigation.navigate(link.url))
+                  Navigation.navigate(link.url)
                 }
+              }
             }
           }
-        }
+        })
 
-        deleteButtonRef = button("delete") {
-          buttonType_=("button")
-          classes = "material-icons"
-          onClick { _ =>
-            valueProperty.get match {
-              case null =>
-                ()
-              case owner =>
+        Navigation.linkByRel("delete", owner.links).foreach(link => {
+          if (customDeleteHandler) {
+            button("delete") {
+              buttonType_=("button")
+              classes = "material-icons"
+              onClick { _ =>
                 if (customDeleteHandler) {
                   onDeleteHandler()
                 } else {
-                  Navigation.linkByRel("delete", owner.links).foreach(link => Navigation.navigate(link.url))
+                  Navigation.navigate(link.url)
                 }
+              }
             }
           }
-        }
+        })
       }
-
-      addDisposable(
-        valueProperty.observe { owner =>
-          val user = Option(owner).flatMap(value => Option(value.user.get))
-          val userId = user.flatMap(current => Option(current.id.get))
-          val image = user.flatMap(current => Option(current.image.get))
-          val userName = user.map(_.nickName.get).filter(_.trim.nonEmpty).getOrElse("User")
-          val links = Option(owner).map(_.links).getOrElse(jfx.core.state.ListProperty())
-
-          if (userLinkRef != null) {
-            userLinkRef.nn.href = userId.map(id => s"/core/users/user/$id").getOrElse("/core/users")
-          }
-
-          if (avatarImageRef != null && avatarIconRef != null) {
-            image match {
-              case Some(media) =>
-                avatarImageRef.nn.src = MediaHelper.thumbnailLink(media)
-                avatarImageRef.nn.element.style.display = "block"
-                avatarIconRef.nn.element.style.display = "none"
-              case None =>
-                avatarImageRef.nn.src = ""
-                avatarImageRef.nn.element.style.display = "none"
-                avatarIconRef.nn.element.style.display = "flex"
-            }
-          }
-
-          if (nameHeadingRef != null) {
-            nameHeadingRef.nn.textContent = userName
-          }
-
-          if (createdRef != null) {
-            createdRef.nn.textContent = Option(owner).map(value => TimeAgo.format(value.created.get)).getOrElse("")
-          }
-
-          if (readButtonRef != null) {
-            readButtonRef.nn.element.style.display =
-              if (Navigation.linkByRel("read", links).nonEmpty) "inline-flex" else "none"
-          }
-
-          if (updateButtonRef != null) {
-            updateButtonRef.nn.element.style.display =
-              if (customUpdateHandler || Navigation.linkByRel("update", links).nonEmpty) "inline-flex" else "none"
-          }
-
-          if (deleteButtonRef != null) {
-            deleteButtonRef.nn.element.style.display =
-              if (customDeleteHandler || Navigation.linkByRel("delete", links).nonEmpty) "inline-flex" else "none"
-          }
-        }
-      )
     }
   }
 }
 
 object ComponentHeader {
-  def componentHeader(init: ComponentHeader ?=> Unit = {}): ComponentHeader =
-    CompositeSupport.buildComposite(new ComponentHeader)(init)
+  def componentHeader(owner : OwnerProvider)(init: ComponentHeader ?=> Unit = {}): ComponentHeader =
+    CompositeSupport.buildComposite(new ComponentHeader(owner))(init)
+
+  def onUpdate(value : () => Unit)(using component: ComponentHeader): Unit =
+    component.onUpdate(value)
+
+  def onDelete(value : () => Unit)(using component: ComponentHeader): Unit =
+    component.onDelete(value)
+
+
 }

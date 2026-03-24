@@ -11,16 +11,12 @@ import java.util.UUID
 import scala.concurrent.Future
 import scala.scalajs.js
 
-class FirstComment(
-                    val id: Property[UUID] = Property(null),
-                    val modified: Property[String] = Property(""),
-                    val created: Property[String] = Property(""),
-                    val user: Property[User | Null] = Property(null),
-                    val editor: Property[js.Any | Null] = Property(null),
-                    val likes: ListProperty[Like] = ListProperty(),
-                    val comments: ListProperty[SecondComment] = ListProperty(),
-                    val links: ListProperty[Link] = ListProperty()
-) extends AbstractEntity[FirstComment] with OwnerProvider {
+class FirstComment extends AbstractEntity[FirstComment] with OwnerProvider {
+
+  val user: Property[User | Null] = Property(null)
+  val editor: Property[js.Any | Null] = Property(null)
+  val likes: ListProperty[Like] = ListProperty()
+  val comments: ListProperty[SecondComment] = ListProperty()
 
   val editable: Property[Boolean] = Property(false)
 

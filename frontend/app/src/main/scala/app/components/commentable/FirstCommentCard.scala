@@ -2,7 +2,7 @@ package app.components.commentable
 
 import app.components.likeable.LikeButton.likeButton
 import app.components.commentable.CommentsSection.commentsSection
-import app.components.shared.ComponentHeader.componentHeader
+import app.components.shared.ComponentHeader.{componentHeader, onDelete, onUpdate}
 import app.domain.core.AbstractEntity
 import app.domain.documents.Document
 import app.domain.shared.FirstComment
@@ -30,7 +30,7 @@ class FirstCommentCard(
   private given ExecutionContext = ExecutionContext.global
 
   override protected def compose(using DslContext): Unit = {
-    classProperty += "glass-border"
+    classes = "glass-border"
 
     withDslContext {
       form(comment) {
@@ -47,17 +47,17 @@ class FirstCommentCard(
           }
         }
 
-        val header = componentHeader {}
-        header.model(comment)
-        header.onDelete { () =>
-          val request =
-            if (comment.id.get != null) comment.delete(owner)
-            else scala.concurrent.Future.successful(())
+        componentHeader(comment) {
+          onDelete { () =>
+            val request =
+              if (comment.id.get != null) comment.delete(owner)
+              else scala.concurrent.Future.successful(())
 
-          request.foreach(_ => onDeleteCompleted(comment))
-        }
-        header.onUpdate { () =>
-          comment.editable.set(!comment.editable.get)
+            request.foreach(_ => onDeleteCompleted(comment))
+          }
+          onUpdate { () =>
+            comment.editable.set(!comment.editable.get)
+          }
         }
 
         val editorField = editor("editor") {
@@ -80,15 +80,14 @@ class FirstCommentCard(
         subscribeBidirectional(comment.editor, editorField.valueProperty)
         subscribeBidirectional(comment.editable, editorField.editableProperty)
 
-        val likes = likeButton {}
-        likes.model(comment.likes, comment.links)
+        likeButton(comment.likes, comment.links) {}
 
-        val nestedComments = commentsSection {}
-        nestedComments.model(comment, owner)
+        commentsSection(comment, owner) {}
       }
     }
   }
 }
+
 
 object FirstCommentCard {
   def firstCommentCard(

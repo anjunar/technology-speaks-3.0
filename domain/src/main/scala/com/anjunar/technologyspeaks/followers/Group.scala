@@ -6,6 +6,7 @@ import com.anjunar.technologyspeaks.core.{AbstractEntity, AbstractEntitySchema, 
 import com.anjunar.technologyspeaks.hibernate.{EntityContext, RepositoryContext}
 import jakarta.json.bind.annotation.JsonbProperty
 import jakarta.persistence.{Entity, ManyToOne, Table}
+import jakarta.validation.constraints.Size
 
 import scala.annotation.meta.field
 import scala.beans.BeanProperty
@@ -13,7 +14,7 @@ import scala.compiletime.uninitialized
 
 @Entity
 @Table(name = "Followers#Group")
-class Group(@(JsonbProperty @field) var name: String)
+class Group(@(JsonbProperty @field) @(Size @field)(min = 3, max = 80)var name: String)
   extends AbstractEntity, OwnerProvider, EntityContext[Group] {
 
   def this() = this(null)

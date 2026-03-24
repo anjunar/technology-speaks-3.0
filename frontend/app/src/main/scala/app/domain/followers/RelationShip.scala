@@ -9,15 +9,11 @@ import java.util.UUID
 import scala.concurrent.Future
 import scala.scalajs.js
 
-class RelationShip(
-                    val id: Property[UUID] = Property(null),
-                    val modified: Property[String] = Property(""),
-                    val created: Property[String] = Property(""),
-                    val follower: Property[User | Null] = Property(null),
-                    val users: ListProperty[User] = ListProperty(),
-                    val groups: ListProperty[Group] = ListProperty(),
-                    val links: ListProperty[Link] = ListProperty()
-) extends AbstractEntity[RelationShip] {
+class RelationShip extends AbstractEntity[RelationShip] {
+
+  val follower: Property[User | Null] = Property(null)
+  val users: ListProperty[User] = ListProperty()
+  val groups: ListProperty[Group] = ListProperty()
 
   override def properties: js.Array[PropertyAccess[RelationShip, ?]] =
     RelationShip.properties

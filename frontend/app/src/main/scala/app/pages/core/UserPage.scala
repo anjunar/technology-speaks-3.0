@@ -4,7 +4,7 @@ import app.components.shared.LoadingCard.loadingCard
 import app.domain.core.{Address, Data, User, UserInfo}
 import app.domain.followers.{Group, GroupAssignmentRequest}
 import app.support.Navigation.renderByRel
-import app.support.{Api, AppJson, ErrorResponseException, Navigation, RemotePageQuery, RemoteTableList}
+import app.support.{Api, AppJson, Navigation, RemotePageQuery, RemoteTableList}
 import app.ui.{CompositeSupport, DivComposite, PageComposite}
 import jfx.action.Button.{button, buttonType, buttonType_=, onClick}
 import jfx.control.Image.image
@@ -13,10 +13,11 @@ import jfx.core.component.ElementComponent.*
 import jfx.core.component.NodeComponent
 import jfx.core.state.{ListProperty, Property, RemoteListProperty}
 import jfx.dsl.*
-import jfx.form.{Form, SubForm}
-import jfx.form.Form.{form, onSubmit, onSubmit_=}
+import jfx.form.Editable.editable
+import jfx.form.{ErrorResponseException, Form, SubForm}
+import jfx.form.Form.{form, onSubmit}
 import jfx.form.ImageCropper.{aspectRatio, imageCropper, outputMaxHeight, outputMaxWidth, outputQuality, outputType}
-import jfx.form.Input.{input, inputType, inputType_=}
+import jfx.form.Input.{input, inputType}
 import jfx.form.InputContainer.inputContainer
 import jfx.form.SubForm.{factory, subForm}
 import jfx.layout.Div.div
@@ -28,6 +29,7 @@ import jfx.statement.DynamicOutlet.dynamicOutlet
 import scala.concurrent.ExecutionContext
 import scala.scalajs.js
 import scala.scalajs.js.JSConverters.*
+import scala.util.{Success, Failure}
 
 class UserPage(val model: User) extends PageComposite("User", pageResizable = false) {
 
@@ -53,15 +55,14 @@ class UserPage(val model: User) extends PageComposite("User", pageResizable = fa
 
           onSubmit = { (event : Form[User]) =>
 
-            try {
-              event.valueProperty.get.update()
-              Viewport.notify("Benutzer gespeichert!", Viewport.NotificationKind.Success)
-            } catch {
-              case e: ErrorResponseException =>
-                Viewport.notify("Fehler im Benutzer", Viewport.NotificationKind.Error)
-//                event.setErrors(e.errors)
-            }
+            model.update().onComplete {
+              case Success(_) =>
+                Viewport.notify("Benutzer gespeichert!", Viewport.NotificationKind.Success)
 
+              case Failure(e: ErrorResponseException) =>
+                Viewport.notify("Fehler im Benutzer", Viewport.NotificationKind.Error)
+                event.setErrorResponses(e.errors)
+            }
           }
 
           vbox {
@@ -210,6 +211,7 @@ class UserPage(val model: User) extends PageComposite("User", pageResizable = fa
 
           }
 
+          editable = model.links.exists(_.rel == "update")
 
         }
 

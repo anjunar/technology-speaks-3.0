@@ -22,8 +22,8 @@ class ImagePlugin extends AbstractEditorPlugin("image-plugin") {
 
       Viewport.addWindow(
         new Viewport.WindowConf(
-          "Add Image",
-          Viewport.captureComponent {
+          title = "Add Image",
+          component = Viewport.captureComponent {
             Form.form(new Dimensions()) {
               val formComponent = summon[Form[Dimensions]]
               var previewImage: Image | Null = null

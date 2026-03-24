@@ -9,14 +9,10 @@ import java.util.UUID
 import scala.concurrent.Future
 import scala.scalajs.js
 
-class Group(
-             val id: Property[UUID] = Property(null),
-             val name: Property[String] = Property(""),
-             val modified: Property[String] = Property(""),
-             val created: Property[String] = Property(""),
-             val users: ListProperty[User] = ListProperty(),
-             val links: ListProperty[Link] = ListProperty()
-) extends AbstractEntity[Group] {
+class Group extends AbstractEntity[Group] {
+
+  val name: Property[String] = Property("")
+  val users: ListProperty[User] = ListProperty()
 
   val editable: Property[Boolean] = Property(false)
 

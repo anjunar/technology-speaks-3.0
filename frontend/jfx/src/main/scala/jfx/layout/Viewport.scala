@@ -4,7 +4,7 @@ import java.util.UUID
 import jfx.core.component.{ElementComponent, ManagedElementComponent, NodeComponent}
 import jfx.core.state.Property.subscribeBidirectional
 import jfx.core.state.{Disposable, ListProperty, Property}
-import jfx.dsl.{ComponentContext, DslRuntime, Scope}
+import jfx.dsl.{ComponentContext, DslRuntime, Scope, height, width}
 import jfx.statement.ForEach
 import org.scalajs.dom.{Event, HTMLDivElement, HTMLElement, Node, window}
 
@@ -43,6 +43,10 @@ final class Viewport extends ManagedElementComponent[HTMLDivElement] {
   private def buildWindow(conf: Viewport.WindowConf): Window = {
     val component = new Window()
 
+    component.addStyle {
+      width = conf.width.toString + "px"
+      height = conf.height.toString + "px"
+    }
     component.title = conf.title
     component.draggable = conf.draggable
     component.resizeable = conf.resizable
@@ -135,6 +139,8 @@ object Viewport {
 
   final class WindowConf(
     val title: String,
+    val width : Int = -1,
+    val height : Int = -1,
     val component: () => NodeComponent[? <: Node] | Null,
     val zIndex: Property[Int] = Property(0),
     val onClose: Option[Window => Unit] = None,

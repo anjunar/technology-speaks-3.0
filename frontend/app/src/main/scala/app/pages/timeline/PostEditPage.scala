@@ -4,13 +4,12 @@ import app.components.shared.ComponentHeader.componentHeader
 import app.domain.core.Data
 import app.domain.timeline.{Post, PostCreated, PostUpdated}
 import app.services.ApplicationService
-import app.support.ErrorResponseException
 import app.ui.{CompositeSupport, PageComposite}
 import jfx.action.Button.button
 import jfx.core.component.ElementComponent.classes
 import jfx.dsl.*
 import jfx.form.Editor.editor
-import jfx.form.Form
+import jfx.form.{ErrorResponseException, Form}
 import jfx.form.Form.form
 import jfx.form.editor.plugins.*
 import jfx.layout.VBox.vbox
@@ -19,6 +18,9 @@ import jfx.layout.Viewport
 import scala.concurrent.ExecutionContext
 
 class PostEditPage(val data: Post) extends PageComposite("Posts") {
+
+  override def pageWidth: Int = 360
+  override def pageHeight: Int = 600
 
   private given ExecutionContext = ExecutionContext.global
 
@@ -61,7 +63,7 @@ class PostEditPage(val data: Post) extends PageComposite("Posts") {
             height = "100%"
           }
 
-          componentHeader {}.model(data)
+          componentHeader(data) {}
 
           editor("editor") {
             style {

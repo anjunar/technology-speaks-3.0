@@ -10,15 +10,11 @@ import java.util.UUID
 import scala.concurrent.Future
 import scala.scalajs.js
 
-class Issue(
-             val id: Property[UUID] = Property(null),
-             val modified: Property[String] = Property(""),
-             val created: Property[String] = Property(""),
-             val title: Property[String] = Property(""),
-             val user: Property[User | Null] = Property(null),
-             val editor: Property[js.Any | Null] = Property(null),
-             val links: ListProperty[Link] = ListProperty()
-) extends AbstractEntity[Issue] with OwnerProvider {
+class Issue extends AbstractEntity[Issue] with OwnerProvider {
+
+  val title: Property[String] = Property("")
+  val user: Property[User | Null] = Property(null)
+  val editor: Property[js.Any | Null] = Property(null)
 
   val editable: Property[Boolean] = Property(false)
 

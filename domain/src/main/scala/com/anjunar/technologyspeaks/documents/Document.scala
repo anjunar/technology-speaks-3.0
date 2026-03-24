@@ -58,7 +58,7 @@ import scala.compiletime.uninitialized
     )
   )
 )
-class Document(@Column(nullable = false) @(JsonbProperty @field) var title: String) 
+class Document(@(Column @field)(nullable = false) @(JsonbProperty @field) var title: String) 
   extends AbstractEntity, EntityContext[Document], OwnerProvider {
 
   def this() = this(null)

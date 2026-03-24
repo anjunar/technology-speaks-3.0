@@ -11,14 +11,14 @@ import scala.compiletime.uninitialized
 
 @Entity
 @Table(name = "Core#Role")
-class Role(@Size(min = 3, max = 80)
-           @NotBlank
-           @Column(unique = true)
+class Role(@(Size @field)(min = 3, max = 80)
+           @(NotBlank @field)
+           @(Column @field)(unique = true)
            @(JsonbProperty @field)
            var name: String,
 
-           @Size(min = 3, max = 80)
-           @NotBlank
+           @(Size @field)(min = 3, max = 80)
+           @(NotBlank @field)
            @(JsonbProperty @field)
            var description: String)
   extends AbstractEntity with EntityContext[Role] {

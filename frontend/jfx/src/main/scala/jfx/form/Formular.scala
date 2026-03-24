@@ -7,7 +7,7 @@ import org.scalajs.dom.{HTMLElement, Node, console}
 
 import scala.collection.mutable
 
-trait Formular[M <: Model[M], N <: Node] extends NodeComponent[N] {
+trait Formular[M <: Model[M], N <: Node] extends NodeComponent[N], Editable {
 
   val name : String
 
@@ -15,8 +15,12 @@ trait Formular[M <: Model[M], N <: Node] extends NodeComponent[N] {
 
   type AnyControl = Control[?, ? <: HTMLElement]
 
-  val controls : ListProperty[AnyControl] =
-    new ListProperty[AnyControl]()
+  val controls : ListProperty[AnyControl] = new ListProperty[AnyControl]()
+
+  private val editableObserver = editableProperty.observe(editable => {
+      controls.foreach(control => control.editable = editable)
+    })
+  addDisposable(editableObserver)
 
   private val bindingsByControl: mutable.Map[AnyControl, CompositeDisposable] =
     mutable.Map.empty
@@ -37,6 +41,20 @@ trait Formular[M <: Model[M], N <: Node] extends NodeComponent[N] {
     disposeBinding(control)
     val idx = controls.indexOf(control)
     if (idx >= 0) controls.remove(idx)
+  }
+
+  def setErrorResponses(errors: Seq[ErrorResponse]): Unit = {
+    errors.groupBy(error => error.path.apply(0))
+      .foreach((key, errors) => {
+
+        controls.foreach {
+          case subForm: SubForm[?] if subForm.index == key => subForm.setErrorResponses(errors.map(error => new ErrorResponse(error.message, error.path.tail)))
+          case subForm: SubForm[?] if subForm.name == key => subForm.setErrorResponses(errors.map(error => new ErrorResponse(error.message, error.path.tail)))
+          case control : AnyControl if control.name == key => control.setErrors(errors.map(error => error.message))
+          case _ => ()
+        }
+
+      })
   }
 
   private def initBinding(control: AnyControl): CompositeDisposable = {
@@ -61,7 +79,7 @@ trait Formular[M <: Model[M], N <: Node] extends NodeComponent[N] {
         binding.add(bindNow(control))
       } else {
         control.valueProperty match {
-          case property : Property[Any] => property.set(null.asInstanceOf[Any])
+          case property : Property[Any @unchecked] => property.set(null.asInstanceOf[Any])
           case listProperty : ListProperty[?] => listProperty.clear()
         }
       }
@@ -89,9 +107,7 @@ trait Formular[M <: Model[M], N <: Node] extends NodeComponent[N] {
 
     if (modelPropertyOption.isEmpty) {
       console.warn(s"Skipping form binding for control '$controlName' because no matching model property was found.")
-      return new Disposable {
-        override def dispose(): Unit = ()
-      }
+      return () => ()
     }
 
     val modelProperty: Any = modelPropertyOption.get

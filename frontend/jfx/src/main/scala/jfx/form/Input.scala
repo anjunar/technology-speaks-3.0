@@ -27,7 +27,10 @@ class Input(val name: String, override val standalone: Boolean = false) extends 
 
   private val valueObserver = valueProperty.observe(applyElementValue)
   addDisposable(valueObserver)
-
+  
+  private val editableObserver = editableProperty.observe(editable => element.readOnly = !editable)
+  addDisposable(editableObserver)
+  
   private val placeholderObserver =
     placeholderProperty.observe(value => element.placeholder = if (value == null) "" else value)
   addDisposable(placeholderObserver)

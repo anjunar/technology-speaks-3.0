@@ -13,7 +13,7 @@ import scala.compiletime.uninitialized
 
 @Entity
 @Table(name = "Core#Email")
-class EMail(@(JsonbProperty @field) @Email @NotBlank @Column(unique = true) var value: String)
+class EMail(@(JsonbProperty @field) @Email @(NotBlank @field) @Column(unique = true) var value: String)
   extends AbstractEntity, OwnerProvider, EntityContext[EMail] {
 
   def this() = this(null)

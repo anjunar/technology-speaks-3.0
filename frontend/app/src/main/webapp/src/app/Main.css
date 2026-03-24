@@ -26,6 +26,7 @@ html[data-theme=dark] #root {
     display: flex;
     background-color: var(--color-background-secondary);
     height: 32px;
+    width: 100%;
 }
 
 .app-shell {

@@ -10,8 +10,9 @@
     position: absolute;
     overflow: visible;
     max-height: 1024px;
-    min-width: 0;
-    min-height: 0;
+    min-width: 360px;
+    min-height: 360px;
+    max-width: 1600px;
 
     transition:
             opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),

@@ -24,11 +24,11 @@ class Thumbnail(@(NotBlank @field)
                 @(JsonbProperty @field)
                 var name: String,
 
-                @NotBlank @Size(min = 2, max = 80)
+                @(NotBlank @field) @(Size @field)(min = 2, max = 80)
                 @(JsonbProperty @field)
                 var contentType: String,
 
-                @Lob 
+                @(Lob @field) 
                 @(JsonbProperty @field) var data: Array[Byte])
   extends AbstractEntity {
 
