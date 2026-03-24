@@ -29,64 +29,62 @@ class PostEditPage(val data: Post) extends PageComposite("Posts") {
     classProperty.setAll(Seq("post-edit-page", "container"))
 
     withDslContext {
-      scope {
-        val service = inject[ApplicationService]
+      val service = inject[ApplicationService]
 
-        form(data) {
-          Form.onSubmit = { (event: Form[Post]) =>
-            val isExisting = data.id.get != null
-            val request =
-              if (isExisting) data.update()
-              else data.save()
+      form(data) {
+        Form.onSubmit = { (event: Form[Post]) =>
+          val isExisting = data.id.get != null
+          val request =
+            if (isExisting) data.update()
+            else data.save()
 
-            request.foreach { saved =>
-              if (isExisting) {
-                service.messageBus.publish(new PostUpdated(saved))
-              } else {
-                service.messageBus.publish(new PostCreated(saved))
-              }
-              close()
+          request.foreach { saved =>
+            if (isExisting) {
+              service.messageBus.publish(new PostUpdated(saved))
+            } else {
+              service.messageBus.publish(new PostCreated(saved))
             }
-
-            request.failed.foreach {
-              case e: ErrorResponseException =>
-                Viewport.notify("Fehler beim Speichern", Viewport.NotificationKind.Error)
-              case _ =>
-                Viewport.notify("Ein unerwarteter Fehler ist aufgetreten", Viewport.NotificationKind.Error)
-            }
+            close()
           }
 
+          request.failed.foreach {
+            case e: ErrorResponseException =>
+              Viewport.notify("Fehler beim Speichern", Viewport.NotificationKind.Error)
+            case _ =>
+              Viewport.notify("Ein unerwarteter Fehler ist aufgetreten", Viewport.NotificationKind.Error)
+          }
+        }
+
+        style {
+          padding = "10px"
+          height = "calc(100% - 20px)"
+        }
+
+        vbox {
           style {
-            padding = "10px"
-            height = "calc(100% - 20px)"
+            rowGap = "10px"
+            height = "100%"
           }
 
-          vbox {
+          componentHeader(data) {}
+
+          editor("editor") {
             style {
-              rowGap = "10px"
-              height = "100%"
+              flex = "1"
+              minHeight = "0px"
             }
 
-            componentHeader(data) {}
+            basePlugin {}
+            headingPlugin {}
+            listPlugin {}
+            linkPlugin {}
+            imagePlugin {}
+          }
 
-            editor("editor") {
-              style {
-                flex = "1"
-                minHeight = "0px"
-              }
-
-              basePlugin {}
-              headingPlugin {}
-              listPlugin {}
-              linkPlugin {}
-              imagePlugin {}
-            }
-
-            button("Senden") {
-              classes = "btn-secondary"
-              style {
-                width = "100%"
-              }
+          button("Senden") {
+            classes = "btn-secondary"
+            style {
+              width = "100%"
             }
           }
         }

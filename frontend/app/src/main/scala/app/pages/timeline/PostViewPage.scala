@@ -55,7 +55,7 @@ class PostViewPage(val model: Post) extends PageComposite("Post") {
     }
 
     withDslContext {
-      val service = injectFromDsl[ApplicationService]
+      val service = inject[ApplicationService]
 
       vbox {
         style {

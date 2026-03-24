@@ -19,6 +19,9 @@ trait CompositeComponent[N <: Node]
   private[jfx] final def renderComposite(using context: DslContext): Unit =
     compose
 
+  protected given dslScope(using context: DslContext): Scope =
+    context.scope
+
   protected final def withDslContext[A](block: => A)(using context: DslContext): A =
     DslRuntime.withCompositeContext(this, context) {
       given Scope = context.scope
@@ -29,7 +32,7 @@ trait CompositeComponent[N <: Node]
   protected final def dslContext(using context: DslContext): DslContext =
     context
 
-  protected final def injectFromDsl[T](using context: DslContext, key: Scope.ServiceKey[T]): T =
+  protected final def inject[T](using context: DslContext, key: Scope.ServiceKey[T]): T =
     context.scope.inject[T]
 
   protected final def addChild(child: NodeComponent[? <: Node]): Unit = {

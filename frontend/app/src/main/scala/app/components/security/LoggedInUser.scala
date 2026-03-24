@@ -7,6 +7,7 @@ import jfx.control.Image.{image, src}
 import jfx.core.component.ElementComponent.*
 import jfx.layout.Div.div
 import jfx.dsl.*
+import jfx.dsl.Scope.inject
 import jfx.layout.HBox.hbox
 import jfx.statement.ObserveRender.observeRender
 
@@ -17,7 +18,7 @@ class LoggedInUser extends DivComposite {
 
 
     withDslContext {
-      val service = injectFromDsl[ApplicationService]
+      val service = inject[ApplicationService]
 
       observeRender(service.app) { app =>
         val label =
@@ -58,7 +59,6 @@ class LoggedInUser extends DivComposite {
           }
         }
       }
-
     }
   }
 }

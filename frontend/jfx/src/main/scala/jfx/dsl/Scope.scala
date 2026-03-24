@@ -72,7 +72,9 @@ object Scope {
       if (currentScope == null) Scope.root()
       else currentScope.child()
 
-    block(using nextScope)
+    DslRuntime.withScope(nextScope) {
+      block(using nextScope)
+    }
 
   def singleton[T](provider: Scope ?=> T)(using scope: Scope, key: Scope.ServiceKey[T]): Unit =
     scope.singleton(provider)

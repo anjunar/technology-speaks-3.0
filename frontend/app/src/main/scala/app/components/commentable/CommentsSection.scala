@@ -32,7 +32,7 @@ class CommentsSection(val firstComment: FirstComment, val owner: AbstractEntity[
     classes = "comments-section"
 
     withDslContext {
-      val service = injectFromDsl[ApplicationService]
+      val service = inject[ApplicationService]
 
       vbox {
         style {
@@ -90,7 +90,7 @@ object CommentsSection {
       classes = "glass-border"
 
       withDslContext {
-        val service = injectFromDsl[ApplicationService]
+        val service = inject[ApplicationService]
 
         form(comment) {
           onSubmit_= { (event: Form[SecondComment]) =>

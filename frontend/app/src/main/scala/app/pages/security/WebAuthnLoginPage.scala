@@ -29,7 +29,7 @@ class WebAuthnLoginPage extends PageComposite("Login mit WebAuthn", pageResizabl
     classProperty += "webauthn-login-page"
 
     withDslContext {
-      val service = injectFromDsl[ApplicationService]
+      val service = inject[ApplicationService]
 
       form(loginForm) {
         onSubmit_= { (event : Form[WebAuthnLogin])  =>

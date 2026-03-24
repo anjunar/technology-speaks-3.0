@@ -31,7 +31,7 @@ class LikeButton(val likes: ListProperty[Like], val links: ListProperty[Link], v
     classes = "like-button"
 
     withDslContext {
-      val service = injectFromDsl[ApplicationService]
+      val service = inject[ApplicationService]
       var iconButtonRef: jfx.action.Button | Null = null
       var countRef: jfx.layout.Div | Null = null
 

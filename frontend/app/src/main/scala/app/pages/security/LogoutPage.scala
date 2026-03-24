@@ -23,7 +23,7 @@ class LogoutPage extends PageComposite("Abmelden", pageResizable = false) {
 
     withDslContext {
 
-      val service = injectFromDsl[ApplicationService]
+      val service = inject[ApplicationService]
 
       vbox {
         image {

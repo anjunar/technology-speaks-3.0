@@ -38,7 +38,7 @@ class PostsPage(postsProperty : RemoteListProperty[Data[Post], RemotePageQuery])
     }
 
     withDslContext {
-      val service = injectFromDsl[ApplicationService]
+      val service = inject[ApplicationService]
 
       addDisposable(
         service.messageBus.subscribe {

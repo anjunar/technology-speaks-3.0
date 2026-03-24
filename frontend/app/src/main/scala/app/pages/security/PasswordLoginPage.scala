@@ -29,7 +29,7 @@ class PasswordLoginPage extends PageComposite("Login", pageResizable = false) {
     classProperty += "password-login-page"
 
     withDslContext {
-      val service = injectFromDsl[ApplicationService]
+      val service = inject[ApplicationService]
 
       form(loginForm) {
         onSubmit_= { (event : Form[PasswordLogin])  =>

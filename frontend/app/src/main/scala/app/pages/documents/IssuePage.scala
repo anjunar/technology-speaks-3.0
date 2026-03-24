@@ -90,7 +90,7 @@ class IssuePage(val model: Issue) extends PageComposite("Aufgabe", pageResizable
 
     withDslContext {
 
-      val service = injectFromDsl[ApplicationService]
+      val service = inject[ApplicationService]
 
       form(model) {
           onSubmit = { (_: Form[Issue]) =>

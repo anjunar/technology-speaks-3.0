@@ -68,7 +68,7 @@ class DocumentPage(val model: Document) extends PageComposite("Dokument") {
     addDisposable(() => cancelScheduledReload())
 
     withDslContext {
-      val service = injectFromDsl[ApplicationService]
+      val service = inject[ApplicationService]
 
       addDisposable(
         service.messageBus.subscribe {

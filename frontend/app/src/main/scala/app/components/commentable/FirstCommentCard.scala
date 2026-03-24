@@ -33,7 +33,7 @@ class FirstCommentCard(
     classes = "glass-border"
 
     withDslContext {
-      val service = injectFromDsl[ApplicationService]
+      val service = inject[ApplicationService]
 
       form(comment) {
         onSubmit_= { (event : Form[FirstComment])  =>

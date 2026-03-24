@@ -29,7 +29,7 @@ class ConfirmPage extends PageComposite("Bestaetigen", pageResizable = false) {
     classProperty += "confirm-page"
 
     withDslContext {
-      val service = injectFromDsl[ApplicationService]
+      val service = inject[ApplicationService]
 
       form(confirmForm) {
         onSubmit_= { (event : Form[ConfirmCode])  =>
