@@ -101,6 +101,9 @@ object ElementComponent {
     normalized.toVector
   }
 
+  def textProperty(using component: ElementComponent[?]): Property[String] =
+    component.textContentProperty
+
   def text(using component: ElementComponent[?]): String =
     component.textContent
 

@@ -62,6 +62,8 @@ class UserPage(val model: User) extends PageComposite("User", pageResizable = fa
               case Failure(e: ErrorResponseException) =>
                 Viewport.notify("Fehler im Benutzer", Viewport.NotificationKind.Error)
                 event.setErrorResponses(e.errors)
+
+              case _ => ()
             }
           }
 

@@ -7,18 +7,18 @@ import app.domain.documents.{Document, Issue, IssueCreated, IssueUpdated}
 import app.services.ApplicationService
 import app.support.{Navigation, RemotePageQuery, RemoteTableList, TimeAgo}
 import app.ui.{CompositeSupport, DivComposite, PageComposite}
-import jfx.action.Button.{button, buttonType, buttonType_=, onClick}
-import jfx.control.TableColumn.{cellFactory_=, cellValueFactory_=, column, prefWidth_=}
-import jfx.control.TableView.{fixedCellSize_=, items_=, showHeader_=, tableView}
-import jfx.control.{TableCell, virtualList}
+import jfx.action.Button.{button, buttonType, onClick}
+import jfx.control.TableColumn.{cellFactory, cellValueFactory, column, prefWidth}
+import jfx.control.TableView.{fixedCellSize, items, showHeader, tableView}
+import jfx.control.{TableCell, TableColumn, virtualList}
 import jfx.core.component.ElementComponent.*
 import jfx.core.state.Property.subscribeBidirectional
 import jfx.core.state.{ListProperty, Property, RemoteListProperty}
 import jfx.dsl.*
 import jfx.form.Editor.editor
 import jfx.form.Form
-import jfx.form.Form.{form, onSubmit_=}
-import jfx.form.Input.{input, inputType_=}
+import jfx.form.Form.{form, onSubmit}
+import jfx.form.Input.{input, inputType, placeholder, stringValueProperty}
 import jfx.form.editor.plugins.*
 import jfx.layout.Div.div
 import jfx.layout.HBox.hbox
@@ -148,11 +148,11 @@ object DocumentPage {
 }
 
 private final class DocumentListPanel(
-  documents: ListProperty[Data[Document]],
-  currentDocument: Property[Document],
-  searchQuery: Property[String],
-  createNewDocument: () => Unit
-) extends DivComposite {
+                                       documents: ListProperty[Data[Document]],
+                                       currentDocument: Property[Document],
+                                       searchQuery: Property[String],
+                                       createNewDocument: () => Unit
+                                     ) extends DivComposite {
 
   override protected def compose(using DslContext): Unit = {
     classProperty += "doc-panel"
@@ -181,10 +181,11 @@ private final class DocumentListPanel(
             text = "search"
           }
 
-          val searchInput = input("search") {}
-          searchInput.placeholder = "Suche..."
-          inputType_=("search")(using searchInput)
-          subscribeBidirectional(searchQuery, searchInput.valueProperty.asInstanceOf[Property[String]])
+          input("search") {
+            placeholder = "Suche..."
+            inputType = "search"
+            subscribeBidirectional(searchQuery, stringValueProperty)
+          }
         }
 
         div {
@@ -194,15 +195,14 @@ private final class DocumentListPanel(
           }
 
           val table = tableView[Data[Document]] {
-            items_=(documents)
-            fixedCellSize_=(64.0)
-            showHeader_=(false)
+            items = documents
+            fixedCellSize = 64.0
+            showHeader = false
 
             column[Data[Document], String]("Titel") {
-              val current = summon[jfx.control.TableColumn[Data[Document], String]]
-              current.setPrefWidth(400.0)
-              current.setCellValueFactory(features => features.value.data.title)
-              current.setCellFactory(_ => new DocumentSummaryCell())
+              prefWidth = 400.0
+              cellValueFactory = (features: TableColumn.CellDataFeatures[Data[Document], String]) => features.value.data.title
+              cellFactory = (column: TableColumn[Data[Document], String]) => new DocumentSummaryCell()
             }
           }
 
@@ -256,72 +256,86 @@ private final class DocumentListPanel(
 
 private object DocumentListPanel {
   def panel(
-    documents: ListProperty[Data[Document]],
-    currentDocument: Property[Document],
-    searchQuery: Property[String],
-    createNewDocument: () => Unit
-  )(using Scope): DocumentListPanel =
+             documents: ListProperty[Data[Document]],
+             currentDocument: Property[Document],
+             searchQuery: Property[String],
+             createNewDocument: () => Unit
+           )(using Scope): DocumentListPanel =
     CompositeSupport.buildComposite(new DocumentListPanel(documents, currentDocument, searchQuery, createNewDocument))
 }
 
 private final class DocumentSummaryCell extends TableCell[Data[Document], String] {
+  private val titleProperty = Property("")
+  private val subtitleProperty = Property("")
+  private val visibleProperty = Property(false)
 
-  private val wrapper = newElement("div")
-  private val icon = newElement("span")
-  private val textColumn = newElement("div")
-  private val title = newElement("div")
-  private val subtitle = newElement("div")
+  val wrapper = hbox {
 
-  wrapper.style.display = "flex"
-  wrapper.style.setProperty("align-items", "center")
-  wrapper.style.columnGap = "10px"
-  wrapper.style.width = "100%"
+    style {
+      alignItems = "center"
+      columnGap = "10px"
+      width = "100%"
+      display <-- visibleProperty.map(visible => if (visible) "flex" else "none")
+    }
 
-  icon.className = "material-icons"
-  icon.textContent = "description"
-  icon.style.fontSize = "18px"
-  icon.style.opacity = "0.75"
+    span {
+      classes = "material-icons"
+      text = "description"
+      style {
+        fontSize = "18px"
+        opacity = "0.75"
+      }
+    }
 
-  textColumn.style.display = "flex"
-  textColumn.style.setProperty("flex-direction", "column")
-  textColumn.style.overflow = "hidden"
-  textColumn.style.minWidth = "0"
+    vbox {
+      style {
+        flex = "1"
+        minWidth = "0px"
+        overflow = "hidden"
+      }
 
-  title.style.fontWeight = "600"
-  title.style.overflow = "hidden"
-  title.style.textOverflow = "ellipsis"
-  title.style.whiteSpace = "nowrap"
+      div {
+        subscribeBidirectional(titleProperty, textProperty)
+        style {
+          fontWeight = "600"
+          overflow = "hidden"
+          textOverflow = "ellipsis"
+          whiteSpace = "nowrap"
+        }
+      }
 
-  subtitle.style.fontSize = "12px"
-  subtitle.style.opacity = "0.75"
+      div {
+        subscribeBidirectional(subtitleProperty, textProperty)
+        style {
+          fontSize = "12px"
+          opacity = "0.75"
+        }
+      }
+    }
+  }
 
-  textColumn.appendChild(title)
-  textColumn.appendChild(subtitle)
-  wrapper.appendChild(icon)
-  wrapper.appendChild(textColumn)
-  element.appendChild(wrapper)
+  wrapper.onMount()
+  element.appendChild(wrapper.element)
 
   override protected def updateItem(item: String | Null, empty: Boolean): Unit = {
     val rowValue = Option(getTableRow).flatMap(row => Option(row.getItem))
     if (empty || rowValue.isEmpty) {
       element.classList.add("jfx-table-cell-empty")
-      title.textContent = ""
-      subtitle.textContent = ""
-      wrapper.style.display = "none"
+      visibleProperty.set(false)
     } else {
       val document = rowValue.get.data
       element.classList.remove("jfx-table-cell-empty")
-      title.textContent = Option(document.title.get).filter(_.trim.nonEmpty).getOrElse("(Ohne Titel)")
-      subtitle.textContent = TimeAgo.format(document.created.get)
-      wrapper.style.display = "flex"
+      titleProperty.set(Option(document.title.get).filter(_.trim.nonEmpty).getOrElse("(Ohne Titel)"))
+      subtitleProperty.set(TimeAgo.format(document.created.get))
+      visibleProperty.set(true)
     }
   }
 }
 
 private final class DocumentEditorPanel(
-  document: Document,
-  onSaved: Data[Document] => Unit
-) extends DivComposite {
+                                         document: Document,
+                                         onSaved: Data[Document] => Unit
+                                       ) extends DivComposite {
 
   private given ExecutionContext = ExecutionContext.global
 
@@ -333,13 +347,13 @@ private final class DocumentEditorPanel(
 
     withDslContext {
       form(document) {
-        onSubmit_= { (_ : Form[Document]) =>
+        onSubmit = (_: Form[Document]) =>
           val request =
             if (document.id.get != null) document.update()
             else document.save()
 
           request.foreach(onSaved)
-        }
+
 
         style {
           display = "flex"
@@ -364,7 +378,7 @@ private final class DocumentEditorPanel(
 
           Navigation.renderByRel("update", document.links) { () =>
             val editButton = button("edit") {
-              buttonType_=("button")
+              buttonType = "button"
               classes = Seq("material-icons", "doc-icon-btn")
               onClick { _ =>
                 document.editable.set(!document.editable.get)
@@ -411,9 +425,9 @@ private object DocumentEditorPanel {
 }
 
 private final class IssuesPanel(
-  currentDocument: Property[Document],
-  issues: ListProperty[Issue]
-) extends DivComposite {
+                                 currentDocument: Property[Document],
+                                 issues: ListProperty[Issue]
+                               ) extends DivComposite {
 
   override protected def compose(using DslContext): Unit = {
     classProperty += "doc-panel"
@@ -489,9 +503,9 @@ private object IssuesPanel {
 }
 
 private final class IssueListItem(
-  currentDocument: Property[Document],
-  issue: Issue
-) extends DivComposite {
+                                   currentDocument: Property[Document],
+                                   issue: Issue
+                                 ) extends DivComposite {
 
   override protected def compose(using DslContext): Unit = {
     classProperty += "glass-border"
