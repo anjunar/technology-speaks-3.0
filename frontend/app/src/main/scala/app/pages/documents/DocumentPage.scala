@@ -15,6 +15,8 @@ import jfx.core.component.ElementComponent.*
 import jfx.core.state.Property.subscribeBidirectional
 import jfx.core.state.{ListProperty, Property, RemoteListProperty}
 import jfx.dsl.*
+import jfx.form.Control.valueProperty
+import jfx.form.Editable.editable
 import jfx.form.Editor.editor
 import jfx.form.Form
 import jfx.form.Form.{form, onSubmit}
@@ -255,12 +257,10 @@ private final class DocumentListPanel(
 }
 
 private object DocumentListPanel {
-  def panel(
-             documents: ListProperty[Data[Document]],
-             currentDocument: Property[Document],
-             searchQuery: Property[String],
-             createNewDocument: () => Unit
-           )(using Scope): DocumentListPanel =
+  def panel(documents: ListProperty[Data[Document]],
+            currentDocument: Property[Document],
+            searchQuery: Property[String],
+            createNewDocument: () => Unit)(using Scope): DocumentListPanel =
     CompositeSupport.buildComposite(new DocumentListPanel(documents, currentDocument, searchQuery, createNewDocument))
 }
 
@@ -333,10 +333,7 @@ private final class DocumentSummaryCell extends TableCell[Data[Document], String
   }
 }
 
-private final class DocumentEditorPanel(
-                                         document: Document,
-                                         onSaved: Data[Document] => Unit
-                                       ) extends DivComposite {
+private final class DocumentEditorPanel(document: Document, onSaved: Data[Document] => Unit) extends DivComposite {
 
   private given ExecutionContext = ExecutionContext.global
 
@@ -431,7 +428,7 @@ private final class IssuesPanel(
                                ) extends DivComposite {
 
   override protected def compose(using DslContext): Unit = {
-    classProperty += "doc-panel"
+    classes += "doc-panel"
 
     withDslContext {
       vbox {
@@ -458,9 +455,11 @@ private final class IssuesPanel(
 
           virtualList(issues, estimateHeightPx = 220, overscanPx = 240, prefetchItems = 40) { (issue, _) =>
             if (issue == null) {
-              val card = loadingCard {}
-              card.minHeight("160px")
-              card
+              loadingCard {
+                style {
+                  minHeight = "160px"
+                }
+              }
             } else {
               IssueListItem.item(currentDocument, issue)
             }
@@ -503,16 +502,12 @@ private object IssuesPanel {
     CompositeSupport.buildComposite(new IssuesPanel(currentDocument, issues))
 }
 
-private final class IssueListItem(
-                                   currentDocument: Property[Document],
-                                   issue: Issue
-                                 ) extends DivComposite {
+private final class IssueListItem(currentDocument: Property[Document], issue: Issue) extends DivComposite {
 
   override protected def compose(using DslContext): Unit = {
-    classProperty += "glass-border"
+    classes = "glass-border"
 
     withDslContext {
-      var editorFieldRef: jfx.form.Editor | Null = null
 
       vbox {
         style {
@@ -530,24 +525,19 @@ private final class IssueListItem(
           text = Option(issue.title.get).filter(_.trim.nonEmpty).getOrElse("(Ohne Titel)")
         }
 
-        editorFieldRef = editor("editor", true) {
+        editor("editor", true) {
           basePlugin {}
           headingPlugin {}
           listPlugin {}
           linkPlugin {}
           imagePlugin {}
-        }
 
-        editorFieldRef.nn.editableProperty.set(false)
-      }
-
-      subscribeBidirectional(issue.editor, editorFieldRef.nn.valueProperty)
-      element.onclick = _ => {
-        val documentId = currentDocument.get.id.get
-        if (documentId != null && issue.id.get != null) {
-          Navigation.navigate(s"/document/documents/document/$documentId/issues/issue/${issue.id.get}")
+          editable = false
+          subscribeBidirectional(issue.editor, valueProperty)
         }
       }
+
+
     }
   }
 }
