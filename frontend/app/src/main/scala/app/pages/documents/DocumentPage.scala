@@ -316,6 +316,7 @@ private final class DocumentSummaryCell extends TableCell[Data[Document], String
 
   wrapper.onMount()
   element.appendChild(wrapper.element)
+  addDisposable(() => wrapper.dispose())
 
   override protected def updateItem(item: String | Null, empty: Boolean): Unit = {
     val rowValue = Option(getTableRow).flatMap(row => Option(row.getItem))

@@ -102,16 +102,16 @@ private final class UserImageCell extends TableCell[Data[User], Media | Null] {
 
   val imageSource = Property[String](null)
   val imageVisible = Property[Boolean](false)
-  
+
   val wrapper: HBox = hbox {
     
     style {
       alignItems = "center"
       justifyContent = "center"
     }
-    
+
     conditional(imageVisible) {
-      
+
       thenDo {
         image {
 
@@ -124,7 +124,7 @@ private final class UserImageCell extends TableCell[Data[User], Media | Null] {
           }
         }
       }
-      
+
       elseDo {
         div {
           classes = "material-icons"
@@ -134,13 +134,14 @@ private final class UserImageCell extends TableCell[Data[User], Media | Null] {
           }
         }
       }
-      
+
     }
-    
+
   }
-  
+
   wrapper.onMount()
   element.appendChild(wrapper.element)
+  addDisposable(() => wrapper.dispose())
 
   override protected def updateItem(item: Media | Null, empty: Boolean): Unit = {
     val isEmptyCell = empty || item == null
