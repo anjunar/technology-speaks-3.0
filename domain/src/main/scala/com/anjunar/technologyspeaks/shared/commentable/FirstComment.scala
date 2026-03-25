@@ -29,10 +29,10 @@ object FirstComment extends RepositoryContext[FirstComment] with SchemaProvider 
   override def schema(): EntitySchema[?] = new Schema
 
   class Schema extends AbstractEntitySchema[FirstComment] {
-    @JsonbProperty val user = property[com.anjunar.technologyspeaks.core.User]("user", classOf[com.anjunar.technologyspeaks.core.User])
-    @JsonbProperty val editor = property[com.anjunar.technologyspeaks.shared.editor.Node]("editor", classOf[com.anjunar.technologyspeaks.shared.editor.Node], new DefaultWritableRule[FirstComment]())
-    @JsonbProperty val comments = property[java.util.List[SecondComment]]("comments", classOf[java.util.List[?]], new DefaultWritableRule[FirstComment](), classOf[SecondComment])
-    @JsonbProperty val likes = property[java.util.Set[Like]]("likes", classOf[java.util.Set[?]], collectionType = classOf[Like])
+    @JsonbProperty val user = property(_.user)
+    @JsonbProperty val editor = property(_.editor, new DefaultWritableRule[FirstComment]())
+    @JsonbProperty val comments = property(_.comments, new DefaultWritableRule[FirstComment]())
+    @JsonbProperty val likes = property(_.likes)
   }
 
 }

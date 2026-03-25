@@ -82,8 +82,8 @@ object RelationShip extends RepositoryContext[RelationShip] with SchemaProvider 
   override def schema(): EntitySchema[?] = new Schema
 
   class Schema extends AbstractEntitySchema[RelationShip] {
-    @JsonbProperty val follower = property[User]("follower", classOf[User], new OwnerRule[RelationShip]())
-    @JsonbProperty val groups = property[java.util.Set[Group]]("groups", classOf[java.util.Set[?]], new OwnerRule[RelationShip](), classOf[Group])
+    @JsonbProperty val follower = property(_.follower, new OwnerRule[RelationShip]())
+    @JsonbProperty val groups = property(_.groups, new OwnerRule[RelationShip]())
   }
 
 }

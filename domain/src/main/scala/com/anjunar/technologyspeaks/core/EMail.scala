@@ -33,7 +33,7 @@ object EMail extends RepositoryContext[EMail] with SchemaProvider {
   override def schema(): EntitySchema[?] = new Schema
 
   class Schema extends AbstractEntitySchema[EMail] {
-    @JsonbProperty val value = property[String]("value", classOf[String], new OwnerRule[EMail]())
+    @JsonbProperty val value = property(_.value, new OwnerRule[EMail]())
   }
 
 }

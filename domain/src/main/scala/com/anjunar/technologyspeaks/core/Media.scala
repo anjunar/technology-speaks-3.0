@@ -33,10 +33,10 @@ object Media extends SchemaProvider {
   override def schema(): EntitySchema[?] = new Schema
 
   class Schema extends AbstractEntitySchema[Media] {
-    @JsonbProperty val name = property[String]("name", classOf[String], new DefaultWritableRule[Media]())
-    @JsonbProperty val contentType = property[String]("contentType", classOf[String], new DefaultWritableRule[Media]())
-    @JsonbProperty val data = property[Array[Byte]]("data", classOf[Array[Byte]], new DefaultWritableRule[Media]())
-    @JsonbProperty val thumbnail = property[Thumbnail]("thumbnail", classOf[Thumbnail], new DefaultWritableRule[Media]())
+    @JsonbProperty val name = property(_.name, new DefaultWritableRule[Media]())
+    @JsonbProperty val contentType = property(_.contentType, new DefaultWritableRule[Media]())
+    @JsonbProperty val data = property(_.data, new DefaultWritableRule[Media]())
+    @JsonbProperty val thumbnail = property(_.thumbnail, new DefaultWritableRule[Media]())
   }
 
 }

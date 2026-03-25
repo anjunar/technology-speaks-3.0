@@ -41,9 +41,9 @@ object Thumbnail extends SchemaProvider {
   override def schema(): EntitySchema[?] = new Schema
 
   class Schema extends AbstractEntitySchema[Thumbnail] {
-    val name = property[String]("name", classOf[String], new DefaultWritableRule[Thumbnail]())
-    val contentType = property[String]("contentType", classOf[String], new DefaultWritableRule[Thumbnail]())
-    val data = property[Array[Byte]]("data", classOf[Array[Byte]], new DefaultWritableRule[Thumbnail]())
+    val name = property(_.name, new DefaultWritableRule[Thumbnail]())
+    val contentType = property(_.contentType, new DefaultWritableRule[Thumbnail]())
+    val data = property(_.data, new DefaultWritableRule[Thumbnail]())
   }
 
 }

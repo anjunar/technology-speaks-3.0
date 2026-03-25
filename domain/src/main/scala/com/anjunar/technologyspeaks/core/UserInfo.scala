@@ -41,10 +41,10 @@ object UserInfo extends SchemaProvider {
   override def schema(): EntitySchema[?] = new Schema
 
   class Schema extends EntitySchema[UserInfo] {
-    @JsonbProperty val id = property[java.util.UUID]("id", classOf[java.util.UUID], new ManagedRule[UserInfo]())
-    @JsonbProperty val firstName = property[String]("firstName", classOf[String], new ManagedRule[UserInfo]())
-    @JsonbProperty val lastName = property[String]("lastName", classOf[String], new ManagedRule[UserInfo]())
-    @JsonbProperty val birthDate = property[LocalDate]("birthDate", classOf[LocalDate], new ManagedRule[UserInfo]())
+    @JsonbProperty val id = property(_.id, new ManagedRule[UserInfo]())
+    @JsonbProperty val firstName = property(_.firstName, new ManagedRule[UserInfo]())
+    @JsonbProperty val lastName = property(_.lastName, new ManagedRule[UserInfo]())
+    @JsonbProperty val birthDate = property(_.birthDate, new ManagedRule[UserInfo]())
   }
 
 }

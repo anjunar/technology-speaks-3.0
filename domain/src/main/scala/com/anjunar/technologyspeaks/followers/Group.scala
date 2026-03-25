@@ -32,7 +32,7 @@ object Group extends RepositoryContext[Group] with SchemaProvider {
   override def schema(): EntitySchema[?] = new Schema
 
   class Schema extends AbstractEntitySchema[Group] {
-    @JsonbProperty val name = property[String]("name", classOf[String], new OwnerRule[Group]())
+    @JsonbProperty val name = property(_.name, new OwnerRule[Group]())
   }
 
 }

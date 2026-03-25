@@ -81,9 +81,9 @@ object Document extends RepositoryContext[Document] with SchemaProvider {
   override def schema(): EntitySchema[?] = new Schema
 
   class Schema extends AbstractEntitySchema[Document] {
-    @JsonbProperty val title = property[String]("title", classOf[String], new OwnerRule[Document]())
-    @JsonbProperty val user = property[User]("user", classOf[User], new OwnerRule[Document]())
-    @JsonbProperty val editor = property[Node]("editor", classOf[Node], new OwnerRule[Document]())
+    @JsonbProperty val title = property(_.title, new OwnerRule[Document]())
+    @JsonbProperty val user = property(_.user, new OwnerRule[Document]())
+    @JsonbProperty val editor = property(_.editor, new OwnerRule[Document]())
   }
 
 }

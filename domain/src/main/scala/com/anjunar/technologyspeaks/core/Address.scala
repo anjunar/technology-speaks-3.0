@@ -45,10 +45,10 @@ object Address extends SchemaProvider {
   override def schema(): EntitySchema[?] = new Schema
 
   class Schema extends AbstractEntitySchema[Address] {
-    @JsonbProperty val street = property[String]("street", classOf[String], new ManagedRule[Address]())
-    @JsonbProperty val number = property[String]("number", classOf[String], new ManagedRule[Address]())
-    @JsonbProperty val zipCode = property[String]("zipCode", classOf[String], new ManagedRule[Address]())
-    @JsonbProperty val country = property[String]("country", classOf[String], new ManagedRule[Address]())
+    @JsonbProperty val street = property(_.street, new ManagedRule[Address]())
+    @JsonbProperty val number = property(_.number, new ManagedRule[Address]())
+    @JsonbProperty val zipCode = property(_.zipCode, new ManagedRule[Address]())
+    @JsonbProperty val country = property(_.country, new ManagedRule[Address]())
   }
 
 }

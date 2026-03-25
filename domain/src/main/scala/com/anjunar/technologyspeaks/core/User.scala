@@ -60,11 +60,11 @@ object User extends RepositoryContext[User] with SchemaProvider {
   override def schema(): EntitySchema[?] = new Schema
 
   open class Schema extends AbstractEntitySchema[User] {
-    @JsonbProperty val nickName = property[String]("nickName", classOf[String], new OwnerRule[User]())
-    @JsonbProperty val image = property[Media]("image", classOf[Media], new OwnerRule[User]())
-    @JsonbProperty val info = property[UserInfo]("info", classOf[UserInfo], new OwnerRule[User]())
-    @JsonbProperty val address = property[Address]("address", classOf[Address], new OwnerRule[User]())
-    @JsonbProperty val emails = property[java.util.Set[EMail]]("emails", classOf[java.util.Set[?]], new ManagedRule[User](), classOf[EMail])
+    @JsonbProperty val nickName = property(_.nickName, new OwnerRule[User]())
+    @JsonbProperty val image = property(_.image, new OwnerRule[User]())
+    @JsonbProperty val info = property(_.info, new OwnerRule[User]())
+    @JsonbProperty val address = property(_.address, new OwnerRule[User]())
+    @JsonbProperty val emails = property(_.emails, new ManagedRule[User]())
   }
 
   @Entity(name = "UserView")

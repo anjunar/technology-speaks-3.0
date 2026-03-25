@@ -8,9 +8,9 @@ import java.util
 
 abstract class AbstractEntitySchema[E <: AbstractEntity] extends EntitySchema[E] {
 
-  val id: Property[E, UUID] = property[UUID]("id", classOf[UUID])
-  val links: Property[E, util.List[Link]] = property[util.List[Link]]("links", classOf[util.List[?]], collectionType = classOf[Link])
-  val modified: Property[E, LocalDateTime] = property[LocalDateTime]("modified", classOf[LocalDateTime])
-  val created: Property[E, LocalDateTime] = property[LocalDateTime]("created", classOf[LocalDateTime])
+  val id: Property[E, UUID] = property(_.id)
+  val links: Property[E, util.List[Link]] = property(_.links)
+  val modified: Property[E, LocalDateTime] = property(_.modified)
+  val created: Property[E, LocalDateTime] = property(_.created)
 
 }

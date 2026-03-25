@@ -2,10 +2,10 @@ package com.anjunar.json.mapper.schema
 
 import com.anjunar.scala.universe.introspector.AbstractProperty
 
-class DefaultRule extends VisibilityRule[Any] {
+class DefaultRule[E] extends VisibilityRule[E] {
 
-  override def isVisible(instance: Any, property: AbstractProperty): Boolean = true
+  override def isVisible(instance: E, property: AbstractProperty): Boolean = true
 
-  override def isWriteable(instance: Any, property: AbstractProperty): Boolean = false
+  override def isWriteable(instance: E, property: AbstractProperty): Boolean = false
 
 }

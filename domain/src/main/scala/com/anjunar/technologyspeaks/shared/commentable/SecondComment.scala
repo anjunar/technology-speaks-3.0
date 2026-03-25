@@ -24,9 +24,9 @@ object SecondComment extends RepositoryContext[SecondComment] with SchemaProvide
   override def schema(): EntitySchema[?] = new Schema
 
   class Schema extends AbstractEntitySchema[SecondComment] {
-    @JsonbProperty val user = property[com.anjunar.technologyspeaks.core.User]("user", classOf[com.anjunar.technologyspeaks.core.User])
-    @JsonbProperty val editor = property[com.anjunar.technologyspeaks.shared.editor.Node]("editor", classOf[com.anjunar.technologyspeaks.shared.editor.Node], new DefaultWritableRule[SecondComment]())
-    @JsonbProperty val likes = property[java.util.Set[Like]]("likes", classOf[java.util.Set[?]], collectionType = classOf[Like])
+    @JsonbProperty val user = property(_.user)
+    @JsonbProperty val editor = property(_.editor, new DefaultWritableRule[SecondComment]())
+    @JsonbProperty val likes = property(_.likes)
   }
 
 }

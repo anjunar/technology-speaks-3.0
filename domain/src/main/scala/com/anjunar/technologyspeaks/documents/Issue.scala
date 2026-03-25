@@ -94,10 +94,10 @@ object Issue extends RepositoryContext[Issue] with SchemaProvider {
   override def schema(): EntitySchema[?] = new Schema
 
   class Schema extends AbstractEntitySchema[Issue] {
-    @JsonbProperty val title = property[String]("title", classOf[String], new OwnerRule[Issue]())
-    @JsonbProperty val user = property[User]("user", classOf[User], new OwnerRule[Issue]())
-    @JsonbProperty val editor = property[Node]("editor", classOf[Node], new OwnerRule[Issue]())
-    @JsonbProperty val likes = property[java.util.Set[Like]]("likes", classOf[java.util.Set[?]], new OwnerRule[Issue](), classOf[Like])
+    @JsonbProperty val title = property(_.title, new OwnerRule[Issue]())
+    @JsonbProperty val user = property(_.user, new OwnerRule[Issue]())
+    @JsonbProperty val editor = property(_.editor, new OwnerRule[Issue]())
+    @JsonbProperty val likes = property(_.likes, new OwnerRule[Issue]())
   }
 
 }
