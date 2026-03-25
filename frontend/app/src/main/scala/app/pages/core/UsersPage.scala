@@ -3,15 +3,19 @@ package app.pages.core
 import app.domain.core.{Data, MediaHelper, User}
 import app.support.{Navigation, RemotePageQuery, RemoteTableList}
 import app.ui.{CompositeSupport, PageComposite}
-import jfx.control.TableColumn.{cellFactory_=, cellValueFactory_=, column, prefWidth_=}
-import jfx.control.TableView.{fixedCellSize, fixedCellSize_=, items, items_=, rowFactory, rowFactory_=, tableView}
+import jfx.control.TableColumn.{cellFactory, cellValueFactory, column, prefWidth}
+import jfx.control.TableView.{fixedCellSize, items, rowFactory, tableView}
+import jfx.control.Image.{image, srcProperty}
+import jfx.layout.HBox.hbox
 import jfx.control.{TableCell, TableRow, TableView}
 import jfx.core.component.ElementComponent.*
 import jfx.core.state.{ListProperty, Property, RemoteListProperty}
 import jfx.domain.Media
 import jfx.dsl.*
 import jfx.layout.Div.div
+import jfx.layout.HBox
 import jfx.layout.VBox.vbox
+import jfx.statement.Conditional.{conditional, elseDo, thenDo}
 import org.scalajs.dom.HTMLImageElement
 
 import scala.concurrent.ExecutionContext
@@ -96,37 +100,58 @@ private final class UserNavigationRow extends TableRow[Data[User]] {
 
 private final class UserImageCell extends TableCell[Data[User], Media | Null] {
 
-  private val icon = newElement("div")
-  private val image = newElement("img").asInstanceOf[HTMLImageElement]
+  val imageSource = Property[String](null)
+  val imageVisible = Property[Boolean](false)
+  
+  val wrapper: HBox = hbox {
+    
+    style {
+      alignItems = "center"
+      justifyContent = "center"
+    }
+    
+    conditional(imageVisible) {
+      
+      thenDo {
+        image {
 
-  icon.className = "material-icons"
-  icon.textContent = "account_circle"
-  icon.style.fontSize = "40px"
+          Property.subscribeBidirectional(imageSource, srcProperty)
 
-  image.style.width = "40px"
-  image.style.height = "40px"
-  image.style.borderRadius = "50%"
-  image.style.setProperty("object-fit", "cover")
-  image.style.display = "none"
-
-  element.style.display = "flex"
-  element.style.setProperty("align-items", "center")
-  element.style.setProperty("justify-content", "center")
-  element.appendChild(icon)
-  element.appendChild(image)
+          style {
+            width = "40px"
+            height = "40px"
+            borderRadius = "50%"
+          }
+        }
+      }
+      
+      elseDo {
+        div {
+          classes = "material-icons"
+          text = "account_circle"
+          style {
+            fontSize = "40px"
+          }
+        }
+      }
+      
+    }
+    
+  }
+  
+  wrapper.onMount()
+  element.appendChild(wrapper.element)
 
   override protected def updateItem(item: Media | Null, empty: Boolean): Unit = {
     val isEmptyCell = empty || item == null
     if (isEmptyCell) {
       element.classList.add("jfx-table-cell-empty")
-      image.src = ""
-      image.style.display = "none"
-      icon.style.display = "flex"
+      imageVisible.set(false)
+      imageSource.set(null)
     } else {
       element.classList.remove("jfx-table-cell-empty")
-      image.src = MediaHelper.thumbnailLink(item)
-      image.style.display = "block"
-      icon.style.display = "none"
+      imageVisible.set(true)
+      imageSource.set(MediaHelper.thumbnailLink(item))
     }
   }
 }

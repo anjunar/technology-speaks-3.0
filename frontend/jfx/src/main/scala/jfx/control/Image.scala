@@ -1,20 +1,26 @@
 package jfx.control
 
 import jfx.core.component.ManagedElementComponent
+import jfx.core.state.Property
 import jfx.dsl.{ComponentContext, DslRuntime, Scope}
 import org.scalajs.dom.HTMLImageElement
 
 class Image extends ManagedElementComponent[HTMLImageElement] {
 
   override val element: HTMLImageElement = newElement("img")
+  
+  val srcProperty = new Property[String](null)
+  
+  private val srcObserver = srcProperty.observe { value =>
+    if (value != null) element.src = value
+  }
+  addDisposable(srcObserver)
 
   def src: String =
-    element.src
+    srcProperty.get
 
   def src_=(value: String): Unit =
-    element.src =
-      if (value == null) ""
-      else value
+    srcProperty.set(value)
 
   def alt: String =
     element.alt
@@ -39,6 +45,9 @@ object Image {
       DslRuntime.attach(component, currentContext)
       component
     }
+
+  def srcProperty(using image: Image): Property[String] =
+    image.srcProperty
 
   def src(using image: Image): String =
     image.src
