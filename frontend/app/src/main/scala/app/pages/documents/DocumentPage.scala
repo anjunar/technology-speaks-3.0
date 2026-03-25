@@ -95,7 +95,6 @@ class DocumentPage(val model: Document) extends PageComposite("Dokument") {
           style {
             flex = "1"
             minWidth = "0px"
-            height = "100%"
           }
 
           observeRender(currentDocumentProperty) { document =>
@@ -327,7 +326,10 @@ private final class DocumentEditorPanel(
   private given ExecutionContext = ExecutionContext.global
 
   override protected def compose(using DslContext): Unit = {
-    classProperty += "doc-panel"
+    classes = "doc-panel"
+    style {
+      height = "100%"
+    }
 
     withDslContext {
       form(document) {
