@@ -10,6 +10,7 @@ import jakarta.persistence.*
 import scala.beans.BeanProperty
 import scala.compiletime.uninitialized
 import com.anjunar.technologyspeaks.SpringContext
+import com.anjunar.technologyspeaks.followers.RelationShip.Schema
 
 
 @Entity
@@ -79,9 +80,7 @@ class RelationShip extends AbstractEntity, OwnerProvider, EntityContext[Relation
 
 }
 
-object RelationShip extends RepositoryContext[RelationShip] with SchemaProvider {
-
-  override def schema(): EntitySchema[?] = new Schema
+object RelationShip extends RepositoryContext[RelationShip] with SchemaProvider[Schema] {
 
   class Schema extends AbstractEntitySchema[RelationShip](SpringContext.entityManager()) {
     @JsonbProperty val follower = property(_.follower, new OwnerRule[RelationShip]())

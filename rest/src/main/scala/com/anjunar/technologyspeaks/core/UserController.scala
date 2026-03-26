@@ -14,7 +14,7 @@ class UserController(val identityHolder: IdentityHolder) {
   @RolesAllowed(Array("User", "Administrator"))
   @EntityGraph("User.full")
   def read(@PathVariable("id") user: User): Data[User] = {
-    val form = new Data(user, User.schema())
+    val form = new Data(user, User.schema)
 
     if (identityHolder.user == user) {
       user.addLinks(
@@ -59,7 +59,7 @@ class UserController(val identityHolder: IdentityHolder) {
   @RolesAllowed(Array("User", "Administrator"))
   @EntityGraph("User.full")
   def update(@RequestBody user: User): Data[User] = {
-    val form = new Data(user, User.schema())
+    val form = new Data(user, User.schema)
 
     user.addLinks(
       LinkBuilder.create(classOf[UserController], "update")

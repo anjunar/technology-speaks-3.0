@@ -20,7 +20,7 @@ class DocumentController(val identityHolder: IdentityHolder) {
     node.nodeType = "doc"
     entity.editor = node
 
-    val form = new Data(entity, Document.schema())
+    val form = new Data(entity, Document.schema)
 
     entity.addLinks(
       LinkBuilder.create(classOf[DocumentController], "save")
@@ -45,7 +45,7 @@ class DocumentController(val identityHolder: IdentityHolder) {
       entity.persist()
     }
 
-    val form = new Data(entity, Document.schema())
+    val form = new Data(entity, Document.schema)
 
     entity.addLinks(
       LinkBuilder.create(classOf[DocumentController], "create")
@@ -74,7 +74,7 @@ class DocumentController(val identityHolder: IdentityHolder) {
   @RolesAllowed(Array("User", "Administrator"))
   @EntityGraph("Document.full")
   def read(@PathVariable("id") entity: Document): Data[Document] = {
-    val form = new Data(entity, Document.schema())
+    val form = new Data(entity, Document.schema)
 
     entity.addLinks(
       LinkBuilder.create(classOf[IssuesController], "list")
@@ -102,7 +102,7 @@ class DocumentController(val identityHolder: IdentityHolder) {
     entity.user = identityHolder.user
     entity.persist()
 
-    val form = new Data(entity, Document.schema())
+    val form = new Data(entity, Document.schema)
 
     entity.addLinks(
       LinkBuilder.create(classOf[DocumentController], "update")
@@ -124,7 +124,7 @@ class DocumentController(val identityHolder: IdentityHolder) {
   def update(@RequestBody entity: Document): Data[Document] = {
     entity.user = identityHolder.user
 
-    val form = new Data(entity, Document.schema())
+    val form = new Data(entity, Document.schema)
 
     entity.addLinks(
       LinkBuilder.create(classOf[DocumentController], "update")

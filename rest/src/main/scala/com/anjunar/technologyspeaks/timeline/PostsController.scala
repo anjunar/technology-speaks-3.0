@@ -48,7 +48,7 @@ class PostsController(val query: HibernateSearch, val identityHolder: IdentityHo
       }
     }
 
-    new Table(entities, count, Post.schema())
+    new Table(entities, count, Post.schema)
   }
 
 }
@@ -56,6 +56,6 @@ class PostsController(val query: HibernateSearch, val identityHolder: IdentityHo
 object PostsController {
 
   @JsonbSubtype(alias = "Data", `type` = classOf[Data[?]])
-  class PostRow(data: Post) extends Data[Post](data, Post.schema())
+  class PostRow(data: Post) extends Data[Post](data, Post.schema)
 
 }

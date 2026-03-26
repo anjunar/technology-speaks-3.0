@@ -47,7 +47,7 @@ class DocumentsController(val query: HibernateSearch) {
       )
     }
 
-    val table = new Table(entities, count, Document.schema())
+    val table = new Table(entities, count, Document.schema)
 
     table.addLinks(
       LinkBuilder.create(classOf[DocumentController], "create")
@@ -62,6 +62,6 @@ class DocumentsController(val query: HibernateSearch) {
 object DocumentsController {
 
   @JsonbSubtype(alias = "Data", `type` = classOf[Data[?]])
-  class DocumentRow(data: Document, @(JsonbProperty @field) val score: Double) extends Data[Document](data, Document.schema())
+  class DocumentRow(data: Document, @(JsonbProperty @field) val score: Double) extends Data[Document](data, Document.schema)
 
 }

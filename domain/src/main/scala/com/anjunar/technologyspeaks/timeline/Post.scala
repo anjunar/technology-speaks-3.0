@@ -17,6 +17,7 @@ import scala.beans.BeanProperty
 import scala.compiletime.uninitialized
 import java.util
 import com.anjunar.technologyspeaks.SpringContext
+import com.anjunar.technologyspeaks.timeline.Post.Schema
 
 
 @Entity
@@ -86,9 +87,7 @@ class Post extends AbstractEntity, EntityContext[Post], OwnerProvider, LikeConta
 
 }
 
-object Post extends RepositoryContext[Post] with SchemaProvider {
-
-  override def schema(): EntitySchema[?] = new Schema
+object Post extends RepositoryContext[Post] with SchemaProvider[Schema] {
 
   class Schema extends AbstractEntitySchema[Post](SpringContext.entityManager()) {
     @JsonbProperty

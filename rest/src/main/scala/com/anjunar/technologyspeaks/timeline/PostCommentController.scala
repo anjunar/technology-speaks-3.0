@@ -23,7 +23,7 @@ class PostCommentController(val identityHolder: IdentityHolder) {
 
     post.comments.add(body)
 
-    new Data(body, FirstComment.schema())
+    new Data(body, FirstComment.schema)
   }
 
   @PutMapping(value = Array("/timeline/posts/post/{id}/comment"), produces = Array("application/json"), consumes = Array("application/json"))
@@ -35,7 +35,7 @@ class PostCommentController(val identityHolder: IdentityHolder) {
 
     post.comments.add(body)
 
-    new Data(body, FirstComment.schema())
+    new Data(body, FirstComment.schema)
   }
 
   @DeleteMapping(value = Array("/timeline/posts/post/{id}/comment"), produces = Array("application/json"), consumes = Array("application/json"))

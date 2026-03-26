@@ -25,7 +25,7 @@ class UserGroupsController(private val identityHolder: IdentityHolder) {
     }
 
     relationShip.groups.asScala
-      .map(group => new Data(group, Group.schema()))
+      .map(group => new Data(group, Group.schema))
       .toList
       .asJava
   }
@@ -54,7 +54,7 @@ class UserGroupsController(private val identityHolder: IdentityHolder) {
     relationShip.groups.addAll(resolved.asJava)
 
     relationShip.groups.asScala
-      .map(group => new Data(group, Group.schema()))
+      .map(group => new Data(group, Group.schema))
       .toList
       .asJava
   }

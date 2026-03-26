@@ -9,6 +9,7 @@ import jakarta.persistence.{CascadeType, Entity, OneToMany, Table}
 
 import scala.beans.BeanProperty
 import com.anjunar.technologyspeaks.SpringContext
+import com.anjunar.technologyspeaks.shared.commentable.SecondComment.Schema
 
 
 @Entity
@@ -21,9 +22,7 @@ class SecondComment extends AbstractComment with EntityContext[SecondComment] wi
 
 }
 
-object SecondComment extends RepositoryContext[SecondComment] with SchemaProvider {
-
-  override def schema(): EntitySchema[?] = new Schema
+object SecondComment extends RepositoryContext[SecondComment] with SchemaProvider[Schema] {
 
   class Schema extends AbstractEntitySchema[SecondComment](SpringContext.entityManager()) {
     @JsonbProperty val user = property(_.user)

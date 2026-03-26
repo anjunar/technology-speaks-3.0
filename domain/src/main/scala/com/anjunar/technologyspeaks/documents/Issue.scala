@@ -14,6 +14,7 @@ import org.hibernate.annotations.Type
 import scala.annotation.meta.field
 import scala.compiletime.uninitialized
 import com.anjunar.technologyspeaks.SpringContext
+import com.anjunar.technologyspeaks.documents.Issue.Schema
 
 
 @Entity
@@ -91,9 +92,7 @@ class Issue(@(Column @field)(nullable = false) @(JsonbProperty @field) var title
 
 }
 
-object Issue extends RepositoryContext[Issue] with SchemaProvider {
-
-  override def schema(): EntitySchema[?] = new Schema
+object Issue extends RepositoryContext[Issue] with SchemaProvider[Schema] {
 
   class Schema extends AbstractEntitySchema[Issue](SpringContext.entityManager()) {
     @JsonbProperty val title = property(_.title, new OwnerRule[Issue]())

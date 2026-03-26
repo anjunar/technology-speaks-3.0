@@ -17,13 +17,7 @@ class BeanSerializer extends Serializer[Any] {
     val nodes = new java.util.LinkedHashMap[String, JsonNode]()
     val json = new JsonObject(nodes)
 
-    val companionInstance = TypeResolver.companionInstance[SchemaProvider](context.resolvedClass.raw)
-    val schemaProvider =
-      if (companionInstance != null) {
-        companionInstance
-      } else {
-        null
-      }
+    val schemaProvider = TypeResolver.companionInstance[SchemaProvider[?]](context.resolvedClass.raw)
 
     val properties = beanModel.properties
     var index = 0
@@ -39,7 +33,7 @@ class BeanSerializer extends Serializer[Any] {
         index += 1
       } else {
         if (schemaProvider != null) {
-          val schemaProperties = schemaProvider.schema().properties
+          val schemaProperties = schemaProvider.schema.properties
           val schemaProperty = schemaProperties.get(property.name)
 
           if (schemaProperty == null) {

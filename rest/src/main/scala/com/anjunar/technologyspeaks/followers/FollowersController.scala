@@ -43,7 +43,7 @@ class FollowersController(val query: HibernateSearch, val identityHolder: Identi
       )
     }
 
-    new Table(entities, count, RelationShip.schema())
+    new Table(entities, count, RelationShip.schema)
   }
 
 }
@@ -51,6 +51,6 @@ class FollowersController(val query: HibernateSearch, val identityHolder: Identi
 object FollowersController {
 
   @JsonbSubtype(alias = "Data", `type` = classOf[Data[?]])
-  class RelationShipRow(@(JsonbProperty @field) data: RelationShip) extends Data[RelationShip](data, RelationShip.schema())
+  class RelationShipRow(@(JsonbProperty @field) data: RelationShip) extends Data[RelationShip](data, RelationShip.schema)
 
 }

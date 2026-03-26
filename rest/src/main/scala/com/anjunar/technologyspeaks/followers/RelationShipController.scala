@@ -21,7 +21,7 @@ class RelationShipController {
         .build()
     )
 
-    new Data(entity, RelationShip.schema())
+    new Data(entity, RelationShip.schema)
   }
 
   @PostMapping(value = Array("/followers/relationships/relationship"), consumes = Array("application/json"), produces = Array("application/json"))
@@ -37,7 +37,7 @@ class RelationShipController {
         .build()
     )
 
-    new Data(entity, RelationShip.schema())
+    new Data(entity, RelationShip.schema)
   }
 
   @PutMapping(value = Array("/followers/relationships/relationship"), consumes = Array("application/json"), produces = Array("application/json"))
@@ -51,7 +51,7 @@ class RelationShipController {
         .build()
     )
 
-    new Data(entity, RelationShip.schema())
+    new Data(entity, RelationShip.schema)
   }
 
   @DeleteMapping(value = Array("/followers/relationships/relationship"), consumes = Array("application/json"))

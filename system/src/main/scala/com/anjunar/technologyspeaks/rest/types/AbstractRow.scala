@@ -13,6 +13,6 @@ abstract class AbstractRow[E](
 
   @JsonbProperty
   val schema: EntitySchema[?] =
-    TypeResolver.companionInstance(clazz).asInstanceOf[SchemaProvider].schema()
+    TypeResolver.companionInstance(clazz).asInstanceOf[SchemaProvider[?]].schema
 
 }

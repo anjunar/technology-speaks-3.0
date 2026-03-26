@@ -13,6 +13,7 @@ import scala.annotation.meta.field
 import scala.beans.BeanProperty
 import scala.compiletime.uninitialized
 import com.anjunar.technologyspeaks.SpringContext
+import com.anjunar.technologyspeaks.documents.Document.Schema
 
 
 @Entity
@@ -78,9 +79,7 @@ class Document(@(Column @field)(nullable = false) @(JsonbProperty @field) var ti
 
 }
 
-object Document extends RepositoryContext[Document] with SchemaProvider {
-
-  override def schema(): EntitySchema[?] = new Schema
+object Document extends RepositoryContext[Document] with SchemaProvider[Schema] {
 
   class Schema extends AbstractEntitySchema[Document](SpringContext.entityManager()) {
     @JsonbProperty val title = property(_.title, new OwnerRule[Document]())

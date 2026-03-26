@@ -22,7 +22,7 @@ class GroupController(private val identityHolder: IdentityHolder) {
       LinkBuilder.create(classOf[GroupController], "delete").build()
     )
 
-    new Data(entity, Group.schema())
+    new Data(entity, Group.schema)
   }
 
   @PostMapping(value = Array("/followers/groups/groups"), consumes = Array("application/json"), produces = Array("application/json"))
@@ -36,7 +36,7 @@ class GroupController(private val identityHolder: IdentityHolder) {
       LinkBuilder.create(classOf[GroupController], "delete").build()
     )
 
-    new Data(entity, Group.schema())
+    new Data(entity, Group.schema)
   }
 
   @PutMapping(value = Array("/followers/groups/groups"), consumes = Array("application/json"), produces = Array("application/json"))
@@ -51,7 +51,7 @@ class GroupController(private val identityHolder: IdentityHolder) {
       LinkBuilder.create(classOf[GroupController], "delete").build()
     )
 
-    new Data(entity, Group.schema())
+    new Data(entity, Group.schema)
   }
 
   @DeleteMapping(value = Array("/followers/groups/groups"), consumes = Array("application/json"))

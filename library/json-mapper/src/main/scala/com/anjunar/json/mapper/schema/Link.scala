@@ -1,5 +1,6 @@
 package com.anjunar.json.mapper.schema
 
+import com.anjunar.json.mapper.schema.Link.Schema
 import jakarta.json.bind.annotation.JsonbProperty
 
 import scala.annotation.meta.field
@@ -12,9 +13,7 @@ class Link(
   @(JsonbProperty @field)("@type") val id: String = null
 )
 
-object Link extends SchemaProvider {
-
-  override def schema(): EntitySchema[?] = new Schema
+object Link extends SchemaProvider[Schema] {
 
   class Schema extends EntitySchema[Link]() {
     @JsonbProperty("@type") val id = property(_.id)

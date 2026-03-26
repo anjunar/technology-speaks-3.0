@@ -13,7 +13,7 @@ class PostController(val identityHolder: IdentityHolder) {
   @RolesAllowed(Array("User", "Administrator"))
   @EntityGraph("Post.full")
   def read(@PathVariable("id") post: Post): Data[Post] = {
-    val data = new Data(post, Post.schema())
+    val data = new Data(post, Post.schema)
 
     post.addLinks(
       LinkBuilder.create(classOf[PostLikeController], "likePost")
@@ -51,7 +51,7 @@ class PostController(val identityHolder: IdentityHolder) {
   def save(@RequestBody post: Post): Data[Post] = {
     post.user = identityHolder.user
     post.persist()
-    val data = new Data(post, Post.schema())
+    val data = new Data(post, Post.schema)
 
     post.addLinks(
       LinkBuilder.create(classOf[PostLikeController], "likePost")
@@ -87,7 +87,7 @@ class PostController(val identityHolder: IdentityHolder) {
   @RolesAllowed(Array("User", "Administrator"))
   @EntityGraph("Post.full")
   def update(@RequestBody post: Post): Data[Post] = {
-    val data = new Data(post.merge(), Post.schema())
+    val data = new Data(post.merge(), Post.schema)
 
     post.addLinks(
       LinkBuilder.create(classOf[PostLikeController], "likePost")

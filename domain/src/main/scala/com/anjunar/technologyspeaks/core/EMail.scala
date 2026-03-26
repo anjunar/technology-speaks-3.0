@@ -11,6 +11,7 @@ import scala.annotation.meta.field
 import scala.beans.BeanProperty
 import scala.compiletime.uninitialized
 import com.anjunar.technologyspeaks.SpringContext
+import com.anjunar.technologyspeaks.core.EMail.Schema
 
 @Entity
 @Table(name = "Core#Email")
@@ -29,9 +30,7 @@ class EMail(@(JsonbProperty @field) @Email @(NotBlank @field) @Column(unique = t
 
 }
 
-object EMail extends RepositoryContext[EMail] with SchemaProvider {
-
-  override def schema(): EntitySchema[?] = new Schema
+object EMail extends RepositoryContext[EMail] with SchemaProvider[Schema] {
 
   class Schema extends AbstractEntitySchema[EMail](SpringContext.entityManager()) {
     @JsonbProperty val value = property(_.value, new OwnerRule[EMail]())

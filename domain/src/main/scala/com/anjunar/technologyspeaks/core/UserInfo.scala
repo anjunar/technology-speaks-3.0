@@ -11,6 +11,7 @@ import scala.annotation.meta.field
 import scala.beans.BeanProperty
 import scala.compiletime.uninitialized
 import com.anjunar.technologyspeaks.SpringContext
+import com.anjunar.technologyspeaks.core.UserInfo.Schema
 
 @Entity
 @Table(name = "Core#UserInfo")
@@ -37,9 +38,7 @@ class UserInfo(@(NotBlank @field)
 
 }
 
-object UserInfo extends SchemaProvider {
-
-  override def schema(): EntitySchema[?] = new Schema
+object UserInfo extends SchemaProvider[Schema] {
 
   class Schema extends EntitySchema[UserInfo](SpringContext.entityManager()) {
     @JsonbProperty val id = property(_.id, new ManagedRule[UserInfo]())

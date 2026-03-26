@@ -6,6 +6,7 @@ import jakarta.json.bind.annotation.JsonbProperty
 import jakarta.persistence.{Entity, OneToOne, Table}
 import jakarta.validation.constraints.{NotBlank, Size}
 import com.anjunar.technologyspeaks.SpringContext
+import com.anjunar.technologyspeaks.core.Address.Schema
 
 import scala.annotation.meta.field
 import scala.beans.BeanProperty
@@ -41,9 +42,7 @@ class Address(@(NotBlank @field)
 
 }
 
-object Address extends SchemaProvider {
-
-  override def schema(): EntitySchema[?] = new Schema
+object Address extends SchemaProvider[Schema] {
 
   class Schema extends AbstractEntitySchema[Address](SpringContext.entityManager()) {
     @JsonbProperty val street = property(_.street, new ManagedRule[Address]())

@@ -23,12 +23,12 @@ class Property[T, V](val propertyAccess : PropertyAccess[T, V], var rule: Visibi
     if (value == null) {
       null
     } else {
-      val companion = TypeResolver.companionInstance[SchemaProvider](value)
+      val companion = TypeResolver.companionInstance[SchemaProvider[?]](value)
 
       if (companion == null) {
         null
       } else {
-        companion.schema()
+        companion.schema
       }
     }
 

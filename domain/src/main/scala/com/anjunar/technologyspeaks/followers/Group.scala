@@ -12,6 +12,7 @@ import scala.annotation.meta.field
 import scala.beans.BeanProperty
 import scala.compiletime.uninitialized
 import com.anjunar.technologyspeaks.SpringContext
+import com.anjunar.technologyspeaks.followers.Group.Schema
 
 
 @Entity
@@ -29,9 +30,7 @@ class Group(@(JsonbProperty @field) @(Size @field)(min = 3, max = 80)var name: S
 
 }
 
-object Group extends RepositoryContext[Group] with SchemaProvider {
-
-  override def schema(): EntitySchema[?] = new Schema
+object Group extends RepositoryContext[Group] with SchemaProvider[Schema] {
 
   class Schema extends AbstractEntitySchema[Group](SpringContext.entityManager()) {
     @JsonbProperty val name = property(_.name, new OwnerRule[Group]())

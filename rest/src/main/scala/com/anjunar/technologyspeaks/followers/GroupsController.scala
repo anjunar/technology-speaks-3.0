@@ -40,7 +40,7 @@ class GroupsController(val query: HibernateSearch, val identityHolder: IdentityH
       )
     }
 
-    new Table(entities, count, Group.schema())
+    new Table(entities, count, Group.schema)
   }
 
 }
@@ -48,6 +48,6 @@ class GroupsController(val query: HibernateSearch, val identityHolder: IdentityH
 object GroupsController {
 
   @JsonbSubtype(alias = "Data", `type` = classOf[Data[?]])
-  class GroupRow(@(JsonbProperty @field) data: Group) extends Data[Group](data, Group.schema())
+  class GroupRow(@(JsonbProperty @field) data: Group) extends Data[Group](data, Group.schema)
 
 }

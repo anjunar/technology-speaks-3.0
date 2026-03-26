@@ -8,6 +8,7 @@ import com.anjunar.technologyspeaks.shared.likeable.{Like, LikeContainer}
 import jakarta.json.bind.annotation.JsonbProperty
 import jakarta.persistence.{CascadeType, Entity, OneToMany, Table}
 import com.anjunar.technologyspeaks.SpringContext
+import com.anjunar.technologyspeaks.shared.commentable.FirstComment.Schema
 
 
 @Entity
@@ -26,9 +27,7 @@ class FirstComment extends AbstractComment, EntityContext[FirstComment], LikeCon
 
 }
 
-object FirstComment extends RepositoryContext[FirstComment] with SchemaProvider {
-
-  override def schema(): EntitySchema[?] = new Schema
+object FirstComment extends RepositoryContext[FirstComment] with SchemaProvider[Schema] {
 
   class Schema extends AbstractEntitySchema[FirstComment](SpringContext.entityManager()) {
     @JsonbProperty val user = property(_.user)

@@ -74,7 +74,7 @@ class PostCommentsController(val query: HibernateSearch, val identityHolder: Ide
       }
     }
 
-    new Table(entities, count, Post.schema())
+    new Table(entities, count, Post.schema)
   }
 
 }
@@ -82,6 +82,6 @@ class PostCommentsController(val query: HibernateSearch, val identityHolder: Ide
 object PostCommentsController {
 
   @JsonbSubtype(alias = "Data", `type` = classOf[Data[?]])
-  class CommentRow(data: FirstComment) extends Data[FirstComment](data, FirstComment.schema())
+  class CommentRow(data: FirstComment) extends Data[FirstComment](data, FirstComment.schema)
 
 }

@@ -48,7 +48,7 @@ class IssuesController(val query: HibernateSearch, val identityHolder: IdentityH
       }
     }
 
-    new Table(entities, count, Issue.schema())
+    new Table(entities, count, Issue.schema)
   }
 
 }
@@ -56,6 +56,6 @@ class IssuesController(val query: HibernateSearch, val identityHolder: IdentityH
 object IssuesController {
 
   @JsonbSubtype(alias = "Data", `type` = classOf[Data[?]])
-  class IssueRow(@(JsonbProperty @field) data: Issue) extends Data[Issue](data, Issue.schema())
+  class IssueRow(@(JsonbProperty @field) data: Issue) extends Data[Issue](data, Issue.schema)
 
 }

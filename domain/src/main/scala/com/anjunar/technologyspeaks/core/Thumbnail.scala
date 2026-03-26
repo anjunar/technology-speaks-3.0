@@ -9,6 +9,7 @@ import scala.annotation.meta.field
 import scala.beans.BeanProperty
 import scala.compiletime.uninitialized
 import com.anjunar.technologyspeaks.SpringContext
+import com.anjunar.technologyspeaks.core.Thumbnail.Schema
 
 @Entity
 @Table(name = "Core#Media")
@@ -37,9 +38,7 @@ class Thumbnail(@(NotBlank @field)
   
 }
 
-object Thumbnail extends SchemaProvider {
-
-  override def schema(): EntitySchema[?] = new Schema
+object Thumbnail extends SchemaProvider[Schema] {
 
   class Schema extends AbstractEntitySchema[Thumbnail](SpringContext.entityManager()) {
     val name = property(_.name, new DefaultWritableRule[Thumbnail]())

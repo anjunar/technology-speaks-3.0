@@ -6,6 +6,7 @@ import com.anjunar.json.mapper.provider.{EntityProvider, OwnerProvider}
 import com.anjunar.json.mapper.schema.property.Property
 import com.anjunar.json.mapper.schema.{EntitySchema, SchemaProvider}
 import com.anjunar.technologyspeaks.SpringContext
+import com.anjunar.technologyspeaks.core.User.Schema
 import com.anjunar.technologyspeaks.hibernate.{EntityContext, RepositoryContext}
 import jakarta.json.bind.annotation.JsonbProperty
 import jakarta.persistence.*
@@ -58,10 +59,8 @@ class User(@(JsonbProperty @field) @(NotBlank @field) @(Size @field)(min = 2, ma
 
 }
 
-object User extends RepositoryContext[User] with SchemaProvider {
+object User extends RepositoryContext[User] with SchemaProvider[Schema] {
   
-  override def schema(): EntitySchema[?] = new Schema
-
   class Schema extends AbstractEntitySchema[User](SpringContext.entityManager()) {
     @JsonbProperty val nickName: Property[User, String] = property(_.nickName, new OwnerRule[User]())
     @JsonbProperty val image: Property[User, Media] = property(_.image, new OwnerRule[User]())
