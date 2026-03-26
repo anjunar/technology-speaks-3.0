@@ -1,25 +1,13 @@
 package com.anjunar.technologyspeaks.rest.types
 
-import com.anjunar.json.mapper.macros.PropertyMacrosHelper
 import com.anjunar.json.mapper.provider.DTO
-import com.anjunar.json.mapper.schema.property.Property
-import com.anjunar.json.mapper.schema.{EntitySchema, SchemaProvider}
-import com.anjunar.technologyspeaks.rest.types.Table.Schema
+import com.anjunar.json.mapper.schema.EntitySchema
 import jakarta.json.bind.annotation.JsonbProperty
 
 import scala.annotation.meta.field
-import scala.collection.mutable
 
 class Table[C](
                 @(JsonbProperty @field) val rows: java.util.List[C],
                 @(JsonbProperty @field) val size: Long,
                 @(JsonbProperty @field)("schema") val tableSchema: EntitySchema[?]
-) extends DTO with LinksContainer
-
-object Table extends SchemaProvider[Schema] {
-  
-  class Schema extends EntitySchema[Table[Any]] {
-    override val properties: mutable.Map[String, Property[Table[Any], Any]] = PropertyMacrosHelper.describeProperties[Table[Any]]
-  }
-  
-}
+              ) extends DTO with LinksContainer
