@@ -14,10 +14,12 @@ import scala.collection.mutable
 
 abstract class EntitySchema[T](val entityManager: EntityManager = null) {
 
-  val properties = new mutable.LinkedHashMap[String, Property[T, Any]].addAll(describeProperties[T].map(p => (p.name, p.asInstanceOf[Property[T, Any]])))
+  lazy val properties: mutable.Map[String, Property[T, Any]] = {
+    val properties = describeProperties[T]
+    val tuples = properties.map(p => (p.name, new Property[T, Any](p.asInstanceOf[PropertyAccess[T, Any]], new DefaultRule[T])))
+    mutable.LinkedHashMap[String, Property[T, Any]](tuples*)
+  }
 
-  println(properties)
-    
   def findProperty[V](name: String): Property[T, V] = properties(name).asInstanceOf[Property[T, V]]
 
   protected inline def property[V](inline selector: T => V,

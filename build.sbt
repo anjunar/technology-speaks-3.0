@@ -61,7 +61,8 @@ lazy val jsonMapper2 = (project in file("library/json-mapper"))
       "jakarta.validation" % "jakarta.validation-api" % "3.1.1",
       "tools.jackson.core" % "jackson-databind" % "3.1.0",
       "tools.jackson.module" %% "jackson-module-scala" % "3.1.0",
-      "org.hibernate.orm" % "hibernate-core" % "7.2.6.Final"
+      "org.hibernate.orm" % "hibernate-core" % "7.2.6.Final",
+      "org.scalatest" %% "scalatest" % "3.2.19" % Test
     )
   )
 

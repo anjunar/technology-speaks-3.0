@@ -7,6 +7,7 @@ import com.anjunar.json.mapper.{JavaContext, ObjectMapperProvider}
 import com.anjunar.json.mapper.intermediate.model.{JsonNode, JsonObject, JsonString}
 import com.anjunar.json.mapper.schema.property.Property
 import com.anjunar.scala.universe.TypeResolver
+import com.google.common.base.Strings
 import jakarta.json.bind.annotation.{JsonbProperty, JsonbSubtype}
 import jakarta.persistence.{Entity, EntityGraph, Subgraph}
 
@@ -17,7 +18,7 @@ class BeanSerializer extends Serializer[DTO] {
     val json = new JsonObject(nodes)
 
     val schemaProvider : EntitySchema[Any] = input.schema
-    val properties : Array[Property[Any, Any]] = schemaProvider.properties.values.toArray.asInstanceOf[Array[Property[Any, Any]]]
+    val properties : Array[Property[Any, Any]] = schemaProvider.properties.values.toArray
 
     var index = 0
     while (index < properties.length) {
@@ -114,14 +115,14 @@ class BeanSerializer extends Serializer[DTO] {
     }
 
     val name =
-      if (jsonbProperty.value().isEmpty) property.name else jsonbProperty.value()
+      if (Strings.isNullOrEmpty(jsonbProperty.value())) property.name else jsonbProperty.value()
 
     val propertyType =
       if (
         classOf[java.util.Collection[?]].isAssignableFrom(property.propertyType) ||
           classOf[java.util.Map[?, ?]].isAssignableFrom(property.propertyType)
       ) {
-        TypeResolver.resolve(property.propertyType)
+        TypeResolver.resolve(property.genericType)
       } else {
         TypeResolver.resolve(value.getClass)
       }
@@ -141,7 +142,7 @@ class BeanSerializer extends Serializer[DTO] {
         serializer.serialize(value, javaContext)
       } else {
         val converter = converterAnnotation.value().getDeclaredConstructor().newInstance()
-        val toJson = converter.toJson(value, TypeResolver.resolve(property.propertyType))
+        val toJson = converter.toJson(value, TypeResolver.resolve(property.genericType))
         val serializer = SerializerRegistry.find(classOf[String].asInstanceOf[Class[Any]], toJson).asInstanceOf[Serializer[Any]]
         serializer.serialize(toJson, javaContext)
       }

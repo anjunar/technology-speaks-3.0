@@ -16,6 +16,7 @@ object RuntimeTypeResolver {
       case "scala.Short" => java.lang.Short.TYPE
       case "scala.Char" => java.lang.Character.TYPE
       case "scala.Unit" => java.lang.Void.TYPE
+      case "scala.Any" | "scala.AnyRef" => classOf[java.lang.Object]
       case other => Class.forName(other)
     }
 

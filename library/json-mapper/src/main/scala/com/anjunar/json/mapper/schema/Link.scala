@@ -1,5 +1,6 @@
 package com.anjunar.json.mapper.schema
 
+import com.anjunar.json.mapper.provider.DTO
 import com.anjunar.json.mapper.schema.Link.Schema
 import jakarta.json.bind.annotation.JsonbProperty
 
@@ -11,7 +12,7 @@ class Link(
   @(JsonbProperty @field) val url: String = null,
   @(JsonbProperty @field) val method: String = null,
   @(JsonbProperty @field)("@type") val id: String = null
-)
+) extends DTO
 
 object Link extends SchemaProvider[Schema] {
 

@@ -22,7 +22,14 @@ class Property[T, V](val propertyAccess : PropertyAccess[T, V], val rule: Visibi
 
   def set(instance: T, value: V): Unit = propertyAccess.set(instance, value)
   
-  def findAnnotation[A <: Annotation](clazz: Class[A]): A = propertyAccess.annotations.find(_.annotationType == clazz).get.asInstanceOf[A]
+  def findAnnotation[A <: Annotation](clazz: Class[A]): A = {
+    val option = propertyAccess.annotations.find(_.annotationType == clazz)
+    if (option.isEmpty) {
+      null.asInstanceOf[A]
+    } else {
+      option.get.asInstanceOf[A]
+    }
+  }
 
   @JsonbProperty("type")
   val typeName: String = TypeResolver.rawType(propertyAccess.genericType).getSimpleName

@@ -128,7 +128,7 @@ class BeanDeserializer extends Deserializer[Any] {
     val useConverter = property.findAnnotation(classOf[UseConverter])
 
     if (useConverter == null) {
-      val value = deserializeValue(TypeResolver.resolve(property.propertyType), property.name, oldValue, context, node)
+      val value = deserializeValue(TypeResolver.resolve(property.genericType), property.name, oldValue, context, node)
       context.checkForViolations(instance.getClass, property.name, value, () => property.set(instance.asInstanceOf[AnyRef], value))
     } else {
       val rawValue = deserializeValue(TypeResolver.resolve(classOf[String]), property.name, oldValue, context, node)
@@ -137,7 +137,7 @@ class BeanDeserializer extends Deserializer[Any] {
       }
 
       val converter = useConverter.value().getDeclaredConstructor().newInstance()
-      val convertedValue = converter.toJava(rawValue.asInstanceOf[String], TypeResolver.resolve(property.propertyType))
+      val convertedValue = converter.toJava(rawValue.asInstanceOf[String], TypeResolver.resolve(property.genericType))
 
       context.checkForViolations(instance.getClass, property.name, convertedValue, () => property.set(instance.asInstanceOf[AnyRef], convertedValue))
     }
@@ -161,7 +161,7 @@ class BeanDeserializer extends Deserializer[Any] {
         throw new IllegalStateException("Collection property must be initialized")
       }
 
-    val deserialized = deserializeValue(TypeResolver.resolve(property.propertyType), property.name, existingCollection, context, node).asInstanceOf[java.util.Collection[Any]]
+    val deserialized = deserializeValue(TypeResolver.resolve(property.genericType), property.name, existingCollection, context, node).asInstanceOf[java.util.Collection[Any]]
     val targetCollection = property.get(instance.asInstanceOf[AnyRef]).asInstanceOf[java.util.Collection[Any]]
 
     context.checkForViolations(instance.getClass, property.name, targetCollection, () => {
@@ -189,7 +189,7 @@ class BeanDeserializer extends Deserializer[Any] {
         throw new IllegalStateException("Collection property must be initialized")
       }
 
-    val deserialized = deserializeValue(TypeResolver.resolve(property.propertyType), property.name, existingMap, context, node).asInstanceOf[java.util.Map[String, Any]]
+    val deserialized = deserializeValue(TypeResolver.resolve(property.genericType), property.name, existingMap, context, node).asInstanceOf[java.util.Map[String, Any]]
     val targetMap = property.get(instance.asInstanceOf[AnyRef]).asInstanceOf[java.util.Map[String, Any]]
 
     context.checkForViolations(instance.getClass, property.name, targetMap, () => {
@@ -218,7 +218,7 @@ class BeanDeserializer extends Deserializer[Any] {
     }
 
     if (oldValue != null) {
-      val value = deserializeValue(TypeResolver.resolve(property.propertyType), property.name, oldValue, context, node)
+      val value = deserializeValue(TypeResolver.resolve(property.genericType), property.name, oldValue, context, node)
       context.checkForViolations(instance.getClass, property.name, value, () => setPropertyAndSynchronize(instance, property, value))
       return
     }
@@ -246,7 +246,7 @@ class BeanDeserializer extends Deserializer[Any] {
     node: JsonNode
   ): Any = {
     val newInstance = propertyType.getConstructor().newInstance()
-    deserializeValue(TypeResolver.resolve(property.propertyType), property.name, newInstance, context, node)
+    deserializeValue(TypeResolver.resolve(property.genericType), property.name, newInstance, context, node)
   }
 
   private def setPropertyAndSynchronize(owner: DTO, property: Property[Any, Any], value: Any): Unit = {
@@ -376,7 +376,7 @@ class BeanDeserializer extends Deserializer[Any] {
       return
     }
 
-    val elementType = TypeResolver.resolve(property.propertyType).typeArguments.headOption.map(_.raw).orNull
+    val elementType = TypeResolver.resolve(property.genericType).typeArguments.headOption.map(_.raw).orNull
     if (elementType != null && !elementType.isAssignableFrom(value.getClass)) {
       return
     }

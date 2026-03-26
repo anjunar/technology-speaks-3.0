@@ -1,5 +1,6 @@
 package com.anjunar.technologyspeaks
 
+import com.anjunar.json.mapper.macros.PropertyMacros.describeProperties
 import com.anjunar.json.mapper.provider.DTO
 import com.anjunar.json.mapper.schema.{EntitySchema, SchemaProvider}
 import com.anjunar.technologyspeaks.Application.Schema
@@ -13,8 +14,5 @@ import scala.beans.BeanProperty
 class Application(@(JsonbProperty @field) val user: User) extends DTO with LinksContainer
 
 object Application extends SchemaProvider[Schema] {
-  class Schema extends EntitySchema[Application]() {
-    @JsonbProperty val user = property(_.user)
-    @JsonbProperty val links = property(_.links)
-  }
+  class Schema extends EntitySchema[Application]()
 }

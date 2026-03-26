@@ -22,34 +22,38 @@ object PropertyMacros {
     val symbol = typeRepr.typeSymbol
 
     val members = symbol.fieldMembers ++ symbol.methodMembers
-
+    
     val propertySymbols = members.filter { s =>
       val flags = s.flags
       !flags.is(Flags.Private) &&
         !flags.is(Flags.Protected) &&
-        !flags.is(Flags.Synthetic) &&
         !flags.is(Flags.Artifact) &&
         !flags.is(Flags.Macro) &&
         !s.name.contains("$") &&
         !s.name.endsWith("_=") &&
-        (s.isTerm && (!flags.is(Flags.Method) || (flags.is(Flags.ParamAccessor) || (flags.is(Flags.Method) && s.paramSymss.isEmpty && !typeRepr.memberType(s).isInstanceOf[MethodType]))))
+        (s.isTerm && (!flags.is(Flags.Method) || (flags.is(Flags.ParamAccessor) || (flags.is(Flags.Method) && s.paramSymss.isEmpty))))
     }.distinctBy(_.name)
 
-    // Filter to only include those that are actually val or var (have a field or are accessors)
     val filteredSymbols = propertySymbols.filter { s =>
-      val tpe = typeRepr.memberType(s).widen
-      val isMethod = tpe.isInstanceOf[MethodType] || tpe.isInstanceOf[PolyType]
+      val tpe = normalizeType(typeRepr.memberType(s))
+      val isMethod = tpe match {
+        case _: MethodType => true
+        case _: PolyType => true
+        case _ => false
+      }
       !isMethod && !s.isClassConstructor && s.name != "hashCode" && s.name != "toString" && s.name != "getClass" && s.name != "clone" && s.name != "notify" && s.name != "notifyAll" && s.name != "wait" && s.name != "finalize"
     }
 
     val propertyExprs = filteredSymbols.map { s =>
       val name = s.name
-      val tpe = typeRepr.memberType(s).widen
+      val tpe = normalizeType(typeRepr.memberType(s))
+      val isWriteable = symbol.methodMember(s"${name}_=").nonEmpty
       
       tpe.asType match {
         case '[v] =>
           val nameExpr = Expr(name)
           val genericTypeExpr = runtimeTypeExpr(tpe)
+          val isWriteableExpr = Expr(isWriteable)
           
           val annotationsExpr = {
             val annTerms = s.annotations
@@ -77,6 +81,7 @@ object PropertyMacros {
               override val name: String = $nameExpr
               override val annotations: Array[? <: Annotation] = $annotationsExpr
               override val genericType: JType = $genericTypeExpr
+              override val isWriteable: Boolean = $isWriteableExpr
               override def get(instance: E): v = $getterExpr(instance)
               override def set(instance: E, value: v): Unit = $setterLambdaExpr(instance, value)
             }
@@ -195,6 +200,8 @@ object PropertyMacros {
     val selectedType = resolvedSelectedType(selected)
     val genericTypeExpr = runtimeTypeExpr(selectedType)
     val setterLambdaExpr = setterExpr[E, V](propertyName)
+    val isWriteable = selected.qualifierType.typeSymbol.methodMember(s"${propertyName}_=").nonEmpty
+    val isWriteableExpr = Expr(isWriteable)
     
     val annotationsArrayExpr = {
         val annTerms = selected.symbol.annotations
@@ -217,6 +224,9 @@ object PropertyMacros {
 
         override val genericType: JType =
           $genericTypeExpr
+
+        override val isWriteable: Boolean =
+          $isWriteableExpr
 
         override def get(instance: E): V =
           $selectorExpr(instance)
