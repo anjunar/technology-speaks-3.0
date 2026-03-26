@@ -1,11 +1,14 @@
 package com.anjunar.technologyspeaks.rest.types
 
+import com.anjunar.json.mapper.macros.PropertyMacrosHelper
 import com.anjunar.json.mapper.provider.DTO
+import com.anjunar.json.mapper.schema.property.Property
 import com.anjunar.json.mapper.schema.{EntitySchema, SchemaProvider}
 import com.anjunar.technologyspeaks.rest.types.Table.Schema
 import jakarta.json.bind.annotation.JsonbProperty
 
 import scala.annotation.meta.field
+import scala.collection.mutable
 
 class Table[C](
                 @(JsonbProperty @field) val rows: java.util.List[C],
@@ -15,6 +18,8 @@ class Table[C](
 
 object Table extends SchemaProvider[Schema] {
   
-  class Schema extends EntitySchema[Table[?]]
+  class Schema extends EntitySchema[Table[Any]] {
+    override val properties: mutable.Map[String, Property[Table[Any], Any]] = PropertyMacrosHelper.describeProperties[Table[Any]]
+  }
   
 }

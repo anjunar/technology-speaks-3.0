@@ -1,11 +1,14 @@
 package com.anjunar.json.mapper.schema
 
+import com.anjunar.json.mapper.macros.PropertyMacrosHelper
 import com.anjunar.json.mapper.provider.DTO
 import com.anjunar.json.mapper.schema.Link.Schema
+import com.anjunar.json.mapper.schema.property.Property
 import jakarta.json.bind.annotation.JsonbProperty
 
 import scala.annotation.meta.field
 import scala.beans.BeanProperty
+import scala.collection.mutable
 
 class Link(
   @(JsonbProperty @field) val rel: String = null,
@@ -17,10 +20,7 @@ class Link(
 object Link extends SchemaProvider[Schema] {
 
   class Schema extends EntitySchema[Link]() {
-    @JsonbProperty("@type") val id = property(_.id)
-    @JsonbProperty val rel = property(_.rel)
-    @JsonbProperty val url = property(_.url)
-    @JsonbProperty val method = property(_.method)
+    override val properties: mutable.Map[String, Property[Link, Any]] = PropertyMacrosHelper.describeProperties[Link]
   }
 
 }

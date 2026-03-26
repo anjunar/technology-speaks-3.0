@@ -7,7 +7,7 @@ import jakarta.validation.{ConstraintViolation, Validator}
 
 class JsonContext(
   val resolvedClass: ResolvedClass,
-  val instance: DTO,
+  val instance: Any,
   val graph: EntityGraph[?],
   val loader: EntityLoader,
   val validator: Validator,

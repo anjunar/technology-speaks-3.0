@@ -11,7 +11,7 @@ trait SchemaProvider[E <: EntitySchema[?]] {
       Class.forName(schemaClassName)
     } catch {
       case _: ClassNotFoundException =>
-        throw new IllegalStateException(s"Schema class not found: $schemaClassName")
+        null
     }
 
     val ctor = schemaClass.getConstructors.headOption.getOrElse {

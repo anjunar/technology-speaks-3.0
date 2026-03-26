@@ -2,7 +2,6 @@ package com.anjunar.technologyspeaks.core
 
 import com.anjunar.json.mapper.provider.{EntityProvider, OwnerProvider}
 import com.anjunar.json.mapper.schema.VisibilityRule
-import com.anjunar.json.mapper.schema.property.Property
 import com.anjunar.scala.universe.introspector.AbstractProperty
 import com.anjunar.technologyspeaks.SpringContext
 import com.anjunar.technologyspeaks.security.IdentityHolder
@@ -11,7 +10,7 @@ class ManagedRule[E <: OwnerProvider & EntityProvider] extends VisibilityRule[E]
 
   val holder = SpringContext.getBean(classOf[IdentityHolder])
 
-  override def isVisible(instance: E, property: Property[E, Any]): Boolean = {
+  override def isVisible(instance: E, property: AbstractProperty): Boolean = {
     if (instance == null) {
       return false
     }
@@ -49,7 +48,7 @@ class ManagedRule[E <: OwnerProvider & EntityProvider] extends VisibilityRule[E]
     managedProperty.users.stream().anyMatch(user => user.id == holder.user.id)
   }
 
-  override def isWriteable(instance: E, property: Property[E, Any]): Boolean = {
+  override def isWriteable(instance: E, property: AbstractProperty): Boolean = {
     if (instance.version == -1L) {
       true
     } else {
