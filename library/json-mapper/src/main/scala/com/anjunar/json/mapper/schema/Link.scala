@@ -16,7 +16,7 @@ object Link extends SchemaProvider {
 
   override def schema(): EntitySchema[?] = new Schema
 
-  class Schema extends EntitySchema[Link] {
+  class Schema extends EntitySchema[Link]() {
     @JsonbProperty("@type") val id = property(_.id)
     @JsonbProperty val rel = property(_.rel)
     @JsonbProperty val url = property(_.url)

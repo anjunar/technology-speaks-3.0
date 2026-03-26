@@ -10,6 +10,7 @@ import java.time.LocalDate
 import scala.annotation.meta.field
 import scala.beans.BeanProperty
 import scala.compiletime.uninitialized
+import com.anjunar.technologyspeaks.SpringContext
 
 @Entity
 @Table(name = "Core#UserInfo")
@@ -40,7 +41,7 @@ object UserInfo extends SchemaProvider {
 
   override def schema(): EntitySchema[?] = new Schema
 
-  class Schema extends EntitySchema[UserInfo] {
+  class Schema extends EntitySchema[UserInfo](SpringContext.entityManager()) {
     @JsonbProperty val id = property(_.id, new ManagedRule[UserInfo]())
     @JsonbProperty val firstName = property(_.firstName, new ManagedRule[UserInfo]())
     @JsonbProperty val lastName = property(_.lastName, new ManagedRule[UserInfo]())

@@ -1,6 +1,7 @@
 package com.anjunar.scala.universe
 
 import java.lang.reflect.{ParameterizedType, Type, TypeVariable, WildcardType}
+import scala.annotation.tailrec
 import scala.collection.mutable
 
 object TypeResolver {
@@ -16,16 +17,16 @@ object TypeResolver {
     }
   }
   
-  def companionInstance(clazz : Class[?]) : AnyRef = {
+  def companionInstance[E](clazz : Class[?]) : E = {
     try {
       val value = companionClass(clazz)
       if (value == null) {
-        null
+        null.asInstanceOf[E]
       } else {
-        value.getField("MODULE$").get(null)
+        value.getField("MODULE$").get(null).asInstanceOf[E]
       }
     } catch {
-      case e : NoSuchFieldException => null
+      case e : NoSuchFieldException => null.asInstanceOf[E]
     }
   }
   
@@ -40,6 +41,7 @@ object TypeResolver {
     }
   }
 
+  @tailrec
   def rawType(aType: Type): Class[?] = aType match {
     case aClass: Class[?] => aClass
     case parameterizedType: ParameterizedType => rawType(parameterizedType.getRawType)

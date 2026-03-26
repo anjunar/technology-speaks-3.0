@@ -12,6 +12,81 @@ object PropertyMacros {
   inline def makePropertyAccess[E, V](inline selector: E => V): PropertyAccess[E, V] =
     ${ makePropertyAccessImpl[E, V]('selector) }
 
+  inline def describeProperties[E]: List[PropertyAccess[E, ?]] =
+    ${ describePropertiesImpl[E] }
+
+  private def describePropertiesImpl[E: Type](using Quotes): Expr[List[PropertyAccess[E, ?]]] = {
+    import quotes.reflect.*
+
+    val typeRepr = TypeRepr.of[E]
+    val symbol = typeRepr.typeSymbol
+
+    val members = symbol.fieldMembers ++ symbol.methodMembers
+
+    val propertySymbols = members.filter { s =>
+      val flags = s.flags
+      !flags.is(Flags.Private) &&
+        !flags.is(Flags.Protected) &&
+        !flags.is(Flags.Synthetic) &&
+        !flags.is(Flags.Artifact) &&
+        !flags.is(Flags.Macro) &&
+        !s.name.contains("$") &&
+        !s.name.endsWith("_=") &&
+        (s.isTerm && (!flags.is(Flags.Method) || (flags.is(Flags.ParamAccessor) || (flags.is(Flags.Method) && s.paramSymss.isEmpty && !typeRepr.memberType(s).isInstanceOf[MethodType]))))
+    }.distinctBy(_.name)
+
+    // Filter to only include those that are actually val or var (have a field or are accessors)
+    val filteredSymbols = propertySymbols.filter { s =>
+      val tpe = typeRepr.memberType(s).widen
+      val isMethod = tpe.isInstanceOf[MethodType] || tpe.isInstanceOf[PolyType]
+      !isMethod && !s.isClassConstructor && s.name != "hashCode" && s.name != "toString" && s.name != "getClass" && s.name != "clone" && s.name != "notify" && s.name != "notifyAll" && s.name != "wait" && s.name != "finalize"
+    }
+
+    val propertyExprs = filteredSymbols.map { s =>
+      val name = s.name
+      val tpe = typeRepr.memberType(s).widen
+      
+      tpe.asType match {
+        case '[v] =>
+          val nameExpr = Expr(name)
+          val genericTypeExpr = runtimeTypeExpr(tpe)
+          
+          val annotationsExpr = {
+            val annTerms = s.annotations
+            val descriptorExprs = annTerms.flatMap(annotationDescriptorExpr)
+            '{
+              RuntimeAnnotationSupport.instantiateAll(
+                Array(${Varargs(descriptorExprs)}*)
+              )
+            }
+          }
+
+          val getterExpr = Lambda(
+            Symbol.spliceOwner,
+            MethodType(List("instance"))(_ => List(typeRepr), _ => tpe),
+            (owner, params) => {
+              val instance = params.head.asInstanceOf[Term]
+              Select(instance, s).changeOwner(owner)
+            }
+          ).asExprOf[E => v]
+
+          val setterLambdaExpr = setterExpr[E, v](name)
+
+          '{
+            new PropertyAccess[E, v] {
+              override val name: String = $nameExpr
+              override val annotations: Array[? <: Annotation] = $annotationsExpr
+              override val genericType: JType = $genericTypeExpr
+              override def get(instance: E): v = $getterExpr(instance)
+              override def set(instance: E, value: v): Unit = $setterLambdaExpr(instance, value)
+            }
+          }
+      }
+    }
+
+    Expr.ofList(propertyExprs)
+  }
+
   private def makePropertyAccessImpl[E: Type, V: Type](
                                                         selectorExpr: Expr[E => V]
                                                       )(using Quotes): Expr[PropertyAccess[E, V]] = {
@@ -22,45 +97,6 @@ object PropertyMacros {
                                        symbol: Symbol,
                                        qualifierType: TypeRepr
                                      )
-
-    def normalizeType(tpe: TypeRepr): TypeRepr = {
-      @tailrec
-      def loop(current: TypeRepr): TypeRepr = {
-        val simplified = current.widenTermRefByName.dealias.simplified
-
-        simplified match {
-          case AnnotatedType(inner, _) =>
-            loop(inner)
-
-          case ByNameType(inner) =>
-            loop(inner)
-
-          case mt: MethodType if mt.paramTypes.isEmpty =>
-            loop(mt.resType)
-
-          case pt: PolyType =>
-            loop(pt.resType)
-
-          case ct: ConstantType =>
-            val widened = ct.widen
-            if widened =:= ct then ct else loop(widened)
-
-          case other =>
-            other
-        }
-      }
-
-      loop(tpe)
-    }
-
-    @tailrec
-    def unwrapTerm(term: Term): Term =
-      term match {
-        case Inlined(_, _, inner) => unwrapTerm(inner)
-        case Typed(inner, _)      => unwrapTerm(inner)
-        case Block(Nil, expr)     => unwrapTerm(expr)
-        case other                => other
-      }
 
     @tailrec
     def selectedPropertyFromBody(body: Term, paramSym: Symbol): SelectedProperty =
@@ -154,229 +190,21 @@ object PropertyMacros {
       normalizeType(contextualOwner.memberType(selected.symbol))
     }
 
-    def runtimeClassExpr(tpe: TypeRepr): Expr[Class[?]] = {
-      val normalized = normalizeType(tpe)
-
-      normalized match {
-        case tr: TypeRef if tr.typeSymbol.flags.is(Flags.Param) =>
-          report.errorAndAbort(
-            s"BUG: tried to resolve runtime class for type parameter '${tr.typeSymbol.name}' from type ${normalized.show(using Printer.TypeReprStructure)}"
-          )
-
-        case _ =>
-          val sym = normalized.typeSymbol
-          if sym == Symbol.noSymbol then
-            report.errorAndAbort(
-              s"No runtime class symbol available for type ${normalized.show(using Printer.TypeReprStructure)}"
-            )
-
-          '{ RuntimeTypeResolver.resolveClass(${ Expr(sym.fullName) }) }
-      }
-    }
-
-    def runtimeTypeExpr(tpe: TypeRepr): Expr[JType] = {
-      normalizeType(tpe) match {
-        case tr: TypeRef if tr.typeSymbol.flags.is(Flags.Param) =>
-          val name = tr.typeSymbol.name
-          '{ RuntimeTypeResolver.typeVariable(${ Expr(name) }) }
-
-        case AppliedType(rawType, args) =>
-          val rawClassExpr = runtimeClassExpr(rawType)
-          val argExprs: Seq[Expr[JType]] = args.map(runtimeTypeExpr)
-          val argArrayExpr: Expr[Array[JType]] = '{ ${ Expr.ofSeq(argExprs) }.toArray }
-
-          '{
-            RuntimeTypeResolver.parameterized(
-              $rawClassExpr,
-              $argArrayExpr
-            )
-          }
-
-        case t if t <:< TypeRepr.of[Array[?]] =>
-          t.asType match {
-            case '[Array[a]] =>
-              val componentExpr = runtimeTypeExpr(TypeRepr.of[a])
-              '{
-                val component = $componentExpr
-                component match
-                  case cls: Class[?] =>
-                    java.lang.reflect.Array.newInstance(cls, 0).getClass.asInstanceOf[JType]
-                  case other =>
-                    RuntimeTypeResolver.genericArray(other)
-              }
-          }
-
-        case other =>
-          val clsExpr = runtimeClassExpr(other)
-          '{ $clsExpr: JType }
-      }
-    }
-
-    def setterExpr(propertyName: String): Expr[(E, V) => Unit] = {
-      val setterName = s"${propertyName}_="
-
-      Lambda(
-        Symbol.spliceOwner,
-        MethodType(List("instance", "value"))(
-          _ => List(TypeRepr.of[E], TypeRepr.of[V]),
-          _ => TypeRepr.of[Unit]
-        ),
-        (owner, params) => {
-          val instanceTerm = params.head.asInstanceOf[Term]
-          val valueTerm = params(1).asInstanceOf[Term]
-
-          val setterSym =
-            instanceTerm.tpe.widen.typeSymbol.methodMember(setterName).headOption.getOrElse(Symbol.noSymbol)
-
-          if setterSym != Symbol.noSymbol then
-            Apply(Select(instanceTerm, setterSym), List(valueTerm.changeOwner(owner)))
-          else
-            '{
-              throw new UnsupportedOperationException(
-                ${ Expr(s"Property '$propertyName' is read-only. No Scala setter '$setterName' was found.") }
-              )
-            }.asTerm.changeOwner(owner)
-        }
-      ).asExprOf[(E, V) => Unit]
-    }
-
-    def constantValueExpr(term: Term): Expr[Any] =
-      term match {
-        case Literal(IntConstant(v))       => Expr(v)
-        case Literal(LongConstant(v))      => Expr(v)
-        case Literal(FloatConstant(v))     => Expr(v)
-        case Literal(DoubleConstant(v))    => Expr(v)
-        case Literal(BooleanConstant(v))   => Expr(v)
-        case Literal(StringConstant(v))    => Expr(v)
-        case Literal(ByteConstant(v))      => Expr(v)
-        case Literal(ShortConstant(v))     => Expr(v)
-        case Literal(CharConstant(v))      => Expr(v)
-        case Literal(NullConstant())       => '{ null }
-        case Literal(ClassOfConstant(tpe)) => runtimeClassExpr(tpe)
-        case _ =>
-          report.errorAndAbort(
-            s"Only literal annotation arguments are currently supported, but found:\n${term.show(using Printer.TreeStructure)}"
-          )
-      }
-
-    def annotationValueExpr(term: Term): Option[Expr[Any]] = {
-      def loop(t: Term): Option[Expr[Any]] = {
-        val unwrapped = unwrapTerm(t)
-
-        unwrapped match {
-          case NamedArg(_, value) =>
-            loop(value)
-
-          case Inlined(_, _, inner) =>
-            loop(inner)
-
-          case Block(Nil, expr) =>
-            loop(expr)
-
-          case Typed(inner, _) =>
-            loop(inner)
-
-          case Literal(_) =>
-            Some(constantValueExpr(unwrapped))
-
-          case Repeated(elems, _) =>
-            val elemExprs = elems.flatMap(loop)
-            if (elemExprs.size == elems.size) then
-              Some('{ ${ Expr.ofSeq(elemExprs) }.toArray })
-            else
-              None
-
-          case Select(_, member) if unwrapped.tpe <:< TypeRepr.of[java.lang.Enum[?]] =>
-            val enumClassExpr = runtimeClassExpr(unwrapped.tpe)
-            Some('{
-              $enumClassExpr.getField(${ Expr(member) }).get(null).asInstanceOf[Any]
-            })
-
-          case Wildcard() =>
-            Some('{ null })
-
-          case TypeApply(inner, _) =>
-            loop(inner)
-
-          case Apply(Apply(TypeApply(Select(Ident("Array"), "apply"), _), List(Typed(Repeated(elems, _), _))), _) =>
-            val elemExprs = elems.flatMap(loop)
-            if (elemExprs.size == elems.size) then
-              Some('{ ${ Expr.ofSeq(elemExprs) }.toArray })
-            else
-              None
-
-          case _ =>
-            report.warning(s"Unsupported annotation argument:\n${unwrapped.show(using Printer.TreeStructure)}")
-            None
-        }
-      }
-
-      loop(term)
-    }
-    
-    def annotationDescriptorExpr(annotation: Term): Option[Expr[RuntimeAnnotationSupport.AnnotationDescriptor]] = {
-      val ann = unwrapTerm(annotation)
-
-      ann match {
-        case Apply(Select(New(tpt), _), args) =>
-          val annotationType = tpt.tpe.typeSymbol
-          val annotationClassName = annotationType.fullName
-
-          val values: Seq[Option[Expr[RuntimeAnnotationSupport.AnnotationValue]]] =
-            args.zipWithIndex.map { case (arg, idx) =>
-              val (name, value) = arg match {
-                case NamedArg(n, v) => (Some(n), v)
-                case other =>
-                  val methods = annotationType.methodMembers.filter(m => m.paramSymss.flatten.isEmpty)
-                  (methods.lift(idx).map(_.name), other)
-              }
-
-              for {
-                n <- name
-                v <- annotationValueExpr(value)
-              } yield '{
-                RuntimeAnnotationSupport.AnnotationValue(
-                  ${ Expr(n) },
-                  $v
-                )
-              }
-            }
-
-          if (values.forall(_.isDefined)) then
-            val definedValues = values.flatten
-            Some('{
-              RuntimeAnnotationSupport.AnnotationDescriptor(
-                ${ Expr(annotationClassName) },
-                ${ Expr.ofSeq(definedValues) }.toArray
-              )
-            })
-          else
-            None
-
-        case _ =>
-          None
-      }
-    }
-
-    def annotationsExpr(selected: SelectedProperty): Expr[Array[? <: Annotation]] = {
-      val annTerms = selected.symbol.annotations
-
-      val descriptorExprs =
-        annTerms.flatMap(annotationDescriptorExpr)
-
-      '{
-        RuntimeAnnotationSupport.instantiateAll(
-          ${ Expr.ofSeq(descriptorExprs) }.toArray
-        )
-      }
-    }
-
     val selected = propertyFromSelector(selectorExpr)
     val propertyName = selected.name
     val selectedType = resolvedSelectedType(selected)
     val genericTypeExpr = runtimeTypeExpr(selectedType)
-    val setterLambdaExpr = setterExpr(propertyName)
-    val annotationsArrayExpr = annotationsExpr(selected)
+    val setterLambdaExpr = setterExpr[E, V](propertyName)
+    
+    val annotationsArrayExpr = {
+        val annTerms = selected.symbol.annotations
+        val descriptorExprs = annTerms.flatMap(annotationDescriptorExpr)
+        '{
+            RuntimeAnnotationSupport.instantiateAll(
+                Array(${Varargs(descriptorExprs)}*)
+            )
+        }
+    }
 
     '{
       new PropertyAccess[E, V] {
@@ -398,4 +226,258 @@ object PropertyMacros {
       }
     }
   }
+
+  private def normalizeType(using Quotes)(tpe: quotes.reflect.TypeRepr): quotes.reflect.TypeRepr = {
+    import quotes.reflect.*
+    @tailrec
+    def loop(current: TypeRepr): TypeRepr = {
+      val simplified = current.widenTermRefByName.dealias.simplified
+
+      simplified match {
+        case AnnotatedType(inner, _) =>
+          loop(inner)
+
+        case ByNameType(inner) =>
+          loop(inner)
+
+        case mt: MethodType if mt.paramTypes.isEmpty =>
+          loop(mt.resType)
+
+        case pt: PolyType =>
+          loop(pt.resType)
+
+        case ct: ConstantType =>
+          val widened = ct.widen
+          if widened =:= ct then ct else loop(widened)
+
+        case other =>
+          other
+      }
+    }
+
+    loop(tpe)
+  }
+
+  @tailrec
+  private def unwrapTerm(using Quotes)(term: quotes.reflect.Term): quotes.reflect.Term = {
+    import quotes.reflect.*
+    term match {
+      case Inlined(_, _, inner) => unwrapTerm(inner)
+      case Typed(inner, _)      => unwrapTerm(inner)
+      case Block(Nil, expr)     => unwrapTerm(expr)
+      case other                => other
+    }
+  }
+
+  private def runtimeClassExpr(using Quotes)(tpe: quotes.reflect.TypeRepr): Expr[Class[?]] = {
+    import quotes.reflect.*
+    val normalized = normalizeType(tpe)
+
+    normalized match {
+      case tr: TypeRef if tr.typeSymbol.flags.is(Flags.Param) =>
+        report.errorAndAbort(
+          s"BUG: tried to resolve runtime class for type parameter '${tr.typeSymbol.name}' from type ${normalized.show(using Printer.TypeReprStructure)}"
+        )
+
+      case _ =>
+        val sym = normalized.typeSymbol
+        if sym == Symbol.noSymbol then
+          report.errorAndAbort(
+            s"No runtime class symbol available for type ${normalized.show(using Printer.TypeReprStructure)}"
+          )
+
+        '{ RuntimeTypeResolver.resolveClass(${ Expr(sym.fullName) }) }
+    }
+  }
+
+  private def runtimeTypeExpr(using Quotes)(tpe: quotes.reflect.TypeRepr): Expr[JType] = {
+    import quotes.reflect.*
+    normalizeType(tpe) match {
+      case tr: TypeRef if tr.typeSymbol.flags.is(Flags.Param) =>
+        val name = tr.typeSymbol.name
+        '{ RuntimeTypeResolver.typeVariable(${ Expr(name) }) }
+
+      case AppliedType(rawType, args) =>
+        val rawClassExpr = runtimeClassExpr(rawType)
+        val argExprs: Seq[Expr[JType]] = args.map(runtimeTypeExpr)
+        val argArrayExpr: Expr[Array[JType]] = '{ ${ Expr.ofSeq(argExprs) }.toArray }
+
+        '{
+          RuntimeTypeResolver.parameterized(
+            $rawClassExpr,
+            $argArrayExpr
+          )
+        }
+
+      case t if t <:< TypeRepr.of[Array[?]] =>
+        t.asType match {
+          case '[Array[a]] =>
+            val componentExpr = runtimeTypeExpr(TypeRepr.of[a])
+            '{
+              val component = $componentExpr
+              component match
+                case cls: Class[?] =>
+                  java.lang.reflect.Array.newInstance(cls, 0).getClass.asInstanceOf[JType]
+                case other =>
+                  RuntimeTypeResolver.genericArray(other)
+            }
+        }
+
+      case other =>
+        val clsExpr = runtimeClassExpr(other)
+        '{ $clsExpr: JType }
+    }
+  }
+
+  private def setterExpr[E: Type, V: Type](using Quotes)(propertyName: String): Expr[(E, V) => Unit] = {
+    import quotes.reflect.*
+    val setterName = s"${propertyName}_="
+
+    Lambda(
+      Symbol.spliceOwner,
+      MethodType(List("instance", "value"))(
+        _ => List(TypeRepr.of[E], TypeRepr.of[V]),
+        _ => TypeRepr.of[Unit]
+      ),
+      (owner, params) => {
+        val instanceTerm = params.head.asInstanceOf[Term]
+        val valueTerm = params(1).asInstanceOf[Term]
+
+        val setterSym =
+          instanceTerm.tpe.widen.typeSymbol.methodMember(setterName).headOption.getOrElse(Symbol.noSymbol)
+
+        if setterSym != Symbol.noSymbol then
+          Apply(Select(instanceTerm, setterSym), List(valueTerm.changeOwner(owner)))
+        else
+          '{
+            throw new UnsupportedOperationException(
+              ${ Expr(s"Property '$propertyName' is read-only. No Scala setter '$setterName' was found.") }
+            )
+          }.asTerm.changeOwner(owner)
+      }
+    ).asExprOf[(E, V) => Unit]
+  }
+
+  private def constantValueExpr(using Quotes)(term: quotes.reflect.Term): Expr[Any] = {
+    import quotes.reflect.*
+    term match {
+      case Literal(IntConstant(v))       => Expr(v)
+      case Literal(LongConstant(v))      => Expr(v)
+      case Literal(FloatConstant(v))     => Expr(v)
+      case Literal(DoubleConstant(v))    => Expr(v)
+      case Literal(BooleanConstant(v))   => Expr(v)
+      case Literal(StringConstant(v))    => Expr(v)
+      case Literal(ByteConstant(v))      => Expr(v)
+      case Literal(ShortConstant(v))     => Expr(v)
+      case Literal(CharConstant(v))      => Expr(v)
+      case Literal(NullConstant())       => '{ null }
+      case Literal(ClassOfConstant(tpe)) => runtimeClassExpr(tpe)
+      case _ =>
+        report.errorAndAbort(
+          s"Only literal annotation arguments are currently supported, but found:\n${term.show(using Printer.TreeStructure)}"
+        )
+    }
+  }
+
+  private def annotationValueExpr(using Quotes)(term: quotes.reflect.Term): Option[Expr[Any]] = {
+    import quotes.reflect.*
+    def loop(t: Term): Option[Expr[Any]] = {
+      val unwrapped = unwrapTerm(t)
+
+      unwrapped match {
+        case NamedArg(_, value) =>
+          loop(value)
+
+        case Inlined(_, _, inner) =>
+          loop(inner)
+
+        case Block(Nil, expr) =>
+          loop(expr)
+
+        case Typed(inner, _) =>
+          loop(inner)
+
+        case Literal(_) =>
+          Some(constantValueExpr(unwrapped))
+
+        case Repeated(elems, _) =>
+          val elemExprs = elems.flatMap(loop)
+          if (elemExprs.size == elems.size) then
+            Some('{ ${ Expr.ofSeq(elemExprs) }.toArray })
+          else
+            None
+
+        case Select(_, member) if unwrapped.tpe <:< TypeRepr.of[java.lang.Enum[?]] =>
+          val enumClassExpr = runtimeClassExpr(unwrapped.tpe)
+          Some('{
+            $enumClassExpr.getField(${ Expr(member) }).get(null).asInstanceOf[Any]
+          })
+
+        case Wildcard() =>
+          Some('{ null })
+
+        case TypeApply(inner, _) =>
+          loop(inner)
+
+        case Apply(Apply(TypeApply(Select(Ident("Array"), "apply"), _), List(Typed(Repeated(elems, _), _))), _) =>
+          val elemExprs = elems.flatMap(loop)
+          if (elemExprs.size == elems.size) then
+            Some('{ ${ Expr.ofSeq(elemExprs) }.toArray })
+          else
+            None
+
+        case _ =>
+          report.warning(s"Unsupported annotation argument:\n${unwrapped.show(using Printer.TreeStructure)}")
+          None
+      }
+    }
+
+    loop(term)
+  }
+  
+  private def annotationDescriptorExpr(using Quotes)(annotation: quotes.reflect.Term): Option[Expr[RuntimeAnnotationSupport.AnnotationDescriptor]] = {
+    import quotes.reflect.*
+    val ann = unwrapTerm(annotation)
+
+    ann match {
+      case Apply(Select(New(tpt), _), args) =>
+        val annotationType = tpt.tpe.typeSymbol
+        val annotationClassName = annotationType.fullName
+
+        val values: Seq[Option[Expr[RuntimeAnnotationSupport.AnnotationValue]]] =
+          args.zipWithIndex.map { case (arg, idx) =>
+            val (name, value) = arg match {
+              case NamedArg(n, v) => (Some(n), v)
+              case other =>
+                val methods = annotationType.methodMembers.filter(m => m.paramSymss.flatten.isEmpty)
+                (methods.lift(idx).map(_.name), other)
+            }
+
+            for {
+              n <- name
+              v <- annotationValueExpr(value)
+            } yield '{
+              RuntimeAnnotationSupport.AnnotationValue(
+                ${ Expr(n) },
+                $v
+              )
+            }
+          }
+
+        if (values.forall(_.isDefined)) then
+          val definedValues = values.flatten
+          Some('{
+            RuntimeAnnotationSupport.AnnotationDescriptor(
+              ${ Expr(annotationClassName) },
+              Array(${Varargs(definedValues)}*)
+            )
+          })
+        else
+          None
+
+      case _ =>
+        None
+    }
+  }
+
 }

@@ -8,6 +8,8 @@ import jakarta.json.bind.annotation.JsonbProperty
 import jakarta.persistence.{CascadeType, Entity, OneToMany, Table}
 
 import scala.beans.BeanProperty
+import com.anjunar.technologyspeaks.SpringContext
+
 
 @Entity
 @Table(name = "Shared#SecondComment")
@@ -23,7 +25,7 @@ object SecondComment extends RepositoryContext[SecondComment] with SchemaProvide
 
   override def schema(): EntitySchema[?] = new Schema
 
-  class Schema extends AbstractEntitySchema[SecondComment] {
+  class Schema extends AbstractEntitySchema[SecondComment](SpringContext.entityManager()) {
     @JsonbProperty val user = property(_.user)
     @JsonbProperty val editor = property(_.editor, new DefaultWritableRule[SecondComment]())
     @JsonbProperty val likes = property(_.likes)

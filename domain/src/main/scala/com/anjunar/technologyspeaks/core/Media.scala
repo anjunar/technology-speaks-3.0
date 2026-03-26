@@ -6,7 +6,7 @@ import jakarta.persistence.*
 
 import scala.beans.BeanProperty
 import scala.compiletime.uninitialized
-
+import com.anjunar.technologyspeaks.SpringContext
 @Entity
 @NamedEntityGraph(
   name = "Media.full",
@@ -32,7 +32,7 @@ object Media extends SchemaProvider {
 
   override def schema(): EntitySchema[?] = new Schema
 
-  class Schema extends AbstractEntitySchema[Media] {
+  class Schema extends AbstractEntitySchema[Media](SpringContext.entityManager()) {
     @JsonbProperty val name = property(_.name, new DefaultWritableRule[Media]())
     @JsonbProperty val contentType = property(_.contentType, new DefaultWritableRule[Media]())
     @JsonbProperty val data = property(_.data, new DefaultWritableRule[Media]())

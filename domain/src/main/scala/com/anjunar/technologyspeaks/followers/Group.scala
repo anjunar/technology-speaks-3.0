@@ -11,6 +11,8 @@ import jakarta.validation.constraints.Size
 import scala.annotation.meta.field
 import scala.beans.BeanProperty
 import scala.compiletime.uninitialized
+import com.anjunar.technologyspeaks.SpringContext
+
 
 @Entity
 @Table(name = "Followers#Group")
@@ -31,7 +33,7 @@ object Group extends RepositoryContext[Group] with SchemaProvider {
 
   override def schema(): EntitySchema[?] = new Schema
 
-  class Schema extends AbstractEntitySchema[Group] {
+  class Schema extends AbstractEntitySchema[Group](SpringContext.entityManager()) {
     @JsonbProperty val name = property(_.name, new OwnerRule[Group]())
   }
 

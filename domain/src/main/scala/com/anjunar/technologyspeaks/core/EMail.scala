@@ -10,6 +10,7 @@ import jakarta.validation.constraints.{Email, NotBlank}
 import scala.annotation.meta.field
 import scala.beans.BeanProperty
 import scala.compiletime.uninitialized
+import com.anjunar.technologyspeaks.SpringContext
 
 @Entity
 @Table(name = "Core#Email")
@@ -32,7 +33,7 @@ object EMail extends RepositoryContext[EMail] with SchemaProvider {
 
   override def schema(): EntitySchema[?] = new Schema
 
-  class Schema extends AbstractEntitySchema[EMail] {
+  class Schema extends AbstractEntitySchema[EMail](SpringContext.entityManager()) {
     @JsonbProperty val value = property(_.value, new OwnerRule[EMail]())
   }
 

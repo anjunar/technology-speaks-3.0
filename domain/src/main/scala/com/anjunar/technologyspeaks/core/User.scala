@@ -1,6 +1,9 @@
 package com.anjunar.technologyspeaks.core
 
+import com.anjunar.json.mapper.macros.PropertyAccess
+import com.anjunar.json.mapper.macros.PropertyMacros.describeProperties
 import com.anjunar.json.mapper.provider.{EntityProvider, OwnerProvider}
+import com.anjunar.json.mapper.schema.property.Property
 import com.anjunar.json.mapper.schema.{EntitySchema, SchemaProvider}
 import com.anjunar.technologyspeaks.SpringContext
 import com.anjunar.technologyspeaks.hibernate.{EntityContext, RepositoryContext}
@@ -56,16 +59,18 @@ class User(@(JsonbProperty @field) @(NotBlank @field) @(Size @field)(min = 2, ma
 }
 
 object User extends RepositoryContext[User] with SchemaProvider {
-
+  
   override def schema(): EntitySchema[?] = new Schema
 
-  open class Schema extends AbstractEntitySchema[User] {
-    @JsonbProperty val nickName = property(_.nickName, new OwnerRule[User]())
-    @JsonbProperty val image = property(_.image, new OwnerRule[User]())
-    @JsonbProperty val info = property(_.info, new OwnerRule[User]())
-    @JsonbProperty val address = property(_.address, new OwnerRule[User]())
-    @JsonbProperty val emails = property(_.emails, new ManagedRule[User]())
+  class Schema extends AbstractEntitySchema[User](SpringContext.entityManager()) {
+    @JsonbProperty val nickName: Property[User, String] = property(_.nickName, new OwnerRule[User]())
+    @JsonbProperty val image: Property[User, Media] = property(_.image, new OwnerRule[User]())
+    @JsonbProperty val info: Property[User, UserInfo] = property(_.info, new OwnerRule[User]())
+    @JsonbProperty val address: Property[User, Address] = property(_.address, new OwnerRule[User]())
+    @JsonbProperty val emails: Property[User, java.util.Set[EMail]] = property(_.emails, new OwnerRule[User]())
   }
+  
+  val properties: Seq[PropertyAccess[User, ?]] = describeProperties[User]
 
   @Entity(name = "UserView")
   class View extends EntityView

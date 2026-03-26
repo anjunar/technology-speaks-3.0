@@ -17,10 +17,10 @@ class BeanSerializer extends Serializer[Any] {
     val nodes = new java.util.LinkedHashMap[String, JsonNode]()
     val json = new JsonObject(nodes)
 
-    val companionInstance = TypeResolver.companionInstance(context.resolvedClass.raw)
+    val companionInstance = TypeResolver.companionInstance[SchemaProvider](context.resolvedClass.raw)
     val schemaProvider =
-      if (companionInstance != null && companionInstance.isInstanceOf[SchemaProvider]) {
-        companionInstance.asInstanceOf[SchemaProvider]
+      if (companionInstance != null) {
+        companionInstance
       } else {
         null
       }

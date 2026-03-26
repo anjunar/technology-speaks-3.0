@@ -1,7 +1,8 @@
 package com.anjunar.technologyspeaks.timeline
 
 import com.anjunar.json.mapper.provider.{EntityProvider, OwnerProvider}
-import com.anjunar.json.mapper.schema.{EntitySchema, Property, SchemaProvider}
+import com.anjunar.json.mapper.schema.property.Property
+import com.anjunar.json.mapper.schema.{EntitySchema, SchemaProvider}
 import com.anjunar.technologyspeaks.core.*
 import com.anjunar.technologyspeaks.hibernate.{EntityContext, RepositoryContext}
 import com.anjunar.technologyspeaks.shared.commentable.{CommentContainer, FirstComment}
@@ -15,6 +16,8 @@ import java.util
 import scala.beans.BeanProperty
 import scala.compiletime.uninitialized
 import java.util
+import com.anjunar.technologyspeaks.SpringContext
+
 
 @Entity
 @Table(name = "Timeline#Post")
@@ -87,7 +90,7 @@ object Post extends RepositoryContext[Post] with SchemaProvider {
 
   override def schema(): EntitySchema[?] = new Schema
 
-  class Schema extends AbstractEntitySchema[Post] {
+  class Schema extends AbstractEntitySchema[Post](SpringContext.entityManager()) {
     @JsonbProperty
     val user: Property[Post, User] = property(_.user, new OwnerRule[Post]())
 

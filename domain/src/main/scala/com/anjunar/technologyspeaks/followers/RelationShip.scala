@@ -9,6 +9,8 @@ import jakarta.persistence.*
 
 import scala.beans.BeanProperty
 import scala.compiletime.uninitialized
+import com.anjunar.technologyspeaks.SpringContext
+
 
 @Entity
 @Table(name = "Followers#RelationShip")
@@ -81,7 +83,7 @@ object RelationShip extends RepositoryContext[RelationShip] with SchemaProvider 
 
   override def schema(): EntitySchema[?] = new Schema
 
-  class Schema extends AbstractEntitySchema[RelationShip] {
+  class Schema extends AbstractEntitySchema[RelationShip](SpringContext.entityManager()) {
     @JsonbProperty val follower = property(_.follower, new OwnerRule[RelationShip]())
     @JsonbProperty val groups = property(_.groups, new OwnerRule[RelationShip]())
   }
