@@ -5,6 +5,8 @@ import java.lang.reflect.Type
 
 trait PropertyAccess[E, V] {
 
+  val isWriteable: Boolean = false
+  
   val name: String
 
   val annotations : Array[? <: Annotation]

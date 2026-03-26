@@ -1,7 +1,8 @@
 package com.anjunar.json.mapper.schema
 
 
-import com.anjunar.json.mapper.macros.PropertyMacros
+import com.anjunar.json.mapper.macros.{PropertyAccess, PropertyMacros}
+import com.anjunar.json.mapper.macros.PropertyMacros.describeProperties
 import com.anjunar.json.mapper.schema.property.{ListProperty, Property, SetProperty, SingularProperty}
 import com.anjunar.scala.universe.TypeResolver
 import jakarta.persistence.EntityManager
@@ -9,10 +10,15 @@ import jakarta.persistence.metamodel.{ListAttribute, SetAttribute, SingularAttri
 import org.hibernate.metamodel.model.domain.PersistentAttribute
 import org.hibernate.query.sqm.SqmPathSource
 
+import scala.collection.mutable
+
 abstract class EntitySchema[T](val entityManager: EntityManager = null) {
 
-  val properties: java.util.LinkedHashMap[String, Property[T, Any]] =
-    new java.util.LinkedHashMap[String, Property[T, Any]]()
+  val properties = new mutable.LinkedHashMap[String, Property[T, Any]].addAll(describeProperties[T].map(p => (p.name, p.asInstanceOf[Property[T, Any]])))
+
+  println(properties)
+    
+  def findProperty[V](name: String): Property[T, V] = properties(name).asInstanceOf[Property[T, V]]
 
   protected inline def property[V](inline selector: T => V,
                                    rule: VisibilityRule[T] = new DefaultRule().asInstanceOf[VisibilityRule[T]]): Property[T, V] = {

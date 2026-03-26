@@ -8,10 +8,7 @@ object RuntimeAnnotationSupport {
 
   final case class AnnotationValue(name: String, value: Any)
 
-  final case class AnnotationDescriptor(
-                                         annotationClassName: String,
-                                         values: Array[AnnotationValue]
-                                       )
+  final case class AnnotationDescriptor(annotationClassName: String, values: Array[AnnotationValue])
 
   def instantiateAll(descriptors: Array[AnnotationDescriptor]): Array[? <: Annotation] =
     descriptors.map(instantiate)

@@ -2,7 +2,7 @@ package com.anjunar.json.mapper.deserializer
 
 import com.anjunar.json.mapper.JsonContext
 import com.anjunar.json.mapper.intermediate.model.{JsonArray, JsonNode, JsonObject}
-import com.anjunar.json.mapper.provider.EntityProvider
+import com.anjunar.json.mapper.provider.{DTO, EntityProvider}
 
 import java.util.UUID
 
@@ -40,7 +40,7 @@ class ArrayDeserializer extends Deserializer[java.util.Collection[?]] {
 
               val jsonContext = new JsonContext(
                 elementResolvedClass,
-                entity,
+                entity.asInstanceOf[DTO],
                 context.graph,
                 context.loader,
                 context.validator,

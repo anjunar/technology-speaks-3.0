@@ -3,6 +3,7 @@ package com.anjunar.json.mapper
 import com.anjunar.json.mapper.deserializer.DeserializerRegistry
 import com.anjunar.json.mapper.intermediate.JsonGenerator
 import com.anjunar.json.mapper.intermediate.model.JsonNode
+import com.anjunar.json.mapper.provider.DTO
 import com.anjunar.json.mapper.serializers.{Serializer, SerializerRegistry}
 import com.anjunar.scala.universe.ResolvedClass
 import jakarta.persistence.EntityGraph
@@ -10,14 +11,12 @@ import jakarta.validation.Validator
 
 object JsonMapper {
 
-  def deserialize(
-    jsonNode: JsonNode,
-    instance: Any,
-    resolvedClass: ResolvedClass,
-    graph: EntityGraph[?],
-    loader: EntityLoader,
-    validator: Validator
-  ): Any = {
+  def deserialize(jsonNode: JsonNode,
+                  instance: DTO,
+                  resolvedClass: ResolvedClass,
+                  graph: EntityGraph[?],
+                  loader: EntityLoader,
+                  validator: Validator): Any = {
     val deserializer = DeserializerRegistry.findDeserializer(resolvedClass.raw.asInstanceOf[Class[Any]], jsonNode)
     val context = new JsonContext(resolvedClass, instance, graph, loader, validator, null, null)
     val deserialized = deserializer.deserialize(jsonNode, context)

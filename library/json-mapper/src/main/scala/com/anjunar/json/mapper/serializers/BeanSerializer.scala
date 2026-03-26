@@ -1,25 +1,24 @@
 package com.anjunar.json.mapper.serializers
 
 import com.anjunar.json.mapper.annotations.UseConverter
-import com.anjunar.json.mapper.provider.EntityProvider
-import com.anjunar.json.mapper.schema.{SchemaProvider, VisibilityRule}
+import com.anjunar.json.mapper.provider.{DTO, EntityProvider}
+import com.anjunar.json.mapper.schema.{EntitySchema, SchemaProvider, VisibilityRule}
 import com.anjunar.json.mapper.{JavaContext, ObjectMapperProvider}
 import com.anjunar.json.mapper.intermediate.model.{JsonNode, JsonObject, JsonString}
+import com.anjunar.json.mapper.schema.property.Property
 import com.anjunar.scala.universe.TypeResolver
-import com.anjunar.scala.universe.introspector.{AbstractProperty, AnnotationIntrospector, AnnotationProperty}
 import jakarta.json.bind.annotation.{JsonbProperty, JsonbSubtype}
 import jakarta.persistence.{Entity, EntityGraph, Subgraph}
 
-class BeanSerializer extends Serializer[Any] {
+class BeanSerializer extends Serializer[DTO] {
 
-  override def serialize(input: Any, context: JavaContext): JsonNode = {
-    val beanModel = AnnotationIntrospector.create(context.resolvedClass, classOf[JsonbProperty])
+  override def serialize(input: DTO, context: JavaContext): JsonNode = {
     val nodes = new java.util.LinkedHashMap[String, JsonNode]()
     val json = new JsonObject(nodes)
 
-    val schemaProvider = TypeResolver.companionInstance[SchemaProvider[?]](context.resolvedClass.raw)
+    val schemaProvider : EntitySchema[Any] = input.schema
+    val properties : Array[Property[Any, Any]] = schemaProvider.properties.values.toArray.asInstanceOf[Array[Property[Any, Any]]]
 
-    val properties = beanModel.properties
     var index = 0
     while (index < properties.length) {
       val property = properties(index)
@@ -33,13 +32,13 @@ class BeanSerializer extends Serializer[Any] {
         index += 1
       } else {
         if (schemaProvider != null) {
-          val schemaProperties = schemaProvider.schema.properties
-          val schemaProperty = schemaProperties.get(property.name)
+          val schemaProperties = schemaProvider.properties
+          val schemaProperty = schemaProperties(property.name)
 
           if (schemaProperty == null) {
             index += 1
           } else {
-            val visibilityRule = schemaProperty.rule.asInstanceOf[VisibilityRule[Any]]
+            val visibilityRule = schemaProperty.rule
             if (!visibilityRule.isVisible(input, property)) {
               index += 1
             } else {
@@ -72,7 +71,7 @@ class BeanSerializer extends Serializer[Any] {
                                  input: Any,
                                  context: JavaContext,
                                  nodes: java.util.LinkedHashMap[String, JsonNode],
-                                 property: AnnotationProperty
+                                 property: Property[Any, Any]
                                ): Unit = {
     val value =
       try {
@@ -105,7 +104,7 @@ class BeanSerializer extends Serializer[Any] {
     }
   }
 
-  private def convertToJsonNode(property: AbstractProperty,
+  private def convertToJsonNode(property: Property[Any, Any],
                                 nodes: java.util.LinkedHashMap[String, JsonNode],
                                 value: Any,
                                 context: JavaContext): Unit = {
@@ -119,10 +118,10 @@ class BeanSerializer extends Serializer[Any] {
 
     val propertyType =
       if (
-        classOf[java.util.Collection[?]].isAssignableFrom(property.propertyType.raw) ||
-          classOf[java.util.Map[?, ?]].isAssignableFrom(property.propertyType.raw)
+        classOf[java.util.Collection[?]].isAssignableFrom(property.propertyType) ||
+          classOf[java.util.Map[?, ?]].isAssignableFrom(property.propertyType)
       ) {
-        property.propertyType
+        TypeResolver.resolve(property.propertyType)
       } else {
         TypeResolver.resolve(value.getClass)
       }
@@ -138,11 +137,11 @@ class BeanSerializer extends Serializer[Any] {
 
     val jsonNode =
       if (converterAnnotation == null) {
-        val serializer = SerializerRegistry.find(property.propertyType.raw.asInstanceOf[Class[Any]], value).asInstanceOf[Serializer[Any]]
+        val serializer = SerializerRegistry.find(property.propertyType.asInstanceOf[Class[Any]], value).asInstanceOf[Serializer[Any]]
         serializer.serialize(value, javaContext)
       } else {
         val converter = converterAnnotation.value().getDeclaredConstructor().newInstance()
-        val toJson = converter.toJson(value, property.propertyType)
+        val toJson = converter.toJson(value, TypeResolver.resolve(property.propertyType))
         val serializer = SerializerRegistry.find(classOf[String].asInstanceOf[Class[Any]], toJson).asInstanceOf[Serializer[Any]]
         serializer.serialize(toJson, javaContext)
       }
@@ -157,7 +156,7 @@ class BeanSerializer extends Serializer[Any] {
     }
   }
 
-  private def isSelectedByGraph(context: JavaContext, property: AnnotationProperty): Boolean = {
+  private def isSelectedByGraph(context: JavaContext, property: Property[Any, Any]): Boolean = {
     val currentContainer = resolveContainer(context)
 
     if (currentContainer != null) {

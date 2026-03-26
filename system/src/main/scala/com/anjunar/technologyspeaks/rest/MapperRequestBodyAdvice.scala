@@ -1,8 +1,9 @@
 package com.anjunar.technologyspeaks.rest
 
-import com.anjunar.json.mapper.{EntityLoader, JsonMapper}
 import com.anjunar.json.mapper.intermediate.JsonParser
 import com.anjunar.json.mapper.intermediate.model.JsonObject
+import com.anjunar.json.mapper.provider.DTO
+import com.anjunar.json.mapper.{EntityLoader, JsonMapper}
 import com.anjunar.scala.universe.TypeResolver
 import jakarta.persistence.EntityManager
 import jakarta.validation.Validator
@@ -19,27 +20,25 @@ import java.util.UUID
 class MapperRequestBodyAdvice(val entityManager: EntityManager, val validator: Validator) extends RequestBodyAdvice {
 
   override def supports(
-    methodParameter: MethodParameter,
-    targetType: Type,
-    converterType: Class[? <: HttpMessageConverter[?]]
-  ): Boolean =
+                         methodParameter: MethodParameter,
+                         targetType: Type,
+                         converterType: Class[? <: HttpMessageConverter[?]]
+                       ): Boolean =
     classOf[MapperHttpMessageConverter].isAssignableFrom(converterType)
 
   override def beforeBodyRead(
-    inputMessage: HttpInputMessage,
-    parameter: MethodParameter,
-    targetType: Type,
-    converterType: Class[? <: HttpMessageConverter[?]]
-  ): HttpInputMessage =
+                               inputMessage: HttpInputMessage,
+                               parameter: MethodParameter,
+                               targetType: Type,
+                               converterType: Class[? <: HttpMessageConverter[?]]
+                             ): HttpInputMessage =
     inputMessage
 
-  override def afterBodyRead(
-    body: Any,
-    inputMessage: HttpInputMessage,
-    parameter: MethodParameter,
-    targetType: Type,
-    converterType: Class[? <: HttpMessageConverter[?]]
-  ): Any =
+  override def afterBodyRead(body: Any,
+                             inputMessage: HttpInputMessage,
+                             parameter: MethodParameter,
+                             targetType: Type,
+                             converterType: Class[? <: HttpMessageConverter[?]]): Any =
     body match {
       case text: String =>
         JsonParser.parse(text) match {
@@ -66,7 +65,7 @@ class MapperRequestBodyAdvice(val entityManager: EntityManager, val validator: V
                 entityManager.find(clazz, id)
             }
 
-            JsonMapper.deserialize(jsonObject, instance, resolvedClass, entityGraph, loader, validator)
+            JsonMapper.deserialize(jsonObject, instance.asInstanceOf[DTO], resolvedClass, entityGraph, loader, validator)
           case _ =>
             throw new IllegalArgumentException("body must be a json object")
         }
@@ -75,12 +74,12 @@ class MapperRequestBodyAdvice(val entityManager: EntityManager, val validator: V
     }
 
   override def handleEmptyBody(
-    body: Any,
-    inputMessage: HttpInputMessage,
-    parameter: MethodParameter,
-    targetType: Type,
-    converterType: Class[? <: HttpMessageConverter[?]]
-  ): Any =
+                                body: Any,
+                                inputMessage: HttpInputMessage,
+                                parameter: MethodParameter,
+                                targetType: Type,
+                                converterType: Class[? <: HttpMessageConverter[?]]
+                              ): Any =
     body
 
 }

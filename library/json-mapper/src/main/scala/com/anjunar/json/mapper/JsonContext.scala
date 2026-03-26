@@ -1,12 +1,13 @@
 package com.anjunar.json.mapper
 
+import com.anjunar.json.mapper.provider.DTO
 import com.anjunar.scala.universe.ResolvedClass
 import jakarta.persistence.EntityGraph
 import jakarta.validation.{ConstraintViolation, Validator}
 
 class JsonContext(
   val resolvedClass: ResolvedClass,
-  val instance: Any,
+  val instance: DTO,
   val graph: EntityGraph[?],
   val loader: EntityLoader,
   val validator: Validator,

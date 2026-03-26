@@ -1,6 +1,7 @@
 package com.anjunar.json.mapper.deserializer
 
 import com.anjunar.json.mapper.JsonContext
+import com.anjunar.json.mapper.provider.DTO
 import com.anjunar.json.mapper.intermediate.model.{JsonNode, JsonObject}
 
 class MapDeserializer extends Deserializer[java.util.Map[String, ?]] {
@@ -25,7 +26,7 @@ class MapDeserializer extends Deserializer[java.util.Map[String, ?]] {
 
           val jsonContext = new JsonContext(
             elementResolvedClass,
-            entity,
+            entity.asInstanceOf[DTO],
             context.graph,
             context.loader,
             context.validator,
