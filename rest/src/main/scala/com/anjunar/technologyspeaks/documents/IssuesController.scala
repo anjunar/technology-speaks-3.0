@@ -34,15 +34,13 @@ class IssuesController(val query: HibernateSearch, val identityHolder: IdentityH
 
     for (entity <- entities.asScala) {
       entity.data.addLinks(
-        LinkBuilder.create(classOf[IssueController], "read")
-          .withVariable("document", entity.data.document.id)
-          .withVariable("id", entity.data.id)
+        LinkBuilder.create[IssueController](_.read(entity.data.document, entity.data))
           .build()
       )
 
       if (identityHolder.user == entity.data.user) {
         entity.data.addLinks(
-          LinkBuilder.create(classOf[IssueController], "delete")
+          LinkBuilder.create[IssueController](_.delete(null))
             .build()
         )
       }

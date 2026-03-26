@@ -15,9 +15,9 @@ class RelationShipController {
   @EntityGraph("RelationShip.full")
   def read(@PathVariable("id") entity: RelationShip): Data[RelationShip] = {
     entity.addLinks(
-      LinkBuilder.create(classOf[RelationShipController], "update")
+      LinkBuilder.create[RelationShipController](_.update(null))
         .build(),
-      LinkBuilder.create(classOf[RelationShipController], "delete")
+      LinkBuilder.create[RelationShipController](_.delete(null))
         .build()
     )
 
@@ -31,9 +31,9 @@ class RelationShipController {
     entity.persist()
 
     entity.addLinks(
-      LinkBuilder.create(classOf[RelationShipController], "update")
+      LinkBuilder.create[RelationShipController](_.update(null))
         .build(),
-      LinkBuilder.create(classOf[RelationShipController], "delete")
+      LinkBuilder.create[RelationShipController](_.delete(null))
         .build()
     )
 
@@ -45,9 +45,9 @@ class RelationShipController {
   @EntityGraph("RelationShip.full")
   def update(@RequestBody entity: RelationShip): Data[RelationShip] = {
     entity.addLinks(
-      LinkBuilder.create(classOf[RelationShipController], "update")
+      LinkBuilder.create[RelationShipController](_.update(null))
         .build(),
-      LinkBuilder.create(classOf[RelationShipController], "delete")
+      LinkBuilder.create[RelationShipController](_.delete(null))
         .build()
     )
 

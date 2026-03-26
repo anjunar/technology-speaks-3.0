@@ -32,42 +32,35 @@ class IssueCommentsController(val query: HibernateSearch, val identityHolder: Id
 
     for (row <- entities.asScala) {
       row.data.addLinks(
-        LinkBuilder.create(classOf[IssueLikeController], "likeFirstComment")
+        LinkBuilder.create[IssueLikeController](_.likeFirstComment(row.data))
           .withRel("like")
-          .withVariable("id", row.data.id)
           .build(),
-        LinkBuilder.create(classOf[IssueCommentController], "update")
+        LinkBuilder.create[IssueCommentController](_.update(search.issue, null))
           .withRel("updateChildren")
-          .withVariable("id", search.issue.id)
           .build()
       )
 
       if (row.data.user == identityHolder.user) {
         row.data.addLinks(
-          LinkBuilder.create(classOf[IssueCommentController], "update")
-            .withVariable("id", search.issue.id)
+          LinkBuilder.create[IssueCommentController](_.update(search.issue, null))
             .build(),
-          LinkBuilder.create(classOf[IssueCommentController], "delete")
-            .withVariable("id", search.issue.id)
+          LinkBuilder.create[IssueCommentController](_.delete(search.issue, null))
             .build()
         )
       }
 
       for (comment <- row.data.comments.asScala) {
         comment.addLinks(
-          LinkBuilder.create(classOf[IssueLikeController], "likeSecondComment")
+          LinkBuilder.create[IssueLikeController](_.likeSecondComment(comment))
             .withRel("like")
-            .withVariable("id", comment.id)
             .build()
         )
 
         if (comment.user == identityHolder.user) {
           comment.addLinks(
-            LinkBuilder.create(classOf[IssueCommentController], "update")
-              .withVariable("id", search.issue.id)
+            LinkBuilder.create[IssueCommentController](_.update(search.issue, null))
               .build(),
-            LinkBuilder.create(classOf[IssueCommentController], "delete")
-              .withVariable("id", search.issue.id)
+            LinkBuilder.create[IssueCommentController](_.delete(search.issue, null))
               .build()
           )
         }

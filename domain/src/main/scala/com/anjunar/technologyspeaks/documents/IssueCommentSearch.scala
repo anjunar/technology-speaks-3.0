@@ -13,7 +13,7 @@ import scala.beans.BeanProperty
 
 class IssueCommentSearch(
   issueValue: Issue = null,
-  sort: java.util.List[String],
+  sort: java.util.List[String] = new java.util.ArrayList[String](),
   index: Int = 0,
   limit: Int = 5
 ) extends AbstractSearch(sort, index, limit) {

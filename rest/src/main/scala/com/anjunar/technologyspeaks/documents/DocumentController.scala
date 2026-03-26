@@ -23,7 +23,7 @@ class DocumentController(val identityHolder: IdentityHolder) {
     val form = new Data(entity, Document.schema)
 
     entity.addLinks(
-      LinkBuilder.create(classOf[DocumentController], "save")
+      LinkBuilder.create[DocumentController](_.save(null))
         .build()
     )
 
@@ -48,21 +48,19 @@ class DocumentController(val identityHolder: IdentityHolder) {
     val form = new Data(entity, Document.schema)
 
     entity.addLinks(
-      LinkBuilder.create(classOf[DocumentController], "create")
+      LinkBuilder.create[DocumentController](_.create())
         .withRel("create-document")
         .build(),
-      LinkBuilder.create(classOf[IssuesController], "list")
-        .withVariable("id", entity.id)
+      LinkBuilder.create[IssuesController](_.list(new IssueSearch(entity)))
         .build(),
-      LinkBuilder.create(classOf[IssueController], "create")
+      LinkBuilder.create[IssueController](_.create(entity))
         .withRel("create-issue")
-        .withVariable("id", entity.id)
         .build()
     )
 
     if (identityHolder.user == entity.user) {
       entity.addLinks(
-        LinkBuilder.create(classOf[DocumentController], "update")
+        LinkBuilder.create[DocumentController](_.update(null))
           .build()
       )
     }
@@ -77,17 +75,15 @@ class DocumentController(val identityHolder: IdentityHolder) {
     val form = new Data(entity, Document.schema)
 
     entity.addLinks(
-      LinkBuilder.create(classOf[IssuesController], "list")
-        .withVariable("id", entity.id)
+      LinkBuilder.create[IssuesController](_.list(new IssueSearch(entity)))
         .build(),
-      LinkBuilder.create(classOf[IssueController], "create")
-        .withVariable("id", entity.id)
+      LinkBuilder.create[IssueController](_.create(entity))
         .build()
     )
 
     if (identityHolder.user == entity.user) {
       entity.addLinks(
-        LinkBuilder.create(classOf[DocumentController], "update")
+        LinkBuilder.create[DocumentController](_.update(null))
           .build()
       )
     }
@@ -105,12 +101,11 @@ class DocumentController(val identityHolder: IdentityHolder) {
     val form = new Data(entity, Document.schema)
 
     entity.addLinks(
-      LinkBuilder.create(classOf[DocumentController], "update")
+      LinkBuilder.create[DocumentController](_.update(null))
         .build(),
-      LinkBuilder.create(classOf[IssuesController], "list")
-        .withVariable("id", entity.id)
+      LinkBuilder.create[IssuesController](_.list(new IssueSearch(entity)))
         .build(),
-      LinkBuilder.create(classOf[IssueController], "create")
+      LinkBuilder.create[IssueController](_.create(entity))
         .withVariable("id", entity.id)
         .build()
     )
@@ -127,13 +122,11 @@ class DocumentController(val identityHolder: IdentityHolder) {
     val form = new Data(entity, Document.schema)
 
     entity.addLinks(
-      LinkBuilder.create(classOf[DocumentController], "update")
+      LinkBuilder.create[DocumentController](_.update(null))
         .build(),
-      LinkBuilder.create(classOf[IssuesController], "list")
-        .withVariable("id", entity.id)
+      LinkBuilder.create[IssuesController](_.list(new IssueSearch(entity)))
         .build(),
-      LinkBuilder.create(classOf[IssueController], "create")
-        .withVariable("id", entity.id)
+      LinkBuilder.create[IssueController](_.create(entity))
         .build()
     )
 

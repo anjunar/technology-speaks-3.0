@@ -1,11 +1,12 @@
 package com.anjunar.technologyspeaks
 
-import com.anjunar.technologyspeaks.core.UsersController
+import com.anjunar.json.mapper.intermediate.model.JsonObject
+import com.anjunar.technologyspeaks.core.{UserSearch, UsersController}
 import com.anjunar.technologyspeaks.documents.{DocumentController, DocumentsController}
-import com.anjunar.technologyspeaks.followers.FollowersController
+import com.anjunar.technologyspeaks.followers.{FollowersController, RelationShipSearch}
 import com.anjunar.technologyspeaks.rest.EntityGraph
-import com.anjunar.technologyspeaks.security._
-import com.anjunar.technologyspeaks.timeline.PostsController
+import com.anjunar.technologyspeaks.security.*
+import com.anjunar.technologyspeaks.timeline.{PostSearch, PostsController}
 import jakarta.annotation.security.RolesAllowed
 import org.springframework.web.bind.annotation.{GetMapping, RestController}
 
@@ -19,43 +20,43 @@ class ApplicationController(val identityHolder: IdentityHolder) {
     val application = new Application(identityHolder.user)
 
     application.addLinks(
-      LinkBuilder.create(classOf[DocumentController], "root")
+      LinkBuilder.create[DocumentController](_.root())
         .withId(true)
         .withRel("document")
         .build(),
-      LinkBuilder.create(classOf[PostsController], "list")
+      LinkBuilder.create[PostsController](_.list(new PostSearch()))
         .withId(true)
         .withRel("posts")
         .build(),
-      LinkBuilder.create(classOf[UsersController], "list")
+      LinkBuilder.create[UsersController](_.list(new UserSearch()))
         .withId(true)
         .withRel("users")
         .build(),
-      LinkBuilder.create(classOf[FollowersController], "list")
+      LinkBuilder.create[FollowersController](_.list(new RelationShipSearch()))
         .withId(true)
         .withRel("followers")
         .build(),
-      LinkBuilder.create(classOf[WebAuthnLoginController], "options")
+      LinkBuilder.create[WebAuthnLoginController](_.options(new JsonObject()))
         .withId(true)
         .withRel("login")
         .build(),
-      LinkBuilder.create(classOf[WebAuthnRegisterController], "options")
+      LinkBuilder.create[WebAuthnRegisterController](_.options(new JsonObject()))
         .withId(true)
         .withRel("register")
         .build(),
-      LinkBuilder.create(classOf[PasswordLoginController], "login")
+      LinkBuilder.create[PasswordLoginController](_.login(new JsonObject()))
         .withId(true)
         .withRel("login")
         .build(),
-      LinkBuilder.create(classOf[PasswordRegisterController], "register")
+      LinkBuilder.create[PasswordRegisterController](_.register(new JsonObject()))
         .withId(true)
         .withRel("register")
         .build(),
-      LinkBuilder.create(classOf[LogoutController], "logout")
+      LinkBuilder.create[LogoutController](_.logout())
         .withId(true)
         .withRel("logout")
         .build(),
-      LinkBuilder.create(classOf[ConfirmController], "confirm")
+      LinkBuilder.create[ConfirmController](_.confirm(""))
         .withId(true)
         .withRel("confirm")
         .build()

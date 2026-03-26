@@ -17,8 +17,7 @@ class IssueController(val identityHolder: IdentityHolder) {
     val entity = new Issue("Neue Aufgabe")
 
     entity.addLinks(
-      LinkBuilder.create(classOf[IssueController], "save")
-        .withVariable("id", document.id)
+      LinkBuilder.create[IssueController](_.save(document, null))
         .build()
     )
 
@@ -31,20 +30,17 @@ class IssueController(val identityHolder: IdentityHolder) {
   def read(@PathVariable("document") document: Document, @PathVariable("id") entity: Issue): Data[Issue] = {
     if (identityHolder.user == entity.user) {
       entity.addLinks(
-        LinkBuilder.create(classOf[IssueController], "update")
-          .withVariable("id", entity.document.id)
+        LinkBuilder.create[IssueController](_.update(entity.document, null))
           .build(),
-        LinkBuilder.create(classOf[IssueController], "delete")
+        LinkBuilder.create[IssueController](_.delete(null))
           .build()
       )
     }
 
     entity.addLinks(
-      LinkBuilder.create(classOf[IssueCommentsController], "comments")
-        .withVariable("issue", entity.id)
+      LinkBuilder.create[IssueCommentsController](_.comments(new IssueCommentSearch(entity)))
         .build(),
-      LinkBuilder.create(classOf[IssueCommentController], "save")
-        .withVariable("id", entity.id)
+      LinkBuilder.create[IssueCommentController](_.save(entity, null))
         .build()
     )
 
@@ -60,10 +56,9 @@ class IssueController(val identityHolder: IdentityHolder) {
     entity.persist()
 
     entity.addLinks(
-      LinkBuilder.create(classOf[IssueController], "update")
-        .withVariable("id", entity.document.id)
+      LinkBuilder.create[IssueController](_.update(entity.document, null))
         .build(),
-      LinkBuilder.create(classOf[IssueController], "delete")
+      LinkBuilder.create[IssueController](_.delete(null))
         .build()
     )
 
@@ -78,10 +73,9 @@ class IssueController(val identityHolder: IdentityHolder) {
     entity.user = identityHolder.user
 
     entity.addLinks(
-      LinkBuilder.create(classOf[IssueController], "update")
-        .withVariable("id", entity.document.id)
+      LinkBuilder.create[IssueController](_.update(entity.document, null))
         .build(),
-      LinkBuilder.create(classOf[IssueController], "delete")
+      LinkBuilder.create[IssueController](_.delete(null))
         .build()
     )
 

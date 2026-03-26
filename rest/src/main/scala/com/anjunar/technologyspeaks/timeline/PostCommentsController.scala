@@ -32,42 +32,35 @@ class PostCommentsController(val query: HibernateSearch, val identityHolder: Ide
 
     for (row <- entities.asScala) {
       row.data.addLinks(
-        LinkBuilder.create(classOf[PostLikeController], "likeFirstComment")
+        LinkBuilder.create[PostLikeController](_.likeFirstComment(row.data))
           .withRel("like")
-          .withVariable("id", row.data.id)
           .build(),
-        LinkBuilder.create(classOf[PostCommentController], "update")
+        LinkBuilder.create[PostCommentController](_.update(search.post, null))
           .withRel("updateChildren")
-          .withVariable("id", search.post.id)
           .build()
       )
 
       if (row.data.user == identityHolder.user) {
         row.data.addLinks(
-          LinkBuilder.create(classOf[PostCommentController], "update")
-            .withVariable("id", search.post.id)
+          LinkBuilder.create[PostCommentController](_.update(search.post, null))
             .build(),
-          LinkBuilder.create(classOf[PostCommentController], "delete")
-            .withVariable("id", search.post.id)
+          LinkBuilder.create[PostCommentController](_.delete(search.post, null))
             .build()
         )
       }
 
       for (comment <- row.data.comments.asScala) {
         comment.addLinks(
-          LinkBuilder.create(classOf[PostLikeController], "likeSecondComment")
+          LinkBuilder.create[PostLikeController](_.likeSecondComment(comment))
             .withRel("like")
-            .withVariable("id", comment.id)
             .build()
         )
 
         if (comment.user == identityHolder.user) {
           comment.addLinks(
-            LinkBuilder.create(classOf[PostCommentController], "update")
-              .withVariable("id", search.post.id)
+            LinkBuilder.create[PostCommentController](_.update(search.post, null))
               .build(),
-            LinkBuilder.create(classOf[PostCommentController], "delete")
-              .withVariable("id", search.post.id)
+            LinkBuilder.create[PostCommentController](_.delete(search.post, null))
               .build()
           )
         }

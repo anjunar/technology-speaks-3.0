@@ -41,8 +41,7 @@ class DocumentsController(val query: HibernateSearch) {
 
     for (entity <- entities.asScala) {
       entity.data.addLinks(
-        LinkBuilder.create(classOf[DocumentController], "read")
-          .withVariable("id", entity.data.id)
+        LinkBuilder.create[DocumentController](_.read(entity.data))
           .build()
       )
     }
@@ -50,7 +49,7 @@ class DocumentsController(val query: HibernateSearch) {
     val table = new Table(entities, count, Document.schema)
 
     table.addLinks(
-      LinkBuilder.create(classOf[DocumentController], "create")
+      LinkBuilder.create[DocumentController](_.create())
         .build()
     )
 

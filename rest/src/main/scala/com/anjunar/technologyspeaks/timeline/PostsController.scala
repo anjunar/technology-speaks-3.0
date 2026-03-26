@@ -33,16 +33,14 @@ class PostsController(val query: HibernateSearch, val identityHolder: IdentityHo
 
     for (post <- entities.asScala) {
       post.data.addLinks(
-        LinkBuilder.create(classOf[PostLikeController], "likePost")
+        LinkBuilder.create[PostLikeController](_.likePost(post.data))
           .withRel("like")
-          .withVariable("id", post.data.id)
           .build()
       )
 
       if (identityHolder.user == post.data.user) {
         post.data.addLinks(
-          LinkBuilder.create(classOf[PostController], "read")
-            .withVariable("id", post.data.id)
+          LinkBuilder.create[PostController](_.read(post.data))
             .build()
         )
       }

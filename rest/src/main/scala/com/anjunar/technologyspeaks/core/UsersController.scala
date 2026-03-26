@@ -41,8 +41,7 @@ class UsersController(val query: HibernateSearch) {
 
     for (user <- entities.asScala) {
       user.data.addLinks(
-        LinkBuilder.create(classOf[UserController], "read")
-          .withVariable("id", user.data.id)
+        LinkBuilder.create[UserController](_.read(user.data))
           .build()
       )
     }

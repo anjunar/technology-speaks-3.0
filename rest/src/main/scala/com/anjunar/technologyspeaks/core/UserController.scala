@@ -1,5 +1,6 @@
 package com.anjunar.technologyspeaks.core
 
+import com.anjunar.technologyspeaks.followers.UserGroupsController.GroupAssignmentRequest
 import com.anjunar.technologyspeaks.followers.{FollowerController, RelationShip, UserGroupsController}
 import com.anjunar.technologyspeaks.rest.EntityGraph
 import com.anjunar.technologyspeaks.rest.types.Data
@@ -18,7 +19,7 @@ class UserController(val identityHolder: IdentityHolder) {
 
     if (identityHolder.user == user) {
       user.addLinks(
-        LinkBuilder.create(classOf[UserController], "update")
+        LinkBuilder.create[UserController](_.update(new User("")))
           .build()
       )
     }
@@ -27,27 +28,23 @@ class UserController(val identityHolder: IdentityHolder) {
 
     user.addLinks(
       if (relationShip == null) {
-        LinkBuilder.create(classOf[FollowerController], "follow")
+        LinkBuilder.create[FollowerController](_.follow(user))
           .withRel("follow")
-          .withVariable("id", user.id)
           .build()
       } else {
-        LinkBuilder.create(classOf[FollowerController], "unfollow")
+        LinkBuilder.create[FollowerController](_.unfollow(user))
           .withRel("unfollow")
-          .withVariable("id", user.id)
           .build()
       }
     )
 
     if (relationShip != null) {
       user.addLinks(
-        LinkBuilder.create(classOf[UserGroupsController], "list")
+        LinkBuilder.create[UserGroupsController](_.list(user))
           .withRel("groups")
-          .withVariable("id", user.id)
           .build(),
-        LinkBuilder.create(classOf[UserGroupsController], "update")
+        LinkBuilder.create[UserGroupsController](_.update(user, null))
           .withRel("updateGroups")
-          .withVariable("id", user.id)
           .build()
       )
     }
@@ -62,10 +59,9 @@ class UserController(val identityHolder: IdentityHolder) {
     val form = new Data(user, User.schema)
 
     user.addLinks(
-      LinkBuilder.create(classOf[UserController], "update")
+      LinkBuilder.create[UserController](_.update(new User("")))
         .build(),
-      LinkBuilder.create(classOf[ManagedPropertyController], "read")
-        .withVariable("id", "")
+      LinkBuilder.create[ManagedPropertyController](_.read(new ManagedProperty("")))
         .build()
     )
 

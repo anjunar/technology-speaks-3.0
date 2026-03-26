@@ -34,8 +34,7 @@ class GroupsController(val query: HibernateSearch, val identityHolder: IdentityH
 
     for (entity <- entities.asScala) {
       entity.data.addLinks(
-        LinkBuilder.create(classOf[GroupController], "read")
-          .withVariable("id", entity.data.id)
+        LinkBuilder.create[GroupController](_.read(entity.data))
           .build()
       )
     }

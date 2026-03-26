@@ -18,8 +18,8 @@ class GroupController(private val identityHolder: IdentityHolder) {
     }
 
     entity.addLinks(
-      LinkBuilder.create(classOf[GroupController], "update").build(),
-      LinkBuilder.create(classOf[GroupController], "delete").build()
+      LinkBuilder.create[GroupController](_.update(null)).build(),
+      LinkBuilder.create[GroupController](_.delete(null)).build()
     )
 
     new Data(entity, Group.schema)
@@ -32,8 +32,8 @@ class GroupController(private val identityHolder: IdentityHolder) {
     entity.persist()
 
     entity.addLinks(
-      LinkBuilder.create(classOf[GroupController], "update").build(),
-      LinkBuilder.create(classOf[GroupController], "delete").build()
+      LinkBuilder.create[GroupController](_.update(null)).build(),
+      LinkBuilder.create[GroupController](_.delete(null)).build()
     )
 
     new Data(entity, Group.schema)
@@ -47,8 +47,8 @@ class GroupController(private val identityHolder: IdentityHolder) {
     }
 
     entity.addLinks(
-      LinkBuilder.create(classOf[GroupController], "update").build(),
-      LinkBuilder.create(classOf[GroupController], "delete").build()
+      LinkBuilder.create[GroupController](_.update(null)).build(),
+      LinkBuilder.create[GroupController](_.delete(null)).build()
     )
 
     new Data(entity, Group.schema)

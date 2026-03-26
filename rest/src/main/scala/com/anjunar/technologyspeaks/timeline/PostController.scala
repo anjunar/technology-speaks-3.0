@@ -16,28 +16,23 @@ class PostController(val identityHolder: IdentityHolder) {
     val data = new Data(post, Post.schema)
 
     post.addLinks(
-      LinkBuilder.create(classOf[PostLikeController], "likePost")
+      LinkBuilder.create[PostLikeController](_.likePost(post))
         .withRel("like")
-        .withVariable("id", post.id)
         .build()
     )
 
     post.addLinks(
-      LinkBuilder.create(classOf[PostCommentsController], "comments")
-        .withVariable("post", post.id)
+      LinkBuilder.create[PostCommentsController](_.comments(new PostCommentSearch(post)))
         .build(),
-      LinkBuilder.create(classOf[PostCommentController], "save")
-        .withVariable("id", post.id)
+      LinkBuilder.create[PostCommentController](_.save(post, null))
         .build()
     )
 
     if (post.user == identityHolder.user) {
       post.addLinks(
-        LinkBuilder.create(classOf[PostController], "read")
-          .withVariable("id", post.id)
+        LinkBuilder.create[PostController](_.read(post))
           .build(),
-        LinkBuilder.create(classOf[PostController], "delete")
-          .withVariable("id", post.id)
+        LinkBuilder.create[PostController](_.delete(post))
           .build()
       )
     }
@@ -54,28 +49,23 @@ class PostController(val identityHolder: IdentityHolder) {
     val data = new Data(post, Post.schema)
 
     post.addLinks(
-      LinkBuilder.create(classOf[PostLikeController], "likePost")
+      LinkBuilder.create[PostLikeController](_.likePost(post))
         .withRel("like")
-        .withVariable("id", post.id)
         .build()
     )
 
     post.addLinks(
-      LinkBuilder.create(classOf[PostCommentsController], "comments")
-        .withVariable("post", post.id)
+      LinkBuilder.create[PostCommentsController](_.comments(new PostCommentSearch(post)))
         .build(),
-      LinkBuilder.create(classOf[PostCommentController], "save")
-        .withVariable("id", post.id)
+      LinkBuilder.create[PostCommentController](_.save(post, null))
         .build()
     )
 
     if (post.user == identityHolder.user) {
       post.addLinks(
-        LinkBuilder.create(classOf[PostController], "read")
-          .withVariable("id", post.id)
+        LinkBuilder.create[PostController](_.read(post))
           .build(),
-        LinkBuilder.create(classOf[PostController], "delete")
-          .withVariable("id", post.id)
+        LinkBuilder.create[PostController](_.delete(post))
           .build()
       )
     }
@@ -90,30 +80,25 @@ class PostController(val identityHolder: IdentityHolder) {
     val data = new Data(post.merge(), Post.schema)
 
     post.addLinks(
-      LinkBuilder.create(classOf[PostLikeController], "likePost")
+      LinkBuilder.create[PostLikeController](_.likePost(post))
         .withRel("like")
-        .withVariable("id", post.id)
         .build()
     )
 
     post.addLinks(
-      LinkBuilder.create(classOf[PostCommentsController], "comments")
-        .withVariable("post", post.id)
+      LinkBuilder.create[PostCommentsController](_.comments(new PostCommentSearch(post)))
         .build(),
-      LinkBuilder.create(classOf[PostCommentController], "save")
-        .withVariable("id", post.id)
+      LinkBuilder.create[PostCommentController](_.save(post, null))
         .build()
     )
 
     if (post.user == identityHolder.user) {
       post.addLinks(
-        LinkBuilder.create(classOf[PostController], "read")
-          .withVariable("id", post.id)
+        LinkBuilder.create[PostController](_.read(post))
           .build(),
-        LinkBuilder.create(classOf[PostController], "update")
+        LinkBuilder.create[PostController](_.update(null))
           .build(),
-        LinkBuilder.create(classOf[PostController], "delete")
-          .withVariable("id", post.id)
+        LinkBuilder.create[PostController](_.delete(post))
           .build()
       )
     }

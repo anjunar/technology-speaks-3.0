@@ -15,8 +15,8 @@ import scala.beans.BeanProperty
 class PostCommentSearch(
                          @(JsonbProperty @field)
                          @(RestPredicate @field)(classOf[PostCommentSearch.PostPredicate])
-                                                  val post: Post = null,
-                         sort: java.util.List[String],
+                         val post: Post = null,
+                         sort: java.util.List[String] = new java.util.ArrayList[String](),
                          index: Int = 0,
                          limit: Int = 5
                        ) extends AbstractSearch(sort, index, limit)

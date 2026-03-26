@@ -37,8 +37,7 @@ class FollowersController(val query: HibernateSearch, val identityHolder: Identi
 
     for (entity <- entities.asScala) {
       entity.data.addLinks(
-        LinkBuilder.create(classOf[UserController], "read")
-          .withVariable("id", entity.data.follower.id)
+        LinkBuilder.create[UserController](_.read(entity.data.follower))
           .build()
       )
     }
