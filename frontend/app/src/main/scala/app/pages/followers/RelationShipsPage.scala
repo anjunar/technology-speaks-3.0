@@ -28,17 +28,13 @@ import scala.concurrent.ExecutionContext
 import scala.scalajs.js.JSConverters.*
 import scala.util.{Failure, Success}
 
-class RelationShipsPage extends PageComposite("Following") {
+class RelationShipsPage(val relationShipsProperty: RemoteListProperty[Data[RelationShip], RemotePageQuery]) extends PageComposite("Following") {
 
   override def pageWidth: Int = 1040
   override def pageHeight: Int = 860
 
   private given ExecutionContext = ExecutionContext.global
   private val pageSize = 200
-  private val relationShipsProperty: RemoteListProperty[Data[RelationShip], RemotePageQuery] =
-    RemoteTableList.create[Data[RelationShip]](pageSize = pageSize) { (index, limit) =>
-      RelationShip.list(index, limit)
-    }
   private val availableGroupsProperty: RemoteListProperty[Group, RemotePageQuery] =
     RemoteTableList.createMapped[Data[Group], Group](pageSize = pageSize) { (index, limit) =>
       Group.list(index, limit)
@@ -151,8 +147,8 @@ class RelationShipsPage extends PageComposite("Following") {
 }
 
 object RelationShipsPage {
-  def relationShipsPage(init: RelationShipsPage ?=> Unit = {})(using Scope): RelationShipsPage =
-    CompositeSupport.buildPage(new RelationShipsPage)(init)
+  def relationShipsPage(relationShipsProperty: RemoteListProperty[Data[RelationShip], RemotePageQuery])(init: RelationShipsPage ?=> Unit = {})(using Scope): RelationShipsPage =
+    CompositeSupport.buildPage(new RelationShipsPage(relationShipsProperty))(init)
 
   private def follower(data: Data[RelationShip]): User | Null =
     data.data.follower.get

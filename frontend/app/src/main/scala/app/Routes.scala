@@ -2,6 +2,7 @@ package app
 
 import app.domain.core.{Data, User}
 import app.domain.documents.{Document, Issue}
+import app.domain.followers.RelationShip
 import app.domain.timeline.Post
 import app.pages.HomePage.homePage
 import app.pages.core.{UserPage, UsersPage}
@@ -58,8 +59,15 @@ object Routes {
         IssuePage.issuePage(issue.data)
       }
     },
-    route("/followers/relationships") {
-      RelationShipsPage.relationShipsPage()
+    asyncRoute("/followers/relationships") {
+      val relationShipsProperty: RemoteListProperty[Data[RelationShip], RemotePageQuery] =
+        RemoteTableList.create[Data[RelationShip]](pageSize = 200) { (index, limit) =>
+          RelationShip.list(index, limit)
+        }
+
+      relationShipsProperty.reload(RemotePageQuery.first(200)).toFuture.map(_ => {
+        RelationShipsPage.relationShipsPage(relationShipsProperty) {}
+      })
     },
     route("/followers/groups") {
       GroupsPage.groupsPage()
