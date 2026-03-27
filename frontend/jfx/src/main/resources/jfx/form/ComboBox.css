@@ -55,6 +55,8 @@
 }
 
 .jfx-combo-box__dropdown {
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
   border: 1px solid var(--glass-border);
   border-radius: 0.9rem;
@@ -94,4 +96,29 @@
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+}
+
+.jfx-combo-box__footer-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-top: 1px solid var(--glass-border);
+  color: var(--color-selected);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+.jfx-combo-box__footer-link:hover {
+  background: rgba(135, 196, 64, 0.08);
+}
+
+.jfx-combo-box__footer-link::after {
+  content: "north_east";
+  font-family: "Material Icons", sans-serif;
+  font-size: 18px;
+  line-height: 1;
 }

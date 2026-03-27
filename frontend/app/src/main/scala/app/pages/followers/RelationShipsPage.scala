@@ -1,24 +1,30 @@
 package app.pages.followers
 
 import app.domain.core.{Data, MediaHelper, User}
-import app.domain.followers.RelationShip
-import app.support.{Navigation, RemotePageQuery, RemoteTableList}
+import app.domain.followers.{Group, RelationShip}
+import app.support.{Api, Navigation, RemotePageQuery, RemoteTableList}
 import app.ui.{CompositeSupport, PageComposite}
 import jfx.control.Image.{image, srcProperty}
+import jfx.control.Link.link
 import jfx.control.TableColumn.column
 import jfx.control.TableView.{fixedCellSize, items, rowFactory, tableView}
-import jfx.control.{TableCell, TableRow, TableView}
+import jfx.control.{TableCell, TableColumn, TableRow, TableView}
 import jfx.core.component.ElementComponent.*
 import jfx.core.state.{Property, RemoteListProperty}
 import jfx.domain.Media
 import jfx.dsl.*
+import jfx.form.ComboBox
+import jfx.form.ComboBox.{comboBox, comboItem, comboItemSelected, comboSelectedItems}
 import jfx.layout.Div.div
-import jfx.layout.HBox.hbox
 import jfx.layout.HBox
+import jfx.layout.HBox.hbox
 import jfx.layout.VBox.vbox
+import jfx.layout.Viewport
 import jfx.statement.Conditional.{conditional, elseDo, thenDo}
 
 import scala.concurrent.ExecutionContext
+import scala.scalajs.js.JSConverters.*
+import scala.util.{Failure, Success}
 
 class RelationShipsPage extends PageComposite("Following") {
 
@@ -28,10 +34,15 @@ class RelationShipsPage extends PageComposite("Following") {
     RemoteTableList.create[Data[RelationShip]](pageSize = pageSize) { (index, limit) =>
       RelationShip.list(index, limit)
     }
+  private val availableGroupsProperty: RemoteListProperty[Group, RemotePageQuery] =
+    RemoteTableList.createMapped[Data[Group], Group](pageSize = pageSize) { (index, limit) =>
+      Group.list(index, limit)
+    }(_.data)
 
   override protected def compose(using DslContext): Unit = {
     classProperty += "relation-ships-page"
     RemoteTableList.reloadFirstPage(relationShipsProperty, pageSize = pageSize)
+    RemoteTableList.reloadFirstPage(availableGroupsProperty, pageSize = pageSize)
 
     withDslContext {
       vbox {
@@ -49,38 +60,39 @@ class RelationShipsPage extends PageComposite("Following") {
 
           val table = tableView[Data[RelationShip]] {
             items = relationShipsProperty
-            fixedCellSize = 64.0
+            fixedCellSize = 72.0
             rowFactory = (_: TableView[Data[RelationShip]]) => new RelationShipNavigationRow()
 
             column[Data[RelationShip], Media | Null]("Bild") {
-              val current = summon[jfx.control.TableColumn[Data[RelationShip], Media | Null]]
+              val current = summon[TableColumn[Data[RelationShip], Media | Null]]
               current.setPrefWidth(96.0)
               current.setCellValueFactory(features => RelationShipsPage.followerImage(features.value))
               current.setCellFactory(_ => new RelationShipImageCell())
             }
 
             column[Data[RelationShip], String]("Nickname") {
-              val current = summon[jfx.control.TableColumn[Data[RelationShip], String]]
+              val current = summon[TableColumn[Data[RelationShip], String]]
               current.setPrefWidth(220.0)
               current.setCellValueFactory(features => Property(RelationShipsPage.nickName(features.value)))
             }
 
             column[Data[RelationShip], String]("Vorname") {
-              val current = summon[jfx.control.TableColumn[Data[RelationShip], String]]
+              val current = summon[TableColumn[Data[RelationShip], String]]
               current.setPrefWidth(180.0)
               current.setCellValueFactory(features => Property(RelationShipsPage.firstName(features.value)))
             }
 
             column[Data[RelationShip], String]("Nachname") {
-              val current = summon[jfx.control.TableColumn[Data[RelationShip], String]]
+              val current = summon[TableColumn[Data[RelationShip], String]]
               current.setPrefWidth(180.0)
               current.setCellValueFactory(features => Property(RelationShipsPage.lastName(features.value)))
             }
 
-            column[Data[RelationShip], String]("Gruppe") {
-              val current = summon[jfx.control.TableColumn[Data[RelationShip], String]]
-              current.setPrefWidth(240.0)
-              current.setCellValueFactory(features => Property(RelationShipsPage.groupNames(features.value)))
+            column[Data[RelationShip], Data[RelationShip]]("Gruppen") {
+              val current = summon[TableColumn[Data[RelationShip], Data[RelationShip]]]
+              current.setPrefWidth(320.0)
+              current.setCellValueFactory(features => Property(features.value))
+              current.setCellFactory(_ => new RelationShipGroupsCell(availableGroupsProperty))
             }
           }
 
@@ -122,9 +134,17 @@ object RelationShipsPage {
       .flatMap(info => Option(info.lastName.get))
       .getOrElse("")
 
-  private def groupNames(data: Data[RelationShip]): String = {
-    val groups = data.data.groups.map(_.name.get).filter(name => name != null && name.trim.nonEmpty)
-    if (groups.isEmpty) "Keine Gruppe" else groups.mkString(", ")
+  private def groupNames(data: Data[RelationShip]): String =
+    groupNames(data.data.groups.iterator)
+
+  def groupNames(groups: IterableOnce[Group]): String = {
+    val values =
+      groups.iterator
+        .flatMap(group => Option(group.name.get).map(_.trim).filter(_.nonEmpty))
+        .toVector
+
+    if (values.isEmpty) "Keine Gruppe"
+    else values.mkString(", ")
   }
 }
 
@@ -196,4 +216,153 @@ private final class RelationShipImageCell extends TableCell[Data[RelationShip], 
       imageSource.set(MediaHelper.thumbnailLink(item))
     }
   }
+}
+
+private final class RelationShipGroupsCell(availableGroups: RemoteListProperty[Group, RemotePageQuery])
+    extends TableCell[Data[RelationShip], Data[RelationShip]] {
+
+  private given ExecutionContext = ExecutionContext.global
+
+  private var currentRelationShip: Data[RelationShip] | Null = null
+  private var selectorRef: ComboBox[Group] | Null = null
+  private var syncingSelection = false
+  private var activeRequestRowId: String | Null = null
+
+  private val wrapper = div {
+    classes = "relation-ship-groups-editor"
+
+    selectorRef = comboBox[Group]("relationGroups", standalone = true) {
+      val current = summon[ComboBox[Group]]
+      current.placeholder = "Keine Gruppe"
+
+      current.items = availableGroups
+      current.multipleSelection = true
+      current.rowHeightPx = 40.0
+      current.dropdownHeightPx = 280.0
+
+      current.valueRenderer = {
+        div {
+          classes = "relation-ship-groups-value"
+          text = RelationShipsPage.groupNames(comboSelectedItems[Group].iterator)
+        }
+      }
+
+      current.itemRenderer = {
+        val group = comboItem[Group]
+        val selected = comboItemSelected
+
+        hbox {
+          classes = "relation-ship-group-option"
+
+          div {
+            classes = Seq(
+              "material-icons",
+              "relation-ship-group-option-icon",
+              if (selected) "is-selected" else "is-unselected"
+            )
+            text = if (selected) "check_circle" else "radio_button_unchecked"
+          }
+
+          div {
+            classes = "relation-ship-group-option-text"
+            text = Option(group.name.get).filter(_.trim.nonEmpty).getOrElse("(Ohne Namen)")
+          }
+        }
+      }
+
+      current.dropdownFooterRenderer = {
+        link("/followers/groups") {
+          classes = Seq("jfx-combo-box__footer-link", "relation-ship-manage-groups-link")
+          textContent = "Gruppen verwalten"
+          element.setAttribute("data-jfx-combo-box-action", "true")
+        }
+      }
+    }
+  }
+
+  wrapper.onMount()
+  element.appendChild(wrapper.element)
+  addDisposable(() => wrapper.dispose())
+
+  addDisposable(
+    selectorRef.nn.valueProperty.observeWithoutInitial { values =>
+      if (!syncingSelection) {
+        val relationShip = currentRelationShip
+        if (relationShip != null) {
+          persistSelection(relationShip, values.iterator.toVector)
+        }
+      }
+    }
+  )
+
+  override protected def updateItem(item: Data[RelationShip] | Null, empty: Boolean): Unit = {
+    val isEmptyCell = empty || item == null
+    if (isEmptyCell) {
+      currentRelationShip = null
+      element.classList.add("jfx-table-cell-empty")
+      wrapper.element.style.display = "none"
+      syncSelection(Vector.empty)
+    } else {
+      currentRelationShip = item
+      element.classList.remove("jfx-table-cell-empty")
+      wrapper.element.style.display = "flex"
+      syncSelection(item.data.groups.iterator.toVector)
+    }
+
+    applyBusyState()
+  }
+
+  private def syncSelection(groups: Seq[Group]): Unit = {
+    syncingSelection = true
+    try selectorRef.nn.valueProperty.setAll(groups)
+    finally syncingSelection = false
+  }
+
+  private def persistSelection(relationShip: Data[RelationShip], groups: Vector[Group]): Unit = {
+    val relationShipId = rowId(relationShip)
+    if (relationShipId == null || activeRequestRowId != null) {
+      syncSelection(relationShip.data.groups.iterator.toVector)
+      return
+    }
+
+    activeRequestRowId = relationShipId
+    applyBusyState()
+
+    relationShip.data.updateGroups(groups).onComplete {
+      case Success(_) =>
+        if (activeRequestRowId == relationShipId) {
+          activeRequestRowId = null
+        }
+        if (currentRelationShip eq relationShip) {
+          syncSelection(relationShip.data.groups.iterator.toVector)
+        }
+        Option(getTableView).foreach(_.refresh())
+        applyBusyState()
+
+      case Failure(error) =>
+        if (activeRequestRowId == relationShipId) {
+          activeRequestRowId = null
+        }
+        Api.logFailure("RelationShip groups", error)
+        Viewport.notify("Gruppen konnten nicht aktualisiert werden.", Viewport.NotificationKind.Error)
+        if (currentRelationShip eq relationShip) {
+          syncSelection(relationShip.data.groups.iterator.toVector)
+        }
+        applyBusyState()
+    }
+  }
+
+  private def applyBusyState(): Unit = {
+    val isBusyForCurrentRow =
+      activeRequestRowId != null &&
+        currentRelationShip != null &&
+        activeRequestRowId == rowId(currentRelationShip.nn)
+
+    val selector = selectorRef.nn.element
+    selector.style.pointerEvents = if (isBusyForCurrentRow) "none" else "auto"
+    selector.style.opacity = if (isBusyForCurrentRow) "0.7" else "1"
+  }
+
+  private def rowId(relationShip: Data[RelationShip]): String | Null =
+    Option(relationShip.data.id.get).map(_.toString).orNull
 }

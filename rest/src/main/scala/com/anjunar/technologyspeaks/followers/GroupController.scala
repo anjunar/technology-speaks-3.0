@@ -42,26 +42,36 @@ class GroupController(private val identityHolder: IdentityHolder) {
   @PutMapping(value = Array("/followers/groups/groups"), consumes = Array("application/json"), produces = Array("application/json"))
   @RolesAllowed(Array("User", "Administrator"))
   def update(@RequestBody entity: Group): Data[Group] = {
-    if (entity.user.id != identityHolder.user.id) {
+    val managed = Group.find(entity.id)
+    if (managed == null) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found")
+    }
+    if (managed.user.id != identityHolder.user.id) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied")
     }
 
-    entity.addLinks(
+    managed.name = entity.name
+
+    managed.addLinks(
       LinkBuilder.create[GroupController](_.update(null)).build(),
       LinkBuilder.create[GroupController](_.delete(null)).build()
     )
 
-    new Data(entity, Group.schema)
+    new Data(managed, Group.schema)
   }
 
   @DeleteMapping(value = Array("/followers/groups/groups"), consumes = Array("application/json"))
   @RolesAllowed(Array("User", "Administrator"))
   def delete(@RequestBody entity: Group): ResponseEntity[Void] = {
-    if (entity.user.id != identityHolder.user.id) {
+    val managed = Group.find(entity.id)
+    if (managed == null) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found")
+    }
+    if (managed.user.id != identityHolder.user.id) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied")
     }
 
-    entity.remove()
+    managed.remove()
     ResponseEntity.ok().build()
   }
 

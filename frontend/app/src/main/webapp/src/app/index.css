@@ -2,3 +2,5 @@
 @import "core/UserPage.css";
 @import "document/DocumentPage.css";
 @import "document/IssuePage.css";
+@import "followers/RelationShipsPage.css";
+@import "followers/GroupsPage.css";

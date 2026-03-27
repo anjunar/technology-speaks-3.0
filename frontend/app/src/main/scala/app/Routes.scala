@@ -6,7 +6,7 @@ import app.domain.timeline.Post
 import app.pages.HomePage.homePage
 import app.pages.core.{UserPage, UsersPage}
 import app.pages.documents.{DocumentPage, IssuePage}
-import app.pages.followers.RelationShipsPage.relationShipsPage
+import app.pages.followers.{GroupsPage, RelationShipsPage}
 import app.pages.security.*
 import app.pages.timeline.{PostEditPage, PostViewPage, PostsPage}
 import app.support.{RemotePageQuery, RemoteTableList}
@@ -59,7 +59,10 @@ object Routes {
       }
     },
     route("/followers/relationships") {
-      relationShipsPage()
+      RelationShipsPage.relationShipsPage()
+    },
+    route("/followers/groups") {
+      GroupsPage.groupsPage()
     },
     asyncRoute("/timeline/posts") {
       val postsProperty: RemoteListProperty[Data[Post], RemotePageQuery] =

@@ -10,7 +10,8 @@ import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.{GetMapping, PathVariable, PutMapping, RequestBody, RestController}
 import org.springframework.web.server.ResponseStatusException
 
-import scala.jdk.CollectionConverters._
+import java.util.UUID
+import scala.jdk.CollectionConverters.*
 
 @RestController
 class UserGroupsController(private val identityHolder: IdentityHolder) {
@@ -64,9 +65,9 @@ class UserGroupsController(private val identityHolder: IdentityHolder) {
 object UserGroupsController {
 
   class GroupAssignmentRequest(
-    @JsonbProperty val groupIds: java.util.List[String] = new java.util.ArrayList[String]()
+    @JsonbProperty val groupIds: java.util.List[UUID] = new java.util.ArrayList[UUID]()
   ) {
-    def this() = this(new java.util.ArrayList[String]())
+    def this() = this(new java.util.ArrayList[UUID]())
   }
 
 }

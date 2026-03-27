@@ -1,0 +1,118 @@
+.relation-ships-page {
+    height: 100%;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 16px;
+
+    --relation-surface: rgba(255, 255, 255, 0.56);
+    --relation-surface-border: rgba(0, 0, 0, 0.08);
+    --relation-surface-shadow: rgba(17, 24, 39, 0.16);
+    --relation-chip-bg: rgba(255, 255, 255, 0.72);
+    --relation-chip-border: rgba(0, 0, 0, 0.08);
+}
+
+html[data-theme="dark"] .relation-ships-page {
+    --relation-surface: rgba(18, 18, 18, 0.58);
+    --relation-surface-border: rgba(255, 255, 255, 0.08);
+    --relation-surface-shadow: rgba(0, 0, 0, 0.36);
+    --relation-chip-bg: rgba(33, 33, 33, 0.82);
+    --relation-chip-border: rgba(255, 255, 255, 0.08);
+}
+
+.relation-ships-page .relation-ship-page-table {
+    height: 100%;
+    overflow: hidden;
+}
+
+.relation-ships-page .relation-ship-page-table .jfx-table-header-cell {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.relation-ships-page .relation-ship-page-table .jfx-table-row {
+    cursor: pointer;
+}
+
+.relation-ships-page .relation-ship-page-table .jfx-table-cell {
+    padding: 0 16px;
+}
+
+.relation-ships-page .relation-ship-groups-editor {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.relation-ships-page .relation-ship-groups-editor .jfx-combo-box {
+    min-height: 42px;
+    padding: 0 12px;
+    border: 1px solid var(--relation-chip-border);
+    border-radius: 999px;
+    background: var(--relation-chip-bg);
+    transition: border-color 160ms ease, transform 160ms ease, background-color 160ms ease;
+}
+
+.relation-ships-page .relation-ship-groups-editor .jfx-combo-box:hover,
+.relation-ships-page .relation-ship-groups-editor .jfx-combo-box:focus-visible,
+.relation-ships-page .relation-ship-groups-editor .jfx-combo-box.jfx-combo-box-open {
+    border-color: var(--color-selected);
+}
+
+.relation-ships-page .relation-ship-groups-editor .jfx-combo-box:hover {
+    transform: translateY(-1px);
+}
+
+.relation-ships-page .relation-ship-groups-value {
+    min-width: 0;
+    width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.relation-ships-page .relation-ship-group-option {
+    width: 100%;
+    min-width: 0;
+    align-items: center;
+    gap: 10px;
+}
+
+.relation-ships-page .relation-ship-group-option-icon {
+    flex: 0 0 auto;
+    font-size: 18px;
+}
+
+.relation-ships-page .relation-ship-group-option-icon.is-selected {
+    color: var(--color-selected);
+}
+
+.relation-ships-page .relation-ship-group-option-icon.is-unselected {
+    opacity: 0.34;
+}
+
+.relation-ships-page .relation-ship-group-option-text {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.relation-ships-page .relation-ship-manage-groups-link {
+    letter-spacing: 0.01em;
+}
+
+@media (max-width: 900px) {
+    .relation-ships-page {
+        padding: 10px;
+    }
+
+    .relation-ships-page .relation-ship-page-table {
+        border-radius: 18px;
+    }
+}
