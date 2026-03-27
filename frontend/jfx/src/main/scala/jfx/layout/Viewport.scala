@@ -227,7 +227,9 @@ object Viewport {
       index += 1
     }
 
-    conf.zIndex.set(index)
+    window.setTimeout(() => {
+      conf.zIndex.set(index)
+    }, 100)
   }
 
   def closeWindow(conf: WindowConf): Unit = {
