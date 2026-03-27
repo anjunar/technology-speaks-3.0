@@ -36,6 +36,8 @@ class LikeButton(val likes: ListProperty[Like], val links: ListProperty[Link], v
       var countRef: jfx.layout.Div | Null = null
 
       hbox {
+        classes = "like-button__row"
+
         style {
           alignItems = "center"
           columnGap = "6px"
@@ -43,7 +45,7 @@ class LikeButton(val likes: ListProperty[Like], val links: ListProperty[Link], v
 
         iconButtonRef = button("favorite_border") {
           buttonType_=("button")
-          classes = Seq("material-icons", "hover")
+          classes = Seq("material-icons", "hover", "like-button__toggle")
           onClick { _ =>
             if (!busyProperty.get) {
               Navigation.linkByRel(rel, links).foreach { link =>
@@ -64,6 +66,7 @@ class LikeButton(val likes: ListProperty[Like], val links: ListProperty[Link], v
         }
 
         countRef = div {
+          classes = "like-button__count"
           text = "0"
         }
       }

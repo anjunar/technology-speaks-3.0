@@ -46,12 +46,15 @@ class ComponentHeader(val owner : OwnerProvider) extends DivComposite {
 
     withDslContext {
       hbox {
+        classes = "component-header__row"
+
         style {
           alignItems = "center"
           columnGap = "10px"
         }
 
         link(userId.map(id => s"/core/users/user/$id").getOrElse("/core/users")) {
+          classes = "component-header__avatar-link"
 
           style {
             display = "inline-flex"
@@ -62,6 +65,8 @@ class ComponentHeader(val owner : OwnerProvider) extends DivComposite {
 
           if (media.isDefined) {
             image {
+              classes = "component-header__avatar"
+
               style {
                 width = "48px"
                 height = "48px"
@@ -73,7 +78,7 @@ class ComponentHeader(val owner : OwnerProvider) extends DivComposite {
             }
           } else {
             div {
-              classes = "material-icons"
+              classes = Seq("material-icons", "component-header__avatar", "component-header__avatar-fallback")
               style {
                 fontSize = "48px"
               }
@@ -84,11 +89,14 @@ class ComponentHeader(val owner : OwnerProvider) extends DivComposite {
         }
 
         vbox {
+          classes = "component-header__meta"
+
           style {
             justifyContent = "center"
           }
 
           heading(3) {
+            classes = "component-header__name"
             text = userName
             style {
               margin = "0"
@@ -96,6 +104,7 @@ class ComponentHeader(val owner : OwnerProvider) extends DivComposite {
           }
 
           span {
+            classes = "component-header__timestamp"
             style {
               fontSize = "10px"
             }
@@ -104,6 +113,8 @@ class ComponentHeader(val owner : OwnerProvider) extends DivComposite {
         }
 
         div {
+          classes = "component-header__spacer"
+
           style {
             flex = "1"
           }
@@ -112,7 +123,7 @@ class ComponentHeader(val owner : OwnerProvider) extends DivComposite {
         Navigation.linkByRel("read", links).foreach { link =>
           button("open_in_new") {
             buttonType_=("button")
-            classes = "material-icons"
+            classes = Seq("material-icons", "component-header__action")
             onClick { _ =>
               Navigation.navigate(link.url)
             }
@@ -123,7 +134,7 @@ class ComponentHeader(val owner : OwnerProvider) extends DivComposite {
           if (customUpdateHandler) {
             button("edit") {
               buttonType_=("button")
-              classes = "material-icons"
+              classes = Seq("material-icons", "component-header__action")
               onClick { _ =>
                 if (customUpdateHandler) {
                   onUpdateHandler()
@@ -139,7 +150,7 @@ class ComponentHeader(val owner : OwnerProvider) extends DivComposite {
           if (customDeleteHandler) {
             button("delete") {
               buttonType_=("button")
-              classes = "material-icons"
+              classes = Seq("material-icons", "component-header__action")
               onClick { _ =>
                 if (customDeleteHandler) {
                   onDeleteHandler()

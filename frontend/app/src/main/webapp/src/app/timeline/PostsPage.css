@@ -1,0 +1,437 @@
+.posts-page {
+    height: 100%;
+    color: rgba(241, 245, 255, 0.94);
+}
+
+.posts-page > .vbox {
+    height: 100%;
+    width: 100%;
+}
+
+.posts-page > .vbox > div:first-child {
+    padding: 18px 18px 12px !important;
+}
+
+.posts-page input[name="post"] {
+    width: 100% !important;
+    box-sizing: border-box;
+    min-height: 54px;
+    padding: 0 18px !important;
+    border: 1px solid rgba(182, 196, 255, 0.08);
+    border-radius: 18px !important;
+    background: transparent !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.04),
+        inset 0 -10px 18px rgba(4, 6, 18, 0.12);
+    backdrop-filter: blur(16px) saturate(145%);
+    -webkit-backdrop-filter: blur(16px) saturate(145%);
+    color: rgba(239, 243, 255, 0.92) !important;
+    font-size: 17px !important;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+}
+
+.posts-page input[name="post"]::placeholder {
+    color: rgba(192, 201, 228, 0.56) !important;
+}
+
+.posts-page > .vbox > div:last-child {
+    padding: 0 6px 14px;
+}
+
+.posts-page .jfx-virtual-list-viewport {
+    padding-right: 4px;
+}
+
+.posts-page .glass-border {
+    position: relative;
+    margin: 0 12px 14px !important;
+    padding: 16px !important;
+    border: 1px solid rgba(181, 195, 240, 0.08) !important;
+    border-radius: 24px !important;
+    background: transparent !important;
+    box-shadow:
+        0 18px 36px rgba(3, 6, 16, 0.28),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        inset 0 -16px 24px rgba(6, 8, 18, 0.18) !important;
+    -webkit-backdrop-filter: blur(18px) saturate(155%);
+}
+
+.posts-page .glass-border > .vbox {
+    row-gap: 14px !important;
+}
+
+.posts-page__layout {
+    gap: 0;
+}
+
+.posts-page__composer {
+    padding: 18px 18px 12px !important;
+}
+
+.posts-page__prompt {
+    width: 100% !important;
+    box-sizing: border-box;
+    min-height: 54px;
+    padding: 0 18px !important;
+    border: 1px solid rgba(182, 196, 255, 0.08);
+    border-radius: 18px !important;
+    background:
+        linear-gradient(180deg, rgba(62, 70, 99, 0.30), rgba(29, 34, 52, 0.46)) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.04),
+        inset 0 -10px 18px rgba(4, 6, 18, 0.12);
+    color: rgba(239, 243, 255, 0.92) !important;
+    font-size: 17px !important;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+}
+
+.posts-page__prompt::placeholder {
+    color: rgba(192, 201, 228, 0.56) !important;
+}
+
+.posts-page__feed {
+    padding: 0 6px 14px;
+}
+
+.post-card {
+    position: relative;
+    margin: 0 12px 14px !important;
+    padding: 16px !important;
+    border: 1px solid rgba(181, 195, 240, 0.08) !important;
+    border-radius: 24px !important;
+    background:
+        linear-gradient(180deg, rgba(23, 28, 43, 0.72), rgba(14, 18, 30, 0.66)),
+        rgba(12, 15, 24, 0.56);
+    box-shadow:
+        0 18px 36px rgba(3, 6, 16, 0.28),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        inset 0 -16px 24px rgba(6, 8, 18, 0.18) !important;
+}
+
+.post-card__body {
+    row-gap: 14px !important;
+}
+
+.component-header {
+    width: 100%;
+}
+
+.posts-page .component-header > .hbox {
+    align-items: center;
+    column-gap: 12px !important;
+}
+
+.posts-page .component-header a:first-child {
+    display: inline-flex !important;
+    flex: 0 0 auto;
+}
+
+.posts-page .component-header a:first-child img,
+.posts-page .component-header a:first-child .material-icons {
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 50% !important;
+    border: 1px solid rgba(214, 223, 255, 0.10);
+    background: rgba(255, 255, 255, 0.04);
+    box-shadow:
+        0 10px 22px rgba(0, 0, 0, 0.20),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.posts-page .component-header a:first-child .material-icons {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    font-size: 44px !important;
+    color: rgba(232, 237, 253, 0.88);
+}
+
+.posts-page .component-header > .hbox > .vbox {
+    gap: 3px;
+}
+
+.posts-page .component-header h3 {
+    color: rgba(247, 249, 255, 0.96);
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.01em;
+}
+
+.posts-page .component-header span {
+    color: rgba(183, 191, 219, 0.68);
+    font-size: 11px !important;
+    line-height: 1.2;
+    letter-spacing: 0.02em;
+}
+
+.posts-page .component-header button {
+    width: 30px;
+    height: 30px;
+    padding: 0 !important;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(202, 209, 234, 0.76);
+}
+
+.posts-page .component-header button:not([disabled]):hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(239, 243, 255, 0.92);
+    transform: none;
+}
+
+.component-header__row {
+    align-items: center;
+    column-gap: 12px !important;
+}
+
+.component-header__avatar-link {
+    flex: 0 0 auto;
+}
+
+.component-header__avatar {
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 50% !important;
+    border: 1px solid rgba(214, 223, 255, 0.10);
+    background: rgba(255, 255, 255, 0.04);
+    box-shadow:
+        0 10px 22px rgba(0, 0, 0, 0.20),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.component-header__avatar-fallback {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    font-size: 44px !important;
+    color: rgba(232, 237, 253, 0.88);
+}
+
+.component-header__meta {
+    gap: 3px;
+}
+
+.component-header__name {
+    color: rgba(247, 249, 255, 0.96);
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.01em;
+}
+
+.component-header__timestamp {
+    color: rgba(183, 191, 219, 0.68);
+    font-size: 11px !important;
+    line-height: 1.2;
+    letter-spacing: 0.02em;
+}
+
+.component-header__action {
+    width: 30px;
+    height: 30px;
+    padding: 0 !important;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(202, 209, 234, 0.76);
+}
+
+.component-header__action:not([disabled]):hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(239, 243, 255, 0.92);
+    transform: none;
+}
+
+.post-card .editor {
+    min-height: 0;
+}
+
+.posts-page .ProseMirror,
+.post-card .ProseMirror {
+    overflow: visible;
+    color: rgba(237, 241, 252, 0.92);
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.posts-page .ProseMirror h1,
+.posts-page .ProseMirror h2,
+.posts-page .ProseMirror h3,
+.post-card .ProseMirror h1,
+.post-card .ProseMirror h2,
+.post-card .ProseMirror h3 {
+    color: rgba(249, 251, 255, 0.98);
+    font-weight: 700;
+    line-height: 1.25;
+    margin: 0.15em 0 0.5em;
+}
+
+.posts-page .ProseMirror h1,
+.post-card .ProseMirror h1 {
+    font-size: 28px;
+}
+
+.posts-page .ProseMirror h2,
+.post-card .ProseMirror h2 {
+    font-size: 24px;
+}
+
+.posts-page .ProseMirror h3,
+.post-card .ProseMirror h3 {
+    font-size: 20px;
+}
+
+.posts-page .ProseMirror p,
+.post-card .ProseMirror p {
+    margin: 0 0 0.8em;
+}
+
+.posts-page .ProseMirror p:last-child,
+.post-card .ProseMirror p:last-child {
+    margin-bottom: 0;
+}
+
+.posts-page .glass-border > .vbox > .hbox:last-child {
+    align-items: center !important;
+    column-gap: 10px !important;
+    padding-top: 2px;
+}
+
+.posts-page .like-button .hbox {
+    column-gap: 8px !important;
+}
+
+.posts-page .like-button button {
+    width: 34px;
+    height: 34px;
+    padding: 0 !important;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(228, 234, 249, 0.82);
+}
+
+.posts-page .like-button button:not([disabled]):hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: rgba(255, 255, 255, 0.94) !important;
+    transform: none;
+}
+
+.posts-page .like-button button.active {
+    color: rgba(255, 212, 227, 0.96) !important;
+}
+
+.posts-page .like-button .hbox > div:last-child {
+    min-width: 10px;
+    color: rgba(201, 209, 233, 0.72);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.posts-page input[name="comment"] {
+    min-height: 36px;
+    padding: 0 14px !important;
+    border: 1px solid rgba(188, 199, 233, 0.08) !important;
+    border-radius: 14px !important;
+    background: transparent !important;
+    color: rgba(236, 240, 252, 0.88) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+}
+
+.posts-page input[name="comment"]::placeholder {
+    color: rgba(189, 197, 222, 0.5) !important;
+}
+
+.post-card__footer {
+    align-items: center !important;
+    column-gap: 10px !important;
+    padding-top: 2px;
+}
+
+.like-button__row {
+    column-gap: 8px !important;
+}
+
+.like-button__toggle {
+    width: 34px;
+    height: 34px;
+    padding: 0 !important;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(228, 234, 249, 0.82);
+}
+
+.like-button__toggle:not([disabled]):hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: rgba(255, 255, 255, 0.94) !important;
+    transform: none;
+}
+
+.like-button__toggle.active {
+    color: rgba(255, 212, 227, 0.96) !important;
+}
+
+.like-button__count {
+    min-width: 10px;
+    color: rgba(201, 209, 233, 0.72);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.post-card__comment-input {
+    min-height: 36px;
+    padding: 0 14px !important;
+    border: 1px solid rgba(188, 199, 233, 0.08) !important;
+    border-radius: 14px !important;
+    background:
+        linear-gradient(180deg, rgba(69, 78, 106, 0.22), rgba(28, 34, 50, 0.42)) !important;
+    color: rgba(236, 240, 252, 0.88) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.post-card__comment-input::placeholder {
+    color: rgba(189, 197, 222, 0.5) !important;
+}
+
+.jfx-window:has(.posts-page) .jfx-window__surface {
+    border-radius: 28px;
+    border-color: rgba(190, 204, 245, 0.10);
+    box-shadow:
+        0 26px 64px rgba(0, 0, 0, 0.34),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        inset 0 -22px 48px rgba(4, 6, 14, 0.26);
+    backdrop-filter: blur(24px) saturate(170%);
+    -webkit-backdrop-filter: blur(24px) saturate(170%);
+}
+
+.jfx-window:has(.posts-page) .jfx-window__header {
+    flex-basis: 40px;
+    min-height: 40px;
+    max-height: 40px;
+    height: 40px;
+    padding: 0 10px 0 14px;
+    background: rgba(255, 255, 255, 0.02);
+    border-bottom: 1px solid rgba(187, 199, 235, 0.07);
+}
+
+.jfx-window:has(.posts-page) .jfx-window__title {
+    padding-left: 0;
+    color: rgba(224, 231, 251, 0.76);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+}
+
+.jfx-window:has(.posts-page) .jfx-window__chrome-button {
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    border-radius: 999px;
+    color: rgba(204, 212, 238, 0.64);
+}
+
+.jfx-window:has(.posts-page) .jfx-window__chrome-button:not(.is-hidden):not([disabled]):hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(246, 248, 255, 0.88);
+    transform: none;
+}

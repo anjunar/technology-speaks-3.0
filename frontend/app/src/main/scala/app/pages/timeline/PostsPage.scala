@@ -25,8 +25,8 @@ import scala.concurrent.ExecutionContext
 
 class PostsPage(postsProperty : RemoteListProperty[Data[Post], RemotePageQuery]) extends PageComposite("Posts") {
 
-  override def pageWidth: Int = 460
-  override def pageHeight: Int = 760
+  override def pageWidth: Int = 478
+  override def pageHeight: Int = 812
 
   private val pageSize = 50
 
@@ -52,17 +52,23 @@ class PostsPage(postsProperty : RemoteListProperty[Data[Post], RemotePageQuery])
       )
 
       vbox {
+        classes = "posts-page__layout"
+
         style {
           height = "100%"
           width = "100%"
         }
 
         div {
+          classes = "posts-page__composer"
+
           style {
             padding = "12px"
           }
 
           val prompt = input("post") {
+            classes = "posts-page__prompt"
+
             style {
               padding = "12px"
               setProperty("width", "calc(100% - 24px)")
@@ -78,6 +84,8 @@ class PostsPage(postsProperty : RemoteListProperty[Data[Post], RemotePageQuery])
         }
 
         div {
+          classes = "posts-page__feed"
+
           style {
             flex = "1"
             minHeight = "0px"
@@ -106,10 +114,12 @@ object PostsPage {
   final class PostFeedCard(data: Data[Post]) extends DivComposite {
 
     override protected def compose(using DslContext): Unit = {
-      classes = "glass-border"
+      classes = Seq("glass-border", "post-card")
 
       withDslContext {
         vbox {
+          classes = "post-card__body"
+
           style {
             rowGap = "10px"
           }
@@ -132,6 +142,8 @@ object PostsPage {
           subscribeBidirectional(data.data.editor, editorField.valueProperty)
 
           hbox {
+            classes = "post-card__footer"
+
             style {
               columnGap = "8px"
               alignItems = "center"
@@ -140,6 +152,8 @@ object PostsPage {
             likeButton(data.data.likes, data.data.links) {}
 
             val commentPrompt = input("comment") {
+              classes = "post-card__comment-input"
+
               style {
                 flex = "1"
                 padding = "8px"
