@@ -11,8 +11,8 @@ import jfx.layout.Div.div
 import jfx.layout.HBox.hbox
 import jfx.layout.Span.span
 import jfx.layout.VBox.vbox
-import jfx.layout.Viewport.{viewport, windows}
 import jfx.layout.Viewport
+import jfx.layout.Viewport.viewport
 import jfx.router.WindowRouter.windowRouter
 import jfx.statement.ForEach.forEach
 import jfx.statement.ObserveRender.observeRender
@@ -23,22 +23,29 @@ class AppShell extends DivComposite {
     classes = "app-shell"
 
     withDslContext {
-      
+
       val service = inject[ApplicationService]
-      
+
       vbox {
-        hbox {
-          classes = "app-header-bar"
 
-          loggedInUser {
-            classes += "app-header-user"
+        viewport {
+
+          style {
+            display = "flex"
+            flexDirection = "column"
           }
-        }
 
-        div {
-          classes = "app-shell-body"
+          hbox {
+            classes = "app-header-bar"
 
-          viewport {
+            loggedInUser {
+              classes += "app-header-user"
+            }
+          }
+
+          div {
+            classes = "app-shell-body"
+
             div {
               addDisposable(Viewport.windows.observe(windows => {
                 if (windows.nonEmpty) {
@@ -72,48 +79,49 @@ class AppShell extends DivComposite {
                     }
                   }
                 }
+
               }
 
+              windowRouter(Routes.routes) {}
             }
-
-            windowRouter(Routes.routes) {}
           }
-        }
-
-        hbox {
-          classes = "app-footer-bar"
 
           hbox {
-            classes = "app-footer-tabs"
+            classes = "app-footer-bar"
 
-            forEach(Viewport.windows) { window =>
-              button(window.title) {
-                buttonType = "button"
-                classes =
-                  if (Viewport.isActive(window)) Seq("app-footer-window", "is-active")
-                  else Seq("app-footer-window", "is-inactive")
+            hbox {
+              classes = "app-footer-tabs"
+
+              forEach(Viewport.windows) { window =>
+                button(window.title) {
+                  buttonType = "button"
+                  classes =
+                    if (Viewport.isActive(window)) Seq("app-footer-window", "is-active")
+                    else Seq("app-footer-window", "is-inactive")
+                  onClick { _ =>
+                    Viewport.touchWindow(window)
+                  }
+                }
+              }
+            }
+
+            hbox {
+              classes = "app-footer-actions"
+              style {
+                justifyContent = "flex-end"
+                flex = "1"
+              }
+
+              button("dark_mode") {
+                classes = Seq("material-icons", "app-footer-control")
                 onClick { _ =>
-                  Viewport.touchWindow(window)
+                  service.darkMode.set(!service.darkMode.get)
                 }
               }
             }
           }
-
-          hbox {
-            classes = "app-footer-actions"
-            style {
-              justifyContent = "flex-end"
-              flex = "1"
-            }
-
-            button("dark_mode") {
-              classes = Seq("material-icons", "app-footer-control")
-              onClick { _ =>
-                service.darkMode.set(!service.darkMode.get)
-              }
-            }
-          }
         }
+
       }
     }
   }

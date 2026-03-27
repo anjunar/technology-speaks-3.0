@@ -25,8 +25,8 @@ import scala.concurrent.ExecutionContext
 
 class PostsPage(postsProperty : RemoteListProperty[Data[Post], RemotePageQuery]) extends PageComposite("Posts") {
 
-  override def pageWidth: Int = 478
-  override def pageHeight: Int = 812
+  override def pageWidth: Int = 980
+  override def pageHeight: Int = 860
 
   private val pageSize = 50
 
@@ -62,20 +62,8 @@ class PostsPage(postsProperty : RemoteListProperty[Data[Post], RemotePageQuery])
         div {
           classes = "posts-page__composer"
 
-          style {
-            padding = "12px"
-          }
-
           val prompt = input("post") {
             classes = "posts-page__prompt"
-
-            style {
-              padding = "12px"
-              setProperty("width", "calc(100% - 24px)")
-              backgroundColor = "var(--color-background-secondary)"
-              fontSize = "24px"
-              borderRadius = "8px"
-            }
           }
 
           prompt.placeholder = "Nach was ist dir heute?"
@@ -114,7 +102,7 @@ object PostsPage {
   final class PostFeedCard(data: Data[Post]) extends DivComposite {
 
     override protected def compose(using DslContext): Unit = {
-      classes = Seq("glass-border", "post-card")
+      classes = "post-card"
 
       withDslContext {
         vbox {
@@ -127,6 +115,7 @@ object PostsPage {
           componentHeader(data.data) {}
 
           val editorField = editor("editor", true) {
+            classes = "post-card__editor"
             style {
               width = "100%"
             }
@@ -153,13 +142,8 @@ object PostsPage {
 
             val commentPrompt = input("comment") {
               classes = "post-card__comment-input"
-
               style {
                 flex = "1"
-                padding = "8px"
-                borderRadius = "6px"
-                backgroundColor = "var(--color-background-secondary)"
-                border = "1px solid var(--color-background-primary)"
               }
             }
 
