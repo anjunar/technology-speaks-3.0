@@ -157,10 +157,11 @@ private final class DocumentListPanel(
                                      ) extends DivComposite {
 
   override protected def compose(using DslContext): Unit = {
-    classProperty += "doc-panel"
+    classes = Seq("doc-panel", "glass", "doc-sidebar", "doc-sidebar-left")
 
     withDslContext {
       vbox {
+        classes = "doc-panel-shell"
         style {
           width = "420px"
           height = "100%"
@@ -169,9 +170,18 @@ private final class DocumentListPanel(
         hbox {
           classes = "doc-panel-header"
 
-          span {
-            classes = "doc-panel-title"
-            text = "Dokumente"
+          vbox {
+            classes = "doc-heading"
+
+            span {
+              classes = "doc-panel-title"
+              text = "Wissensraum"
+            }
+
+            span {
+              classes = "doc-panel-subtitle"
+              text = "Diskurse"
+            }
           }
         }
 
@@ -191,6 +201,7 @@ private final class DocumentListPanel(
         }
 
         div {
+          classes = "doc-table-shell"
           style {
             flex = "1"
             minHeight = "0px"
@@ -230,7 +241,7 @@ private final class DocumentListPanel(
           )
         }
 
-        button("Neues Dokument") {
+        button("Neuer Text") {
           buttonType = "button"
           classes = "doc-new-btn"
           style {
@@ -246,7 +257,7 @@ private final class DocumentListPanel(
           }
 
           span {
-            text = "Neues Dokument"
+            text = "Neuer Text"
           }
 
           onClick(_ => createNewDocument())
@@ -270,24 +281,22 @@ private final class DocumentSummaryCell extends TableCell[Data[Document], String
   private val visibleProperty = Property(false)
 
   val wrapper = hbox {
+    classes = "doc-summary"
 
     style {
       alignItems = "center"
-      columnGap = "10px"
+      columnGap = "14px"
       width = "100%"
       display <-- visibleProperty.map(visible => if (visible) "flex" else "none")
     }
 
     span {
-      classes = "material-icons"
+      classes = Seq("material-icons", "doc-summary-icon")
       text = "description"
-      style {
-        fontSize = "18px"
-        opacity = "0.75"
-      }
     }
 
     vbox {
+      classes = "doc-summary-copy"
       style {
         flex = "1"
         minWidth = "0px"
@@ -295,21 +304,13 @@ private final class DocumentSummaryCell extends TableCell[Data[Document], String
       }
 
       div {
+        classes = "doc-summary-title"
         subscribeBidirectional(titleProperty, textProperty)
-        style {
-          fontWeight = "600"
-          overflow = "hidden"
-          textOverflow = "ellipsis"
-          whiteSpace = "nowrap"
-        }
       }
 
       div {
+        classes = "doc-summary-subtitle"
         subscribeBidirectional(subtitleProperty, textProperty)
-        style {
-          fontSize = "12px"
-          opacity = "0.75"
-        }
       }
     }
   }
@@ -338,7 +339,7 @@ private final class DocumentEditorPanel(document: Document, onSaved: Data[Docume
   private given ExecutionContext = ExecutionContext.global
 
   override protected def compose(using DslContext): Unit = {
-    classes = "doc-panel"
+    classes = Seq("doc-panel", "glass", "doc-editor-panel")
     style {
       height = "100%"
     }
@@ -364,15 +365,29 @@ private final class DocumentEditorPanel(document: Document, onSaved: Data[Docume
         hbox {
           classes = "doc-titlebar"
 
-          val titleInput = input("title") {
+          vbox {
+            classes = "doc-title-copy"
             style {
               flex = "1"
               minWidth = "0px"
             }
-          }
 
-          titleInput.placeholder = "Titel"
-          addDisposable(document.editable.observe(editable => titleInput.element.disabled = !editable))
+            span {
+              classes = "doc-panel-title"
+              text = "Gedankenfeld"
+            }
+
+            val titleInput = input("title") {
+              classes = "doc-title-input"
+              style {
+                flex = "1"
+                minWidth = "0px"
+              }
+            }
+
+            titleInput.placeholder = "Titel"
+            addDisposable(document.editable.observe(editable => titleInput.element.disabled = !editable))
+          }
 
           Navigation.renderByRel("update", document.links) { () =>
             val editButton = button("edit") {
@@ -394,7 +409,7 @@ private final class DocumentEditorPanel(document: Document, onSaved: Data[Docume
         }
 
         val editorField = editor("editor") {
-          classes = "doc-editor"
+          classes = Seq("doc-editor", "glass")
           style {
             flex = "1"
             minHeight = "0px"
@@ -428,10 +443,11 @@ private final class IssuesPanel(
                                ) extends DivComposite {
 
   override protected def compose(using DslContext): Unit = {
-    classes += "doc-panel"
+    classes = Seq("doc-panel", "glass", "doc-sidebar", "doc-sidebar-right")
 
     withDslContext {
       vbox {
+        classes = "doc-panel-shell"
         style {
           width = "420px"
           height = "100%"
@@ -441,13 +457,23 @@ private final class IssuesPanel(
         hbox {
           classes = "doc-panel-header"
 
-          span {
-            classes = "doc-panel-title"
-            text = "Aufgaben"
+          vbox {
+            classes = "doc-heading"
+
+            span {
+              classes = "doc-panel-title"
+              text = "Resonanz"
+            }
+
+            span {
+              classes = "doc-panel-subtitle"
+              text = "Dialoge"
+            }
           }
         }
 
         div {
+          classes = "issues-list-shell"
           style {
             flex = "1"
             minHeight = "0px"
@@ -466,7 +492,7 @@ private final class IssuesPanel(
           }
         }
 
-        button("Neue Aufgabe") {
+        button("Neuer Impuls") {
           buttonType = "button"
           classes = "doc-new-btn"
           style {
@@ -482,7 +508,7 @@ private final class IssuesPanel(
           }
 
           span {
-            text = "Neue Aufgabe"
+            text = "Neuer Impuls"
           }
 
           onClick { _ =>
@@ -505,11 +531,12 @@ private object IssuesPanel {
 private final class IssueListItem(currentDocument: Property[Document], issue: Issue) extends DivComposite {
 
   override protected def compose(using DslContext): Unit = {
-    classes = "glass-border"
+    classes = Seq("glass-border", "issue-card")
 
     withDslContext {
 
       vbox {
+        classes = "issue-card-shell"
         style {
           rowGap = "10px"
           cursor = "pointer"

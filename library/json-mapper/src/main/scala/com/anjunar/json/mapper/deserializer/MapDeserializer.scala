@@ -26,7 +26,7 @@ class MapDeserializer extends Deserializer[java.util.Map[String, ?]] {
 
           val jsonContext = new JsonContext(
             elementResolvedClass,
-            entity.asInstanceOf[DTO],
+            entity,
             context.graph,
             context.loader,
             context.validator,
