@@ -1,5 +1,6 @@
 package com.anjunar.technologyspeaks.followers
 
+import com.anjunar.technologyspeaks.core.SchemaHateoas
 import com.anjunar.technologyspeaks.rest.types.Data
 import com.anjunar.technologyspeaks.security.{IdentityHolder, LinkBuilder}
 import jakarta.annotation.security.RolesAllowed
@@ -22,7 +23,7 @@ class GroupController(private val identityHolder: IdentityHolder) {
       LinkBuilder.create[GroupController](_.delete(null)).build()
     )
 
-    new Data(entity, Group.schema)
+    new Data(entity, SchemaHateoas.enhance(entity, Group.schema))
   }
 
   @PostMapping(value = Array("/followers/groups/groups"), consumes = Array("application/json"), produces = Array("application/json"))
@@ -36,7 +37,7 @@ class GroupController(private val identityHolder: IdentityHolder) {
       LinkBuilder.create[GroupController](_.delete(null)).build()
     )
 
-    new Data(entity, Group.schema)
+    new Data(entity, SchemaHateoas.enhance(entity, Group.schema))
   }
 
   @PutMapping(value = Array("/followers/groups/groups"), consumes = Array("application/json"), produces = Array("application/json"))
@@ -57,7 +58,7 @@ class GroupController(private val identityHolder: IdentityHolder) {
       LinkBuilder.create[GroupController](_.delete(null)).build()
     )
 
-    new Data(managed, Group.schema)
+    new Data(managed, SchemaHateoas.enhance(managed, Group.schema))
   }
 
   @DeleteMapping(value = Array("/followers/groups/groups"), consumes = Array("application/json"))

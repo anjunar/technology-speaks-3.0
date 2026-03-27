@@ -19,12 +19,6 @@
 }
 
 .user-page .user-page-form {
-    border: 1px solid color-mix(in srgb, var(--glass-border) 18%, transparent);
-    border-radius: 22px;
-    background: transparent !important;
-    box-shadow:
-            inset 0 1px 0 color-mix(in srgb, white 4%, transparent),
-            inset 0 0 0 1px color-mix(in srgb, black 10%, transparent);
     overflow: hidden;
 }
 
@@ -33,8 +27,8 @@
     height: 100%;
     min-height: 0;
     box-sizing: border-box;
-    padding: 24px 28px 18px;
-    gap: 18px;
+    padding: 28px 30px 22px;
+    gap: 22px;
     overflow: hidden;
     justify-content: flex-start;
     align-items: stretch;
@@ -42,14 +36,14 @@
 
 .user-page .user-page-hero {
     height: auto !important;
-    padding: 0 8px 8px;
-    border-bottom: 1px solid color-mix(in srgb, var(--glass-border) 12%, transparent);
+    padding: 0 10px 12px;
+    border-bottom: 1px solid color-mix(in srgb, var(--glass-border) 8%, transparent);
 }
 
 .user-page .user-page-hero-copy {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
     max-width: 620px;
 }
 
@@ -70,35 +64,35 @@
 
 .user-page .user-page-title {
     font-size: clamp(28px, 3.8vw, 42px);
-    line-height: 0.98;
-    letter-spacing: -0.055em;
-    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.05em;
+    font-weight: 630;
     color: color-mix(in srgb, var(--color-text-primary) 94%, white 6%);
 }
 
 .user-page .user-page-subtitle {
     max-width: 520px;
-    font-size: 14px;
-    line-height: 1.6;
-    color: color-mix(in srgb, var(--color-text-secondary) 88%, white 12%);
+    font-size: 13px;
+    line-height: 1.65;
+    color: color-mix(in srgb, var(--color-text-secondary) 78%, white 22%);
 }
 
 .user-page .user-page-main {
     width: 100%;
     flex: 1 1 auto;
     min-height: 0;
-    gap: 18px;
+    gap: 22px;
     align-items: flex-start;
     justify-content: flex-start;
 }
 
 .user-page .user-page-profile {
-    flex: 0 0 356px;
-    width: 356px;
-    min-width: 356px;
+    flex: 0 0 316px;
+    width: 316px;
+    min-width: 316px;
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 16px;
     justify-content: flex-start;
 }
 
@@ -106,27 +100,35 @@
 .user-page .user-page-profile-card,
 .user-page .user-page-section,
 .user-page .user-follow-card {
-    border: 1px solid color-mix(in srgb, var(--glass-border) 18%, transparent);
-    background: transparent !important;
-    box-shadow: inset 0 1px 0 color-mix(in srgb, white 4%, transparent);
-    backdrop-filter: blur(10px) saturate(122%);
-    -webkit-backdrop-filter: blur(10px) saturate(122%);
+    border: 1px solid color-mix(in srgb, var(--glass-border) 14%, transparent);
+    background: color-mix(in srgb, var(--color-surface-scrim) 14%, transparent) !important;
+    box-shadow:
+            0 14px 32px color-mix(in srgb, black 16%, transparent),
+            inset 0 1px 0 color-mix(in srgb, white 4%, transparent);
+    backdrop-filter: blur(12px) saturate(118%);
+    -webkit-backdrop-filter: blur(12px) saturate(118%);
 }
 
 .user-page .user-page-avatar {
     width: 100%;
     min-width: 0;
     aspect-ratio: 1 / 1;
-    border-radius: 22px;
+    display: flex;
+    flex-direction: column;
+    border-radius: 24px;
     overflow: hidden;
-    padding: 14px;
+    padding: 16px;
     box-sizing: border-box;
 }
 
 .user-page .user-page-avatar .toolbar {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 6px;
+    order: 2;
+    margin-top: 10px;
+    justify-content: flex-start;
+    flex: 0 0 auto;
 }
 
 .user-page .user-page-avatar input[type="file"] {
@@ -134,22 +136,29 @@
 }
 
 .user-page .user-page-avatar .toolbar button {
-    min-height: 34px;
-    padding: 8px 12px;
+    min-height: 30px;
+    padding: 6px 9px;
     border-radius: 999px;
-    border: 1px solid color-mix(in srgb, var(--glass-border) 14%, transparent);
-    background: transparent;
-    color: var(--color-text-primary);
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.05em;
+    border: 1px solid color-mix(in srgb, var(--glass-border) 10%, transparent);
+    background: color-mix(in srgb, var(--color-surface-subtle) 52%, transparent);
+    color: color-mix(in srgb, var(--color-text-secondary) 82%, white 18%);
+    font-size: 9px;
+    font-weight: 590;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
+    box-shadow: none;
+    white-space: nowrap;
 }
 
 .user-page .user-page-avatar > div:not(.toolbar),
 .user-page .user-page-avatar .preview {
     min-height: 0;
     flex: 1 1 auto;
+}
+
+.user-page .user-page-avatar > div:not(.toolbar) {
+    order: 1;
+    width: 100%;
 }
 
 .user-page .user-page-avatar .preview,
@@ -161,8 +170,8 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
-    padding: 16px 16px 14px;
-    border-radius: 18px;
+    padding: 18px 18px 16px;
+    border-radius: 20px;
 }
 
 .user-page .user-page-details {
@@ -171,52 +180,155 @@
     min-height: 0;
     display: flex;
     flex-direction: column;
-    gap: 14px;
-    overflow: auto;
-    padding-right: 6px;
-    padding-bottom: 10px;
+    gap: 18px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 2px;
+    padding-bottom: 0;
     justify-content: flex-start;
 }
 
 .user-page .user-page-section {
+    width: 100%;
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    gap: 14px;
-    padding: 18px 18px 16px;
-    border-radius: 20px;
+    gap: 18px;
+    padding: 20px 20px 18px;
+    border-radius: 22px;
 }
 
 .user-page .user-page-section-header {
     width: 100%;
     align-items: flex-start;
     justify-content: space-between;
-    gap: 12px;
+    gap: 14px;
+    padding-bottom: 2px;
+    border-bottom: 1px solid color-mix(in srgb, var(--glass-border) 8%, transparent);
 }
 
 .user-page .user-page-section-copy {
     min-width: 0;
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: 4px;
+    padding-bottom: 12px;
 }
 
 .user-page .user-page-section-title {
-    font-size: 20px;
-    line-height: 1.1;
-    letter-spacing: -0.04em;
-    font-weight: 560;
+    font-size: 19px;
+    line-height: 1.12;
+    letter-spacing: -0.03em;
+    font-weight: 600;
     color: var(--color-text-primary);
 }
 
 .user-page .sub-form {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px 14px;
+    gap: 18px 14px;
 }
 
-.user-page .user-page-section:first-of-type .sub-form > .jfx-input-container:last-child {
+.user-page .sub-form > .user-page-field-row {
     grid-column: 1 / -1;
-    max-width: 260px;
+}
+
+.user-page .user-page-field-row {
+    width: 100%;
+    align-items: flex-start;
+    gap: 16px;
+    padding-bottom: 2px;
+}
+
+.user-page .user-page-field-input {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.user-page .user-page-access-control {
+    flex: 0 0 264px;
+    min-width: 264px;
+    position: relative;
+}
+
+.user-page .user-page-access-control::before {
+    content: "";
+    position: absolute;
+    left: -10px;
+    top: 8px;
+    bottom: 2px;
+    width: 1px;
+    background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--glass-border) 10%, transparent) 18%, color-mix(in srgb, var(--glass-border) 7%, transparent) 82%, transparent);
+    pointer-events: none;
+}
+
+.user-page .user-page-access-shell {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-top: 6px;
+}
+
+.user-page .user-page-access-label {
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-text-faint);
+    opacity: 0.56;
+    padding-left: 8px;
+}
+
+.user-page .user-page-access-value,
+.user-page .user-page-access-control .jfx-combo-box__selector {
+    width: 100%;
+    min-height: 46px;
+    box-sizing: border-box;
+    border-radius: 999px;
+}
+
+.user-page .user-page-access-control .jfx-combo-box__selector {
+    border: 1px solid color-mix(in srgb, var(--glass-border) 10%, transparent);
+    background: color-mix(in srgb, var(--color-surface-subtle) 32%, transparent);
+    box-shadow: inset 0 1px 0 color-mix(in srgb, white 3%, transparent);
+    backdrop-filter: blur(10px) saturate(112%);
+    -webkit-backdrop-filter: blur(10px) saturate(112%);
+}
+
+.user-page .user-page-access-value {
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    color: color-mix(in srgb, var(--color-text-secondary) 88%, white 12%);
+    font-size: 13px;
+    font-weight: 540;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.user-page .user-page-access-option {
+    width: 100%;
+    align-items: center;
+    gap: 10px;
+}
+
+.user-page .user-page-access-option-icon {
+    font-size: 19px;
+    color: var(--color-text-faint);
+}
+
+.user-page .user-page-access-option-icon.is-selected {
+    color: var(--color-selected);
+}
+
+.user-page .user-page-access-option-text {
+    min-width: 0;
+    color: var(--color-text-primary);
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .user-page .user-page-input,
@@ -233,9 +345,6 @@
     min-height: 46px;
     padding: 0 16px !important;
     border-radius: 999px !important;
-    background: transparent !important;
-    backdrop-filter: blur(8px) saturate(118%);
-    -webkit-backdrop-filter: blur(8px) saturate(118%);
     color: var(--color-text-primary) !important;
     font-size: 15px !important;
     font-weight: 500;
@@ -249,10 +358,10 @@
     justify-content: center;
     padding: 0 !important;
     border-radius: 999px;
-    border: 1px solid color-mix(in srgb, var(--glass-border) 14%, transparent);
-    background: transparent !important;
-    color: var(--color-text-faint);
-    box-shadow: inset 0 1px 0 color-mix(in srgb, white 4%, transparent);
+    border: 1px solid color-mix(in srgb, var(--glass-border) 8%, transparent);
+    background: color-mix(in srgb, var(--color-surface-subtle) 28%, transparent) !important;
+    color: color-mix(in srgb, var(--color-text-faint) 84%, white 16%);
+    box-shadow: inset 0 1px 0 color-mix(in srgb, white 3%, transparent);
 }
 
 .user-page .user-page-toggle.material-icons:hover,
@@ -264,33 +373,36 @@
 
 .user-page .user-form-actions {
     width: 100%;
+    box-sizing: border-box;
     justify-content: flex-end;
-    column-gap: 10px;
-    position: sticky;
-    bottom: 0;
-    padding-top: 10px;
-    padding-bottom: 2px;
-    margin-top: auto;
-    background: linear-gradient(to top, color-mix(in srgb, var(--color-background-primary) 58%, transparent), transparent 82%);
+    align-items: center;
+    column-gap: 12px;
+    flex: 0 0 auto;
+    padding: 12px 4px 0;
+    margin-top: 0;
+    border-top: 1px solid color-mix(in srgb, var(--glass-border) 8%, transparent);
+    background: transparent;
 }
 
 .user-page .user-page-section:last-of-type {
-    margin-bottom: 56px;
+    margin-bottom: 0;
 }
 
 .user-page .user-page-save-btn {
-    min-width: 180px;
-    min-height: 42px;
-    padding: 10px 16px;
+    min-width: 196px;
+    min-height: 44px;
+    padding: 10px 18px;
     border-radius: 999px;
-    border: 1px solid color-mix(in srgb, var(--glass-border) 14%, transparent);
-    background: transparent !important;
-    box-shadow: inset 0 1px 0 color-mix(in srgb, white 4%, transparent);
+    border: 1px solid color-mix(in srgb, var(--glass-border) 16%, transparent);
+    background: color-mix(in srgb, var(--color-surface-scrim) 54%, transparent) !important;
+    box-shadow:
+            0 10px 22px color-mix(in srgb, black 16%, transparent),
+            inset 0 1px 0 color-mix(in srgb, white 5%, transparent);
     backdrop-filter: blur(8px) saturate(118%);
     -webkit-backdrop-filter: blur(8px) saturate(118%);
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.08em;
+    font-size: 11px;
+    font-weight: 650;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--color-text-primary);
 }
@@ -305,9 +417,9 @@
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    gap: 14px;
-    padding: 16px;
-    border-radius: 18px;
+    gap: 12px;
+    padding: 18px;
+    border-radius: 20px;
 }
 
 .user-page .user-follow-copy {
@@ -326,9 +438,9 @@
 }
 
 .user-page .user-follow-text {
-    font-size: 14px;
-    line-height: 1.5;
-    font-weight: 550;
+    font-size: 13px;
+    line-height: 1.55;
+    font-weight: 540;
     color: var(--color-text-primary);
 }
 
@@ -338,18 +450,18 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
-    min-height: 40px;
-    padding: 10px 16px;
+    min-height: 38px;
+    padding: 9px 14px;
     border-radius: 999px;
-    border: 1px solid color-mix(in srgb, var(--glass-border) 14%, transparent);
-    background: transparent !important;
-    box-shadow: inset 0 1px 0 color-mix(in srgb, white 4%, transparent);
+    border: 1px solid color-mix(in srgb, var(--glass-border) 10%, transparent);
+    background: color-mix(in srgb, var(--color-surface-subtle) 28%, transparent) !important;
+    box-shadow: inset 0 1px 0 color-mix(in srgb, white 3%, transparent);
     backdrop-filter: blur(8px) saturate(118%);
     -webkit-backdrop-filter: blur(8px) saturate(118%);
-    color: var(--color-text-primary);
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.06em;
+    color: color-mix(in srgb, var(--color-text-primary) 88%, white 12%);
+    font-size: 11px;
+    font-weight: 620;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
 }
 
@@ -390,7 +502,13 @@
         grid-template-columns: minmax(0, 1fr);
     }
 
-    .user-page .user-page-section:first-of-type .sub-form > .jfx-input-container:last-child {
-        max-width: none;
+    .user-page .user-page-field-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .user-page .user-page-access-control {
+        min-width: 0;
+        flex-basis: auto;
     }
 }

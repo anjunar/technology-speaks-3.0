@@ -1,5 +1,6 @@
 package com.anjunar.technologyspeaks.documents
 
+import com.anjunar.technologyspeaks.core.SchemaHateoas
 import com.anjunar.technologyspeaks.rest.types.Data
 import com.anjunar.technologyspeaks.security.IdentityHolder
 import com.anjunar.technologyspeaks.shared.commentable.FirstComment
@@ -23,7 +24,7 @@ class IssueCommentController(val identityHolder: IdentityHolder) {
 
     post.comments.add(body)
 
-    new Data(body, FirstComment.schema)
+    new Data(body, SchemaHateoas.enhance(body, FirstComment.schema))
   }
 
   @PutMapping(value = Array("/document/documents/document/issues/issue/{id}/comment"), produces = Array("application/json"), consumes = Array("application/json"))
@@ -35,7 +36,7 @@ class IssueCommentController(val identityHolder: IdentityHolder) {
 
     post.comments.add(body)
 
-    new Data(body, FirstComment.schema)
+    new Data(body, SchemaHateoas.enhance(body, FirstComment.schema))
   }
 
   @DeleteMapping(value = Array("/document/documents/document/issues/issue/{id}/comment"), produces = Array("application/json"), consumes = Array("application/json"))

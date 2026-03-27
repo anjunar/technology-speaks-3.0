@@ -2,7 +2,7 @@ package com.anjunar.json.mapper.serializers
 
 import com.anjunar.json.mapper.annotations.UseConverter
 import com.anjunar.json.mapper.provider.EntityProvider
-import com.anjunar.json.mapper.schema.{SchemaProvider, VisibilityRule}
+import com.anjunar.json.mapper.schema.{EntitySchema, SchemaProvider, VisibilityRule}
 import com.anjunar.json.mapper.{JavaContext, ObjectMapperProvider}
 import com.anjunar.json.mapper.intermediate.model.{JsonNode, JsonObject, JsonString}
 import com.anjunar.scala.universe.TypeResolver
@@ -17,7 +17,11 @@ class BeanSerializer extends Serializer[Any] {
     val nodes = new java.util.LinkedHashMap[String, JsonNode]()
     val json = new JsonObject(nodes)
 
-    val schemaProvider = TypeResolver.companionInstance[SchemaProvider[?]](context.resolvedClass.raw)
+    val companion = TypeResolver.companionInstance[AnyRef](context.resolvedClass.raw)
+    val schemaProvider = companion match {
+      case value: SchemaProvider[EntitySchema[Any]] => value
+      case _ => null
+    }
 
     val properties = beanModel.properties
     var index = 0

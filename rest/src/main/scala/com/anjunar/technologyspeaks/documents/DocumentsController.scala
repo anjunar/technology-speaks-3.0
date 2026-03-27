@@ -1,5 +1,6 @@
 package com.anjunar.technologyspeaks.documents
 
+import com.anjunar.technologyspeaks.core.SchemaHateoas
 import com.anjunar.technologyspeaks.hibernate.search.HibernateSearch
 import com.anjunar.technologyspeaks.rest.EntityGraph
 import com.anjunar.technologyspeaks.rest.types.{Data, Table}
@@ -46,7 +47,7 @@ class DocumentsController(val query: HibernateSearch) {
       )
     }
 
-    val table = new Table(entities, count, Document.schema)
+    val table = new Table(entities, count, SchemaHateoas.enhance(entities.asScala.headOption.map(_.data).orNull, Document.schema))
 
     table.addLinks(
       LinkBuilder.create[DocumentController](_.create())
@@ -61,6 +62,6 @@ class DocumentsController(val query: HibernateSearch) {
 object DocumentsController {
 
   @JsonbSubtype(alias = "Data", `type` = classOf[Data[?]])
-  class DocumentRow(data: Document, @(JsonbProperty @field) val score: Double) extends Data[Document](data, Document.schema)
+  class DocumentRow(data: Document, @(JsonbProperty @field) val score: Double) extends Data[Document](data, SchemaHateoas.enhance(data, Document.schema))
 
 }

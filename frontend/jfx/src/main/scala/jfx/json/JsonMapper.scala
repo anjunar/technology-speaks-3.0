@@ -1,6 +1,5 @@
 package jfx.json
 
-import java.util.UUID
 import jfx.core.state.{ListProperty, Property, PropertyAccess, ReadOnlyProperty}
 import jfx.form.Model
 
@@ -179,17 +178,19 @@ class JsonMapper(val registry: JsonRegistry) {
     out.update("@type", model.getClass.getSimpleName)
 
     val props = model.properties.asInstanceOf[js.Array[PropertyAccess[Any, Any]]]
-    props.foreach { access =>
-      access.get(model) match {
-        case Some(propertyOrValue) =>
-          val serialized = serializeValue(propertyOrValue)
-          if (serialized != null && !js.isUndefined(serialized)) {
-            out.update(registry.serializeFieldName(access.name), serialized)
-          }
-        case None =>
-          ()
+    props
+      .filter(access => access.name != "links")
+      .foreach { access =>
+        access.get(model) match {
+          case Some(propertyOrValue) =>
+            val serialized = serializeValue(propertyOrValue)
+            if (serialized != null && !js.isUndefined(serialized)) {
+              out.update(registry.serializeFieldName(access.name), serialized)
+            }
+          case None =>
+            ()
+        }
       }
-    }
 
     out.asInstanceOf[js.Dynamic]
   }

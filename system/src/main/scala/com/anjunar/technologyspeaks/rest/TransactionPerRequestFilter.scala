@@ -25,7 +25,7 @@ class TransactionPerRequestFilter(private val txManager: PlatformTransactionMana
     filterChain: FilterChain
   ): Unit = {
     val definition = new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRED)
-    definition.setReadOnly(request.getMethod == "GET" || request.getMethod == "HEAD")
+//    definition.setReadOnly(request.getMethod == "GET" || request.getMethod == "HEAD")
     val status = txManager.getTransaction(definition)
 
     try {

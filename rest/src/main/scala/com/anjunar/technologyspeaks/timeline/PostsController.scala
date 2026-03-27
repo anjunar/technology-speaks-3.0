@@ -1,5 +1,6 @@
 package com.anjunar.technologyspeaks.timeline
 
+import com.anjunar.technologyspeaks.core.SchemaHateoas
 import com.anjunar.technologyspeaks.hibernate.search.HibernateSearch
 import com.anjunar.technologyspeaks.rest.EntityGraph
 import com.anjunar.technologyspeaks.rest.types.{Data, Table}
@@ -46,7 +47,7 @@ class PostsController(val query: HibernateSearch, val identityHolder: IdentityHo
       }
     }
 
-    new Table(entities, count, Post.schema)
+    new Table(entities, count, SchemaHateoas.enhance(entities.asScala.headOption.map(_.data).orNull, Post.schema))
   }
 
 }
@@ -54,6 +55,6 @@ class PostsController(val query: HibernateSearch, val identityHolder: IdentityHo
 object PostsController {
 
   @JsonbSubtype(alias = "Data", `type` = classOf[Data[?]])
-  class PostRow(data: Post) extends Data[Post](data, Post.schema)
+  class PostRow(data: Post) extends Data[Post](data, SchemaHateoas.enhance(data, Post.schema))
 
 }

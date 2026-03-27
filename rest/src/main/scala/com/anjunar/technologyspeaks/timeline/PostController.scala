@@ -1,5 +1,6 @@
 package com.anjunar.technologyspeaks.timeline
 
+import com.anjunar.technologyspeaks.core.SchemaHateoas
 import com.anjunar.technologyspeaks.rest.EntityGraph
 import com.anjunar.technologyspeaks.rest.types.Data
 import com.anjunar.technologyspeaks.security.{IdentityHolder, LinkBuilder}
@@ -13,7 +14,7 @@ class PostController(val identityHolder: IdentityHolder) {
   @RolesAllowed(Array("User", "Administrator"))
   @EntityGraph("Post.full")
   def read(@PathVariable("id") post: Post): Data[Post] = {
-    val data = new Data(post, Post.schema)
+    val data = new Data(post, SchemaHateoas.enhance(post, Post.schema))
 
     post.addLinks(
       LinkBuilder.create[PostLikeController](_.likePost(post))
@@ -46,7 +47,7 @@ class PostController(val identityHolder: IdentityHolder) {
   def save(@RequestBody post: Post): Data[Post] = {
     post.user = identityHolder.user
     post.persist()
-    val data = new Data(post, Post.schema)
+    val data = new Data(post, SchemaHateoas.enhance(post, Post.schema))
 
     post.addLinks(
       LinkBuilder.create[PostLikeController](_.likePost(post))
@@ -77,7 +78,7 @@ class PostController(val identityHolder: IdentityHolder) {
   @RolesAllowed(Array("User", "Administrator"))
   @EntityGraph("Post.full")
   def update(@RequestBody post: Post): Data[Post] = {
-    val data = new Data(post.merge(), Post.schema)
+    val data = new Data(post.merge(), SchemaHateoas.enhance(post, Post.schema))
 
     post.addLinks(
       LinkBuilder.create[PostLikeController](_.likePost(post))

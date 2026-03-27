@@ -1,5 +1,6 @@
 package com.anjunar.technologyspeaks.documents
 
+import com.anjunar.technologyspeaks.core.SchemaHateoas
 import com.anjunar.technologyspeaks.hibernate.search.HibernateSearch
 import com.anjunar.technologyspeaks.rest.EntityGraph
 import com.anjunar.technologyspeaks.rest.types.{Data, Table}
@@ -46,7 +47,7 @@ class IssuesController(val query: HibernateSearch, val identityHolder: IdentityH
       }
     }
 
-    new Table(entities, count, Issue.schema)
+    new Table(entities, count, SchemaHateoas.enhance(entities.asScala.headOption.map(_.data).orNull, Issue.schema))
   }
 
 }
@@ -54,6 +55,6 @@ class IssuesController(val query: HibernateSearch, val identityHolder: IdentityH
 object IssuesController {
 
   @JsonbSubtype(alias = "Data", `type` = classOf[Data[?]])
-  class IssueRow(@(JsonbProperty @field) data: Issue) extends Data[Issue](data, Issue.schema)
+  class IssueRow(@(JsonbProperty @field) data: Issue) extends Data[Issue](data, SchemaHateoas.enhance(data, Issue.schema))
 
 }

@@ -1,5 +1,6 @@
 package com.anjunar.technologyspeaks.followers
 
+import com.anjunar.technologyspeaks.core.SchemaHateoas
 import com.anjunar.technologyspeaks.core.UserController
 import com.anjunar.technologyspeaks.hibernate.search.HibernateSearch
 import com.anjunar.technologyspeaks.rest.EntityGraph
@@ -42,7 +43,7 @@ class FollowersController(val query: HibernateSearch, val identityHolder: Identi
       )
     }
 
-    new Table(entities, count, RelationShip.schema)
+    new Table(entities, count, SchemaHateoas.enhance(entities.asScala.headOption.map(_.data).orNull, RelationShip.schema))
   }
 
 }
@@ -50,6 +51,6 @@ class FollowersController(val query: HibernateSearch, val identityHolder: Identi
 object FollowersController {
 
   @JsonbSubtype(alias = "Data", `type` = classOf[Data[?]])
-  class RelationShipRow(@(JsonbProperty @field) data: RelationShip) extends Data[RelationShip](data, RelationShip.schema)
+  class RelationShipRow(@(JsonbProperty @field) data: RelationShip) extends Data[RelationShip](data, SchemaHateoas.enhance(data, RelationShip.schema))
 
 }

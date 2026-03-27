@@ -1,12 +1,13 @@
 package com.anjunar.json.mapper.schema.property
 
 import com.anjunar.json.mapper.macros.PropertyAccess
-import com.anjunar.json.mapper.schema.{EntitySchema, Helper, SchemaProvider, VisibilityRule}
+import com.anjunar.json.mapper.schema.{EntitySchema, Helper, Link, SchemaProvider, VisibilityRule}
 import com.anjunar.scala.universe.TypeResolver
 import jakarta.json.bind.annotation.JsonbProperty
 
 import java.lang.annotation.Annotation
 import java.lang.reflect.Type
+import java.util
 
 class Property[T, V](val propertyAccess : PropertyAccess[T, V], val rule: VisibilityRule[T]) {
   
@@ -35,7 +36,7 @@ class Property[T, V](val propertyAccess : PropertyAccess[T, V], val rule: Visibi
   val typeName: String = TypeResolver.rawType(propertyAccess.genericType).getSimpleName
 
   @JsonbProperty
-  val schema: EntitySchema[?] =
+  var schema: EntitySchema[?] =
     val value = Helper.entityType(propertyAccess.genericType)
 
     if (value == null) {
@@ -50,7 +51,10 @@ class Property[T, V](val propertyAccess : PropertyAccess[T, V], val rule: Visibi
       }
     }
 
+  @JsonbProperty("$links")
+  val links: util.List[Link] = new util.ArrayList[Link]()
 
-
+  def addLinks(value: Link*): Unit =
+    value.filter(_ != null).foreach(link => links.add(link))
 
 }

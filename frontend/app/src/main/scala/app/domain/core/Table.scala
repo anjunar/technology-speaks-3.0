@@ -9,7 +9,8 @@ import scala.reflect.ClassTag
 
 class Table[E: ClassTag](
   var rows: js.Array[E] = new js.Array[E](),
-  var size: Int = 0
+  var size: Int = 0,
+  var schema: Schema | Null = null
 ) extends JsonModel[Table[E]] {
 
   override def properties: js.Array[PropertyAccess[Table[E], ?]] =
@@ -19,6 +20,7 @@ class Table[E: ClassTag](
 object Table {
   def properties[E: ClassTag]: js.Array[PropertyAccess[Table[E], ?]] = js.Array(
     property(_.rows),
-    property(_.size)
+    property(_.size),
+    property(_.schema)
   )
 }

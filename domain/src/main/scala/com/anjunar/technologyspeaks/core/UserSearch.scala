@@ -1,5 +1,6 @@
 package com.anjunar.technologyspeaks.core
 
+import com.anjunar.technologyspeaks.followers.{Group, RelationShip}
 import com.anjunar.technologyspeaks.hibernate.search.AbstractSearch
 import com.anjunar.technologyspeaks.hibernate.search.annotations.RestPredicate
 import com.anjunar.technologyspeaks.hibernate.search.{Context, PredicateProvider}
@@ -126,7 +127,29 @@ object UserSearch {
           context.builder.exists(subquery)
         }
 
-      context.builder.or(ownerVisible, context.builder.exists(visibleForAll), visibleForUser)
+      val visibleForGroup =
+        if (identityHolder.user == null || identityHolder.user.id == null) context.builder.disjunction()
+        else {
+          val subquery = context.query.subquery(classOf[java.lang.Long])
+          val managedPropertyRoot = subquery.from(classOf[ManagedProperty])
+          val managedGroups = managedPropertyRoot.join[ManagedProperty, Group]("groups", JoinType.LEFT)
+          val relationShipRoot = subquery.from(classOf[RelationShip])
+          val relationShipGroups = relationShipRoot.join[RelationShip, Group]("groups", JoinType.LEFT)
+          subquery.select(context.builder.literal(1L))
+          subquery.where(
+            context.builder.equal(
+              managedPropertyRoot.get[EntityView]("view").get[User]("user").get("id"),
+              context.root.get("id")
+            ),
+            context.builder.equal(managedPropertyRoot.get[String]("name"), propertyName),
+            context.builder.equal(relationShipRoot.get[User]("user").get("id"), context.root.get("id")),
+            context.builder.equal(relationShipRoot.get[User]("follower").get("id"), identityHolder.user.id),
+            context.builder.equal(managedGroups.get("id"), relationShipGroups.get("id"))
+          )
+          context.builder.exists(subquery)
+        }
+
+      context.builder.or(ownerVisible, context.builder.exists(visibleForAll), visibleForUser, visibleForGroup)
     }
   }
 

@@ -1,5 +1,6 @@
 package com.anjunar.technologyspeaks.documents
 
+import com.anjunar.technologyspeaks.core.SchemaHateoas
 import com.anjunar.technologyspeaks.rest.EntityGraph
 import com.anjunar.technologyspeaks.rest.types.Data
 import com.anjunar.technologyspeaks.security.{IdentityHolder, LinkBuilder}
@@ -21,7 +22,7 @@ class IssueController(val identityHolder: IdentityHolder) {
         .build()
     )
 
-    new Data(entity, Issue.schema)
+    new Data(entity, SchemaHateoas.enhance(entity, Issue.schema))
   }
 
   @GetMapping(value = Array("/document/documents/document/{document}/issues/issue/{id}"), produces = Array("application/json"))
@@ -44,7 +45,7 @@ class IssueController(val identityHolder: IdentityHolder) {
         .build()
     )
 
-    new Data(entity, Issue.schema)
+    new Data(entity, SchemaHateoas.enhance(entity, Issue.schema))
   }
 
   @PostMapping(value = Array("/document/documents/document/{id}/issues/issue"), produces = Array("application/json"), consumes = Array("application/json"))
@@ -62,7 +63,7 @@ class IssueController(val identityHolder: IdentityHolder) {
         .build()
     )
 
-    new Data(entity, Issue.schema)
+    new Data(entity, SchemaHateoas.enhance(entity, Issue.schema))
   }
 
   @PutMapping(value = Array("/document/documents/document/{id}/issues/issue"), produces = Array("application/json"), consumes = Array("application/json"))
@@ -79,7 +80,7 @@ class IssueController(val identityHolder: IdentityHolder) {
         .build()
     )
 
-    new Data(entity, Issue.schema)
+    new Data(entity, SchemaHateoas.enhance(entity, Issue.schema))
   }
 
   @DeleteMapping(value = Array("/document/documents/document/issues/issue"), consumes = Array("application/json"))

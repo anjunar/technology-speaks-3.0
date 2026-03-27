@@ -1,13 +1,18 @@
 package app.pages.core
 
-import app.domain.core.{Address, Link, User, UserInfo}
+import app.domain.core.{Address, Data, Link, ManagedProperty, Schema, SchemaProperty, User, UserInfo}
+import app.domain.followers.{Group, RelationShip}
 import app.support.Navigation.renderByRel
-import app.support.Api
+import app.support.{Api, Navigation}
 import app.ui.{CompositeSupport, DivComposite, PageComposite}
 import jfx.action.Button.{button, buttonType, onClick}
+import jfx.control.Link.link
 import jfx.core.component.ElementComponent.*
-import jfx.core.state.Property
+import jfx.core.state.{ListProperty, Property}
 import jfx.dsl.*
+import jfx.form.ComboBox
+import jfx.form.ComboBox.*
+import jfx.form.Control.placeholder
 import jfx.form.Editable.{editable, editable_=}
 import jfx.form.{ErrorResponseException, Form, SubForm}
 import jfx.form.Form.{form, onSubmit}
@@ -22,21 +27,26 @@ import jfx.layout.VBox.vbox
 import jfx.layout.Viewport
 import jfx.statement.ObserveRender.observeRender
 
+import java.util.UUID
 import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success}
 
-class UserPage(val model: User) extends PageComposite("User", pageResizable = false) {
+class UserPage(val payload: Data[User]) extends PageComposite("User", pageResizable = false) {
 
-  override def pageWidth: Int = 1040
+  val model: User = payload.data
+
+  override def pageWidth: Int = 1240
   override def pageHeight: Int = 760
 
   private given ExecutionContext = ExecutionContext.global
 
   private val infoDisabled = Property(model.info.get == null)
   private val addressDisabled = Property(model.address.get == null)
+  private val visibilityCatalogProperty = Property(UserPage.VisibilityCatalog.empty)
 
   override protected def compose(using DslContext): Unit = {
     classProperty += "user-page"
+    loadVisibilityCatalog()
 
     withDslContext {
       hbox {
@@ -167,23 +177,53 @@ class UserPage(val model: User) extends PageComposite("User", pageResizable = fa
                       }
                     }))
 
-                    inputContainer("Vorname") {
-                      input("firstName") {
-                        classes = "user-page-input"
+                    hbox {
+                      classes = "user-page-field-row"
+
+                      div {
+                        classes = "user-page-field-input"
+
+                        inputContainer("Vorname") {
+                          input("firstName") {
+                            classes = "user-page-input"
+                          }
+                        }
                       }
+
+                      UserPage.accessControl("user-info-first-name", nestedProperty("info", "firstName"), visibilityCatalogProperty)
                     }
 
-                    inputContainer("Nachname") {
-                      input("lastName") {
-                        classes = "user-page-input"
+                    hbox {
+                      classes = "user-page-field-row"
+
+                      div {
+                        classes = "user-page-field-input"
+
+                        inputContainer("Nachname") {
+                          input("lastName") {
+                            classes = "user-page-input"
+                          }
+                        }
                       }
+
+                      UserPage.accessControl("user-info-last-name", nestedProperty("info", "lastName"), visibilityCatalogProperty)
                     }
 
-                    inputContainer("Geburtsdatum") {
-                      input("birthDate") {
-                        classes = "user-page-input"
-                        inputType = "date"
+                    hbox {
+                      classes = "user-page-field-row"
+
+                      div {
+                        classes = "user-page-field-input"
+
+                        inputContainer("Geburtsdatum") {
+                          input("birthDate") {
+                            classes = "user-page-input"
+                            inputType = "date"
+                          }
+                        }
                       }
+
+                      UserPage.accessControl("user-info-birth-date", nestedProperty("info", "birthDate"), visibilityCatalogProperty)
                     }
 
                     editable = !infoDisabled.get
@@ -236,47 +276,87 @@ class UserPage(val model: User) extends PageComposite("User", pageResizable = fa
                       }
                     }))
 
-                    inputContainer("Strasse") {
-                      input("street") {
-                        classes = "user-page-input"
+                    hbox {
+                      classes = "user-page-field-row"
+
+                      div {
+                        classes = "user-page-field-input"
+
+                        inputContainer("Strasse") {
+                          input("street") {
+                            classes = "user-page-input"
+                          }
+                        }
                       }
+
+                      UserPage.accessControl("user-address-street", nestedProperty("address", "street"), visibilityCatalogProperty)
                     }
 
-                    inputContainer("Hausnummer") {
-                      input("number") {
-                        classes = "user-page-input"
+                    hbox {
+                      classes = "user-page-field-row"
+
+                      div {
+                        classes = "user-page-field-input"
+
+                        inputContainer("Hausnummer") {
+                          input("number") {
+                            classes = "user-page-input"
+                          }
+                        }
                       }
+
+                      UserPage.accessControl("user-address-number", nestedProperty("address", "number"), visibilityCatalogProperty)
                     }
 
-                    inputContainer("Postleitzahl") {
-                      input("zipCode") {
-                        classes = "user-page-input"
+                    hbox {
+                      classes = "user-page-field-row"
+
+                      div {
+                        classes = "user-page-field-input"
+
+                        inputContainer("Postleitzahl") {
+                          input("zipCode") {
+                            classes = "user-page-input"
+                          }
+                        }
                       }
+
+                      UserPage.accessControl("user-address-zip-code", nestedProperty("address", "zipCode"), visibilityCatalogProperty)
                     }
 
-                    inputContainer("Land") {
-                      input("country") {
-                        classes = "user-page-input"
+                    hbox {
+                      classes = "user-page-field-row"
+
+                      div {
+                        classes = "user-page-field-input"
+
+                        inputContainer("Land") {
+                          input("country") {
+                            classes = "user-page-input"
+                          }
+                        }
                       }
+
+                      UserPage.accessControl("user-address-country", nestedProperty("address", "country"), visibilityCatalogProperty)
                     }
 
                     editable = !addressDisabled.get
                   }
                 }
+              }
+            }
 
-                hbox {
-                  classes = "user-form-actions"
+            hbox {
+              classes = "user-form-actions"
 
-                  style {
-                    justifyContent = "flex-end"
-                    columnGap = "10px"
-                  }
+              style {
+                justifyContent = "flex-end"
+                columnGap = "10px"
+              }
 
-                  renderByRel("update", model.links) { () =>
-                    button("Speichern") {
-                      classes = "user-page-save-btn"
-                    }
-                  }
+              renderByRel("update", model.links) { () =>
+                button("Speichern") {
+                  classes = "user-page-save-btn"
                 }
               }
             }
@@ -287,11 +367,381 @@ class UserPage(val model: User) extends PageComposite("User", pageResizable = fa
       }
     }
   }
+
+  private def nestedProperty(parentName: String, propertyName: String): SchemaProperty | Null =
+    Option(payload.schema)
+      .flatMap(schema => Option(schema.findProperty(parentName)))
+      .flatMap(parent => Option(parent.schema))
+      .flatMap(schema => Option(schema.findProperty(propertyName)))
+      .orNull
+
+  private def loadVisibilityCatalog(): Unit = {
+    UserPage.loadVisibilityCatalog().onComplete {
+      case Success(value) =>
+        visibilityCatalogProperty.set(value)
+      case Failure(error) =>
+        Api.logFailure("User visibility catalog", error)
+        Viewport.notify("Sichtbarkeitsoptionen konnten nicht geladen werden.", Viewport.NotificationKind.Error)
+    }
+  }
 }
 
 object UserPage {
-  def userPage(model: User, init: UserPage ?=> Unit = {})(using Scope): UserPage =
-    CompositeSupport.buildPage(new UserPage(model))(init)
+  def userPage(payload: Data[User], init: UserPage ?=> Unit = {})(using Scope): UserPage =
+    CompositeSupport.buildPage(new UserPage(payload))(init)
+
+  private def accessControl(
+    fieldKey: String,
+    property: SchemaProperty | Null,
+    visibilityCatalogProperty: Property[VisibilityCatalog]
+  )(using Scope): ManagedPropertyAccessControl =
+    CompositeSupport.buildComposite(new ManagedPropertyAccessControl(fieldKey, property, visibilityCatalogProperty))
+
+  private def loadVisibilityCatalog()(using ExecutionContext): scala.concurrent.Future[VisibilityCatalog] = {
+    RelationShip.list(0, 200).flatMap { relationShipTable =>
+      Group.list(0, 200).map { groupTable =>
+        buildVisibilityCatalog(relationShipTable.rows.iterator.map(_.data).toVector, groupTable.rows.iterator.map(_.data).toVector)
+      }
+    }
+  }
+
+  private def buildVisibilityCatalog(
+    relationShips: Vector[RelationShip],
+    groups: Vector[Group]
+  ): VisibilityCatalog = {
+    val followersById =
+      relationShips
+        .iterator
+        .flatMap(relationShip => Option(relationShip.follower.get))
+        .flatMap(user => userId(user).map(_ -> user))
+        .toMap
+
+    val directTargets =
+      followersById.valuesIterator
+        .toVector
+        .sortBy(userDisplayName)
+        .map(user =>
+          VisibilityTarget(
+            key = s"user:${user.id.get}",
+            label = userDisplayName(user),
+            kind = "user",
+            users = Vector(user),
+            user = user
+          )
+        )
+
+    val groupMembersById =
+      relationShips.foldLeft(Map.empty[UUID, Vector[User]]) { (acc, relationShip) =>
+        val follower = Option(relationShip.follower.get)
+        relationShip.groups.iterator.foldLeft(acc) { (inner, group) =>
+          val updated =
+            for {
+              groupId <- Option(group.id.get)
+              user <- follower
+            } yield inner.updated(groupId, inner.getOrElse(groupId, Vector.empty) :+ user)
+
+          updated.getOrElse(inner)
+        }
+      }
+
+    val distinctGroups =
+      (groups ++ relationShips.flatMap(_.groups.iterator))
+        .flatMap(group => Option(group.id.get).map(_ -> group))
+        .groupBy(_._1)
+        .values
+        .flatMap(_.lastOption.map(_._2))
+        .toVector
+        .sortBy(group => Option(group.name.get).map(_.trim.toLowerCase).getOrElse(""))
+
+    val groupTargets =
+      distinctGroups.map { group =>
+        val members = Option(group.id.get).flatMap(groupMembersById.get).getOrElse(Vector.empty).distinctBy(userKey)
+
+        VisibilityTarget(
+          key = s"group:${group.id.get}",
+          label = Option(group.name.get).filter(_.trim.nonEmpty).getOrElse("(Ohne Namen)"),
+          kind = "group",
+          users = members,
+          group = group
+        )
+      }
+
+    VisibilityCatalog(
+      allTarget = VisibilityTarget("all", "Alle", "all", Vector.empty),
+      groupTargets = groupTargets,
+      userTargets = directTargets
+    )
+  }
+
+  private def userDisplayName(user: User): String =
+    Option(user.nickName.get).filter(_.trim.nonEmpty).getOrElse("Benutzer")
+
+  private def userId(user: User): Option[UUID] =
+    Option(user.id.get)
+
+  private def userKey(user: User): String =
+    userId(user).map(_.toString).getOrElse(userDisplayName(user))
+
+  final case class VisibilityTarget(
+    key: String,
+    label: String,
+    kind: String,
+    users: Vector[User],
+    user: User | Null = null,
+    group: Group | Null = null
+  )
+
+  final case class VisibilityCatalog(
+    allTarget: VisibilityTarget,
+    groupTargets: Vector[VisibilityTarget],
+    userTargets: Vector[VisibilityTarget]
+  ) {
+    val targets: Vector[VisibilityTarget] =
+      Vector(allTarget) ++ groupTargets ++ userTargets
+
+    def selectedTargets(managedProperty: ManagedProperty): Vector[VisibilityTarget] = {
+      val selectedGroupIds =
+        managedProperty.groups.iterator
+          .flatMap(group => Option(group.id.get))
+          .toSet
+
+      val selectedUserIds =
+        managedProperty.users.iterator
+          .flatMap(userId)
+          .toSet
+
+      val selectedGroups =
+        groupTargets.filter(target =>
+          Option(target.group).flatMap(group => Option(group.id.get)).exists(selectedGroupIds.contains)
+        )
+
+      val directUsers =
+        userTargets.filter(target =>
+          Option(target.user).flatMap(userId).exists(selectedUserIds.contains)
+        )
+
+      val all =
+        if (managedProperty.visibleForAll.get) Vector(allTarget)
+        else Vector.empty
+
+      all ++ selectedGroups ++ directUsers
+    }
+
+    def resolveDirectUsers(selected: Seq[VisibilityTarget]): Vector[User] =
+      selected
+        .iterator
+        .flatMap(target => Option(target.user))
+        .foldLeft(Vector.empty[User]) { (acc, user) =>
+          if (acc.exists(existing => userId(existing) == userId(user))) acc
+          else acc :+ user
+        }
+
+    def resolveGroups(selected: Seq[VisibilityTarget]): Vector[Group] =
+      selected
+        .iterator
+        .flatMap(target => Option(target.group))
+        .foldLeft(Vector.empty[Group]) { (acc, group) =>
+          if (acc.exists(existing => Option(existing.id.get) == Option(group.id.get))) acc
+          else acc :+ group
+        }
+  }
+
+  object VisibilityCatalog {
+    val empty: VisibilityCatalog = VisibilityCatalog(
+      allTarget = VisibilityTarget("all", "Alle", "all", Vector.empty),
+      groupTargets = Vector.empty,
+      userTargets = Vector.empty
+    )
+  }
+}
+
+private final class ManagedPropertyAccessControl(
+  fieldKey: String,
+  property: SchemaProperty | Null,
+  visibilityCatalogProperty: Property[UserPage.VisibilityCatalog]
+) extends DivComposite {
+
+  private given ExecutionContext = ExecutionContext.global
+
+  private val availableTargets = ListProperty[UserPage.VisibilityTarget]()
+  private val managedPropertyProperty = Property[ManagedProperty | Null](null)
+  private val busyProperty = Property(false)
+
+  private var selectorRef: ComboBox[UserPage.VisibilityTarget] | Null = null
+  private var syncingSelection = false
+
+  private val propertyLink =
+    Option(property)
+      .toSeq
+      .flatMap(_.links.iterator)
+      .find(_.rel == "property")
+      .orNull
+
+  override protected def compose(using DslContext): Unit = {
+    classProperty += "user-page-access-control"
+
+    if (propertyLink == null) {
+      element.style.display = "none"
+      return
+    }
+
+    addDisposable(
+      visibilityCatalogProperty.observe { catalog =>
+        availableTargets.setAll(catalog.targets)
+        Option(managedPropertyProperty.get).foreach(syncSelection(_, catalog))
+      }
+    )
+
+    withDslContext {
+      div {
+        classes = "user-page-access-shell"
+
+        div {
+          classes = "user-page-access-label"
+          text = "Sichtbar fuer"
+        }
+
+        selectorRef = comboBox[UserPage.VisibilityTarget](fieldKey, standalone = true) {
+          ComboBox.items = availableTargets
+          placeholder = "Sichtbarkeit"
+          identityBy = { (target: UserPage.VisibilityTarget) => target.key }
+          multipleSelection = true
+          rowHeightPx = 40.0
+          dropdownHeightPx = 220.0
+
+          valueRenderer = {
+            div {
+              classes = "user-page-access-value"
+              text = selectedValueText(comboSelectedItems[UserPage.VisibilityTarget].iterator.toVector)
+            }
+          }
+
+          itemRenderer = {
+            val option = comboItem[UserPage.VisibilityTarget]
+            val selected = comboItemSelected
+
+            hbox {
+              classes = "user-page-access-option"
+
+              div {
+                classes = Seq(
+                  "material-icons",
+                  "user-page-access-option-icon",
+                  s"is-${option.kind}",
+                  if (selected) "is-selected" else "is-unselected"
+                )
+                text =
+                  if (selected) "check_circle"
+                  else option.kind match {
+                    case "group" => "groups"
+                    case "all"   => "public"
+                    case _       => "person"
+                  }
+              }
+
+              div {
+                classes = "user-page-access-option-text"
+                text = option.label
+              }
+            }
+          }
+
+          dropdownFooterRenderer = {
+            link("/followers/groups") {
+              classes = Seq("jfx-combo-box__footer-link", "user-page-manage-groups-link")
+              text = "Gruppen verwalten"
+              summon[jfx.control.Link].element.setAttribute("data-jfx-combo-box-action", "true")
+            }
+          }
+        }
+      }
+    }
+
+    addDisposable(
+      selectorRef.nn.valueProperty.observeWithoutInitial { values =>
+        if (!syncingSelection) {
+          persistSelection(values.iterator.toVector)
+        }
+      }
+    )
+
+    addDisposable(
+      busyProperty.observe { busy =>
+        val elementRef = selectorRef.nn.element
+        elementRef.style.pointerEvents = if (busy) "none" else "auto"
+        elementRef.style.opacity = if (busy) "0.7" else "1"
+      }
+    )
+
+    loadManagedProperty()
+  }
+
+  private def loadManagedProperty(): Unit = {
+    busyProperty.set(true)
+
+    Api.invokeLink[ManagedProperty](propertyLink).onComplete {
+      case Success(value) =>
+        managedPropertyProperty.set(value)
+        syncSelection(value, visibilityCatalogProperty.get)
+        busyProperty.set(false)
+
+      case Failure(error) =>
+        Api.logFailure(s"Managed property $fieldKey", error)
+        element.style.display = "none"
+        busyProperty.set(false)
+    }
+  }
+
+  private def persistSelection(selectedTargets: Vector[UserPage.VisibilityTarget]): Unit = {
+    val managedProperty = managedPropertyProperty.get
+    if (managedProperty == null || busyProperty.get) {
+      Option(managedProperty).foreach(syncSelection(_, visibilityCatalogProperty.get))
+      return
+    }
+
+    val previousVisibleForAll = managedProperty.visibleForAll.get
+    val previousUsers = managedProperty.users.iterator.toVector
+    val previousGroups = managedProperty.groups.iterator.toVector
+    val visibleForAll = selectedTargets.exists(_.kind == "all")
+    val resolvedUsers = visibilityCatalogProperty.get.resolveDirectUsers(selectedTargets)
+    val resolvedGroups = visibilityCatalogProperty.get.resolveGroups(selectedTargets)
+
+    managedProperty.visibleForAll.set(visibleForAll)
+    managedProperty.users.setAll(resolvedUsers)
+    managedProperty.groups.setAll(resolvedGroups)
+
+    busyProperty.set(true)
+
+    managedProperty.updateFromLink().onComplete {
+      case Success(updated) =>
+        managedPropertyProperty.set(updated)
+        syncSelection(updated, visibilityCatalogProperty.get)
+        busyProperty.set(false)
+
+      case Failure(error) =>
+        managedProperty.visibleForAll.set(previousVisibleForAll)
+        managedProperty.users.setAll(previousUsers)
+        managedProperty.groups.setAll(previousGroups)
+        syncSelection(managedProperty, visibilityCatalogProperty.get)
+        Api.logFailure(s"Managed property update $fieldKey", error)
+        Viewport.notify("Sichtbarkeit konnte nicht aktualisiert werden.", Viewport.NotificationKind.Error)
+        busyProperty.set(false)
+    }
+  }
+
+  private def syncSelection(managedProperty: ManagedProperty, catalog: UserPage.VisibilityCatalog): Unit = {
+    syncingSelection = true
+    try selectorRef.nn.valueProperty.setAll(catalog.selectedTargets(managedProperty))
+    finally syncingSelection = false
+  }
+
+  private def selectedValueText(selected: Vector[UserPage.VisibilityTarget]): String = {
+    if (selected.isEmpty) {
+      "Nur du"
+    } else {
+      selected.map(_.label).mkString(", ")
+    }
+  }
 }
 
 private final class UserFollowAction(model: User) extends DivComposite {

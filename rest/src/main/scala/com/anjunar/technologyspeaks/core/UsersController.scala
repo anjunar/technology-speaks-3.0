@@ -46,7 +46,7 @@ class UsersController(val query: HibernateSearch) {
       )
     }
 
-    new Table(entities, count, User.schema)
+    new Table(entities, count, SchemaHateoas.enhance(entities.asScala.headOption.map(_.data).orNull, User.schema))
   }
 
 }
@@ -54,6 +54,6 @@ class UsersController(val query: HibernateSearch) {
 object UsersController {
 
   @JsonbSubtype(alias = "Data", `type` = classOf[Data[?]])
-  class UserRow(data: User, @(JsonbProperty @field) val score: Double) extends Data[User](data, User.schema)
+  class UserRow(data: User, @(JsonbProperty @field) val score: Double) extends Data[User](data, SchemaHateoas.enhance(data, User.schema))
 
 }

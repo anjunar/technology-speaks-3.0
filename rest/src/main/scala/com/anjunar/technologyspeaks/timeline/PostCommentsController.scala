@@ -1,5 +1,6 @@
 package com.anjunar.technologyspeaks.timeline
 
+import com.anjunar.technologyspeaks.core.SchemaHateoas
 import com.anjunar.technologyspeaks.hibernate.search.HibernateSearch
 import com.anjunar.technologyspeaks.rest.types.{Data, Table}
 import com.anjunar.technologyspeaks.security.{IdentityHolder, LinkBuilder}
@@ -67,7 +68,7 @@ class PostCommentsController(val query: HibernateSearch, val identityHolder: Ide
       }
     }
 
-    new Table(entities, count, Post.schema)
+    new Table(entities, count, SchemaHateoas.enhance(entities.asScala.headOption.map(_.data).orNull, Post.schema))
   }
 
 }
@@ -75,6 +76,6 @@ class PostCommentsController(val query: HibernateSearch, val identityHolder: Ide
 object PostCommentsController {
 
   @JsonbSubtype(alias = "Data", `type` = classOf[Data[?]])
-  class CommentRow(data: FirstComment) extends Data[FirstComment](data, FirstComment.schema)
+  class CommentRow(data: FirstComment) extends Data[FirstComment](data, SchemaHateoas.enhance(data, FirstComment.schema))
 
 }

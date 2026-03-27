@@ -3,8 +3,11 @@ package com.anjunar.technologyspeaks.core
 import com.anjunar.json.mapper.provider.{EntityProvider, OwnerProvider}
 import com.anjunar.json.mapper.schema.VisibilityRule
 import com.anjunar.scala.universe.introspector.AbstractProperty
+import com.anjunar.technologyspeaks.followers.RelationShip
 import com.anjunar.technologyspeaks.SpringContext
 import com.anjunar.technologyspeaks.security.IdentityHolder
+
+import scala.jdk.CollectionConverters.*
 
 class ManagedRule[E <: OwnerProvider & EntityProvider] extends VisibilityRule[E] {
 
@@ -45,7 +48,21 @@ class ManagedRule[E <: OwnerProvider & EntityProvider] extends VisibilityRule[E]
       return true
     }
 
-    managedProperty.users.stream().anyMatch(user => user.id == holder.user.id)
+    if (managedProperty.users.stream().anyMatch(user => user.id == holder.user.id)) {
+      return true
+    }
+
+    if (managedProperty.groups.isEmpty) {
+      return false
+    }
+
+    val relationShip = RelationShip.query("follower" -> holder.user, "user" -> owner)
+    if (relationShip == null) {
+      return false
+    }
+
+    val allowedGroupIds = managedProperty.groups.asScala.map(_.id).toSet
+    relationShip.groups.asScala.exists(group => allowedGroupIds.contains(group.id))
   }
 
   override def isWriteable(instance: E, property: AbstractProperty): Boolean = {

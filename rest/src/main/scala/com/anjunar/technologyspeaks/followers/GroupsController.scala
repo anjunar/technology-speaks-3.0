@@ -1,5 +1,6 @@
 package com.anjunar.technologyspeaks.followers
 
+import com.anjunar.technologyspeaks.core.SchemaHateoas
 import com.anjunar.technologyspeaks.hibernate.search.HibernateSearch
 import com.anjunar.technologyspeaks.rest.types.{Data, Table}
 import com.anjunar.technologyspeaks.security.{IdentityHolder, LinkBuilder}
@@ -39,7 +40,7 @@ class GroupsController(val query: HibernateSearch, val identityHolder: IdentityH
       )
     }
 
-    new Table(entities, count, Group.schema)
+    new Table(entities, count, SchemaHateoas.enhance(entities.asScala.headOption.map(_.data).orNull, Group.schema))
   }
 
 }
@@ -47,6 +48,6 @@ class GroupsController(val query: HibernateSearch, val identityHolder: IdentityH
 object GroupsController {
 
   @JsonbSubtype(alias = "Data", `type` = classOf[Data[?]])
-  class GroupRow(@(JsonbProperty @field) data: Group) extends Data[Group](data, Group.schema)
+  class GroupRow(@(JsonbProperty @field) data: Group) extends Data[Group](data, SchemaHateoas.enhance(data, Group.schema))
 
 }

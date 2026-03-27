@@ -129,7 +129,7 @@ object Routes {
     asyncRoute("/core/users/user/:id") {
       val id = pathParam("id")
       User.read(id).map { user =>
-        UserPage.userPage(user.data)
+        UserPage.userPage(user)
       }
     }
   )

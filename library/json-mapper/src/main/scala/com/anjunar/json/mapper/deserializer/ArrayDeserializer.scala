@@ -35,12 +35,21 @@ class ArrayDeserializer extends Deserializer[java.util.Collection[?]] {
                 } else {
                   val entityId = UUID.fromString(idNode.value.toString)
                   val existing = entityCollection.stream().filter(entityProvider => entityProvider.id == entityId).findFirst()
-                  if (existing.isPresent) existing.get() else elementResolvedClass.raw.getConstructor().newInstance()
+                  if (existing.isPresent) {
+                    existing.get()
+                  } else {
+                    val value = context.loader.load(entityId, elementResolvedClass.raw)
+                    if (value == null) {
+                      elementResolvedClass.raw.getConstructor().newInstance()
+                    } else {
+                      value
+                    }
+                  }
                 }
 
               val jsonContext = new JsonContext(
                 elementResolvedClass,
-                entity.asInstanceOf[DTO],
+                entity,
                 context.graph,
                 context.loader,
                 context.validator,

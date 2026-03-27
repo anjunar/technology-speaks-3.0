@@ -1,5 +1,6 @@
 package com.anjunar.technologyspeaks.documents
 
+import com.anjunar.technologyspeaks.core.SchemaHateoas
 import com.anjunar.technologyspeaks.hibernate.search.HibernateSearch
 import com.anjunar.technologyspeaks.rest.types.{Data, Table}
 import com.anjunar.technologyspeaks.security.{IdentityHolder, LinkBuilder}
@@ -67,7 +68,7 @@ class IssueCommentsController(val query: HibernateSearch, val identityHolder: Id
       }
     }
 
-    new Table(entities, count, Issue.schema)
+    new Table(entities, count, SchemaHateoas.enhance(entities.asScala.headOption.map(_.data).orNull, Issue.schema))
   }
 
 }
@@ -75,6 +76,6 @@ class IssueCommentsController(val query: HibernateSearch, val identityHolder: Id
 object IssueCommentsController {
 
   @JsonbSubtype(alias = "Data", `type` = classOf[Data[?]])
-  class CommentRow(data: FirstComment) extends Data[FirstComment](data, FirstComment.schema)
+  class CommentRow(data: FirstComment) extends Data[FirstComment](data, SchemaHateoas.enhance(data, FirstComment.schema))
 
 }

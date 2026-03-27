@@ -15,8 +15,8 @@ class UserController(val identityHolder: IdentityHolder) {
   @RolesAllowed(Array("User", "Administrator"))
   @EntityGraph("User.full")
   def read(@PathVariable("id") user: User): Data[User] = {
-    val form = new Data(user, User.schema)
     val isOwnProfile = identityHolder.user != null && identityHolder.user.id == user.id
+    val form = new Data(user, SchemaHateoas.enhance(user, User.schema))
 
     if (isOwnProfile) {
       user.addLinks(
@@ -61,7 +61,7 @@ class UserController(val identityHolder: IdentityHolder) {
   @RolesAllowed(Array("User", "Administrator"))
   @EntityGraph("User.full")
   def update(@RequestBody user: User): Data[User] = {
-    val form = new Data(user, User.schema)
+    val form = new Data(user, SchemaHateoas.enhance(user, User.schema))
 
     user.addLinks(
       LinkBuilder.create[UserController](_.update(new User("")))

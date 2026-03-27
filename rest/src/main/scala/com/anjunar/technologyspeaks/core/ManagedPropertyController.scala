@@ -1,16 +1,30 @@
 package com.anjunar.technologyspeaks.core
 
-import org.springframework.web.bind.annotation.{GetMapping, PathVariable, PutMapping, RestController}
+import com.anjunar.technologyspeaks.security.LinkBuilder
+import org.springframework.web.bind.annotation.{GetMapping, PathVariable, PutMapping, RequestBody, RestController}
 
 @RestController
 class ManagedPropertyController {
 
   @GetMapping(value = Array("/core/properties/property/{id}"), produces = Array("application/json"))
   def read(@PathVariable("id") managedProperty: ManagedProperty): ManagedProperty =
-    managedProperty
+    enrich(managedProperty)
 
   @PutMapping(value = Array("/core/properties/property"), produces = Array("application/json"), consumes = Array("application/json"))
-  def update(managedProperty: ManagedProperty): ManagedProperty =
+  def update(@RequestBody managedProperty: ManagedProperty): ManagedProperty =
+    enrich(managedProperty)
+
+  private def enrich(managedProperty: ManagedProperty): ManagedProperty = {
+    managedProperty.addLinks(
+      LinkBuilder.create[ManagedPropertyController](_.read(new ManagedProperty("")))
+        .withRel("self")
+        .withVariable("id", managedProperty.id)
+        .build(),
+      LinkBuilder.create[ManagedPropertyController](_.update(new ManagedProperty("")))
+        .build()
+    )
+
     managedProperty
+  }
 
 }

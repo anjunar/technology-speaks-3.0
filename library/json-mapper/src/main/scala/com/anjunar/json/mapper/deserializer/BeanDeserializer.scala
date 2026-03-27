@@ -21,7 +21,11 @@ class BeanDeserializer extends Deserializer[Any] {
       case jsonObject: JsonObject =>
         val beanModel = AnnotationIntrospector.create(context.resolvedClass, classOf[JsonbProperty])
 
-        val schemaProvider = TypeResolver.companionInstance[SchemaProvider[EntitySchema[Any]]](context.resolvedClass.raw)
+        val companion = TypeResolver.companionInstance[AnyRef](context.resolvedClass.raw)
+        val schemaProvider = companion match {
+          case value: SchemaProvider[EntitySchema[Any]] => value
+          case _ => null
+        }
 
         val properties = beanModel.properties
         var index = 0

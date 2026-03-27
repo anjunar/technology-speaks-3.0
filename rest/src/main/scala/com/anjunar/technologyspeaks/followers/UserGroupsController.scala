@@ -1,5 +1,6 @@
 package com.anjunar.technologyspeaks.followers
 
+import com.anjunar.technologyspeaks.core.SchemaHateoas
 import com.anjunar.technologyspeaks.core.User
 import com.anjunar.technologyspeaks.rest.types.Data
 import com.anjunar.technologyspeaks.security.IdentityHolder
@@ -26,7 +27,7 @@ class UserGroupsController(private val identityHolder: IdentityHolder) {
     }
 
     relationShip.groups.asScala
-      .map(group => new Data(group, Group.schema))
+      .map(group => new Data(group, SchemaHateoas.enhance(group, Group.schema)))
       .toList
       .asJava
   }
@@ -55,7 +56,7 @@ class UserGroupsController(private val identityHolder: IdentityHolder) {
     relationShip.groups.addAll(resolved.asJava)
 
     relationShip.groups.asScala
-      .map(group => new Data(group, Group.schema))
+      .map(group => new Data(group, SchemaHateoas.enhance(group, Group.schema)))
       .toList
       .asJava
   }

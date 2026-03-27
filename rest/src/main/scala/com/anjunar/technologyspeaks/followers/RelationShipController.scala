@@ -1,5 +1,6 @@
 package com.anjunar.technologyspeaks.followers
 
+import com.anjunar.technologyspeaks.core.SchemaHateoas
 import com.anjunar.technologyspeaks.rest.EntityGraph
 import com.anjunar.technologyspeaks.rest.types.Data
 import com.anjunar.technologyspeaks.security.LinkBuilder
@@ -21,7 +22,7 @@ class RelationShipController {
         .build()
     )
 
-    new Data(entity, RelationShip.schema)
+    new Data(entity, SchemaHateoas.enhance(entity, RelationShip.schema))
   }
 
   @PostMapping(value = Array("/followers/relationships/relationship"), consumes = Array("application/json"), produces = Array("application/json"))
@@ -37,7 +38,7 @@ class RelationShipController {
         .build()
     )
 
-    new Data(entity, RelationShip.schema)
+    new Data(entity, SchemaHateoas.enhance(entity, RelationShip.schema))
   }
 
   @PutMapping(value = Array("/followers/relationships/relationship"), consumes = Array("application/json"), produces = Array("application/json"))
@@ -51,7 +52,7 @@ class RelationShipController {
         .build()
     )
 
-    new Data(entity, RelationShip.schema)
+    new Data(entity, SchemaHateoas.enhance(entity, RelationShip.schema))
   }
 
   @DeleteMapping(value = Array("/followers/relationships/relationship"), consumes = Array("application/json"))
