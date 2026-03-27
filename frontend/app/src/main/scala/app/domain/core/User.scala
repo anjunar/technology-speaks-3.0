@@ -1,10 +1,11 @@
 package app.domain.core
 
-import app.support.Api
+import app.support.{Api, Navigation}
 import jfx.core.macros.{property, typedProperty}
 import jfx.core.state.{ListProperty, Property, PropertyAccess}
 import jfx.domain.Media
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import java.util.UUID
 import scala.concurrent.Future
 import scala.scalajs.js
@@ -28,6 +29,32 @@ class User extends AbstractEntity[User] {
 
   def delete(): Future[Unit] =
     Api.delete("/service/core/users/user", this)
+
+  def followLink: Option[Link] =
+    links.find(_.rel == "follow")
+
+  def unfollowLink: Option[Link] =
+    links.find(_.rel == "unfollow")
+
+  def followActionLink: Option[Link] =
+    unfollowLink.orElse(followLink)
+
+  def isFollowed: Boolean =
+    unfollowLink.isDefined
+
+  def invokeFollowAction(): Future[User] =
+    followActionLink match {
+      case Some(link) if id.get != null =>
+        Api
+          .requestJson(link.method, Navigation.prefixedServiceUrl(link.url))
+          .flatMap(_ => User.read(id.get.toString))
+          .map { response =>
+            links.setAll(response.data.links)
+            this
+          }
+      case _ =>
+        Future.successful(this)
+    }
 }
 
 object User {

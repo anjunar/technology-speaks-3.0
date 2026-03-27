@@ -1,0 +1,202 @@
+.user-page {
+    height: 100%;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 16px;
+
+    --user-panel-bg: rgba(255, 255, 255, 0.50);
+    --user-panel-border: rgba(0, 0, 0, 0.06);
+    --user-panel-shadow: rgba(0, 0, 0, 0.18);
+    --user-panel-muted: rgba(0, 0, 0, 0.05);
+}
+
+html[data-theme="dark"] .user-page {
+    --user-panel-bg: rgba(20, 20, 20, 0.40);
+    --user-panel-border: rgba(255, 255, 255, 0.08);
+    --user-panel-shadow: rgba(0, 0, 0, 0.35);
+    --user-panel-muted: rgba(255, 255, 255, 0.05);
+}
+
+.user-page .user-page-shell {
+    width: 100%;
+    height: 100%;
+    justify-content: center;
+    align-items: flex-start;
+    overflow-y: auto;
+}
+
+.user-page .user-page-card {
+    width: min(100%, 1080px);
+    padding: 24px;
+    box-sizing: border-box;
+    border: 1px solid var(--user-panel-border);
+    box-shadow: 0 18px 40px var(--user-panel-shadow);
+}
+
+.user-page .user-page-content {
+    width: 100%;
+    gap: 20px;
+}
+
+.user-page .user-page-header {
+    width: 100%;
+    align-items: flex-start;
+    gap: 24px;
+}
+
+.user-page .user-page-sidebar {
+    width: 320px;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.user-page .user-page-avatar {
+    flex: 0 0 auto;
+}
+
+.user-page .user-page-section-row {
+    width: 100%;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.user-page .user-page-toggle.material-icons {
+    width: 44px;
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: var(--user-panel-muted);
+    border: 1px solid var(--user-panel-border);
+    transition: transform 120ms ease, border-color 120ms ease, background-color 120ms ease;
+}
+
+.user-page .user-page-toggle.material-icons:hover {
+    transform: translateY(-1px);
+    border-color: var(--color-selected);
+}
+
+.user-page .user-form-actions {
+    width: 100%;
+}
+
+.user-page .user-page-save-btn {
+    padding: 12px 18px;
+    border-radius: 12px;
+    background: var(--color-selected);
+    color: var(--color-text);
+    transition: transform 120ms ease, filter 120ms ease;
+}
+
+.user-page .user-page-save-btn:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.03);
+}
+
+.user-page .user-follow-slot {
+    width: 100%;
+}
+
+.user-page .user-follow-card {
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 16px;
+    border-radius: 16px;
+    background: var(--user-panel-muted);
+    border: 1px solid var(--user-panel-border);
+}
+
+.user-page .user-follow-copy {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.user-page .user-follow-label {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    opacity: 0.7;
+}
+
+.user-page .user-follow-text {
+    font-size: 15px;
+    line-height: 1.35;
+    font-weight: 600;
+}
+
+.user-page .user-follow-btn {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-width: 140px;
+    padding: 12px 16px;
+    border-radius: 999px;
+    border: 1px solid var(--user-panel-border);
+    transition: transform 120ms ease, border-color 120ms ease, background-color 120ms ease;
+}
+
+.user-page .user-follow-btn::before {
+    font-family: "Material Icons", sans-serif;
+    font-size: 18px;
+    line-height: 1;
+}
+
+.user-page .user-follow-btn:hover {
+    transform: translateY(-1px);
+    border-color: var(--color-selected);
+}
+
+.user-page .user-follow-btn.is-follow {
+    background: var(--color-selected);
+    color: var(--color-background-primary);
+}
+
+.user-page .user-follow-btn.is-follow::before {
+    content: "person_add";
+}
+
+.user-page .user-follow-btn.is-unfollow {
+    background: transparent;
+}
+
+.user-page .user-follow-btn.is-unfollow::before {
+    content: "person_remove";
+}
+
+@media (max-width: 900px) {
+    .user-page {
+        padding: 10px;
+    }
+
+    .user-page .user-page-card {
+        padding: 16px;
+    }
+
+    .user-page .user-page-header {
+        flex-direction: column;
+    }
+
+    .user-page .user-page-sidebar {
+        width: 100%;
+    }
+
+    .user-page .user-follow-card {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .user-page .user-follow-btn {
+        width: 100%;
+    }
+}

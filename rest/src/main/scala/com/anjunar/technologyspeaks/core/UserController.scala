@@ -16,37 +16,40 @@ class UserController(val identityHolder: IdentityHolder) {
   @EntityGraph("User.full")
   def read(@PathVariable("id") user: User): Data[User] = {
     val form = new Data(user, User.schema)
+    val isOwnProfile = identityHolder.user != null && identityHolder.user.id == user.id
 
-    if (identityHolder.user == user) {
+    if (isOwnProfile) {
       user.addLinks(
         LinkBuilder.create[UserController](_.update(new User("")))
           .build()
       )
     }
 
-    val relationShip = RelationShip.query("follower" -> user, "user" -> identityHolder.user)
+    if (!isOwnProfile) {
+      val relationShip = RelationShip.query("follower" -> user, "user" -> identityHolder.user)
 
-    user.addLinks(
-      if (relationShip == null) {
-        LinkBuilder.create[FollowerController](_.follow(user))
-          .withRel("follow")
-          .build()
-      } else {
-        LinkBuilder.create[FollowerController](_.unfollow(user))
-          .withRel("unfollow")
-          .build()
-      }
-    )
-
-    if (relationShip != null) {
       user.addLinks(
-        LinkBuilder.create[UserGroupsController](_.list(user))
-          .withRel("groups")
-          .build(),
-        LinkBuilder.create[UserGroupsController](_.update(user, null))
-          .withRel("updateGroups")
-          .build()
+        if (relationShip == null) {
+          LinkBuilder.create[FollowerController](_.follow(user))
+            .withRel("follow")
+            .build()
+        } else {
+          LinkBuilder.create[FollowerController](_.unfollow(user))
+            .withRel("unfollow")
+            .build()
+        }
       )
+
+      if (relationShip != null) {
+        user.addLinks(
+          LinkBuilder.create[UserGroupsController](_.list(user))
+            .withRel("groups")
+            .build(),
+          LinkBuilder.create[UserGroupsController](_.update(user, null))
+            .withRel("updateGroups")
+            .build()
+        )
+      }
     }
 
     form
