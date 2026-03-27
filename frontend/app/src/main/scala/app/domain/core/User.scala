@@ -60,8 +60,8 @@ class User extends AbstractEntity[User] {
 object User {
   val properties: js.Array[PropertyAccess[User, ?]] = js.Array(
     typedProperty[User, Property[UUID], UUID](_.id),
-    typedProperty[User, Property[String], String](_.modified),
-    typedProperty[User, Property[String], String](_.created),
+    typedProperty[User, Property[String | Null], String | Null](_.modified),
+    typedProperty[User, Property[String | Null], String | Null](_.created),
     typedProperty[User, Property[String], String](_.nickName),
     typedProperty[User, Property[Media | Null], Media | Null](_.image),
     typedProperty[User, Property[UserInfo | Null], UserInfo | Null](_.info),

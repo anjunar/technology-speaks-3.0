@@ -16,6 +16,7 @@ import jfx.form.Input.input
 import jfx.form.InputContainer.inputContainer
 import jfx.layout.Div.div
 import jfx.layout.HBox.hbox
+import jfx.layout.Viewport
 
 import scala.concurrent.ExecutionContext
 

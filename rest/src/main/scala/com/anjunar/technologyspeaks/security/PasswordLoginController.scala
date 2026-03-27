@@ -20,6 +20,7 @@ class PasswordLoginController(val sessionHolder: SessionHolder) {
 
     if (eMailEntity == null) {
       new JsonObject()
+        .put("@type", "JsonResponse")
         .put("status", "error")
         .put("message", "User not found")
     } else {
@@ -33,9 +34,12 @@ class PasswordLoginController(val sessionHolder: SessionHolder) {
         sessionHolder.credentials = credential.id
 
         new JsonObject()
+          .put("@type", "JsonResponse")
           .put("status", "success")
+          .put("message", "")
       } else {
         new JsonObject()
+          .put("@type", "JsonResponse")
           .put("status", "error")
           .put("message", "Invalid password")
       }

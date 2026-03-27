@@ -17,8 +17,8 @@ class Email extends AbstractEntity[Email] {
 object Email {
   val properties: js.Array[PropertyAccess[Email, ?]] = js.Array(
     typedProperty[Email, Property[UUID], UUID](_.id),
-    typedProperty[Email, Property[String], String](_.modified),
-    typedProperty[Email, Property[String], String](_.created),
+    typedProperty[Email, Property[String | Null], String | Null](_.modified),
+    typedProperty[Email, Property[String | Null], String | Null](_.created),
     typedProperty[Email, Property[String], String](_.value),
     typedProperty[Email, ListProperty[Link], Link](_.links)
   )

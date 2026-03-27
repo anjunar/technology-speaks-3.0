@@ -21,6 +21,7 @@ class AppJsonRegistry extends JsonRegistry {
     "Link" -> (() => new Link()),
     "Address" -> (() => new Address()),
     "Email" -> (() => new Email()),
+    "EMail" -> (() => new Email()),
     "Media" -> (() => new Media()),
     "Thumbnail" -> (() => new Thumbnail()),
     "User" -> (() => new User()),
