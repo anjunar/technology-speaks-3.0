@@ -14,6 +14,7 @@ import jfx.form.Input.{input, inputType_=}
 import jfx.form.InputContainer.inputContainer
 import jfx.layout.Div.div
 import jfx.layout.HBox.hbox
+import jfx.layout.Viewport
 
 import scala.concurrent.ExecutionContext
 
@@ -31,7 +32,19 @@ class PasswordRegisterPage extends PageComposite("Register", pageResizable = fal
         onSubmit_= { (event : Form[PasswordRegister])  =>
           registerForm
             .save()
-            .foreach(_ => close())
+            .foreach(response =>
+              if (response != null && response.status == "success") {
+                Viewport.notify("Registrierung abgeschlossen.", Viewport.NotificationKind.Success)
+                close()
+              } else {
+                Viewport.notify(
+                  Option(response)
+                    .flatMap(value => Option(value.message))
+                    .getOrElse("Registrierung fehlgeschlagen."),
+                  Viewport.NotificationKind.Error
+                )
+              }
+            )
         }
 
         image {

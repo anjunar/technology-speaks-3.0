@@ -35,10 +35,23 @@ class ConfirmPage extends PageComposite("Bestaetigen", pageResizable = false) {
         onSubmit_= { (event : Form[ConfirmCode])  =>
           Api
             .post[app.support.JsonResponse](s"/service/security/confirm?code=${confirmForm.confirm.get}")
-            .flatMap(_ => {
-              service.invoke()
+            .flatMap(response => {
+              if (response == null || response.status != "success") {
+                Viewport.notify(
+                  Option(response)
+                    .flatMap(value => Option(value.message))
+                    .getOrElse("Bestaetigung fehlgeschlagen."),
+                  Viewport.NotificationKind.Error
+                )
+                scala.concurrent.Future.failed(RuntimeException("Confirm failed"))
+              } else {
+                service.invoke()
+              }
             })
-            .foreach(_ => close())
+            .foreach { _ =>
+              Viewport.notify("Bestaetigung erfolgreich.", Viewport.NotificationKind.Success)
+              close()
+            }
         }
 
         image {

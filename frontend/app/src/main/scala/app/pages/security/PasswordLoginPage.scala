@@ -16,6 +16,7 @@ import jfx.form.Input.{input, inputType_=}
 import jfx.form.InputContainer.inputContainer
 import jfx.layout.Div.div
 import jfx.layout.HBox.hbox
+import jfx.layout.Viewport
 
 import scala.concurrent.ExecutionContext
 
@@ -35,12 +36,23 @@ class PasswordLoginPage extends PageComposite("Login", pageResizable = false) {
         onSubmit_= { (event : Form[PasswordLogin])  =>
           loginForm
             .save()
-            .flatMap(_ => {
-              service.invoke()
+            .flatMap(response => {
+              if (response == null || response.status != "success") {
+                Viewport.notify(
+                  Option(response)
+                    .flatMap(value => Option(value.message))
+                    .getOrElse("Login fehlgeschlagen."),
+                  Viewport.NotificationKind.Error
+                )
+                scala.concurrent.Future.failed(RuntimeException("Password login failed"))
+              } else {
+                service.invoke()
+              }
             })
             .foreach { _ =>
               close()
-              Navigation.queryParam("redirect").foreach(path => Navigation.navigate(path, replace = true))
+              val target = Navigation.queryParam("redirect").filter(_.trim.nonEmpty).getOrElse("/")
+              Navigation.navigate(target, replace = true)
             }
         }
 
