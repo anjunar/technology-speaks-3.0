@@ -38,11 +38,12 @@ object UserSearch {
 
       val parameterName = s"${context.name}_query"
       val parameter = context.builder.parameter(classOf[String], parameterName)
-      context.parameters.put(parameterName, s"%${rawValue.toLowerCase}%")
+      context.parameters.put(parameterName, rawValue.toLowerCase)
 
       val disjunction = new java.util.ArrayList[jakarta.persistence.criteria.Predicate]()
       disjunction.add(
-        context.builder.like(
+        similarityPredicate(
+          context,
           context.builder.lower(context.root.get("nickName")),
           parameter
         )
@@ -52,7 +53,8 @@ object UserSearch {
       disjunction.add(
         context.builder.and(Array[Predicate](
           canViewManagedProperty(context, "firstName"),
-          context.builder.like(
+          similarityPredicate(
+            context,
             context.builder.lower(infoJoin.get("firstName")),
             parameter
           )
@@ -61,7 +63,8 @@ object UserSearch {
       disjunction.add(
         context.builder.and(Array[Predicate](
           canViewManagedProperty(context, "lastName"),
-          context.builder.like(
+          similarityPredicate(
+            context,
             context.builder.lower(infoJoin.get("lastName")),
             parameter
           )
@@ -69,6 +72,23 @@ object UserSearch {
       )
 
       context.predicates.add(context.builder.or(disjunction.toArray(new Array[Predicate](disjunction.size()))*))
+    }
+
+    private def similarityPredicate(
+      context: Context[String, User],
+      expression: jakarta.persistence.criteria.Expression[String],
+      parameter: jakarta.persistence.criteria.ParameterExpression[String]
+    ): Predicate = {
+      val similarity = context.builder.function(
+        "similarity",
+        classOf[java.lang.Double],
+        expression,
+        parameter
+      )
+
+      context.selection.add(similarity)
+
+      context.builder.greaterThanOrEqualTo[java.lang.Double](similarity, java.lang.Double.valueOf(0.1d))
     }
 
     private def canViewManagedProperty(context: Context[String, User], propertyName: String) = {

@@ -130,6 +130,12 @@ class UsersPage(usersProperty: RemoteListProperty[Data[User], RemotePageQuery], 
                 current.setCellValueFactory(features => features.value.data.nickName)
               }
 
+              column[Data[User], String]("Score") {
+                val current = summon[jfx.control.TableColumn[Data[User], String]]
+                current.setPrefWidth(120.0)
+                current.setCellValueFactory(features => Property(f"${features.value.score}%.3f"))
+              }
+
               column[Data[User], String]("Vorname") {
                 val current = summon[jfx.control.TableColumn[Data[User], String]]
                 current.setPrefWidth(220.0)
