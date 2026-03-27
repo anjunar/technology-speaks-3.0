@@ -28,6 +28,7 @@ class LoggedInUser extends DivComposite {
             .getOrElse(app.user.nickName.get)
 
         hbox {
+          classes = "logged-in-user-inner"
 
           style {
             alignItems = "center"
@@ -36,6 +37,7 @@ class LoggedInUser extends DivComposite {
 
           if (app.user.image.get != null) {
             image {
+              classes = "logged-in-user-avatar"
               style {
                 width = "32px"
                 height = "32px"
@@ -45,16 +47,17 @@ class LoggedInUser extends DivComposite {
             }
           } else {
             div {
+              classes = Seq("material-icons", "logged-in-user-avatar")
               style {
                 fontSize = "32px"
               }
 
               text = "account_circle"
-              classes = "material-icons"
             }
           }
 
           div {
+            classes = "logged-in-user-label"
             text = label
           }
         }

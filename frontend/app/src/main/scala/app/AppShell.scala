@@ -31,9 +31,7 @@ class AppShell extends DivComposite {
           classes = "app-header-bar"
 
           loggedInUser {
-            style {
-              marginRight = "10px"
-            }
+            classes += "app-header-user"
           }
         }
 
@@ -53,7 +51,11 @@ class AppShell extends DivComposite {
               observeRender(service.app) { app =>
                 app.links.foreach { currentLink =>
                   link(currentLink.url) {
+                    classes = "app-shell-nav-link"
+
                     vbox {
+                      classes = "app-shell-nav-item"
+
                       style {
                         alignItems = "center"
                       }
@@ -82,12 +84,14 @@ class AppShell extends DivComposite {
           classes = "app-footer-bar"
 
           hbox {
+            classes = "app-footer-tabs"
+
             forEach(Viewport.windows) { window =>
               button(window.title) {
                 buttonType = "button"
                 classes =
-                  if (Viewport.isActive(window)) "btn-secondary"
-                  else "btn-primary"
+                  if (Viewport.isActive(window)) Seq("app-footer-window", "is-active")
+                  else Seq("app-footer-window", "is-inactive")
                 onClick { _ =>
                   Viewport.touchWindow(window)
                 }
@@ -96,13 +100,14 @@ class AppShell extends DivComposite {
           }
 
           hbox {
+            classes = "app-footer-actions"
             style {
               justifyContent = "flex-end"
               flex = "1"
             }
 
             button("dark_mode") {
-              classes = "material-icons"
+              classes = Seq("material-icons", "app-footer-control")
               onClick { _ =>
                 service.darkMode.set(!service.darkMode.get)
               }
