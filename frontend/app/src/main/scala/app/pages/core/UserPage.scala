@@ -28,7 +28,7 @@ import scala.util.{Failure, Success}
 class UserPage(val model: User) extends PageComposite("User", pageResizable = false) {
 
   override def pageWidth: Int = 1040
-  override def pageHeight: Int = 860
+  override def pageHeight: Int = 760
 
   private given ExecutionContext = ExecutionContext.global
 
