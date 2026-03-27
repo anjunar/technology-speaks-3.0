@@ -2,24 +2,24 @@ package app.pages.documents
 
 import app.components.commentable.FirstCommentCard.firstCommentCard
 import app.components.shared.LoadingCard.loadingCard
-import app.domain.core.{Data, Table}
+import app.domain.core.{AbstractEntity, Data, Table}
 import app.domain.documents.{Issue, IssueCreated, IssueUpdated}
 import app.domain.shared.FirstComment
 import app.services.ApplicationService
 import app.support.Navigation.renderByRel
 import app.support.{Api, RemotePageQuery, RemoteTableList}
-import app.ui.{CompositeSupport, PageComposite}
-import jfx.action.Button.{button, buttonType, buttonType_=, onClick}
+import app.ui.{CompositeSupport, DivComposite, PageComposite}
+import jfx.action.Button.{button, buttonType, onClick}
 import jfx.control.virtualList
 import jfx.core.component.ElementComponent.*
 import jfx.core.state.Property.subscribeBidirectional
-import jfx.core.state.{Property, RemoteListProperty}
+import jfx.core.state.{ListProperty, RemoteListProperty}
 import jfx.dsl.*
 import jfx.form.Control.valueProperty
 import jfx.form.Editable.editableProperty
 import jfx.form.Editor.editor
 import jfx.form.{ErrorResponseException, Form}
-import jfx.form.Form.{form, onSubmit, onSubmit_=}
+import jfx.form.Form.{form, onSubmit}
 import jfx.form.Input.{disabled, input, standaloneInput, stringValueProperty}
 import jfx.form.InputContainer.inputContainer
 import jfx.form.editor.plugins.*
@@ -38,6 +38,7 @@ class IssuePage(val model: Issue) extends PageComposite("Aufgabe", pageResizable
 
   private given ExecutionContext = ExecutionContext.global
   private val pageSize = 50
+  private val itemsProperty: ListProperty[Data[? <: AbstractEntity[?]]] = ListProperty()
 
   private val commentsProperty: RemoteListProperty[FirstComment, RemotePageQuery] =
     RemoteTableList.createMapped[Data[FirstComment], FirstComment](pageSize = pageSize) { (index, limit) =>
@@ -79,12 +80,17 @@ class IssuePage(val model: Issue) extends PageComposite("Aufgabe", pageResizable
 
     if (index >= 0) commentsProperty.update(index, saved)
     else commentsProperty += saved
+    syncItems()
   }
 
-  private def removeComment(comment: FirstComment): Unit = {
-    val index = commentsProperty.indexOf(comment)
-    if (index >= 0) commentsProperty.remove(index)
-  }
+  private def removeComment(comment: FirstComment): Unit =
+    commentsProperty.indexWhere(_ eq comment) match {
+      case index if index >= 0 =>
+        commentsProperty.remove(index)
+        syncItems()
+      case _ =>
+        ()
+    }
 
   private def appendNewComment(service: ApplicationService): Unit = {
     if (!commentsProperty.lastOption.exists(_.editable.get)) {
@@ -92,146 +98,174 @@ class IssuePage(val model: Issue) extends PageComposite("Aufgabe", pageResizable
       comment.editable.set(true)
       comment.user.set(service.app.get.user)
       commentsProperty += comment
+      syncItems()
     }
   }
 
   override protected def compose(using DslContext): Unit = {
     classProperty.setAll(Seq("issue-page"))
 
-    withDslContext {
+    syncItems()
+    addDisposable(commentsProperty.observe(_ => syncItems()))
 
+    if (canLoadComments) {
+      RemoteTableList.reloadFirstPage(commentsProperty, pageSize = pageSize)
+    } else {
+      commentsProperty.clear()
+    }
+
+    withDslContext {
       val service = inject[ApplicationService]
 
-      form(model) {
-          classes = "issue-page__form"
-          onSubmit = { (_: Form[Issue]) =>
-            persistIssue(service)
-          }
+      vbox {
+        classes = "issue-page__layout"
+
+        vbox {
+          classes = "issue-page__hero"
 
           vbox {
-            classes = "issue-page__layout"
+            classes = "issue-page__hero-copy"
 
-            vbox {
-              classes = "issue-page__hero"
-
-              vbox {
-                classes = "issue-page__hero-copy"
-
-                span {
-                  classes = "issue-page__eyebrow"
-                  text = "Resonanz"
-                }
-
-                span {
-                  classes = "issue-page__title"
-                  text = "Aufgabe und Diskussion"
-                }
-              }
+            span {
+              classes = "issue-page__eyebrow"
+              text = "Resonanz"
             }
 
-            div {
-              classes = "issue-page__editor-shell"
-
-              hbox {
-                classes = "issue-page__titlebar"
-
-                div {
-                  classes = "issue-page__title-field"
-                  style {
-                    flex = "1"
-                  }
-
-                  inputContainer("Titel") {
-                    val titleInput = input("title") {
-                      classes = "issue-page__title-input"
-                      subscribeBidirectional(model.title, stringValueProperty)
-                      addDisposable(model.editable.observe(editable => disabled = !editable))
-                    }
-                  }
-                }
-
-                renderByRel("update", model.links) { () =>
-                  button("edit") {
-                    buttonType = "button"
-                    classes = Seq("material-icons", "issue-page__icon-btn")
-                    onClick { _ =>
-                      model.editable.set(!model.editable.get)
-                    }
-                  }
-                }
-              }
-
-              editor("editor") {
-                classes = "issue-page__editor"
-                style {
-                  flex = "1"
-                  minHeight = "240px"
-                }
-
-                basePlugin {}
-                headingPlugin {}
-                listPlugin {}
-                linkPlugin {}
-                imagePlugin {}
-
-                subscribeBidirectional(model.editor, valueProperty)
-                subscribeBidirectional(model.editable, editableProperty)
-              }
-
-              hbox {
-                classes = "issue-page__actions"
-
-                renderByRel("update", model.links) { () =>
-                  button("Aktualisieren") {
-                    classes = "issue-page__submit"
-                  }
-                }
-                renderByRel("save", model.links) { () =>
-                  button("Speichern") {
-                    classes = "issue-page__submit"
-                  }
-                }
-              }
+            span {
+              classes = "issue-page__title"
+              text = "Aufgabe und Diskussion"
             }
+          }
+        }
 
-            div {
-              classes = "issue-page__comments"
-              style {
-                flex = "1"
-                minHeight = "0px"
+        div {
+          classes = "issue-page__feed"
+          style {
+            flex = "1"
+            minHeight = "0px"
+          }
+
+          virtualList(itemsProperty, estimateHeightPx = 240, overscanPx = 240, prefetchItems = 40) { (item, _) =>
+            if (item == null) {
+              loadingCard {
+                summon[app.components.shared.LoadingCard].cardMinHeight("160px")
               }
-
-              virtualList(commentsProperty, estimateHeightPx = 240, prefetchItems = 40) { (comment, _) =>
-                if (comment == null) {
-                  loadingCard {
-                    summon[app.components.shared.LoadingCard].cardMinHeight("160px")
-                  }
-                } else {
+            } else {
+              item.data match {
+                case issue: Issue =>
+                  IssuePage.IssueViewIssueCard.card(issue, () => persistIssue(service))
+                case comment: FirstComment =>
                   firstCommentCard(
                     comment = comment,
                     owner = model,
                     onPersist = saved => upsertComment(comment, saved),
-                    onDeleteCompleted = _ => removeComment(comment)
+                    onDeleteCompleted = saved => removeComment(saved)
                   )
+                case _ =>
+                  loadingCard {
+                    summon[app.components.shared.LoadingCard].cardMinHeight("160px")
+                  }
+              }
+            }
+          }
+        }
+
+        if (canCreateComments) {
+          val commentInput = standaloneInput("newComment") {
+            classes = "issue-page__prompt"
+          }
+          commentInput.placeholder = "Neuer Kommentar..."
+          commentInput.readOnly = true
+          commentInput.onClick(_ => appendNewComment(service))
+        }
+      }
+    }
+  }
+
+  private def syncItems(): Unit =
+    itemsProperty.setAll(
+      Seq(new Data(model).asInstanceOf[Data[? <: AbstractEntity[?]]]) ++
+        commentsProperty.iterator.map(comment => new Data(comment).asInstanceOf[Data[? <: AbstractEntity[?]]])
+    )
+}
+
+object IssuePage {
+
+  final class IssueViewIssueCard(issue: Issue, onPersist: () => Unit) extends DivComposite {
+
+    override protected def compose(using DslContext): Unit = {
+      classes = "issue-page__issue-card"
+
+      withDslContext {
+        form(issue) {
+          classes = "issue-page__form"
+          onSubmit = { (_: Form[Issue]) =>
+            onPersist()
+          }
+
+          vbox {
+            classes = "issue-page__editor-shell"
+
+            hbox {
+              classes = "issue-page__titlebar"
+
+              div {
+                classes = "issue-page__title-field"
+                style {
+                  flex = "1"
+                }
+
+                inputContainer("Titel") {
+                  input("title") {
+                    classes = "issue-page__title-input"
+                    subscribeBidirectional(issue.title, stringValueProperty)
+                    addDisposable(issue.editable.observe(editable => disabled = !editable))
+                  }
+                }
+              }
+
+              renderByRel("update", issue.links) { () =>
+                button("edit") {
+                  buttonType = "button"
+                  classes = Seq("material-icons", "issue-page__icon-btn")
+                  onClick { _ =>
+                    issue.editable.set(!issue.editable.get)
+                  }
                 }
               }
             }
 
-            if (canCreateComments) {
-              val commentInput = standaloneInput("newComment") {
-                classes = "issue-page__prompt"
+            editor("editor") {
+              classes = "issue-page__editor"
+              style {
+                flex = "1"
+                minHeight = "240px"
               }
-              commentInput.placeholder = "Neuer Kommentar..."
-              commentInput.readOnly = true
-              commentInput.onClick(_ => appendNewComment(service))
+
+              basePlugin {}
+              headingPlugin {}
+              listPlugin {}
+              linkPlugin {}
+              imagePlugin {}
+
+              button("save") {
+                classes = Seq("material-icons", "hover")
+              }
+
+              subscribeBidirectional(issue.editor, valueProperty)
+              subscribeBidirectional(issue.editable, editableProperty)
             }
           }
+        }
       }
+    }
   }
-}
-}
 
-object IssuePage {
+  object IssueViewIssueCard {
+    def card(issue: Issue, onPersist: () => Unit)(using Scope): IssueViewIssueCard =
+      CompositeSupport.buildComposite(new IssueViewIssueCard(issue, onPersist))
+  }
+
   def issuePage(model: Issue, init: IssuePage ?=> Unit = {})(using Scope): IssuePage =
     CompositeSupport.buildPage(new IssuePage(model))(init)
 }
