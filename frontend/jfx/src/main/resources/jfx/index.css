@@ -49,10 +49,10 @@ html[data-theme="light"] {
     --color-selected: var(--color-olive-500);
     --color-reflective: var(--color-olive-200);
 
-    --glass-bg: rgba(255, 255, 255, 0.5);
-    --glass-border: rgba(255, 255, 255, 0.3);
-    --glass-shadow: rgba(0, 0, 0, 0.1);
-    --glass-blur: 12px;
+    --glass-bg: rgba(255, 255, 255, 0.58);
+    --glass-border: rgba(255, 255, 255, 0.24);
+    --glass-shadow: rgba(0, 0, 0, 0.16);
+    --glass-blur: 14px;
 
     --jfx-table-border: rgba(18, 18, 18, 0.08);
     --jfx-table-shadow: none;
@@ -109,10 +109,10 @@ html[data-theme="dark"] {
     --color-selected: var(--color-olive-500);
     --color-reflective: var(--color-olive-600);
 
-    --glass-bg: rgba(20, 20, 20, 0.55);
-    --glass-border: rgba(255, 255, 255, 0.08);
-    --glass-shadow: rgba(0, 0, 0, 0.4);
-    --glass-blur: 16px;
+    --glass-bg: rgba(18, 18, 18, 0.62);
+    --glass-border: rgba(255, 255, 255, 0.10);
+    --glass-shadow: rgba(0, 0, 0, 0.46);
+    --glass-blur: 18px;
 
     --jfx-table-border: rgba(245, 245, 245, 0.08);
     --jfx-table-shadow: none;

@@ -30,6 +30,7 @@ class HomePage extends PageComposite("Home") {
         style {
           rowGap = "12px"
           padding = "12px"
+          width = "320px"
         }
 
         div {

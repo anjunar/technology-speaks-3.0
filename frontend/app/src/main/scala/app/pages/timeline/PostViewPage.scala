@@ -26,8 +26,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class PostViewPage(val model: Post) extends PageComposite("Post") {
 
-  override def pageWidth: Int = 360 
-  override def pageHeight: Int = 600
+  override def pageWidth: Int = 500 
+  override def pageHeight: Int = 760
 
   private given ExecutionContext = ExecutionContext.global
   private val pageSize = 40

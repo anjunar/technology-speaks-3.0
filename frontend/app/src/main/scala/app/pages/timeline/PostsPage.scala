@@ -25,8 +25,8 @@ import scala.concurrent.ExecutionContext
 
 class PostsPage(postsProperty : RemoteListProperty[Data[Post], RemotePageQuery]) extends PageComposite("Posts") {
 
-  override def pageWidth: Int = 360
-  override def pageHeight: Int = 600
+  override def pageWidth: Int = 460
+  override def pageHeight: Int = 760
 
   private val pageSize = 50
 
