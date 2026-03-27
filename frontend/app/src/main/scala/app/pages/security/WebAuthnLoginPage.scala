@@ -16,10 +16,15 @@ import jfx.form.Input.{input, inputType_=}
 import jfx.form.InputContainer.inputContainer
 import jfx.layout.Div.div
 import jfx.layout.HBox.hbox
+import jfx.layout.Span.span
+import jfx.layout.VBox.vbox
 
 import scala.concurrent.ExecutionContext
 
 class WebAuthnLoginPage extends PageComposite("Login mit WebAuthn", pageResizable = false) {
+
+  override def pageWidth: Int = 880
+  override def pageHeight: Int = 760
 
   private given ExecutionContext = ExecutionContext.global
 
@@ -32,6 +37,8 @@ class WebAuthnLoginPage extends PageComposite("Login mit WebAuthn", pageResizabl
       val service = inject[ApplicationService]
 
       form(loginForm) {
+        classes = "security-page__form"
+
         onSubmit_= { (event : Form[WebAuthnLogin])  =>
           WebAuthnLoginClient
             .login(loginForm.email.get)
@@ -44,45 +51,86 @@ class WebAuthnLoginPage extends PageComposite("Login mit WebAuthn", pageResizabl
             }
         }
 
-        image {
-          style {
-            width = "500px"
-          }
-          src = "/app/security/login_webauthn.png"
-        }
+        vbox {
+          classes = "security-page__layout"
 
-        hbox {
-          style {
-            justifyContent = "center"
-          }
-          heading(3) {
-            text = "Moechtest du dich mit WebAuthn anmelden?"
-          }
-        }
+          vbox {
+            classes = "security-page__hero"
 
-        div {
-          style {
-            padding = "20px"
-          }
+            div {
+              classes = "security-page__hero-copy"
 
-          inputContainer("Email") {
-            input("email") {
-              inputType_=("email")
+              span {
+                classes = "security-page__eyebrow"
+                text = "Passkey"
+              }
+
+              heading(2) {
+                classes = "security-page__title"
+                text = "Anmeldung mit WebAuthn"
+              }
+
+              span {
+                classes = "security-page__subtitle"
+                text = "Nutze deinen sicheren lokalen Zugang statt eines Passworts."
+              }
             }
           }
-        }
 
-        div {
-          classes = "button-container"
+          hbox {
+            classes = "security-page__content"
 
-          button("Abbrechen") {
-            buttonType_=("button")
-            classes = "btn-secondary"
-            onClick(_ => close())
-          }
+            div {
+              classes = "security-page__media-shell"
 
-          button("Anmelden") {
-            classes = "btn-danger"
+              image {
+                classes = "security-page__image"
+                src = "/app/security/login_webauthn_dark.png"
+              }
+            }
+
+            vbox {
+              classes = "security-page__panel"
+
+              hbox {
+                classes = "security-page__panel-header"
+
+                heading(3) {
+                  classes = "security-page__panel-title"
+                  text = "WebAuthn Login"
+                }
+              }
+
+              span {
+                classes = "security-page__panel-copy"
+                text = "Gib deine Email ein und bestaetige die Anmeldung auf deinem Geraet."
+              }
+
+              div {
+                classes = "security-page__field-group"
+
+                inputContainer("Email") {
+                  input("email") {
+                    classes = "security-page__input"
+                    inputType_=("email")
+                  }
+                }
+              }
+
+              div {
+                classes = "security-page__actions"
+
+                button("Abbrechen") {
+                  buttonType_=("button")
+                  classes = "security-page__button-secondary"
+                  onClick(_ => close())
+                }
+
+                button("Anmelden") {
+                  classes = "security-page__button-primary"
+                }
+              }
+            }
           }
         }
       }

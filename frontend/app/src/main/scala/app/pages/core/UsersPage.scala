@@ -14,6 +14,7 @@ import jfx.domain.Media
 import jfx.dsl.*
 import jfx.layout.Div.div
 import jfx.layout.HBox
+import jfx.layout.Span.span
 import jfx.layout.VBox.vbox
 import jfx.statement.Conditional.{conditional, elseDo, thenDo}
 import org.scalajs.dom.HTMLImageElement
@@ -22,61 +23,106 @@ import scala.concurrent.ExecutionContext
 
 class UsersPage(usersProperty: ListProperty[Data[User]]) extends PageComposite("Users") {
 
+  override def pageWidth: Int = 1040
+  override def pageHeight: Int = 860
+
   override protected def compose(using DslContext): Unit = {
     classProperty += "users-page"
 
     withDslContext {
       vbox {
-        style {
-          setProperty("height", "100%")
-          padding = "12px"
-          boxSizing = "border-box"
+        classes = "users-page__layout"
+
+        vbox {
+          classes = "users-page__hero"
+
+          div {
+            classes = "users-page__hero-copy"
+
+            span {
+              classes = "users-page__eyebrow"
+              text = "Netzwerk"
+            }
+
+            span {
+              classes = "users-page__title"
+              text = "Menschen im Wissensraum"
+            }
+
+            span {
+              classes = "users-page__subtitle"
+              text = "Eine ruhige Uebersicht ueber alle Profile, erreichbar direkt aus der Liste."
+            }
+          }
         }
 
         div {
+          classes = "users-page__panel"
           style {
             flex = "1"
             minHeight = "0px"
           }
 
-          val table = tableView[Data[User]] {
-            items = usersProperty
-            fixedCellSize = 64.0
-            rowFactory = (_: TableView[Data[User]]) => new UserNavigationRow()
+          vbox {
+            classes = "users-page__panel-copy"
 
-            column[Data[User], Media | Null]("Bild") {
-              val current = summon[jfx.control.TableColumn[Data[User], Media | Null]]
-              current.setPrefWidth(96.0)
-              current.setCellValueFactory(features => features.value.data.image)
-              current.setCellFactory(_ => new UserImageCell())
+            span {
+              classes = "users-page__panel-eyebrow"
+              text = "Profile"
             }
 
-            column[Data[User], String]("Nickname") {
-              val current = summon[jfx.control.TableColumn[Data[User], String]]
-              current.setPrefWidth(220.0)
-              current.setCellValueFactory(features => features.value.data.nickName)
-            }
-
-            column[Data[User], String]("Vorname") {
-              val current = summon[jfx.control.TableColumn[Data[User], String]]
-              current.setPrefWidth(180.0)
-              current.setCellValueFactory(features => {
-                val info = features.value.data.info.get
-                Property(if (info == null) "" else info.firstName.get)
-              })
-            }
-
-            column[Data[User], String]("Nachname") {
-              val current = summon[jfx.control.TableColumn[Data[User], String]]
-              current.setPrefWidth(180.0)
-              current.setCellValueFactory(features => {
-                val info = features.value.data.info.get
-                Property(if (info == null) "" else info.lastName.get)
-              })
+            span {
+              classes = "users-page__panel-title"
+              text = "Alle Nutzer"
             }
           }
 
-          table.classProperty += "users-page-table"
+          div {
+            classes = "users-page__table-shell"
+            style {
+              flex = "1"
+              minHeight = "0px"
+            }
+
+            val table = tableView[Data[User]] {
+              items = usersProperty
+              fixedCellSize = 72.0
+              rowFactory = (_: TableView[Data[User]]) => new UserNavigationRow()
+
+              column[Data[User], Media | Null]("Bild") {
+                val current = summon[jfx.control.TableColumn[Data[User], Media | Null]]
+                current.setPrefWidth(104.0)
+                current.setCellValueFactory(features => features.value.data.image)
+                current.setCellFactory(_ => new UserImageCell())
+              }
+
+              column[Data[User], String]("Nickname") {
+                val current = summon[jfx.control.TableColumn[Data[User], String]]
+                current.setPrefWidth(260.0)
+                current.setCellValueFactory(features => features.value.data.nickName)
+              }
+
+              column[Data[User], String]("Vorname") {
+                val current = summon[jfx.control.TableColumn[Data[User], String]]
+                current.setPrefWidth(220.0)
+                current.setCellValueFactory(features => {
+                  val info = features.value.data.info.get
+                  Property(if (info == null) "" else info.firstName.get)
+                })
+              }
+
+              column[Data[User], String]("Nachname") {
+                val current = summon[jfx.control.TableColumn[Data[User], String]]
+                current.setPrefWidth(220.0)
+                current.setCellValueFactory(features => {
+                  val info = features.value.data.info.get
+                  Property(if (info == null) "" else info.lastName.get)
+                })
+              }
+            }
+
+            table.classProperty += "users-page-table"
+          }
         }
       }
     }
@@ -104,7 +150,8 @@ private final class UserImageCell extends TableCell[Data[User], Media | Null] {
   val imageVisible = Property[Boolean](false)
 
   val wrapper: HBox = hbox {
-    
+    classes = "users-page__avatar-cell"
+
     style {
       alignItems = "center"
       justifyContent = "center"
@@ -127,11 +174,8 @@ private final class UserImageCell extends TableCell[Data[User], Media | Null] {
 
       elseDo {
         div {
-          classes = "material-icons"
+          classes = Seq("material-icons", "users-page__avatar-fallback")
           text = "account_circle"
-          style {
-            fontSize = "40px"
-          }
         }
       }
 

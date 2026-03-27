@@ -16,11 +16,16 @@ import jfx.form.Input.{input, inputType_=}
 import jfx.form.InputContainer.inputContainer
 import jfx.layout.Div.div
 import jfx.layout.HBox.hbox
+import jfx.layout.Span.span
+import jfx.layout.VBox.vbox
 import jfx.layout.Viewport
 
 import scala.concurrent.ExecutionContext
 
 class PasswordLoginPage extends PageComposite("Login", pageResizable = false) {
+
+  override def pageWidth: Int = 880
+  override def pageHeight: Int = 760
 
   private given ExecutionContext = ExecutionContext.global
 
@@ -33,6 +38,8 @@ class PasswordLoginPage extends PageComposite("Login", pageResizable = false) {
       val service = inject[ApplicationService]
 
       form(loginForm) {
+        classes = "security-page__form"
+
         onSubmit_= { (event : Form[PasswordLogin])  =>
           loginForm
             .save()
@@ -56,51 +63,93 @@ class PasswordLoginPage extends PageComposite("Login", pageResizable = false) {
             }
         }
 
-        image {
-          style {
-            jfx.dsl.width_=("500px")
-          }
-          src_=("/app/security/login.png")
-        }
+        vbox {
+          classes = "security-page__layout"
 
-        hbox {
-          style {
-            justifyContent = "center"
-          }
-          heading(3) {
-            text = "Moechtest du dich anmelden?"
-          }
-        }
+          vbox {
+            classes = "security-page__hero"
 
-        div {
-          style {
-            padding = "20px"
-          }
+            div {
+              classes = "security-page__hero-copy"
 
-          inputContainer("Email") {
-            input("email") {
-              inputType_=("email")
+              span {
+                classes = "security-page__eyebrow"
+                text = "Zugang"
+              }
+
+              heading(2) {
+                classes = "security-page__title"
+                text = "Willkommen im Wissensraum"
+              }
+
+              span {
+                classes = "security-page__subtitle"
+                text = "Melde dich an, um Dokumente, Beziehungen und Resonanzen weiterzufuehren."
+              }
             }
           }
 
-          inputContainer("Password") {
-            input("password") {
-              inputType_=("password")
+          hbox {
+            classes = "security-page__content"
+
+            div {
+              classes = "security-page__media-shell"
+
+              image {
+                classes = "security-page__image"
+                src_=("/app/security/login_password_dark.png")
+              }
             }
-          }
-        }
 
-        div {
-          classes = "button-container"
+            vbox {
+              classes = "security-page__panel"
 
-          button("Abbrechen") {
-            buttonType_=("button")
-            classes = "btn-secondary"
-            onClick(_ => close())
-          }
+              hbox {
+                classes = "security-page__panel-header"
 
-          button("Anmelden") {
-            classes = "btn-danger"
+                heading(3) {
+                  classes = "security-page__panel-title"
+                  text = "Anmeldung"
+                }
+              }
+
+              span {
+                classes = "security-page__panel-copy"
+                text = "Gib deine Email und dein Passwort ein."
+              }
+
+              div {
+                classes = "security-page__field-group"
+
+                inputContainer("Email") {
+                  input("email") {
+                    classes = "security-page__input"
+                    inputType_=("email")
+                  }
+                }
+
+                inputContainer("Password") {
+                  input("password") {
+                    classes = "security-page__input"
+                    inputType_=("password")
+                  }
+                }
+              }
+
+              div {
+                classes = "security-page__actions"
+
+                button("Abbrechen") {
+                  buttonType_=("button")
+                  classes = "security-page__button-secondary"
+                  onClick(_ => close())
+                }
+
+                button("Anmelden") {
+                  classes = "security-page__button-primary"
+                }
+              }
+            }
           }
         }
       }

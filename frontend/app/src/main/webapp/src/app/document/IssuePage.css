@@ -1,7 +1,232 @@
 .issue-page {
     height: 100%;
+    color: var(--color-text-primary);
+    overflow: hidden;
+}
 
-    form {
-        height: calc(100% - 24px);
-    }
+.issue-page__form {
+    height: 100%;
+}
+
+.issue-page__layout {
+    height: 100%;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 22px 28px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    overflow: hidden;
+}
+
+.issue-page__hero {
+    height: auto !important;
+    padding: 0 8px 4px;
+    border-bottom: 1px solid color-mix(in srgb, var(--glass-border) 10%, transparent);
+}
+
+.issue-page__hero-copy {
+    height: auto !important;
+    gap: 4px;
+}
+
+.issue-page__eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-text-faint);
+    opacity: 0.72;
+}
+
+.issue-page__title {
+    font-size: clamp(26px, 3.8vw, 40px);
+    line-height: 0.98;
+    letter-spacing: -0.05em;
+    color: color-mix(in srgb, var(--color-text-primary) 94%, white 6%);
+    font-weight: 600;
+}
+
+.issue-page__editor-shell {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    padding: 18px 20px;
+    border: 1px solid color-mix(in srgb, var(--glass-border) 14%, transparent);
+    border-radius: 18px;
+    background: transparent !important;
+    box-shadow:
+            inset 0 1px 0 color-mix(in srgb, white 5%, transparent),
+            inset 0 0 0 1px color-mix(in srgb, black 10%, transparent);
+    backdrop-filter: blur(8px) saturate(120%);
+    -webkit-backdrop-filter: blur(8px) saturate(120%);
+    overflow: hidden;
+}
+
+.issue-page__titlebar {
+    align-items: flex-start;
+    column-gap: 12px;
+    padding-bottom: 12px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid color-mix(in srgb, var(--glass-border) 10%, transparent);
+}
+
+.issue-page__title-field {
+    min-width: 0;
+}
+
+.issue-page__title-field label,
+.issue-page__title-field .jfx-input-container__label {
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-text-faint);
+    opacity: 0.72;
+}
+
+.issue-page__title-input,
+.issue-page input[name="title"] {
+    width: 100% !important;
+    box-sizing: border-box;
+    min-height: 50px;
+    padding: 0 18px !important;
+    border: 1px solid color-mix(in srgb, var(--glass-border) 14%, transparent);
+    border-radius: 999px !important;
+    background: transparent !important;
+    box-shadow:
+            inset 0 1px 0 color-mix(in srgb, white 4%, transparent),
+            inset 0 0 0 1px color-mix(in srgb, black 8%, transparent);
+    backdrop-filter: blur(6px) saturate(118%);
+    -webkit-backdrop-filter: blur(6px) saturate(118%);
+    color: var(--color-text-primary) !important;
+    font-size: 17px !important;
+    font-weight: 500;
+}
+
+.issue-page__icon-btn {
+    width: 34px;
+    height: 34px;
+    padding: 0 !important;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--glass-border) 14%, transparent);
+    background: transparent !important;
+    color: var(--color-text-faint);
+    box-shadow: inset 0 1px 0 color-mix(in srgb, white 4%, transparent);
+}
+
+.issue-page__icon-btn:hover {
+    border-color: color-mix(in srgb, var(--color-selected) 28%, white 10%);
+    color: var(--color-text-primary);
+    transform: none;
+}
+
+.issue-page__editor {
+    flex: 1 1 auto;
+    min-height: 240px;
+}
+
+.issue-page__editor .ProseMirror {
+    min-height: 240px;
+    padding: 4px 4px 18px;
+    background: transparent !important;
+    border: none;
+    box-shadow: none;
+    font-size: 18px;
+    line-height: 1.85;
+    letter-spacing: 0.002em;
+    color: color-mix(in srgb, var(--color-text-primary) 96%, white 4%);
+}
+
+.issue-page__editor .ProseMirror h1,
+.issue-page__editor .ProseMirror h2,
+.issue-page__editor .ProseMirror h3 {
+    color: color-mix(in srgb, var(--color-text-primary) 92%, white 8%);
+    font-weight: 600;
+    line-height: 1.04;
+    letter-spacing: -0.05em;
+    margin: 0.1em 0 0.5em;
+}
+
+.issue-page__editor .ProseMirror p {
+    margin: 0 0 0.95em;
+}
+
+.issue-page__editor .ProseMirror p:last-child {
+    margin-bottom: 0;
+}
+
+.issue-page__actions {
+    justify-content: flex-end;
+    column-gap: 10px;
+    padding-top: 14px;
+    border-top: 1px solid color-mix(in srgb, var(--glass-border) 10%, transparent);
+}
+
+.issue-page__submit {
+    min-width: 160px;
+    min-height: 42px;
+    padding: 10px 16px;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--glass-border) 14%, transparent);
+    background: transparent !important;
+    box-shadow: inset 0 1px 0 color-mix(in srgb, white 4%, transparent);
+    backdrop-filter: blur(6px) saturate(118%);
+    -webkit-backdrop-filter: blur(6px) saturate(118%);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-text-primary);
+}
+
+.issue-page__submit:hover {
+    border-color: color-mix(in srgb, var(--color-selected) 28%, white 10%);
+    transform: none;
+}
+
+.issue-page__comments {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.issue-page .glass-border {
+    margin: 0 16px 14px !important;
+    padding: 16px 18px !important;
+    border: 1px solid color-mix(in srgb, var(--glass-border) 12%, transparent) !important;
+    border-radius: 18px !important;
+    background: transparent !important;
+    box-shadow:
+            inset 0 1px 0 color-mix(in srgb, white 4%, transparent),
+            inset 0 0 0 1px color-mix(in srgb, black 8%, transparent) !important;
+    backdrop-filter: blur(8px) saturate(120%);
+    -webkit-backdrop-filter: blur(8px) saturate(120%);
+}
+
+.issue-page .glass-border > .vbox {
+    row-gap: 12px !important;
+}
+
+.issue-page__prompt,
+.issue-page input[name="newComment"] {
+    display: block;
+    width: calc(100% - 32px) !important;
+    margin: 0 16px;
+    box-sizing: border-box;
+    min-height: 46px;
+    padding: 0 16px !important;
+    border: 1px solid color-mix(in srgb, var(--glass-border) 14%, transparent) !important;
+    border-radius: 999px !important;
+    background: transparent !important;
+    box-shadow:
+            inset 0 1px 0 color-mix(in srgb, white 4%, transparent),
+            inset 0 0 0 1px color-mix(in srgb, black 8%, transparent);
+    backdrop-filter: blur(6px) saturate(118%);
+    -webkit-backdrop-filter: blur(6px) saturate(118%);
+    color: var(--color-text-soft) !important;
+    font-size: 15px !important;
+}
+
+.issue-page__prompt::placeholder,
+.issue-page input[name="newComment"]::placeholder {
+    color: color-mix(in srgb, var(--color-text-faint) 78%, white 22%) !important;
 }

@@ -10,11 +10,15 @@ import jfx.core.component.ElementComponent.*
 import jfx.dsl.*
 import jfx.layout.Div.div
 import jfx.layout.HBox.hbox
+import jfx.layout.Span.span
 import jfx.layout.VBox.vbox
 
 import scala.concurrent.ExecutionContext
 
 class LogoutPage extends PageComposite("Abmelden", pageResizable = false) {
+
+  override def pageWidth: Int = 840
+  override def pageHeight: Int = 660
 
   private given ExecutionContext = ExecutionContext.global
 
@@ -26,40 +30,80 @@ class LogoutPage extends PageComposite("Abmelden", pageResizable = false) {
       val service = inject[ApplicationService]
 
       vbox {
-        image {
-          style {
-            jfx.dsl.width_=("500px")
+        classes = "security-page__layout security-page__layout--compact"
+
+        vbox {
+          classes = "security-page__hero"
+
+          div {
+            classes = "security-page__hero-copy"
+
+            span {
+              classes = "security-page__eyebrow"
+              text = "Ausgang"
+            }
+
+            heading(2) {
+              classes = "security-page__title"
+              text = "Sitzung beenden"
+            }
+
+            span {
+              classes = "security-page__subtitle"
+              text = "Melde dich ab, wenn du den Wissensraum in dieser Sitzung verlassen moechtest."
+            }
           }
-          src_=("/app/security/logout.png")
         }
 
         hbox {
-          style {
-            justifyContent = "center"
-          }
-          heading(3) {
-            text = "Moechtest du dich wirklich abmelden?"
-          }
-        }
+          classes = "security-page__content"
 
-        div {
-          classes = "button-container"
+          div {
+            classes = "security-page__media-shell"
 
-          button("Abbrechen") {
-            buttonType_=("button")
-            classes = "btn-secondary"
-            onClick(_ => close())
+            image {
+              classes = "security-page__image"
+              src_=("/app/security/logout_dark.png")
+            }
           }
 
-          button("Abmelden") {
-            classes = "btn-danger"
-            onClick { _ =>
-              Api
-                .post[app.support.JsonResponse]("/service/security/logout")
-                .flatMap(_ => {
-                  service.invoke()
-                })
-                .foreach(_ => close())
+          vbox {
+            classes = "security-page__panel"
+
+            hbox {
+              classes = "security-page__panel-header"
+
+              heading(3) {
+                classes = "security-page__panel-title"
+                text = "Abmelden"
+              }
+            }
+
+            span {
+              classes = "security-page__panel-copy"
+              text = "Offene Ansichten bleiben lokal sichtbar, bis sie geschlossen werden."
+            }
+
+            div {
+              classes = "security-page__actions"
+
+              button("Abbrechen") {
+                buttonType_=("button")
+                classes = "security-page__button-secondary"
+                onClick(_ => close())
+              }
+
+              button("Abmelden") {
+                classes = "security-page__button-primary"
+                onClick { _ =>
+                  Api
+                    .post[app.support.JsonResponse]("/service/security/logout")
+                    .flatMap(_ => {
+                      service.invoke()
+                    })
+                    .foreach(_ => close())
+                }
+              }
             }
           }
         }

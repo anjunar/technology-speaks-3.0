@@ -62,7 +62,7 @@ class UserGroupsController(private val identityHolder: IdentityHolder) {
 
   private def findRelationShip(follower: User): RelationShip =
     if (follower == null || identityHolder.user == null) null
-    else RelationShip.query("follower.id" -> follower.id, "user.id" -> identityHolder.user.id)
+    else RelationShip.query("follower" -> follower, "user" -> identityHolder.user)
 
 }
 

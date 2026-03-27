@@ -20,14 +20,15 @@ import jfx.form.Editor.editor
 import jfx.form.Input.input
 import jfx.form.editor.plugins.*
 import jfx.layout.Div.div
+import jfx.layout.Span.span
 import jfx.layout.VBox.vbox
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class PostViewPage(val model: Post) extends PageComposite("Post") {
 
-  override def pageWidth: Int = 500 
-  override def pageHeight: Int = 760
+  override def pageWidth: Int = 980
+  override def pageHeight: Int = 860
 
   private given ExecutionContext = ExecutionContext.global
   private val pageSize = 40
@@ -43,7 +44,7 @@ class PostViewPage(val model: Post) extends PageComposite("Post") {
     }(_.data)
 
   override protected def compose(using DslContext): Unit = {
-    classes = Seq("post-view-page", "container")
+    classes = "post-view-page"
 
     syncItems()
     addDisposable(commentsProperty.observe(_ => syncItems()))
@@ -58,12 +59,28 @@ class PostViewPage(val model: Post) extends PageComposite("Post") {
       val service = inject[ApplicationService]
 
       vbox {
-        style {
-          height = "100%"
-          width = "100%"
+        classes = "post-view-page__layout"
+
+        vbox {
+          classes = "post-view-page__hero"
+
+          vbox {
+            classes = "post-view-page__hero-copy"
+
+            span {
+              classes = "post-view-page__eyebrow"
+              text = "Resonanz"
+            }
+
+            span {
+              classes = "post-view-page__title"
+              text = "Beitrag und Dialog"
+            }
+          }
         }
 
         div {
+          classes = "post-view-page__feed"
           style {
             flex = "1"
             minHeight = "0px"
@@ -95,14 +112,7 @@ class PostViewPage(val model: Post) extends PageComposite("Post") {
         }
 
         val prompt = input("newComment") {
-          style {
-            padding = "12px"
-            width = "calc(100% - 48px)"
-            backgroundColor = "var(--color-background-secondary)"
-            fontSize = "24px"
-            borderRadius = "8px"
-            margin = "12px"
-          }
+          classes = "post-view-page__prompt"
         }
 
         prompt.placeholder = "Neuer Kommentar..."
@@ -151,18 +161,16 @@ object PostViewPage {
   final class PostViewPostCard(post: Post) extends DivComposite {
 
     override protected def compose(using DslContext): Unit = {
-      classes = "glass-border"
+      classes = Seq("post-card", "post-view-page__post-card")
 
       withDslContext {
         vbox {
-          style {
-            rowGap = "10px"
-            padding = "10px"
-          }
+          classes = "post-card__body"
 
           componentHeader(post) {}
 
           val editorField = editor("editor", true) {
+            classes = "post-card__editor"
             basePlugin {}
             headingPlugin {}
             listPlugin {}
@@ -173,7 +181,11 @@ object PostViewPage {
           editorField.editableProperty.set(false)
           subscribeBidirectional(post.editor, editorField.valueProperty)
 
-          likeButton(post.likes, post.links) {}
+          div {
+            classes = "post-view-page__post-actions"
+
+            likeButton(post.likes, post.links) {}
+          }
         }
       }
     }

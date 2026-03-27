@@ -16,11 +16,16 @@ import jfx.form.Input.input
 import jfx.form.InputContainer.inputContainer
 import jfx.layout.Div.div
 import jfx.layout.HBox.hbox
+import jfx.layout.Span.span
+import jfx.layout.VBox.vbox
 import jfx.layout.Viewport
 
 import scala.concurrent.ExecutionContext
 
 class ConfirmPage extends PageComposite("Bestaetigen", pageResizable = false) {
+
+  override def pageWidth: Int = 880
+  override def pageHeight: Int = 720
 
   private given ExecutionContext = ExecutionContext.global
 
@@ -33,6 +38,8 @@ class ConfirmPage extends PageComposite("Bestaetigen", pageResizable = false) {
       val service = inject[ApplicationService]
 
       form(confirmForm) {
+        classes = "security-page__form"
+
         onSubmit_= { (event : Form[ConfirmCode])  =>
           Api
             .post[app.support.JsonResponse](s"/service/security/confirm?code=${confirmForm.confirm.get}")
@@ -55,37 +62,85 @@ class ConfirmPage extends PageComposite("Bestaetigen", pageResizable = false) {
             }
         }
 
-        image {
-          style {
-            jfx.dsl.width_=("500px")
-          }
-          src_=("/app/security/confirm.png")
-        }
+        vbox {
+          classes = "security-page__layout"
 
-        inputContainer("Bestaetigen") {
-          input("confirm") {}
-        }
+          vbox {
+            classes = "security-page__hero"
 
-        hbox {
-          style {
-            justifyContent = "center"
-          }
-          heading(3) {
-            text = "Bitte bestaetige deinen Email-Code"
-          }
-        }
+            div {
+              classes = "security-page__hero-copy"
 
-        div {
-          classes = "button-container"
+              span {
+                classes = "security-page__eyebrow"
+                text = "Pruefung"
+              }
 
-          button("Abbrechen") {
-            buttonType_=("button")
-            classes = "btn-secondary"
-            onClick(_ => close())
+              heading(2) {
+                classes = "security-page__title"
+                text = "Email bestaetigen"
+              }
+
+              span {
+                classes = "security-page__subtitle"
+                text = "Gib den Bestaetigungscode aus deiner Email ein, um den Zugang freizuschalten."
+              }
+            }
           }
 
-          button("Bestaetigen") {
-            classes = "btn-danger"
+          hbox {
+            classes = "security-page__content"
+
+            div {
+              classes = "security-page__media-shell"
+
+              image {
+                classes = "security-page__image"
+                src_=("/app/security/confirm_dark.png")
+              }
+            }
+
+            vbox {
+              classes = "security-page__panel"
+
+              hbox {
+                classes = "security-page__panel-header"
+
+                heading(3) {
+                  classes = "security-page__panel-title"
+                  text = "Bestaetigung"
+                }
+              }
+
+              span {
+                classes = "security-page__panel-copy"
+                text = "Der Code verbindet diese Sitzung mit deinem bestaetigten Konto."
+              }
+
+              div {
+                classes = "security-page__field-group"
+
+                inputContainer("Bestaetigen") {
+                  input("confirm") {
+                    classes = "security-page__input"
+                  }
+                }
+              }
+
+              div {
+                classes = "security-page__actions"
+
+                button("Abbrechen") {
+                  buttonType_=("button")
+                  classes = "security-page__button-secondary"
+                  onClick(_ => close())
+                }
+
+                button("Bestaetigen") {
+                  classes = "security-page__button-primary"
+                }
+              }
+            }
           }
         }
       }

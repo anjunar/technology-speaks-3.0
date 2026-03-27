@@ -19,6 +19,7 @@ import jfx.form.Control.placeholder
 import jfx.layout.Div.div
 import jfx.layout.HBox
 import jfx.layout.HBox.hbox
+import jfx.layout.Span.span
 import jfx.layout.VBox.vbox
 import jfx.layout.Viewport
 import jfx.statement.Conditional.{conditional, elseDo, thenDo}
@@ -28,6 +29,9 @@ import scala.scalajs.js.JSConverters.*
 import scala.util.{Failure, Success}
 
 class RelationShipsPage extends PageComposite("Following") {
+
+  override def pageWidth: Int = 1040
+  override def pageHeight: Int = 860
 
   private given ExecutionContext = ExecutionContext.global
   private val pageSize = 200
@@ -47,57 +51,99 @@ class RelationShipsPage extends PageComposite("Following") {
 
     withDslContext {
       vbox {
-        style {
-          setProperty("height", "100%")
-          padding = "12px"
-          boxSizing = "border-box"
+        classes = "relation-ships-page__layout"
+
+        vbox {
+          classes = "relation-ships-page__hero"
+
+          div {
+            classes = "relation-ships-page__hero-copy"
+
+            span {
+              classes = "relation-ships-page__eyebrow"
+              text = "Beziehungen"
+            }
+
+            span {
+              classes = "relation-ships-page__title"
+              text = "Folgen und Gruppen"
+            }
+
+            span {
+              classes = "relation-ships-page__subtitle"
+              text = "Ordne die Profile, denen du folgst, in Gruppen ein und navigiere direkt weiter."
+            }
+          }
         }
 
         div {
+          classes = "relation-ships-page__panel"
           style {
             flex = "1"
             minHeight = "0px"
           }
 
-          val table = tableView[Data[RelationShip]] {
-            items = relationShipsProperty
-            fixedCellSize = 72.0
-            rowFactory = (_: TableView[Data[RelationShip]]) => new RelationShipNavigationRow()
+          vbox {
+            classes = "relation-ships-page__panel-copy"
 
-            column[Data[RelationShip], Media | Null]("Bild") {
-              val current = summon[TableColumn[Data[RelationShip], Media | Null]]
-              current.setPrefWidth(96.0)
-              current.setCellValueFactory(features => RelationShipsPage.followerImage(features.value))
-              current.setCellFactory(_ => new RelationShipImageCell())
+            span {
+              classes = "relation-ships-page__panel-eyebrow"
+              text = "Netzwerk"
             }
 
-            column[Data[RelationShip], String]("Nickname") {
-              val current = summon[TableColumn[Data[RelationShip], String]]
-              current.setPrefWidth(220.0)
-              current.setCellValueFactory(features => Property(RelationShipsPage.nickName(features.value)))
-            }
-
-            column[Data[RelationShip], String]("Vorname") {
-              val current = summon[TableColumn[Data[RelationShip], String]]
-              current.setPrefWidth(180.0)
-              current.setCellValueFactory(features => Property(RelationShipsPage.firstName(features.value)))
-            }
-
-            column[Data[RelationShip], String]("Nachname") {
-              val current = summon[TableColumn[Data[RelationShip], String]]
-              current.setPrefWidth(180.0)
-              current.setCellValueFactory(features => Property(RelationShipsPage.lastName(features.value)))
-            }
-
-            column[Data[RelationShip], Data[RelationShip]]("Gruppen") {
-              val current = summon[TableColumn[Data[RelationShip], Data[RelationShip]]]
-              current.setPrefWidth(320.0)
-              current.setCellValueFactory(features => Property(features.value))
-              current.setCellFactory(_ => new RelationShipGroupsCell(availableGroupsProperty))
+            span {
+              classes = "relation-ships-page__panel-title"
+              text = "Deine Verbindungen"
             }
           }
 
-          table.classProperty += "relation-ship-page-table"
+          div {
+            classes = "relation-ships-page__table-shell"
+            style {
+              flex = "1"
+              minHeight = "0px"
+            }
+
+            val table = tableView[Data[RelationShip]] {
+              items = relationShipsProperty
+              fixedCellSize = 76.0
+              rowFactory = (_: TableView[Data[RelationShip]]) => new RelationShipNavigationRow()
+
+              column[Data[RelationShip], Media | Null]("Bild") {
+                val current = summon[TableColumn[Data[RelationShip], Media | Null]]
+                current.setPrefWidth(96.0)
+                current.setCellValueFactory(features => RelationShipsPage.followerImage(features.value))
+                current.setCellFactory(_ => new RelationShipImageCell())
+              }
+
+              column[Data[RelationShip], String]("Nickname") {
+                val current = summon[TableColumn[Data[RelationShip], String]]
+                current.setPrefWidth(200.0)
+                current.setCellValueFactory(features => Property(RelationShipsPage.nickName(features.value)))
+              }
+
+              column[Data[RelationShip], String]("Vorname") {
+                val current = summon[TableColumn[Data[RelationShip], String]]
+                current.setPrefWidth(150.0)
+                current.setCellValueFactory(features => Property(RelationShipsPage.firstName(features.value)))
+              }
+
+              column[Data[RelationShip], String]("Nachname") {
+                val current = summon[TableColumn[Data[RelationShip], String]]
+                current.setPrefWidth(150.0)
+                current.setCellValueFactory(features => Property(RelationShipsPage.lastName(features.value)))
+              }
+
+              column[Data[RelationShip], Data[RelationShip]]("Gruppen") {
+                val current = summon[TableColumn[Data[RelationShip], Data[RelationShip]]]
+                current.setPrefWidth(260.0)
+                current.setCellValueFactory(features => Property(features.value))
+                current.setCellFactory(_ => new RelationShipGroupsCell(availableGroupsProperty))
+              }
+            }
+
+            table.classProperty += "relation-ship-page-table"
+          }
         }
       }
     }
@@ -166,6 +212,7 @@ private final class RelationShipImageCell extends TableCell[Data[RelationShip], 
   val imageVisible = Property[Boolean](false)
 
   val wrapper: HBox = hbox {
+    classes = "relation-ships-page__avatar-cell"
 
     style {
       alignItems = "center"
@@ -189,11 +236,8 @@ private final class RelationShipImageCell extends TableCell[Data[RelationShip], 
 
       elseDo {
         div {
-          classes = "material-icons"
+          classes = Seq("material-icons", "relation-ships-page__avatar-fallback")
           text = "account_circle"
-          style {
-            fontSize = "40px"
-          }
         }
       }
 
@@ -239,7 +283,7 @@ private final class RelationShipGroupsCell(availableGroups: RemoteListProperty[G
       identityBy = { (group: Group) => Option(group.id.get).getOrElse(group) }
       multipleSelection = true
       rowHeightPx = 40.0
-      dropdownHeightPx = 280.0
+      dropdownHeightPx = 124.0
       valueRenderer = {
         div {
           classes = "relation-ship-groups-value"

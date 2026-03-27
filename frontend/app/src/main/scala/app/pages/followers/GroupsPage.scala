@@ -27,6 +27,9 @@ import scala.util.{Failure, Success}
 
 class GroupsPage extends PageComposite("Groups") {
 
+  override def pageWidth: Int = 1040
+  override def pageHeight: Int = 860
+
   private given ExecutionContext = ExecutionContext.global
 
   private val pageSize = 100
@@ -41,100 +44,145 @@ class GroupsPage extends PageComposite("Groups") {
     RemoteTableList.reloadFirstPage(groupsProperty, pageSize = pageSize)
 
     withDslContext {
-      hbox {
-        classes = "groups-layout"
+      vbox {
+        classes = "groups-page__layout"
 
-        div {
-          classes = "groups-panel"
+        vbox {
+          classes = "groups-page__hero"
 
-          vbox {
-            style {
-              height = "100%"
+          div {
+            classes = "groups-page__hero-copy"
+
+            span {
+              classes = "groups-page__eyebrow"
+              text = "Struktur"
             }
 
-            hbox {
-              classes = "groups-panel-header"
-
-              span {
-                classes = "groups-panel-title"
-                text = "Gruppen"
-              }
+            span {
+              classes = "groups-page__title"
+              text = "Gruppen und Zugehoerigkeit"
             }
 
-            div {
-              style {
-                flex = "1"
-                minHeight = "0px"
-              }
-
-              val table = tableView[Data[Group]] {
-                items = groupsProperty
-                fixedCellSize = 56.0
-                showHeader = false
-
-                column[Data[Group], String]("Name") {
-                  val current = summon[TableColumn[Data[Group], String]]
-                  current.setPrefWidth(300.0)
-                  current.setCellValueFactory(features => features.value.data.name)
-                }
-              }
-
-              table.classProperty += "groups-table"
-
-              addDisposable(
-                table.getSelectionModel.selectedItemProperty.observe { selected =>
-                  if (selected != null) {
-                    currentGroupProperty.set(selected.data)
-                  }
-                }
-              )
-
-              addDisposable(
-                currentGroupProperty.observe { active =>
-                  val activeId = Option(active).flatMap(group => Option(group.id.get))
-                  val index =
-                    if (activeId.isEmpty) -1
-                    else groupsProperty.indexWhere(row => Option(row.data.id.get).contains(activeId.get))
-
-                  if (index >= 0) {
-                    table.getSelectionModel.select(index)
-                  } else {
-                    table.getSelectionModel.clearSelection()
-                  }
-                }
-              )
-            }
-
-            button("Neue Gruppe") {
-              buttonType = "button"
-              classes = "groups-new-btn"
-
-              onClick { _ =>
-                currentGroupProperty.set(new Group())
-              }
+            span {
+              classes = "groups-page__subtitle"
+              text = "Verwalte die Sammlungen, in denen Beziehungen und Personen geordnet werden."
             }
           }
         }
 
-        div {
-          classes = "groups-panel"
-          style {
-            flex = "1"
-            minWidth = "0px"
+        hbox {
+          classes = "groups-layout"
+
+          div {
+            classes = Seq("groups-panel", "groups-panel--list")
+
+            vbox {
+              classes = "groups-page__panel-content"
+
+              hbox {
+                classes = "groups-panel-header"
+
+                div {
+                  classes = "groups-page__panel-copy"
+
+                  span {
+                    classes = "groups-page__panel-eyebrow"
+                    text = "Sammlung"
+                  }
+
+                  span {
+                    classes = "groups-page__panel-title"
+                    text = "Gruppen"
+                  }
+                }
+              }
+
+              span {
+                classes = "groups-page__panel-hint"
+                text = "Waehle eine Gruppe aus oder lege eine neue an."
+              }
+
+              div {
+                classes = "groups-page__table-shell"
+                style {
+                  flex = "1"
+                  minHeight = "0px"
+                }
+
+                val table = tableView[Data[Group]] {
+                  items = groupsProperty
+                  fixedCellSize = 62.0
+                  showHeader = false
+
+                column[Data[Group], String]("Name") {
+                  val current = summon[TableColumn[Data[Group], String]]
+                  current.setPrefWidth(260.0)
+                  current.setCellValueFactory(features => features.value.data.name)
+                }
+                }
+
+                table.classProperty += "groups-table"
+
+                addDisposable(
+                  table.getSelectionModel.selectedItemProperty.observe { selected =>
+                    if (selected != null) {
+                      currentGroupProperty.set(selected.data)
+                    }
+                  }
+                )
+
+                addDisposable(
+                  currentGroupProperty.observe { active =>
+                    val activeId = Option(active).flatMap(group => Option(group.id.get))
+                    val index =
+                      if (activeId.isEmpty) -1
+                      else groupsProperty.indexWhere(row => Option(row.data.id.get).contains(activeId.get))
+
+                    if (index >= 0) {
+                      table.getSelectionModel.select(index)
+                    } else {
+                      table.getSelectionModel.clearSelection()
+                    }
+                  }
+                )
+              }
+
+              hbox {
+                classes = "groups-page__list-actions"
+
+                button("Neue Gruppe") {
+                  buttonType = "button"
+                  classes = "groups-new-btn"
+
+                  onClick { _ =>
+                    currentGroupProperty.set(new Group())
+                  }
+                }
+              }
+            }
           }
 
-          observeRender(currentGroupProperty) { group =>
-            GroupEditorPanel.panel(
-              group = group,
-              onSaved = saved => {
-                RemoteTableList.reloadFirstPage(groupsProperty, pageSize = pageSize)
-                currentGroupProperty.set(saved.data)
-              },
-              onDeleted = () => {
-                RemoteTableList.reloadFirstPage(groupsProperty, pageSize = pageSize)
-                currentGroupProperty.set(new Group())
-              }
-            )
+          div {
+            classes = Seq("groups-panel", "groups-panel--editor")
+            style {
+              flex = "1"
+              minWidth = "0px"
+              minHeight = "0px"
+            }
+
+            observeRender(currentGroupProperty) { group =>
+              GroupEditorPanel.panel(
+                group = group,
+                onSaved = saved => {
+                  RemoteTableList.reloadFirstPage(groupsProperty, pageSize = pageSize)
+                  currentGroupProperty.set(saved.data)
+                },
+                onDeleted = () => {
+                  RemoteTableList.reloadFirstPage(groupsProperty, pageSize = pageSize)
+                  currentGroupProperty.set(new Group())
+                }
+              )
+            }
           }
         }
       }
@@ -160,6 +208,8 @@ private final class GroupEditorPanel(
 
     withDslContext {
       form(group) {
+        classes = "groups-editor-form"
+
         onSubmit = (_: Form[Group]) => {
           val request =
             if (group.id.get == null) group.save()
@@ -182,17 +232,33 @@ private final class GroupEditorPanel(
           hbox {
             classes = "groups-panel-header"
 
-            span {
-              classes = "groups-panel-title"
-              text = if (group.id.get == null) "Neue Gruppe" else "Gruppe bearbeiten"
+            div {
+              classes = "groups-page__panel-copy"
+
+              span {
+                classes = "groups-page__panel-eyebrow"
+                text = if (group.id.get == null) "Neu" else "Bearbeiten"
+              }
+
+              span {
+                classes = "groups-page__panel-title"
+                text = if (group.id.get == null) "Neue Gruppe" else "Gruppe bearbeiten"
+              }
             }
+          }
+
+          span {
+            classes = "groups-page__panel-hint"
+            text = "Gib der Gruppe einen klaren Namen und speichere die Aenderung."
           }
 
           div {
             classes = "groups-editor-body"
 
             inputContainer("Name") {
-              input("name")
+              input("name") {
+                classes = "groups-editor-input"
+              }
             }
           }
 

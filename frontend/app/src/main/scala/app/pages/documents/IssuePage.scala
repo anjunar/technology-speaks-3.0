@@ -25,12 +25,16 @@ import jfx.form.InputContainer.inputContainer
 import jfx.form.editor.plugins.*
 import jfx.layout.Div.div
 import jfx.layout.HBox.hbox
+import jfx.layout.Span.span
 import jfx.layout.VBox.vbox
 import jfx.layout.Viewport
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class IssuePage(val model: Issue) extends PageComposite("Aufgabe", pageResizable = true) {
+
+  override def pageWidth: Int = 980
+  override def pageHeight: Int = 860
 
   private given ExecutionContext = ExecutionContext.global
   private val pageSize = 50
@@ -86,91 +90,109 @@ class IssuePage(val model: Issue) extends PageComposite("Aufgabe", pageResizable
   }
 
   override protected def compose(using DslContext): Unit = {
-    classProperty += "issue-page"
+    classProperty.setAll(Seq("issue-page"))
 
     withDslContext {
 
       val service = inject[ApplicationService]
 
       form(model) {
+          classes = "issue-page__form"
           onSubmit = { (_: Form[Issue]) =>
             persistIssue(service)
           }
 
           vbox {
-            style {
-              padding = "10px"
-              rowGap = "10px"
-              height = "100%"
-              flex = "1"
+            classes = "issue-page__layout"
+
+            vbox {
+              classes = "issue-page__hero"
+
+              vbox {
+                classes = "issue-page__hero-copy"
+
+                span {
+                  classes = "issue-page__eyebrow"
+                  text = "Resonanz"
+                }
+
+                span {
+                  classes = "issue-page__title"
+                  text = "Aufgabe und Diskussion"
+                }
+              }
             }
 
-            hbox {
-              style {
-                alignItems = "flex-start"
-                columnGap = "10px"
+            div {
+              classes = "issue-page__editor-shell"
+
+              hbox {
+                classes = "issue-page__titlebar"
+
+                div {
+                  classes = "issue-page__title-field"
+                  style {
+                    flex = "1"
+                  }
+
+                  inputContainer("Titel") {
+                    val titleInput = input("title") {
+                      classes = "issue-page__title-input"
+                      subscribeBidirectional(model.title, stringValueProperty)
+                      addDisposable(model.editable.observe(editable => disabled = !editable))
+                    }
+                  }
+                }
+
+                renderByRel("update", model.links) { () =>
+                  button("edit") {
+                    buttonType = "button"
+                    classes = Seq("material-icons", "issue-page__icon-btn")
+                    onClick { _ =>
+                      model.editable.set(!model.editable.get)
+                    }
+                  }
+                }
               }
 
-              div {
+              editor("editor") {
+                classes = "issue-page__editor"
                 style {
                   flex = "1"
+                  minHeight = "240px"
                 }
 
-                inputContainer("Titel") {
-                  val titleInput = input("title") {
-                    subscribeBidirectional(model.title, stringValueProperty)
-                    addDisposable(model.editable.observe(editable => disabled = !editable))
+                basePlugin {}
+                headingPlugin {}
+                listPlugin {}
+                linkPlugin {}
+                imagePlugin {}
+
+                subscribeBidirectional(model.editor, valueProperty)
+                subscribeBidirectional(model.editable, editableProperty)
+              }
+
+              hbox {
+                classes = "issue-page__actions"
+
+                renderByRel("update", model.links) { () =>
+                  button("Aktualisieren") {
+                    classes = "issue-page__submit"
+                  }
+                }
+                renderByRel("save", model.links) { () =>
+                  button("Speichern") {
+                    classes = "issue-page__submit"
                   }
                 }
               }
-
-              renderByRel("update", model.links) { () =>
-                button("edit") {
-                  buttonType = "button"
-                  classes = "material-icons"
-                  onClick { _ =>
-                    model.editable.set(!model.editable.get)
-                  }
-                }
-              }
             }
 
-            editor("editor") {
-              style {
-                flex = "1"
-                minHeight = "240px"
-              }
-
-              basePlugin {}
-              headingPlugin {}
-              listPlugin {}
-              linkPlugin {}
-              imagePlugin {}
-
-              subscribeBidirectional(model.editor, valueProperty)
-              subscribeBidirectional(model.editable, editableProperty)
-
-            }
-
-            hbox {
-              style {
-                justifyContent = "flex-end"
-                columnGap = "10px"
-              }
-              renderByRel("update", model.links) { () =>
-                button("Aktualisieren")
-              }
-              renderByRel("save", model.links) { () =>
-                button("Speichern")
-              }
-            }
-          }
-
-          div {
+            div {
+              classes = "issue-page__comments"
               style {
                 flex = "1"
                 minHeight = "0px"
-                marginTop = "10px"
               }
 
               virtualList(commentsProperty, estimateHeightPx = 240, prefetchItems = 40) { (comment, _) =>
@@ -191,13 +213,7 @@ class IssuePage(val model: Issue) extends PageComposite("Aufgabe", pageResizable
 
             renderByRel("save", model.links) { () =>
               val commentInput = input("newComment") {
-                style {
-                  padding = "12px"
-                  width = "calc(100% - 24px)"
-                  backgroundColor = "var(--color-background-secondary)"
-                  fontSize = "24px"
-                  borderRadius = "8px"
-                }
+                classes = "issue-page__prompt"
               }
               commentInput.placeholder = "Neuer Kommentar..."
               commentInput.readOnly = true
@@ -206,6 +222,7 @@ class IssuePage(val model: Issue) extends PageComposite("Aufgabe", pageResizable
           }
       }
   }
+}
 }
 
 object IssuePage {

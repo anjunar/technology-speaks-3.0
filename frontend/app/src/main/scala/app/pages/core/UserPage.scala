@@ -17,6 +17,7 @@ import jfx.form.InputContainer.inputContainer
 import jfx.form.SubForm.{factory, subForm}
 import jfx.layout.Div.div
 import jfx.layout.HBox.hbox
+import jfx.layout.Span.span
 import jfx.layout.VBox.vbox
 import jfx.layout.Viewport
 import jfx.statement.ObserveRender.observeRender
@@ -25,6 +26,9 @@ import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success}
 
 class UserPage(val model: User) extends PageComposite("User", pageResizable = false) {
+
+  override def pageWidth: Int = 1040
+  override def pageHeight: Int = 860
 
   private given ExecutionContext = ExecutionContext.global
 
@@ -39,6 +43,7 @@ class UserPage(val model: User) extends PageComposite("User", pageResizable = fa
         classes = "user-page-shell"
 
         form(model) {
+          classes = "user-page-form"
 
           onSubmit = { (event: Form[User]) =>
 
@@ -54,53 +59,102 @@ class UserPage(val model: User) extends PageComposite("User", pageResizable = fa
             }
           }
 
-          style {
-            width = "100%"
-          }
-
           vbox {
             classes = "user-page-content"
 
-            hbox {
-              classes = "user-page-header"
-
-              imageCropper("image") {
-                classes = "user-page-avatar"
-
-                style {
-                  width = "420px"
-                  height = "420px"
-                  maxWidth = "100%"
-                }
-
-                aspectRatio = 1.0
-                outputType = "image/jpeg"
-                outputQuality = 0.92
-                outputMaxWidth = 512
-                outputMaxHeight = 512
-              }
+            vbox {
+              classes = "user-page-hero"
 
               div {
-                classes = "user-page-sidebar"
+                classes = "user-page-hero-copy"
 
-                UserFollowAction.action(model)
-
-                inputContainer("Nickname") {
-                  input("nickName")
+                span {
+                  classes = "user-page-eyebrow"
+                  text = "Profil"
                 }
 
-                hbox {
-                  classes = "user-page-section-row"
+                span {
+                  classes = "user-page-title"
+                  text = "Praesenz und Beziehung"
+                }
 
-                  style {
-                    alignItems = "flex-start"
+                span {
+                  classes = "user-page-subtitle"
+                  text = "Profil, Zugehoerigkeit und grundlegende Angaben in einer ruhigen Ansicht."
+                }
+              }
+            }
+
+            hbox {
+              classes = "user-page-main"
+
+              vbox {
+                classes = "user-page-profile"
+
+                imageCropper("image") {
+                  classes = "user-page-avatar"
+
+                  aspectRatio = 1.0
+                  outputType = "image/jpeg"
+                  outputQuality = 0.92
+                  outputMaxWidth = 512
+                  outputMaxHeight = 512
+                }
+
+                div {
+                  classes = "user-page-profile-card"
+
+                  span {
+                    classes = "user-page-section-eyebrow"
+                    text = "Profilname"
+                  }
+
+                  inputContainer("Nickname") {
+                    input("nickName") {
+                      classes = "user-page-input"
+                    }
+                  }
+                }
+
+                UserFollowAction.action(model)
+              }
+
+              vbox {
+                classes = "user-page-details"
+
+                div {
+                  classes = "user-page-section"
+
+                  hbox {
+                    classes = "user-page-section-header"
+
+                    div {
+                      classes = "user-page-section-copy"
+
+                      span {
+                        classes = "user-page-section-eyebrow"
+                        text = "Identitaet"
+                      }
+
+                      span {
+                        classes = "user-page-section-title"
+                        text = "Persoenliche Angaben"
+                      }
+                    }
+
+                    renderByRel("update", model.links) { () =>
+                      button("close") {
+                        buttonType = "button"
+                        classes = Seq("material-icons", "user-page-toggle")
+
+                        onClick { _ =>
+                          infoDisabled.set(!infoDisabled.get)
+                        }
+                      }
+                    }
                   }
 
                   subForm[UserInfo]("info") {
-
-                    style {
-                      flex = "1"
-                    }
 
                     factory = () => new UserInfo()
 
@@ -114,42 +168,61 @@ class UserPage(val model: User) extends PageComposite("User", pageResizable = fa
                     }))
 
                     inputContainer("Vorname") {
-                      input("firstName")
+                      input("firstName") {
+                        classes = "user-page-input"
+                      }
                     }
 
                     inputContainer("Nachname") {
-                      input("lastName")
+                      input("lastName") {
+                        classes = "user-page-input"
+                      }
                     }
 
                     inputContainer("Geburtsdatum") {
                       input("birthDate") {
+                        classes = "user-page-input"
                         inputType = "date"
                       }
                     }
 
                     editable = !infoDisabled.get
                   }
+                }
 
-                  renderByRel("update", model.links) { () =>
-                    button("close") {
-                      buttonType = "button"
-                      classes = Seq("material-icons", "user-page-toggle")
+                div {
+                  classes = "user-page-section"
 
-                      onClick { _ =>
-                        infoDisabled.set(!infoDisabled.get)
+                  hbox {
+                    classes = "user-page-section-header"
+
+                    div {
+                      classes = "user-page-section-copy"
+
+                      span {
+                        classes = "user-page-section-eyebrow"
+                        text = "Ort"
+                      }
+
+                      span {
+                        classes = "user-page-section-title"
+                        text = "Adresse und Herkunft"
+                      }
+                    }
+
+                    renderByRel("update", model.links) { () =>
+                      button("close") {
+                        buttonType = "button"
+                        classes = Seq("material-icons", "user-page-toggle")
+
+                        onClick { _ =>
+                          addressDisabled.set(!addressDisabled.get)
+                        }
                       }
                     }
                   }
-                }
-
-                hbox {
-                  classes = "user-page-section-row"
 
                   subForm[Address]("address") {
-
-                    style {
-                      flex = "1"
-                    }
 
                     factory = () => new Address()
 
@@ -164,49 +237,46 @@ class UserPage(val model: User) extends PageComposite("User", pageResizable = fa
                     }))
 
                     inputContainer("Strasse") {
-                      input("street")
+                      input("street") {
+                        classes = "user-page-input"
+                      }
                     }
 
                     inputContainer("Hausnummer") {
-                      input("number")
+                      input("number") {
+                        classes = "user-page-input"
+                      }
                     }
 
                     inputContainer("Postleitzahl") {
-                      input("zipCode")
+                      input("zipCode") {
+                        classes = "user-page-input"
+                      }
                     }
 
                     inputContainer("Land") {
-                      input("country")
+                      input("country") {
+                        classes = "user-page-input"
+                      }
                     }
 
                     editable = !addressDisabled.get
                   }
+                }
+
+                hbox {
+                  classes = "user-form-actions"
+
+                  style {
+                    justifyContent = "flex-end"
+                    columnGap = "10px"
+                  }
 
                   renderByRel("update", model.links) { () =>
-                    button("close") {
-                      buttonType = "button"
-                      classes = Seq("material-icons", "user-page-toggle")
-
-                      onClick { _ =>
-                        addressDisabled.set(!addressDisabled.get)
-                      }
+                    button("Speichern") {
+                      classes = "user-page-save-btn"
                     }
                   }
-                }
-              }
-            }
-
-            hbox {
-              classes = "user-form-actions"
-
-              style {
-                justifyContent = "flex-end"
-                columnGap = "10px"
-              }
-
-              renderByRel("update", model.links) { () =>
-                button("Speichern") {
-                  classes = "user-page-save-btn"
                 }
               }
             }

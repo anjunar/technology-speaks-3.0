@@ -4,6 +4,7 @@ import jfx.dsl.DslRuntime
 import jfx.dsl.{ComponentContext, Scope}
 import jfx.form.{Select, SelectOption}
 import jfx.form.editor.prosemirror.*
+import jfx.dsl.*
 
 import scala.scalajs.js
 
@@ -20,8 +21,15 @@ class HeadingPlugin extends AbstractEditorPlugin("heading-plugin") {
   override protected def mountContent(): Unit =
     if (!structureInitialized) {
       structureInitialized = true
-
       withPluginContext {
+
+        style {
+          display = "flex"
+          flexDirection = "row"
+          alignItems = "center"
+        }
+
+
         selectComponent = Select.select("heading", true) {
           summon[Select].valueProperty.observe { value =>
             if (!syncingSelection && viewIsReady) {

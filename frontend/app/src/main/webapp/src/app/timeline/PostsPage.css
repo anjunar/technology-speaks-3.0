@@ -358,3 +358,290 @@
     color: var(--color-text-soft);
     transform: none;
 }
+
+.post-edit-page {
+    height: 100%;
+    color: var(--color-text-primary);
+    overflow: hidden;
+}
+
+.post-edit-page__form {
+    height: 100%;
+}
+
+.post-edit-page__layout {
+    height: 100%;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 24px 30px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    overflow: hidden;
+}
+
+.post-edit-page__hero {
+    height: auto !important;
+    gap: 8px;
+    padding: 0 8px 2px;
+    border-bottom: 1px solid color-mix(in srgb, var(--glass-border) 10%, transparent);
+}
+
+.post-edit-page__hero-copy {
+    height: auto !important;
+    gap: 4px;
+}
+
+.post-edit-page__eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-text-faint);
+    opacity: 0.72;
+}
+
+.post-edit-page__title {
+    font-size: clamp(28px, 4vw, 44px);
+    line-height: 0.98;
+    letter-spacing: -0.05em;
+    color: color-mix(in srgb, var(--color-text-primary) 94%, white 6%);
+    font-weight: 600;
+}
+
+.post-edit-page .component-header {
+    width: 100%;
+}
+
+.post-edit-page .component-header > .hbox {
+    align-items: center;
+    column-gap: 12px !important;
+}
+
+.post-edit-page .component-header a:first-child {
+    display: inline-flex !important;
+    flex: 0 0 auto;
+}
+
+.post-edit-page .component-header a:first-child img,
+.post-edit-page .component-header a:first-child .material-icons {
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 50% !important;
+    border: 1px solid color-mix(in srgb, var(--glass-border) 14%, transparent);
+    background: transparent !important;
+    box-shadow: inset 0 1px 0 color-mix(in srgb, white 5%, transparent);
+    backdrop-filter: blur(6px) saturate(118%);
+    -webkit-backdrop-filter: blur(6px) saturate(118%);
+}
+
+.post-edit-page .component-header a:first-child .material-icons {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px !important;
+    color: var(--color-text-soft);
+}
+
+.post-edit-page .component-header > .hbox > .vbox {
+    gap: 2px;
+}
+
+.post-edit-page .component-header h3 {
+    color: var(--color-text-primary);
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    letter-spacing: -0.01em;
+}
+
+.post-edit-page .component-header span {
+    color: var(--color-text-faint);
+    font-size: 11px !important;
+    line-height: 1.2;
+    letter-spacing: 0.02em;
+}
+
+.post-edit-page__editor-shell {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 18px 20px;
+    border: 1px solid color-mix(in srgb, var(--glass-border) 14%, transparent);
+    border-radius: 18px;
+    background: transparent !important;
+    box-shadow:
+            inset 0 1px 0 color-mix(in srgb, white 5%, transparent),
+            inset 0 0 0 1px color-mix(in srgb, black 10%, transparent);
+    backdrop-filter: blur(8px) saturate(120%);
+    -webkit-backdrop-filter: blur(8px) saturate(120%);
+    overflow: hidden;
+}
+
+.post-edit-page__editor-shell > .component-header {
+    padding-bottom: 12px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid color-mix(in srgb, var(--glass-border) 10%, transparent);
+}
+
+.post-edit-page__editor {
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+.post-edit-page__editor .ProseMirror {
+    min-height: 100%;
+    padding: 4px 4px 18px;
+    background: transparent !important;
+    border: none;
+    box-shadow: none;
+    font-size: 18px;
+    line-height: 1.85;
+    letter-spacing: 0.002em;
+    color: color-mix(in srgb, var(--color-text-primary) 96%, white 4%);
+}
+
+.post-edit-page__editor .ProseMirror h1,
+.post-edit-page__editor .ProseMirror h2,
+.post-edit-page__editor .ProseMirror h3 {
+    color: color-mix(in srgb, var(--color-text-primary) 92%, white 8%);
+    font-weight: 600;
+    line-height: 1.04;
+    letter-spacing: -0.05em;
+    margin: 0.1em 0 0.5em;
+}
+
+.post-edit-page__editor .ProseMirror p {
+    margin: 0 0 0.95em;
+}
+
+.post-edit-page__editor .ProseMirror p:last-child {
+    margin-bottom: 0;
+}
+
+.post-edit-page__actions {
+    padding-top: 14px;
+    border-top: 1px solid color-mix(in srgb, var(--glass-border) 10%, transparent);
+}
+
+.post-edit-page__submit {
+    width: 100%;
+    min-height: 42px;
+    padding: 10px 16px;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--glass-border) 14%, transparent);
+    background: transparent !important;
+    box-shadow: inset 0 1px 0 color-mix(in srgb, white 4%, transparent);
+    backdrop-filter: blur(6px) saturate(118%);
+    -webkit-backdrop-filter: blur(6px) saturate(118%);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-text-primary);
+}
+
+.post-edit-page__submit:hover {
+    border-color: color-mix(in srgb, var(--color-selected) 28%, white 10%);
+    transform: none;
+}
+
+.post-view-page {
+    height: 100%;
+    color: var(--color-text-primary);
+    overflow: hidden;
+}
+
+.post-view-page__layout {
+    height: 100%;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 22px 28px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    overflow: hidden;
+}
+
+.post-view-page__hero {
+    height: auto !important;
+    padding: 0 8px 4px;
+    border-bottom: 1px solid color-mix(in srgb, var(--glass-border) 10%, transparent);
+}
+
+.post-view-page__hero-copy {
+    height: auto !important;
+    gap: 4px;
+}
+
+.post-view-page__eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-text-faint);
+    opacity: 0.72;
+}
+
+.post-view-page__title {
+    font-size: clamp(26px, 3.8vw, 40px);
+    line-height: 0.98;
+    letter-spacing: -0.05em;
+    color: color-mix(in srgb, var(--color-text-primary) 94%, white 6%);
+    font-weight: 600;
+}
+
+.post-view-page__feed {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.post-view-page__post-card {
+    margin: 0 16px 14px !important;
+}
+
+.post-view-page__post-actions {
+    padding-top: 10px;
+    border-top: 1px solid color-mix(in srgb, var(--glass-border) 10%, transparent);
+}
+
+.post-view-page__prompt,
+.post-view-page input[name="newComment"] {
+    display: block;
+    width: calc(100% - 32px) !important;
+    margin: 0 16px;
+    box-sizing: border-box;
+    min-height: 46px;
+    padding: 0 16px !important;
+    border: 1px solid color-mix(in srgb, var(--glass-border) 14%, transparent) !important;
+    border-radius: 999px !important;
+    background: transparent !important;
+    box-shadow:
+            inset 0 1px 0 color-mix(in srgb, white 4%, transparent),
+            inset 0 0 0 1px color-mix(in srgb, black 8%, transparent);
+    backdrop-filter: blur(6px) saturate(118%);
+    -webkit-backdrop-filter: blur(6px) saturate(118%);
+    color: var(--color-text-soft) !important;
+    font-size: 15px !important;
+}
+
+.post-view-page__prompt::placeholder,
+.post-view-page input[name="newComment"]::placeholder {
+    color: color-mix(in srgb, var(--color-text-faint) 78%, white 22%) !important;
+}
+
+.post-view-page .glass-border {
+    margin: 0 16px 14px !important;
+    padding: 16px 18px !important;
+    border: 1px solid color-mix(in srgb, var(--glass-border) 12%, transparent) !important;
+    border-radius: 18px !important;
+    background: transparent !important;
+    box-shadow:
+            inset 0 1px 0 color-mix(in srgb, white 4%, transparent),
+            inset 0 0 0 1px color-mix(in srgb, black 8%, transparent) !important;
+    backdrop-filter: blur(8px) saturate(120%);
+    -webkit-backdrop-filter: blur(8px) saturate(120%);
+}
+
+.post-view-page .glass-border > .vbox {
+    row-gap: 12px !important;
+}

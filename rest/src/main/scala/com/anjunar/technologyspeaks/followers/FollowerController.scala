@@ -24,7 +24,7 @@ class FollowerController(val identityHolder: IdentityHolder) {
   def unfollow(@PathVariable("id") entity: User): ResponseEntity[Void] = {
     val result =
       if (entity == null || identityHolder.user == null) null
-      else RelationShip.query("follower.id" -> entity.id, "user.id" -> identityHolder.user.id)
+      else RelationShip.query("follower" -> entity, "user" -> identityHolder.user)
     if (result != null) {
       result.remove()
     }

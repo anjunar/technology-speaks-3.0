@@ -15,10 +15,15 @@ import jfx.form.Input.{input, inputType_=}
 import jfx.form.InputContainer.inputContainer
 import jfx.layout.Div.div
 import jfx.layout.HBox.hbox
+import jfx.layout.Span.span
+import jfx.layout.VBox.vbox
 
 import scala.concurrent.ExecutionContext
 
 class WebAuthnRegisterPage extends PageComposite("Register mit WebAuthn", pageResizable = false) {
+
+  override def pageWidth: Int = 880
+  override def pageHeight: Int = 760
 
   private given ExecutionContext = ExecutionContext.global
 
@@ -29,55 +34,100 @@ class WebAuthnRegisterPage extends PageComposite("Register mit WebAuthn", pageRe
 
     withDslContext {
       form(registerForm) {
+        classes = "security-page__form"
+
         onSubmit_= { (event : Form[WebAuthnRegister])  =>
           WebAuthnRegistrationClient
             .register(registerForm.email.get, registerForm.nickName.get)
             .foreach(_ => close())
         }
 
-        image {
-          style {
-            jfx.dsl.width_=("500px")
-          }
-          src_=("/app/security/register_webauthn.png")
-        }
+        vbox {
+          classes = "security-page__layout"
 
-        hbox {
-          style {
-            justifyContent = "center"
-          }
-          heading(3) {
-            text = "Moechtest du dich mit WebAuthn registrieren?"
-          }
-        }
+          vbox {
+            classes = "security-page__hero"
 
-        div {
-          style {
-            padding = "20px"
-          }
+            div {
+              classes = "security-page__hero-copy"
 
-          inputContainer("Nick name") {
-            input("nickName") {}
-          }
+              span {
+                classes = "security-page__eyebrow"
+                text = "Passkey"
+              }
 
-          inputContainer("Email") {
-            input("email") {
-              inputType_=("email")
+              heading(2) {
+                classes = "security-page__title"
+                text = "Registrierung mit WebAuthn"
+              }
+
+              span {
+                classes = "security-page__subtitle"
+                text = "Lege einen passwortlosen Zugang an und verknuepfe ihn mit deinem Profil."
+              }
             }
           }
-        }
 
-        div {
-          classes = "button-container"
+          hbox {
+            classes = "security-page__content"
 
-          button("Abbrechen") {
-            buttonType_=("button")
-            classes = "btn-secondary"
-            onClick(_ => close())
-          }
+            div {
+              classes = "security-page__media-shell"
 
-          button("Registrieren") {
-            classes = "btn-danger"
+              image {
+                classes = "security-page__image"
+                src_=("/app/security/register_webauthn_dark.png")
+              }
+            }
+
+            vbox {
+              classes = "security-page__panel"
+
+              hbox {
+                classes = "security-page__panel-header"
+
+                heading(3) {
+                  classes = "security-page__panel-title"
+                  text = "WebAuthn Registrierung"
+                }
+              }
+
+              span {
+                classes = "security-page__panel-copy"
+                text = "Trage Nickname und Email ein, danach erfolgt die Passkey-Bestaetigung."
+              }
+
+              div {
+                classes = "security-page__field-group"
+
+                inputContainer("Nick name") {
+                  input("nickName") {
+                    classes = "security-page__input"
+                  }
+                }
+
+                inputContainer("Email") {
+                  input("email") {
+                    classes = "security-page__input"
+                    inputType_=("email")
+                  }
+                }
+              }
+
+              div {
+                classes = "security-page__actions"
+
+                button("Abbrechen") {
+                  buttonType_=("button")
+                  classes = "security-page__button-secondary"
+                  onClick(_ => close())
+                }
+
+                button("Registrieren") {
+                  classes = "security-page__button-primary"
+                }
+              }
+            }
           }
         }
       }

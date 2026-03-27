@@ -14,11 +14,16 @@ import jfx.form.Input.{input, inputType_=}
 import jfx.form.InputContainer.inputContainer
 import jfx.layout.Div.div
 import jfx.layout.HBox.hbox
+import jfx.layout.Span.span
+import jfx.layout.VBox.vbox
 import jfx.layout.Viewport
 
 import scala.concurrent.ExecutionContext
 
 class PasswordRegisterPage extends PageComposite("Register", pageResizable = false) {
+
+  override def pageWidth: Int = 880
+  override def pageHeight: Int = 760
 
   private given ExecutionContext = ExecutionContext.global
 
@@ -29,6 +34,8 @@ class PasswordRegisterPage extends PageComposite("Register", pageResizable = fal
 
     withDslContext {
       form(registerForm) {
+        classes = "security-page__form"
+
         onSubmit_= { (event : Form[PasswordRegister])  =>
           registerForm
             .save()
@@ -47,55 +54,99 @@ class PasswordRegisterPage extends PageComposite("Register", pageResizable = fal
             )
         }
 
-        image {
-          style {
-            jfx.dsl.width_=("500px")
-          }
-          src_=("/app/security/register.png")
-        }
+        vbox {
+          classes = "security-page__layout"
 
-        hbox {
-          style {
-            justifyContent = "center"
-          }
-          heading(3) {
-            text = "Moechtest du dich registrieren?"
-          }
-        }
+          vbox {
+            classes = "security-page__hero"
 
-        div {
-          style {
-            padding = "20px"
-          }
+            div {
+              classes = "security-page__hero-copy"
 
-          inputContainer("Nick name") {
-            input("nickName") {}
-          }
+              span {
+                classes = "security-page__eyebrow"
+                text = "Eintritt"
+              }
 
-          inputContainer("Email") {
-            input("email") {
-              inputType_=("email")
+              heading(2) {
+                classes = "security-page__title"
+                text = "Einen neuen Zugang anlegen"
+              }
+
+              span {
+                classes = "security-page__subtitle"
+                text = "Erstelle dein Profil und oeffne dir den Zugang zu Dokumenten, Dialogen und Gruppen."
+              }
             }
           }
 
-          inputContainer("Password") {
-            input("password") {
-              inputType_=("password")
+          hbox {
+            classes = "security-page__content"
+
+            div {
+              classes = "security-page__media-shell"
+
+              image {
+                classes = "security-page__image"
+                src_=("/app/security/register_password_dark.png")
+              }
             }
-          }
-        }
 
-        div {
-          classes = "button-container"
+            vbox {
+              classes = "security-page__panel"
 
-          button("Abbrechen") {
-            buttonType_=("button")
-            classes = "btn-secondary"
-            onClick(_ => close())
-          }
+              hbox {
+                classes = "security-page__panel-header"
 
-          button("Registrieren") {
-            classes = "btn-danger"
+                heading(3) {
+                  classes = "security-page__panel-title"
+                  text = "Registrierung"
+                }
+              }
+
+              span {
+                classes = "security-page__panel-copy"
+                text = "Lege Nickname, Email und Passwort fuer dein Konto fest."
+              }
+
+              div {
+                classes = "security-page__field-group"
+
+                inputContainer("Nick name") {
+                  input("nickName") {
+                    classes = "security-page__input"
+                  }
+                }
+
+                inputContainer("Email") {
+                  input("email") {
+                    classes = "security-page__input"
+                    inputType_=("email")
+                  }
+                }
+
+                inputContainer("Password") {
+                  input("password") {
+                    classes = "security-page__input"
+                    inputType_=("password")
+                  }
+                }
+              }
+
+              div {
+                classes = "security-page__actions"
+
+                button("Abbrechen") {
+                  buttonType_=("button")
+                  classes = "security-page__button-secondary"
+                  onClick(_ => close())
+                }
+
+                button("Registrieren") {
+                  classes = "security-page__button-primary"
+                }
+              }
+            }
           }
         }
       }
