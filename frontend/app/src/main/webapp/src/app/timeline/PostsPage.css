@@ -24,32 +24,61 @@
 }
 
 .posts-page__composer {
-    padding: 0 0 14px !important;
+    display: flex;
+    flex-direction: column;
+    padding: 0 16px 30px !important;
+    box-sizing: border-box;
+    border-bottom: 1px solid color-mix(in srgb, var(--glass-border) 10%, transparent);
+    margin-bottom: 10px;
+}
+
+.posts-page__composer-copy {
+    gap: 3px;
+    padding: 0 0 18px;
+}
+
+.posts-page__eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-text-faint);
+    opacity: 0.72;
+}
+
+.posts-page__title {
+    font-size: 24px;
+    line-height: 1.02;
+    letter-spacing: -0.04em;
+    color: color-mix(in srgb, var(--color-text-primary) 94%, white 6%);
+    font-weight: 600;
 }
 
 .posts-page__prompt,
 .posts-page input[name="post"] {
+    display: block;
     width: 100% !important;
     box-sizing: border-box;
-    min-height: 52px;
-    padding: 0 18px !important;
+    min-height: 58px;
+    padding: 0 20px !important;
     border: 1px solid color-mix(in srgb, var(--glass-border) 14%, transparent);
     border-radius: 999px !important;
     background: transparent !important;
     box-shadow:
-            inset 0 1px 0 color-mix(in srgb, white 5%, transparent),
-            inset 0 0 0 1px color-mix(in srgb, black 10%, transparent);
-    backdrop-filter: blur(8px) saturate(120%);
-    -webkit-backdrop-filter: blur(8px) saturate(120%);
+            inset 0 1px 0 color-mix(in srgb, white 6%, transparent),
+            inset 0 0 0 1px color-mix(in srgb, black 12%, transparent);
+    backdrop-filter: blur(10px) saturate(124%);
+    -webkit-backdrop-filter: blur(10px) saturate(124%);
     color: var(--color-text-primary) !important;
-    font-size: 16px !important;
+    font-size: 17px !important;
     font-weight: 500;
     letter-spacing: 0.01em;
+    position: relative;
+    z-index: 1;
 }
 
 .posts-page__prompt::placeholder,
 .posts-page input[name="post"]::placeholder {
-    color: var(--color-text-faint) !important;
+    color: color-mix(in srgb, var(--color-text-faint) 78%, white 22%) !important;
 }
 
 .posts-page__feed {
@@ -66,7 +95,7 @@
 .post-card {
     position: relative;
     margin: 0 16px 14px !important;
-    padding: 18px 20px !important;
+    padding: 18px 20px 16px !important;
     border: 1px solid color-mix(in srgb, var(--glass-border) 14%, transparent) !important;
     border-radius: 18px !important;
     background: transparent !important;
@@ -81,8 +110,13 @@
     row-gap: 14px !important;
 }
 
+.post-card__body > .component-header {
+    padding-bottom: 2px;
+}
+
 .post-card__editor {
     min-height: 0;
+    padding-left: 2px;
 }
 
 .post-card .editor {
@@ -173,6 +207,10 @@
     letter-spacing: 0.002em;
 }
 
+.post-card .ProseMirror {
+    padding: 2px 0 6px;
+}
+
 .posts-page .ProseMirror h1,
 .posts-page .ProseMirror h2,
 .posts-page .ProseMirror h3,
@@ -211,10 +249,17 @@
     margin-bottom: 0;
 }
 
+.post-card .ProseMirror h1:first-child,
+.post-card .ProseMirror h2:first-child,
+.post-card .ProseMirror h3:first-child {
+    margin-top: 0;
+}
+
 .post-card__footer {
     align-items: center !important;
     column-gap: 10px !important;
-    padding-top: 2px;
+    padding-top: 10px;
+    border-top: 1px solid color-mix(in srgb, var(--glass-border) 10%, transparent);
 }
 
 .posts-page .like-button .hbox,

@@ -17,6 +17,7 @@ import jfx.dsl.*
 import jfx.form.Editor.editor
 import jfx.form.Input.input
 import jfx.form.editor.plugins.*
+import jfx.layout.Span.span
 import jfx.layout.Div.div
 import jfx.layout.HBox.hbox
 import jfx.layout.VBox.vbox
@@ -61,6 +62,20 @@ class PostsPage(postsProperty : RemoteListProperty[Data[Post], RemotePageQuery])
 
         div {
           classes = "posts-page__composer"
+
+          vbox {
+            classes = "posts-page__composer-copy"
+
+            span {
+              classes = "posts-page__eyebrow"
+              text = "Resonanz"
+            }
+
+            span {
+              classes = "posts-page__title"
+              text = "Gedanken im Fluss"
+            }
+          }
 
           val prompt = input("post") {
             classes = "posts-page__prompt"
