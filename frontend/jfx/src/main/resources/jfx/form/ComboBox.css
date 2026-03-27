@@ -124,7 +124,7 @@
 }
 
 .jfx-combo-box__footer-link:hover {
-  background: rgba(135, 196, 64, 0.08);
+  background: var(--color-accent-ghost);
 }
 
 .jfx-combo-box__footer-link::after {

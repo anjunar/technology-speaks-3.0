@@ -2,25 +2,25 @@
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    background: linear-gradient(180deg, rgba(10, 10, 10, 0.42), rgba(10, 10, 10, 0.18));
+    background: var(--gradient-chrome-top);
     height: 46px;
     padding: 0 14px;
     box-sizing: border-box;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.10);
-    box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.04);
+    border-bottom: 1px solid var(--color-border-inverse-strong);
+    box-shadow: inset 0 -1px 0 var(--color-border-subtle);
 }
 
 .app-footer-bar {
     display: flex;
     align-items: center;
     gap: 12px;
-    background: linear-gradient(180deg, rgba(10, 10, 10, 0.18), rgba(10, 10, 10, 0.44));
+    background: var(--gradient-chrome-bottom);
     height: 46px;
     width: 100%;
     padding: 0 14px;
     box-sizing: border-box;
-    border-top: 1px solid rgba(255, 255, 255, 0.10);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    border-top: 1px solid var(--color-border-inverse-strong);
+    box-shadow: inset 0 1px 0 var(--color-border-subtle);
 }
 
 .app-shell {
@@ -43,9 +43,9 @@
     min-height: 34px;
     padding: 0 12px;
     border-radius: 999px;
-    background: rgba(14, 14, 14, 0.34);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+    background: var(--color-surface-scrim);
+    border: 1px solid var(--color-border-strong);
+    box-shadow: 0 8px 18px var(--color-shadow-medium);
 }
 
 .logged-in-user-inner {
@@ -81,19 +81,19 @@
 }
 
 .app-footer-window.is-active {
-    background: rgba(255, 255, 255, 0.16);
-    border-color: rgba(255, 255, 255, 0.12);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    background: var(--color-surface-hover);
+    border-color: var(--color-border-inverse-strong);
+    box-shadow: inset 0 1px 0 var(--color-border-muted);
 }
 
 .app-footer-window.is-inactive {
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--color-surface-muted);
     border-color: transparent;
     opacity: 0.82;
 }
 
 .app-footer-window:hover {
-    background: rgba(255, 255, 255, 0.12);
+    background: var(--color-surface-hover);
 }
 
 .app-footer-actions {
@@ -106,12 +106,12 @@
     height: 34px;
     padding: 0;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.06);
-    border-color: rgba(255, 255, 255, 0.08);
+    background: var(--color-surface-muted);
+    border-color: var(--color-border-strong);
 }
 
 .app-footer-control:hover {
-    background: rgba(255, 255, 255, 0.14);
+    background: var(--color-surface-hover);
 }
 
 .app-shell-nav {
@@ -127,11 +127,11 @@
     height: unset;
     min-width: 116px;
     gap: 6px;
-    background: linear-gradient(180deg, rgba(16, 16, 26, 0.76), rgba(18, 18, 30, 0.62));
-    border: 1px solid rgba(255, 255, 255, 0.10);
+    background: var(--gradient-surface-soft);
+    border: 1px solid var(--color-border-inverse-strong);
     box-shadow:
-            0 18px 42px rgba(0, 0, 0, 0.24),
-            inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            0 18px 42px var(--color-shadow-float),
+            inset 0 1px 0 var(--color-border-muted);
 
     .icon {
         font-size: 112px;
@@ -153,8 +153,8 @@
     }
 
     .app-shell-nav-link:hover {
-        background: rgba(255, 255, 255, 0.08);
-        border-color: rgba(255, 255, 255, 0.08);
+        background: var(--color-surface-hover);
+        border-color: var(--color-border-strong);
         transform: translateY(-1px);
     }
 
@@ -195,8 +195,8 @@
         height: 38px;
         font-size: 24px;
         border-radius: 11px;
-        background: rgba(255, 255, 255, 0.08);
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+        background: var(--color-surface-hover);
+        box-shadow: inset 0 1px 0 var(--color-border-subtle);
     }
 
     .app-shell-nav-text {
@@ -215,7 +215,7 @@
     top: 50%;
     transform: translate(-50%, -50%);
 
-    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.24);
+    box-shadow: 0 10px 28px var(--color-shadow-float);
     border-radius: 16px;
 
     .app-shell-nav-item {
@@ -259,17 +259,17 @@
     min-height: 34px;
     padding: 0 12px;
     border-radius: 999px;
-    background: rgba(11, 14, 22, 0.34);
-    border-color: rgba(205, 214, 240, 0.08);
+    background: var(--color-surface-scrim);
+    border-color: var(--color-border-strong);
     box-shadow:
-            0 12px 22px rgba(0, 0, 0, 0.16),
-            inset 0 1px 0 rgba(255, 255, 255, 0.04);
+            0 12px 22px var(--color-shadow-medium),
+            inset 0 1px 0 var(--color-border-subtle);
     backdrop-filter: blur(12px) saturate(160%);
     -webkit-backdrop-filter: blur(12px) saturate(160%);
 }
 
 .logged-in-user-label {
-    color: rgba(236, 241, 255, 0.86);
+    color: var(--color-text-soft);
     font-size: 12px;
     font-weight: 600;
 }
@@ -283,12 +283,11 @@
     gap: 8px;
     padding: 14px;
     border-radius: 28px;
-    background:
-            linear-gradient(180deg, rgba(14, 19, 31, 0.74), rgba(10, 13, 22, 0.58));
-    border-color: rgba(196, 208, 245, 0.10);
+    background: var(--gradient-surface-strong);
+    border-color: var(--color-border-inverse-strong);
     box-shadow:
-            0 24px 56px rgba(2, 4, 12, 0.30),
-            inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            0 24px 56px var(--color-shadow-float),
+            inset 0 1px 0 var(--color-border-muted);
     backdrop-filter: blur(20px) saturate(160%) !important;
     -webkit-backdrop-filter: blur(20px) saturate(160%) !important;
 }
@@ -315,8 +314,8 @@
 }
 
 .app-shell-nav-left .app-shell-nav-link:hover {
-    background: rgba(255, 255, 255, 0.06);
-    border-color: rgba(205, 214, 240, 0.08);
+    background: var(--color-surface-muted);
+    border-color: var(--color-border-strong);
     transform: none;
 }
 
@@ -325,12 +324,12 @@
     min-width: 42px;
     height: 42px;
     border-radius: 14px;
-    background: rgba(255, 255, 255, 0.05);
-    color: rgba(235, 240, 255, 0.84);
+    background: var(--color-surface-subtle);
+    color: var(--color-text-soft);
 }
 
 .app-shell-nav-left .app-shell-nav-text {
-    color: rgba(230, 236, 255, 0.84);
+    color: var(--color-text-soft);
     font-size: 12px;
     font-weight: 600;
     text-align: center;
@@ -343,13 +342,12 @@
     height: 54px;
     margin: auto auto 12px;
     padding: 0 14px 0 12px;
-    border: 1px solid rgba(196, 208, 245, 0.09);
+    border: 1px solid var(--color-border-inverse-strong);
     border-radius: 24px;
-    background:
-            linear-gradient(180deg, rgba(11, 14, 24, 0.42), rgba(8, 11, 20, 0.54));
+    background: var(--gradient-chrome-bottom);
     box-shadow:
-            0 18px 40px rgba(2, 4, 12, 0.24),
-            inset 0 1px 0 rgba(255, 255, 255, 0.04);
+            0 18px 40px var(--color-shadow-float),
+            inset 0 1px 0 var(--color-border-subtle);
     backdrop-filter: blur(18px) saturate(160%);
     -webkit-backdrop-filter: blur(18px) saturate(160%);
 }
@@ -365,16 +363,16 @@
     border-radius: 16px;
     font-size: 13px;
     font-weight: 600;
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--color-surface-subtle);
     border-color: transparent;
-    color: rgba(232, 237, 255, 0.78);
+    color: var(--color-text-soft);
 }
 
 .app-footer-window.is-active {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(208, 217, 244, 0.08);
-    color: rgba(246, 248, 255, 0.94);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    background: var(--color-surface-hover);
+    border-color: var(--color-border-strong);
+    color: var(--color-text-inverse);
+    box-shadow: inset 0 1px 0 var(--color-border-subtle);
 }
 
 .app-footer-window.is-inactive {
@@ -383,7 +381,7 @@
 }
 
 .app-footer-window:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--color-surface-subtle);
     transform: none;
 }
 
@@ -391,11 +389,11 @@
     width: 32px;
     height: 32px;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.04);
-    border-color: rgba(205, 214, 240, 0.08);
-    color: rgba(232, 237, 255, 0.78);
+    background: var(--color-surface-subtle);
+    border-color: var(--color-border-strong);
+    color: var(--color-text-soft);
 }
 
 .app-footer-control:hover {
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--color-surface-hover);
 }

@@ -5,19 +5,11 @@
     box-sizing: border-box;
     padding: 8px;
 
-    --doc-panel-bg: rgba(255, 255, 255, 0.55);
-    --doc-panel-border: rgba(0, 0, 0, 0.04);
-    --doc-panel-shadow: rgba(0, 0, 0, 0.12);
-    --doc-hover-bg: rgba(0, 0, 0, 0.04);
-    --doc-selected-bg: rgba(0, 0, 0, 0.08);
-}
-
-html[data-theme="dark"] .document-page {
-    --doc-panel-bg: rgba(0, 0, 0, 0.22);
-    --doc-panel-border: rgba(255, 255, 255, 0.04);
-    --doc-panel-shadow: rgba(0, 0, 0, 0.35);
-    --doc-hover-bg: rgba(255, 255, 255, 0.05);
-    --doc-selected-bg: rgba(255, 255, 255, 0.08);
+    --doc-panel-bg: var(--color-surface-raised);
+    --doc-panel-border: var(--color-border-subtle);
+    --doc-panel-shadow: var(--color-shadow-soft);
+    --doc-hover-bg: var(--color-surface-subtle);
+    --doc-selected-bg: var(--color-surface-hover);
 }
 
 .document-page .documents-layout {

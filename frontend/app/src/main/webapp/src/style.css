@@ -36,13 +36,13 @@ html, body, #root {
 
 * {
     scrollbar-width: thin;
-    scrollbar-color: var(--scrollbar-thumb, rgba(100, 100, 100, 0.5)) transparent;
+    scrollbar-color: var(--color-scrollbar-thumb) transparent;
 }
 
 html {
     font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
     font-size: 16px;
-    background-color: var(--color-background-primary);
-    color: var(--color-text);
+    background-color: var(--color-canvas);
+    color: var(--color-text-primary);
     letter-spacing: 0.01em;
 }

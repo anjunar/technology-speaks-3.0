@@ -4,17 +4,10 @@
     box-sizing: border-box;
     padding: 16px;
 
-    --user-panel-bg: rgba(255, 255, 255, 0.50);
-    --user-panel-border: rgba(0, 0, 0, 0.06);
-    --user-panel-shadow: rgba(0, 0, 0, 0.18);
-    --user-panel-muted: rgba(0, 0, 0, 0.05);
-}
-
-html[data-theme="dark"] .user-page {
-    --user-panel-bg: rgba(20, 20, 20, 0.40);
-    --user-panel-border: rgba(255, 255, 255, 0.08);
-    --user-panel-shadow: rgba(0, 0, 0, 0.35);
-    --user-panel-muted: rgba(255, 255, 255, 0.05);
+    --user-panel-bg: var(--color-surface-raised);
+    --user-panel-border: var(--color-border-muted);
+    --user-panel-shadow: var(--color-shadow-medium);
+    --user-panel-muted: var(--color-surface-muted);
 }
 
 .user-page .user-page-shell {
@@ -87,7 +80,7 @@ html[data-theme="dark"] .user-page {
     padding: 12px 18px;
     border-radius: 12px;
     background: var(--color-selected);
-    color: var(--color-text);
+    color: var(--color-text-primary);
     transition: transform 120ms ease, filter 120ms ease;
 }
 

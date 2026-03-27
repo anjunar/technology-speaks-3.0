@@ -4,19 +4,11 @@
     box-sizing: border-box;
     padding: 16px;
 
-    --relation-surface: rgba(255, 255, 255, 0.56);
-    --relation-surface-border: rgba(0, 0, 0, 0.08);
-    --relation-surface-shadow: rgba(17, 24, 39, 0.16);
-    --relation-chip-bg: rgba(255, 255, 255, 0.72);
-    --relation-chip-border: rgba(0, 0, 0, 0.08);
-}
-
-html[data-theme="dark"] .relation-ships-page {
-    --relation-surface: rgba(18, 18, 18, 0.58);
-    --relation-surface-border: rgba(255, 255, 255, 0.08);
-    --relation-surface-shadow: rgba(0, 0, 0, 0.36);
-    --relation-chip-bg: rgba(33, 33, 33, 0.82);
-    --relation-chip-border: rgba(255, 255, 255, 0.08);
+    --relation-surface: var(--color-surface-soft);
+    --relation-surface-border: var(--color-border-strong);
+    --relation-surface-shadow: var(--color-shadow-strong);
+    --relation-chip-bg: var(--color-surface-overlay);
+    --relation-chip-border: var(--color-border-strong);
 }
 
 .relation-ships-page .relation-ship-page-table {

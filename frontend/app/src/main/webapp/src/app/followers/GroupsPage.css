@@ -4,21 +4,12 @@
     box-sizing: border-box;
     padding: 16px;
 
-    --groups-panel-bg: rgba(255, 255, 255, 0.58);
-    --groups-panel-border: rgba(0, 0, 0, 0.08);
-    --groups-panel-shadow: rgba(17, 24, 39, 0.14);
-    --groups-muted-bg: rgba(255, 255, 255, 0.56);
-    --groups-muted-border: rgba(0, 0, 0, 0.06);
-    --groups-danger-border: rgba(199, 52, 52, 0.24);
-}
-
-html[data-theme="dark"] .groups-page {
-    --groups-panel-bg: rgba(18, 18, 18, 0.62);
-    --groups-panel-border: rgba(255, 255, 255, 0.08);
-    --groups-panel-shadow: rgba(0, 0, 0, 0.36);
-    --groups-muted-bg: rgba(36, 36, 36, 0.7);
-    --groups-muted-border: rgba(255, 255, 255, 0.06);
-    --groups-danger-border: rgba(255, 118, 118, 0.28);
+    --groups-panel-bg: var(--color-surface-raised);
+    --groups-panel-border: var(--color-border-strong);
+    --groups-panel-shadow: var(--color-shadow-strong);
+    --groups-muted-bg: var(--color-surface-soft);
+    --groups-muted-border: var(--color-border-muted);
+    --groups-danger-border: var(--color-border-danger-soft);
 }
 
 .groups-page .groups-layout {

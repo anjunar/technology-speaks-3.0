@@ -40,7 +40,7 @@ div.jfx-drawer.jfx-drawer--open > .jfx-drawer__panel-shell {
 
 div.jfx-drawer.jfx-drawer--open > .jfx-drawer__panel-shell > .jfx-drawer__panel {
     transform: translateX(0);
-    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.16);
+    box-shadow: 0 16px 32px var(--color-shadow-medium);
 }
 
 div.jfx-drawer .jfx-drawer__navigation {
@@ -70,7 +70,7 @@ div.jfx-drawer > .jfx-drawer__content {
         position: absolute;
         inset: 0;
         display: block;
-        background: rgba(0, 0, 0, 0.32);
+        background: var(--color-surface-backdrop);
         opacity: 0;
         pointer-events: none;
         transition: opacity 180ms ease;

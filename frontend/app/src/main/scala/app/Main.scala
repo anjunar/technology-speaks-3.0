@@ -25,11 +25,13 @@ object Main {
         ()
       } else {
         service.darkMode.observe { enabled =>
-          if (enabled) {
-            document.documentElement.setAttribute("data-theme", "dark")
-          } else {
-            document.documentElement.setAttribute("data-theme", "light")
-          }
+          val rootElement = document.documentElement
+          rootElement.asInstanceOf[js.Dynamic].dataset.theme =
+            if (enabled) "dark" else "light"
+          rootElement.style.setProperty(
+            "--image-app-background",
+            if (enabled) """url("stars.jpg")""" else """url("beach.png")"""
+          )
         }
 
         service
