@@ -58,6 +58,8 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  width: 100%;
+  box-sizing: border-box;
   border: 1px solid var(--glass-border);
   border-radius: 0.9rem;
   background: var(--glass-bg);
@@ -70,6 +72,15 @@
   border: none;
   background: transparent;
   box-shadow: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.jfx-combo-box__footer {
+  width: 100%;
+  min-width: 0;
+  flex: 0 0 auto;
+  box-sizing: border-box;
 }
 
 .jfx-combo-box__table .jfx-table-body-wrapper,

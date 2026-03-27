@@ -236,7 +236,8 @@ private final class RelationShipGroupsCell(availableGroups: RemoteListProperty[G
       placeholder = "Keine Gruppe"
 
       ComboBox.items = availableGroups
-//      multipleSelection = true
+      identityBy = { (group: Group) => Option(group.id.get).getOrElse(group) }
+      multipleSelection = true
       rowHeightPx = 40.0
       dropdownHeightPx = 280.0
       valueRenderer = {
@@ -269,15 +270,13 @@ private final class RelationShipGroupsCell(availableGroups: RemoteListProperty[G
         }
       }
 
-/*
-      current.dropdownFooterRenderer = {
+      dropdownFooterRenderer = {
         link("/followers/groups") {
           classes = Seq("jfx-combo-box__footer-link", "relation-ship-manage-groups-link")
-          textContent = "Gruppen verwalten"
-          element.setAttribute("data-jfx-combo-box-action", "true")
+          text = "Gruppen verwalten"
+          summon[jfx.control.Link].element.setAttribute("data-jfx-combo-box-action", "true")
         }
       }
-*/
     }
   }
 

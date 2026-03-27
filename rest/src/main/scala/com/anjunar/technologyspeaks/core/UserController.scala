@@ -26,7 +26,9 @@ class UserController(val identityHolder: IdentityHolder) {
     }
 
     if (!isOwnProfile) {
-      val relationShip = RelationShip.query("follower" -> user, "user" -> identityHolder.user)
+      val relationShip =
+        if (identityHolder.user == null || user == null) null
+        else RelationShip.query("follower.id" -> user.id, "user.id" -> identityHolder.user.id)
 
       user.addLinks(
         if (relationShip == null) {
