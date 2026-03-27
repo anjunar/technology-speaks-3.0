@@ -20,7 +20,7 @@ import jfx.form.Editable.editableProperty
 import jfx.form.Editor.editor
 import jfx.form.{ErrorResponseException, Form}
 import jfx.form.Form.{form, onSubmit, onSubmit_=}
-import jfx.form.Input.{disabled, input, stringValueProperty}
+import jfx.form.Input.{disabled, input, standaloneInput, stringValueProperty}
 import jfx.form.InputContainer.inputContainer
 import jfx.form.editor.plugins.*
 import jfx.layout.Div.div
@@ -41,12 +41,18 @@ class IssuePage(val model: Issue) extends PageComposite("Aufgabe", pageResizable
 
   private val commentsProperty: RemoteListProperty[FirstComment, RemotePageQuery] =
     RemoteTableList.createMapped[Data[FirstComment], FirstComment](pageSize = pageSize) { (index, limit) =>
-      if (model.id.get != null) {
+      if (canLoadComments) {
         FirstComment.list(index, limit, model)
       } else {
         Future.successful(new Table[Data[FirstComment]]())
       }
     }(_.data)
+
+  private def canLoadComments: Boolean =
+    model.links.exists(link => Option(link.url).exists(_.contains("/comments")))
+
+  private def canCreateComments: Boolean =
+    model.links.exists(link => Option(link.url).exists(_.endsWith("/comment")))
 
   private def persistIssue(service: ApplicationService): Unit = {
     try {
@@ -211,8 +217,8 @@ class IssuePage(val model: Issue) extends PageComposite("Aufgabe", pageResizable
               }
             }
 
-            renderByRel("save", model.links) { () =>
-              val commentInput = input("newComment") {
+            if (canCreateComments) {
+              val commentInput = standaloneInput("newComment") {
                 classes = "issue-page__prompt"
               }
               commentInput.placeholder = "Neuer Kommentar..."

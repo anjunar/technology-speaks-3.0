@@ -17,7 +17,7 @@ import jfx.core.state.Property.subscribeBidirectional
 import jfx.core.state.{ListProperty, Property, RemoteListProperty}
 import jfx.dsl.*
 import jfx.form.Editor.editor
-import jfx.form.Input.input
+import jfx.form.Input.standaloneInput
 import jfx.form.editor.plugins.*
 import jfx.layout.Div.div
 import jfx.layout.Span.span
@@ -111,7 +111,7 @@ class PostViewPage(val model: Post) extends PageComposite("Post") {
           }
         }
 
-        val prompt = input("newComment") {
+        val prompt = standaloneInput("newComment") {
           classes = "post-view-page__prompt"
         }
 
