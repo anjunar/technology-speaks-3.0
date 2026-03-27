@@ -34,6 +34,8 @@ class PostEditPage(val data: Post) extends PageComposite("Posts") {
     withDslContext {
       val service = inject[ApplicationService]
 
+      data.user.set(service.app.get.user)
+
       form(data) {
         Form.onSubmit = { (event: Form[Post]) =>
           val isExisting = data.id.get != null
@@ -86,7 +88,7 @@ class PostEditPage(val data: Post) extends PageComposite("Posts") {
 
             componentHeader(data) {}
 
-            val editorField = editor("editor") {
+            editor("editor") {
               classes = "post-edit-page__editor"
               style {
                 flex = "1"
