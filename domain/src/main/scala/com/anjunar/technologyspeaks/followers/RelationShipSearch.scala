@@ -3,22 +3,26 @@ package com.anjunar.technologyspeaks.followers
 import com.anjunar.technologyspeaks.core.User
 import com.anjunar.technologyspeaks.hibernate.search.annotations.RestPredicate
 import com.anjunar.technologyspeaks.hibernate.search.{AbstractSearch, Context, PredicateProvider}
+import jakarta.json.bind.annotation.JsonbProperty
+import org.springframework.stereotype.Component
 
-import scala.beans.BeanProperty
+import scala.annotation.meta.field
 import scala.compiletime.uninitialized
 
 class RelationShipSearch(sort: java.util.List[String] = new java.util.ArrayList[String](),
                          index: Int = 0,
-                         limit: Int = 5)  
+                         limit: Int = 5)
   extends AbstractSearch(sort, index, limit) {
 
-  @RestPredicate(classOf[RelationShipSearch.UserPredicate])
+  @(JsonbProperty @field)
+  @(RestPredicate @field)(classOf[RelationShipSearch.UserPredicate])
   var user: User = uninitialized
 
 }
 
 object RelationShipSearch {
 
+  @Component
   class UserPredicate extends PredicateProvider[User, RelationShip] {
     override def build(context: Context[User, RelationShip]): Unit = {
       context.predicates.add(

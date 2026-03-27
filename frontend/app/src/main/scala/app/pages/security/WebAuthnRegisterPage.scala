@@ -2,7 +2,7 @@ package app.pages.security
 
 import app.domain.documents.Document
 import app.domain.security.WebAuthnRegister
-import app.services.WebAuthnRegistrationClient
+import app.services.{ApplicationService, WebAuthnRegistrationClient}
 import app.ui.{CompositeSupport, PageComposite}
 import jfx.action.Button.{button, buttonType_=, onClick}
 import jfx.control.Heading.heading
@@ -33,6 +33,8 @@ class WebAuthnRegisterPage extends PageComposite("Register mit WebAuthn", pageRe
     classProperty += "webauthn-register-page"
 
     withDslContext {
+      val service = inject[ApplicationService]
+      
       form(registerForm) {
         classes = "security-page__form"
 
@@ -76,7 +78,7 @@ class WebAuthnRegisterPage extends PageComposite("Register mit WebAuthn", pageRe
 
               image {
                 classes = "security-page__image"
-                src_=("/app/security/register_webauthn_dark.png")
+                src_=(s"/app/security/register_webauthn_${if service.darkMode.get then "dark" else "light"}.png")
               }
             }
 

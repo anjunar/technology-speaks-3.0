@@ -96,7 +96,7 @@ class ConfirmPage extends PageComposite("Bestaetigen", pageResizable = false) {
 
               image {
                 classes = "security-page__image"
-                src_=("/app/security/confirm_dark.png")
+                src_=(s"/app/security/confirm_${if service.darkMode.get then "dark" else "light"}.png")
               }
             }
 

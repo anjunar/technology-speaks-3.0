@@ -3,8 +3,10 @@ package com.anjunar.technologyspeaks.followers
 import com.anjunar.technologyspeaks.core.User
 import com.anjunar.technologyspeaks.hibernate.search.annotations.RestPredicate
 import com.anjunar.technologyspeaks.hibernate.search.{AbstractSearch, Context, PredicateProvider}
+import jakarta.json.bind.annotation.JsonbProperty
+import org.springframework.stereotype.Component
 
-import scala.beans.BeanProperty
+import scala.annotation.meta.field
 import scala.compiletime.uninitialized
 
 class GroupSearch(
@@ -13,13 +15,15 @@ class GroupSearch(
   limit: Int
 ) extends AbstractSearch(sort, index, limit) {
 
-  @RestPredicate(classOf[GroupSearch.UserPredicate])
+  @(JsonbProperty @field)
+  @(RestPredicate @field)(classOf[GroupSearch.UserPredicate])
   var user: User = uninitialized
 
 }
 
 object GroupSearch {
 
+  @Component
   class UserPredicate extends PredicateProvider[User, Group] {
     override def build(context: Context[User, Group]): Unit = {
       context.predicates.add(

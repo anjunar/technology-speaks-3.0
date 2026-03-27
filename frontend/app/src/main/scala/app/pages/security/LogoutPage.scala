@@ -63,7 +63,7 @@ class LogoutPage extends PageComposite("Abmelden", pageResizable = false) {
 
             image {
               classes = "security-page__image"
-              src_=("/app/security/logout_dark.png")
+              src_=(s"/app/security/logout_${if service.darkMode.get then "dark" else "light"}.png")
             }
           }
 

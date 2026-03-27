@@ -85,7 +85,7 @@ class WebAuthnLoginPage extends PageComposite("Login mit WebAuthn", pageResizabl
 
               image {
                 classes = "security-page__image"
-                src = "/app/security/login_webauthn_dark.png"
+                src = s"/app/security/login_webauthn_${if service.darkMode.get then "dark" else "light"}.png"
               }
             }
 
