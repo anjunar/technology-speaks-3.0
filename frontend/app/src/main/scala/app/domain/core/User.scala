@@ -9,6 +9,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import java.util.UUID
 import scala.concurrent.Future
 import scala.scalajs.js
+import scala.scalajs.js.URIUtils.encodeURIComponent
 
 class User extends AbstractEntity[User] {
 
@@ -73,6 +74,12 @@ object User {
   def read(id: String): Future[Data[User]] =
     Api.get(s"/service/core/users/user/$id")
 
-  def list(index: Int, limit: Int): Future[Table[Data[User]]] =
-    Api.get(s"/service/core/users?index=$index&limit=$limit&sort=created:desc")
+  def list(index: Int, limit: Int, query: String = ""): Future[Table[Data[User]]] = {
+    val normalizedQuery = Option(query).map(_.trim).getOrElse("")
+    val queryParameter =
+      if (normalizedQuery.isEmpty) ""
+      else s"&name=${encodeURIComponent(normalizedQuery)}"
+
+    Api.get(s"/service/core/users?index=$index&limit=$limit&sort=created:desc$queryParameter")
+  }
 }

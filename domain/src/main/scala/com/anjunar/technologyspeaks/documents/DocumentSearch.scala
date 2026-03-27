@@ -6,21 +6,17 @@ import jakarta.json.bind.annotation.JsonbProperty
 import org.springframework.stereotype.Component
 import org.springframework.web.bind.annotation.RequestParam
 
+import scala.annotation.meta.field
 import scala.beans.BeanProperty
 
 class DocumentSearch(
-  nameValue: String = null,
+  @(JsonbProperty @field)
+  @(RestPredicate @field)(classOf[DocumentSearch.DocumentPredicate])
+  val name: String,
   sort: java.util.List[String] = new java.util.ArrayList[String](),
   index: Int = 0,
   limit: Int = 5
-) extends AbstractSearch(sort, index, limit) {
-
-    @JsonbProperty
-    @RequestParam
-    @RestPredicate(classOf[DocumentSearch.DocumentPredicate])
-    val name: String = nameValue
-
-}
+) extends AbstractSearch(sort, index, limit)
 
 object DocumentSearch {
 

@@ -82,6 +82,35 @@
     padding: 0 4px;
 }
 
+.users-page .users-page__search {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    margin: 0 4px;
+    border: 1px solid color-mix(in srgb, var(--glass-border) 20%, transparent);
+    border-radius: 16px;
+    background: color-mix(in srgb, var(--color-surface-overlay) 20%, transparent) !important;
+}
+
+.users-page .users-page__search .material-icons {
+    font-size: 16px;
+    opacity: 0.6;
+}
+
+.users-page .users-page__search input {
+    flex: 1 1 auto;
+    width: auto;
+    border: none;
+    background: transparent !important;
+    box-shadow: none;
+    font-size: 14px;
+}
+
+.users-page .users-page__search input:focus {
+    outline: none;
+}
+
 .users-page .users-page__panel-title {
     font-size: 20px;
     line-height: 1.1;

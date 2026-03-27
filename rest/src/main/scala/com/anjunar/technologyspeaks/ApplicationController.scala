@@ -28,7 +28,7 @@ class ApplicationController(val identityHolder: IdentityHolder) {
         .withId(true)
         .withRel("posts")
         .build(),
-      LinkBuilder.create[UsersController](_.list(new UserSearch()))
+      LinkBuilder.create[UsersController](_.list(new UserSearch("")))
         .withId(true)
         .withRel("users")
         .build(),

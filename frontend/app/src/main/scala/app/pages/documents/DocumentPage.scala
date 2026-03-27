@@ -40,6 +40,8 @@ class DocumentPage(val model: Document) extends PageComposite("Dokument") {
 
   private val currentDocumentProperty: Property[Document] = Property(model)
   private val searchQueryProperty: Property[String] = Property("")
+  private val leftSidebarExpandedProperty: Property[Boolean] = Property(true)
+  private val rightSidebarExpandedProperty: Property[Boolean] = Property(true)
   private val documentsProperty: RemoteListProperty[Data[Document], RemotePageQuery] =
     RemoteTableList.create[Data[Document]](pageSize = documentsPageSize) { (index, limit) =>
       Document.list(index, limit, searchQueryProperty.get)
@@ -91,12 +93,40 @@ class DocumentPage(val model: Document) extends PageComposite("Dokument") {
           overflow = "hidden"
         }
 
-        DocumentListPanel.panel(documentsProperty, currentDocumentProperty, searchQueryProperty, createNewDocument)
+        DocumentListPanel.panel(
+          documentsProperty,
+          currentDocumentProperty,
+          searchQueryProperty,
+          leftSidebarExpandedProperty,
+          createNewDocument
+        )
 
         div {
+          classes = "doc-editor-stage"
           style {
             flex = "1"
             minWidth = "0px"
+            position = "relative"
+          }
+
+          button("reopen-left-sidebar") {
+            buttonType = "button"
+            classes = Seq("material-icons", "doc-icon-btn", "doc-dock-toggle", "doc-dock-toggle-left")
+            text = "left_panel_open"
+            style {
+              display <-- leftSidebarExpandedProperty.map(isExpanded => if (isExpanded) "none" else "inline-flex")
+            }
+            onClick(_ => leftSidebarExpandedProperty.set(true))
+          }
+
+          button("reopen-right-sidebar") {
+            buttonType = "button"
+            classes = Seq("material-icons", "doc-icon-btn", "doc-dock-toggle", "doc-dock-toggle-right")
+            text = "right_panel_open"
+            style {
+              display <-- rightSidebarExpandedProperty.map(isExpanded => if (isExpanded) "none" else "inline-flex")
+            }
+            onClick(_ => rightSidebarExpandedProperty.set(true))
           }
 
           observeRender(currentDocumentProperty) { document =>
@@ -104,7 +134,7 @@ class DocumentPage(val model: Document) extends PageComposite("Dokument") {
           }
         }
 
-        IssuesPanel.panel(currentDocumentProperty, issuesProperty)
+        IssuesPanel.panel(currentDocumentProperty, issuesProperty, rightSidebarExpandedProperty)
       }
     }
   }
@@ -153,17 +183,20 @@ private final class DocumentListPanel(
                                        documents: ListProperty[Data[Document]],
                                        currentDocument: Property[Document],
                                        searchQuery: Property[String],
+                                       expanded: Property[Boolean],
                                        createNewDocument: () => Unit
                                      ) extends DivComposite {
 
   override protected def compose(using DslContext): Unit = {
     classes = Seq("doc-panel", "glass", "doc-sidebar", "doc-sidebar-left")
+    style {
+      display <-- expanded.map(isExpanded => if (isExpanded) "block" else "none")
+    }
 
     withDslContext {
       vbox {
         classes = "doc-panel-shell"
         style {
-          width = "420px"
           height = "100%"
         }
 
@@ -182,6 +215,13 @@ private final class DocumentListPanel(
               classes = "doc-panel-subtitle"
               text = "Diskurse"
             }
+          }
+
+          button("toggle-left-sidebar") {
+            buttonType = "button"
+            classes = Seq("material-icons", "doc-icon-btn", "doc-sidebar-toggle")
+            text = "left_panel_close"
+            onClick(_ => expanded.set(!expanded.get))
           }
         }
 
@@ -271,8 +311,9 @@ private object DocumentListPanel {
   def panel(documents: ListProperty[Data[Document]],
             currentDocument: Property[Document],
             searchQuery: Property[String],
+            expanded: Property[Boolean],
             createNewDocument: () => Unit)(using Scope): DocumentListPanel =
-    CompositeSupport.buildComposite(new DocumentListPanel(documents, currentDocument, searchQuery, createNewDocument))
+    CompositeSupport.buildComposite(new DocumentListPanel(documents, currentDocument, searchQuery, expanded, createNewDocument))
 }
 
 private final class DocumentSummaryCell extends TableCell[Data[Document], String] {
@@ -439,17 +480,20 @@ private object DocumentEditorPanel {
 
 private final class IssuesPanel(
                                  currentDocument: Property[Document],
-                                 issues: ListProperty[Issue]
+                                 issues: ListProperty[Issue],
+                                 expanded: Property[Boolean]
                                ) extends DivComposite {
 
   override protected def compose(using DslContext): Unit = {
     classes = Seq("doc-panel", "glass", "doc-sidebar", "doc-sidebar-right")
+    style {
+      display <-- expanded.map(isExpanded => if (isExpanded) "block" else "none")
+    }
 
     withDslContext {
       vbox {
         classes = "doc-panel-shell"
         style {
-          width = "420px"
           height = "100%"
           rowGap = "12px"
         }
@@ -469,6 +513,13 @@ private final class IssuesPanel(
               classes = "doc-panel-subtitle"
               text = "Dialoge"
             }
+          }
+
+          button("toggle-right-sidebar") {
+            buttonType = "button"
+            classes = Seq("material-icons", "doc-icon-btn", "doc-sidebar-toggle")
+            text = "right_panel_close"
+            onClick(_ => expanded.set(!expanded.get))
           }
         }
 
@@ -524,8 +575,8 @@ private final class IssuesPanel(
 }
 
 private object IssuesPanel {
-  def panel(currentDocument: Property[Document], issues: ListProperty[Issue])(using Scope): IssuesPanel =
-    CompositeSupport.buildComposite(new IssuesPanel(currentDocument, issues))
+  def panel(currentDocument: Property[Document], issues: ListProperty[Issue], expanded: Property[Boolean])(using Scope): IssuesPanel =
+    CompositeSupport.buildComposite(new IssuesPanel(currentDocument, issues, expanded))
 }
 
 private final class IssueListItem(currentDocument: Property[Document], issue: Issue) extends DivComposite {

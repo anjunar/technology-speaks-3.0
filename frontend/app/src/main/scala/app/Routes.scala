@@ -11,7 +11,7 @@ import app.pages.followers.{GroupsPage, RelationShipsPage}
 import app.pages.security.*
 import app.pages.timeline.{PostEditPage, PostViewPage, PostsPage}
 import app.support.{RemotePageQuery, RemoteTableList}
-import jfx.core.state.RemoteListProperty
+import jfx.core.state.{Property, RemoteListProperty}
 import jfx.dsl.{DslRuntime, Scope}
 import jfx.router.{Route, RouteContext}
 
@@ -116,13 +116,14 @@ object Routes {
       ConfirmPage.confirmPage()
     },
     asyncRoute("/core/users") {
+      val searchQueryProperty = Property("")
       val usersProperty: RemoteListProperty[Data[User], RemotePageQuery] =
-        RemoteTableList.create[Data[User]]() { (index, limit) =>
-          User.list(index, limit)
+        RemoteTableList.create[Data[User]](pageSize = 50) { (index, limit) =>
+          User.list(index, limit, searchQueryProperty.get)
         }
 
       usersProperty.reload(RemotePageQuery.first(50)).toFuture.map(_ => {
-        UsersPage.usersPage(usersProperty)
+        UsersPage.usersPage(usersProperty, searchQueryProperty)
       })
     },
     asyncRoute("/core/users/user/:id") {

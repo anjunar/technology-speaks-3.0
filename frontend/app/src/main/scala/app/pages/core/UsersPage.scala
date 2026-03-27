@@ -6,9 +6,11 @@ import app.ui.{CompositeSupport, PageComposite}
 import jfx.control.TableColumn.{cellFactory, cellValueFactory, column, prefWidth}
 import jfx.control.TableView.{fixedCellSize, items, rowFactory, tableView}
 import jfx.control.Image.{image, srcProperty}
+import jfx.form.Input.{input, inputType, placeholder, stringValueProperty}
 import jfx.layout.HBox.hbox
 import jfx.control.{TableCell, TableRow, TableView}
 import jfx.core.component.ElementComponent.*
+import jfx.core.state.Property.subscribeBidirectional
 import jfx.core.state.{ListProperty, Property, RemoteListProperty}
 import jfx.domain.Media
 import jfx.dsl.*
@@ -20,11 +22,22 @@ import jfx.statement.Conditional.{conditional, elseDo, thenDo}
 import org.scalajs.dom.HTMLImageElement
 
 import scala.concurrent.ExecutionContext
+import scala.scalajs.js.timers.{SetTimeoutHandle, clearTimeout, setTimeout}
 
-class UsersPage(usersProperty: ListProperty[Data[User]]) extends PageComposite("Users") {
+class UsersPage(usersProperty: RemoteListProperty[Data[User], RemotePageQuery], searchQuery: Property[String]) extends PageComposite("Users") {
+
+  private val pageSize = 50
+  private var pendingReload: SetTimeoutHandle | Null = null
 
   override def pageWidth: Int = 1040
   override def pageHeight: Int = 860
+
+  addDisposable(
+    searchQuery.observeWithoutInitial { _ =>
+      scheduleReload()
+    }
+  )
+  addDisposable(() => cancelScheduledReload())
 
   override protected def compose(using DslContext): Unit = {
     classProperty += "users-page"
@@ -78,6 +91,21 @@ class UsersPage(usersProperty: ListProperty[Data[User]]) extends PageComposite("
           }
 
           div {
+            classes = "users-page__search"
+
+            span {
+              classes = "material-icons"
+              text = "search"
+            }
+
+            input("search") {
+              placeholder = "Nach Nickname, Vorname oder Nachname suchen..."
+              inputType = "search"
+              subscribeBidirectional(searchQuery, stringValueProperty)
+            }
+          }
+
+          div {
             classes = "users-page__table-shell"
             style {
               flex = "1"
@@ -127,11 +155,24 @@ class UsersPage(usersProperty: ListProperty[Data[User]]) extends PageComposite("
       }
     }
   }
+
+  private def scheduleReload(): Unit = {
+    cancelScheduledReload()
+    pendingReload = setTimeout(250) {
+      RemoteTableList.reloadFirstPage(usersProperty, pageSize = pageSize)
+    }
+  }
+
+  private def cancelScheduledReload(): Unit =
+    if (pendingReload != null) {
+      clearTimeout(pendingReload.nn)
+      pendingReload = null
+    }
 }
 
 object UsersPage {
-  def usersPage(list : ListProperty[Data[User]])(using Scope): UsersPage =
-    CompositeSupport.buildPage(new UsersPage(list))({})
+  def usersPage(list : RemoteListProperty[Data[User], RemotePageQuery], searchQuery: Property[String])(using Scope): UsersPage =
+    CompositeSupport.buildPage(new UsersPage(list, searchQuery))({})
 }
 
 private final class UserNavigationRow extends TableRow[Data[User]] {

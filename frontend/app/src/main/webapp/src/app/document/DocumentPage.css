@@ -54,6 +54,11 @@
     flex: 0 0 288px;
 }
 
+.document-page .doc-sidebar-left {
+    width: 420px;
+    flex: 0 0 420px;
+}
+
 .document-page .doc-editor-panel {
     flex: 1 1 auto;
     min-width: 0;
@@ -73,6 +78,11 @@
     flex-basis: 304px;
 }
 
+.document-page .doc-editor-stage {
+    position: relative;
+    min-width: 0;
+}
+
 .document-page .doc-panel-shell {
     position: relative;
     z-index: 1;
@@ -90,12 +100,15 @@
     align-items: center;
     justify-content: space-between;
     padding: 2px 2px 0;
+    gap: 8px;
+    min-height: 34px;
 }
 
 .document-page .doc-heading {
     display: flex;
     flex-direction: column;
     gap: 4px;
+    min-width: 0;
 }
 
 .document-page .doc-panel-title {
@@ -260,7 +273,8 @@
     z-index: 1;
     width: min(100%, 820px);
     margin: 18px auto 6px;
-    padding: 6px 0 10px;
+    padding: 6px 0 10px 28px;
+    box-sizing: border-box;
     background: transparent !important;
     align-items: center;
     gap: 12px;
@@ -324,6 +338,24 @@
     font-size: 16px;
 }
 
+.document-page .doc-sidebar-toggle {
+    flex: 0 0 auto;
+}
+
+.document-page .doc-dock-toggle {
+    position: absolute;
+    top: 22px;
+    z-index: 4;
+}
+
+.document-page .doc-dock-toggle-left {
+    left: 0;
+}
+
+.document-page .doc-dock-toggle-right {
+    right: 0;
+}
+
 .document-page .doc-editor {
     position: relative;
     z-index: 1;
@@ -331,7 +363,8 @@
     min-height: 0;
     width: min(100%, 820px);
     margin: 0 auto;
-    padding: 0;
+    padding: 0 0 0 28px;
+    box-sizing: border-box;
     background: transparent !important;
     border-radius: 0;
     border-color: transparent;
@@ -399,16 +432,21 @@
         flex-basis: 248px;
     }
 
+    .document-page .doc-sidebar-left {
+        width: 360px;
+        flex-basis: 360px;
+    }
+
     .document-page .doc-titlebar {
         width: min(100%, 740px);
         margin: 12px auto 4px;
-        padding: 4px 0 8px;
+        padding: 4px 0 8px 22px;
     }
 
     .document-page .doc-editor {
         width: min(100%, 740px);
         margin: 0 auto;
-        padding: 0;
+        padding: 0 0 0 22px;
     }
 }
 
@@ -426,6 +464,10 @@
     .document-page .doc-editor-panel {
         width: 100%;
         flex: 0 0 auto;
+    }
+
+    .document-page .doc-dock-toggle {
+        top: 14px;
     }
 
     .document-page .doc-panel-shell {
