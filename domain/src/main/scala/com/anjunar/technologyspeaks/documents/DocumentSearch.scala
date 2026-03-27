@@ -15,9 +15,9 @@ class DocumentSearch(
   limit: Int = 5
 ) extends AbstractSearch(sort, index, limit) {
 
-  @JsonbProperty
-  @RequestParam
-  @RestPredicate(classOf[DocumentSearch.DocumentPredicate])
+    @JsonbProperty
+    @RequestParam
+    @RestPredicate(classOf[DocumentSearch.DocumentPredicate])
     val name: String = nameValue
 
 }

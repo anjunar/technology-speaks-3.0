@@ -9,21 +9,17 @@ import org.springframework.stereotype.Component
 import org.springframework.web.bind.annotation.PathVariable
 
 import java.util.UUID
+import scala.annotation.meta.field
 import scala.beans.BeanProperty
 
 class IssueCommentSearch(
-  issueValue: Issue = null,
+  @(JsonbProperty @field)
+  @(RestPredicate  @field)(classOf[IssueCommentSearch.IssuePredicate])
+  val issue: Issue,
   sort: java.util.List[String] = new java.util.ArrayList[String](),
   index: Int = 0,
   limit: Int = 5
-) extends AbstractSearch(sort, index, limit) {
-
-  @JsonbProperty
-  @PathVariable("issue")
-  @RestPredicate(classOf[IssueCommentSearch.IssuePredicate])
-    val issue: Issue = issueValue
-
-}
+) extends AbstractSearch(sort, index, limit)
 
 object IssueCommentSearch {
 
