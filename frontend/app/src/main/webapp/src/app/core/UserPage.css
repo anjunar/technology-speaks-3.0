@@ -27,8 +27,8 @@
     height: 100%;
     min-height: 0;
     box-sizing: border-box;
-    padding: 28px 30px 22px;
-    gap: 22px;
+    padding: 28px 30px 24px;
+    gap: 20px;
     overflow: hidden;
     justify-content: flex-start;
     align-items: stretch;
@@ -92,7 +92,7 @@
     min-width: 316px;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 18px;
     justify-content: flex-start;
 }
 
@@ -117,7 +117,7 @@
     flex-direction: column;
     border-radius: 24px;
     overflow: hidden;
-    padding: 16px;
+    padding: 18px;
     box-sizing: border-box;
 }
 
@@ -126,7 +126,7 @@
     flex-wrap: wrap;
     gap: 6px;
     order: 2;
-    margin-top: 10px;
+    margin-top: 14px;
     justify-content: flex-start;
     flex: 0 0 auto;
 }
@@ -136,8 +136,8 @@
 }
 
 .user-page .user-page-avatar .toolbar button {
-    min-height: 30px;
-    padding: 6px 9px;
+    min-height: 31px;
+    padding: 6px 10px;
     border-radius: 999px;
     border: 1px solid color-mix(in srgb, var(--glass-border) 10%, transparent);
     background: color-mix(in srgb, var(--color-surface-subtle) 52%, transparent);
@@ -169,8 +169,8 @@
 .user-page .user-page-profile-card {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    padding: 18px 18px 16px;
+    gap: 12px;
+    padding: 20px 20px 18px;
     border-radius: 20px;
 }
 
@@ -180,7 +180,7 @@
     min-height: 0;
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: 16px;
     overflow-y: auto;
     overflow-x: hidden;
     padding-right: 2px;
@@ -193,8 +193,8 @@
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    gap: 18px;
-    padding: 20px 20px 18px;
+    gap: 16px;
+    padding: 20px 20px 19px;
     border-radius: 22px;
 }
 
@@ -203,7 +203,7 @@
     align-items: flex-start;
     justify-content: space-between;
     gap: 14px;
-    padding-bottom: 2px;
+    padding-bottom: 4px;
     border-bottom: 1px solid color-mix(in srgb, var(--glass-border) 8%, transparent);
 }
 
@@ -211,8 +211,8 @@
     min-width: 0;
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    padding-bottom: 12px;
+    gap: 5px;
+    padding-bottom: 10px;
 }
 
 .user-page .user-page-section-title {
@@ -226,7 +226,7 @@
 .user-page .sub-form {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 18px 14px;
+    gap: 16px 14px;
 }
 
 .user-page .sub-form > .user-page-field-row {
@@ -237,12 +237,17 @@
     width: 100%;
     align-items: flex-start;
     gap: 16px;
-    padding-bottom: 2px;
+    padding: 1px 0 3px;
 }
 
 .user-page .user-page-field-input {
     flex: 1 1 auto;
     min-width: 0;
+}
+
+.user-page .user-page-field-input .jfx-input-container,
+.user-page .user-page-field-input .jfx-input-container__label {
+    margin-bottom: 0;
 }
 
 .user-page .user-page-access-control {
@@ -255,8 +260,8 @@
     content: "";
     position: absolute;
     left: -10px;
-    top: 8px;
-    bottom: 2px;
+    top: 6px;
+    bottom: 4px;
     width: 1px;
     background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--glass-border) 10%, transparent) 18%, color-mix(in srgb, var(--glass-border) 7%, transparent) 82%, transparent);
     pointer-events: none;
@@ -266,8 +271,8 @@
     width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 5px;
-    margin-top: 6px;
+    gap: 4px;
+    margin-top: 18px;
 }
 
 .user-page .user-page-access-label {
@@ -275,8 +280,8 @@
     letter-spacing: 0.18em;
     text-transform: uppercase;
     color: var(--color-text-faint);
-    opacity: 0.56;
-    padding-left: 8px;
+    opacity: 0.48;
+    padding-left: 10px;
 }
 
 .user-page .user-page-access-value,
@@ -378,7 +383,7 @@
     align-items: center;
     column-gap: 12px;
     flex: 0 0 auto;
-    padding: 12px 4px 0;
+    padding: 14px 6px 2px;
     margin-top: 0;
     border-top: 1px solid color-mix(in srgb, var(--glass-border) 8%, transparent);
     background: transparent;
@@ -405,6 +410,10 @@
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--color-text-primary);
+}
+
+.user-page .user-page-main + .user-form-actions {
+    align-self: stretch;
 }
 
 .user-page .user-follow-slot {

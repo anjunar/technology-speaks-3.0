@@ -399,15 +399,15 @@ html[data-theme="light"] .app-footer-control {
     top: 46%;
     left: 34px;
     min-width: 118px;
-    padding: 18px 10px;
+    padding: 18px 11px 17px;
 }
 
 .app-shell-nav-left .app-shell-nav-item {
     flex-direction: column;
     align-items: center !important;
     justify-content: center;
-    gap: 8px;
-    padding: 10px 8px;
+    gap: 7px;
+    padding: 11px 8px 10px;
     border-radius: 16px;
 }
 
@@ -422,6 +422,14 @@ html[data-theme="light"] .app-footer-control {
     transform: none;
 }
 
+.app-shell-nav-left .app-shell-nav-link[href="/security/logout"] {
+    opacity: 0.76;
+}
+
+.app-shell-nav-left .app-shell-nav-link[href="/security/logout"]:hover {
+    opacity: 0.92;
+}
+
 .app-shell-nav-left .icon {
     width: 64px;
     min-width: 64px;
@@ -431,10 +439,11 @@ html[data-theme="light"] .app-footer-control {
 
 .app-shell-nav-left .app-shell-nav-text {
     color: var(--color-text-soft);
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 600;
     text-align: center;
-    line-height: 1.2;
+    line-height: 1.18;
+    letter-spacing: 0.012em;
 }
 
 .app-shell-nav-center {
