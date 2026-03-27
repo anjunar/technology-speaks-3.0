@@ -3,11 +3,6 @@
     width: 100%;
     box-sizing: border-box;
     padding: 16px;
-
-    --user-panel-bg: var(--color-surface-raised);
-    --user-panel-border: var(--color-border-muted);
-    --user-panel-shadow: var(--color-shadow-medium);
-    --user-panel-muted: var(--color-surface-muted);
 }
 
 .user-page .user-page-shell {
@@ -22,8 +17,8 @@
     width: min(100%, 1080px);
     padding: 24px;
     box-sizing: border-box;
-    border: 1px solid var(--user-panel-border);
-    box-shadow: 0 18px 40px var(--user-panel-shadow);
+    border: 1px solid var(--color-border-muted);
+    box-shadow: 0 18px 40px var(--color-shadow-medium);
 }
 
 .user-page .user-page-content {
@@ -62,8 +57,8 @@
     align-items: center;
     justify-content: center;
     border-radius: 12px;
-    background: var(--user-panel-muted);
-    border: 1px solid var(--user-panel-border);
+    background: var(--color-surface-muted);
+    border: 1px solid var(--color-border-muted);
     transition: transform 120ms ease, border-color 120ms ease, background-color 120ms ease;
 }
 
@@ -102,8 +97,8 @@
     gap: 16px;
     padding: 14px 16px;
     border-radius: 16px;
-    background: var(--user-panel-muted);
-    border: 1px solid var(--user-panel-border);
+    background: var(--color-surface-muted);
+    border: 1px solid var(--color-border-muted);
 }
 
 .user-page .user-follow-copy {
@@ -135,7 +130,7 @@
     min-width: 140px;
     padding: 12px 16px;
     border-radius: 999px;
-    border: 1px solid var(--user-panel-border);
+    border: 1px solid var(--color-border-muted);
     transition: transform 120ms ease, border-color 120ms ease, background-color 120ms ease;
 }
 

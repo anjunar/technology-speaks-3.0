@@ -141,7 +141,7 @@ class ImageCropper(val name: String, override val standalone: Boolean = false) e
       previewPlaceholder.style.setProperty("justify-content", "center")
       previewPlaceholder.style.textAlign = "center"
       previewPlaceholder.style.padding = "16px"
-      previewPlaceholder.style.color = "var(--color-neutral-500)"
+      previewPlaceholder.style.color = "var(--color-text-muted)"
 
       syncPlaceholder(placeholderProperty.get)
 
@@ -579,7 +579,7 @@ private final class ImageCropperDialog(
 
     Option(crop).map(_.normalize()) match {
       case Some(rect) if rect.w > 0.0 && rect.h > 0.0 =>
-        context.fillStyle = "rgba(0,0,0,0.40)"
+        context.fillStyle = ImageCropper.themeColor("--color-surface-backdrop", "rgba(0, 0, 0, 0.32)")
         context.fillRect(0.0, 0.0, canvasWidth, canvasHeight)
 
         context.save()
@@ -589,7 +589,7 @@ private final class ImageCropperDialog(
         context.drawImage(image, 0.0, 0.0, canvasWidth, canvasHeight)
         context.restore()
 
-        context.strokeStyle = "rgba(255,255,255,0.92)"
+        context.strokeStyle = ImageCropper.themeColor("--color-text-inverse", "rgba(255, 255, 255, 0.94)")
         context.lineWidth = 1.0
         context.strokeRect(rect.x + 0.5, rect.y + 0.5, max(0.0, rect.w - 1.0), max(0.0, rect.h - 1.0))
 
@@ -598,9 +598,9 @@ private final class ImageCropperDialog(
         def drawHandle(centerX: Double, centerY: Double): Unit = {
           val x = centerX - handleSize / 2.0
           val y = centerY - handleSize / 2.0
-          context.fillStyle = "rgba(255,255,255,0.92)"
+          context.fillStyle = ImageCropper.themeColor("--color-text-inverse", "rgba(255, 255, 255, 0.94)")
           context.fillRect(x, y, handleSize, handleSize)
-          context.strokeStyle = "rgba(0,0,0,0.55)"
+          context.strokeStyle = ImageCropper.themeColor("--color-surface-scrim", "rgba(0, 0, 0, 0.22)")
           context.strokeRect(x + 0.5, y + 0.5, handleSize - 1.0, handleSize - 1.0)
         }
 
@@ -1110,4 +1110,13 @@ object ImageCropper {
 
   private[form] def context2d(canvas: HTMLCanvasElement): CanvasRenderingContext2D =
     Option(canvas.getContext("2d")).map(_.asInstanceOf[CanvasRenderingContext2D]).orNull
+
+  private[form] def themeColor(name: String, fallback: String): String = {
+    val resolved =
+      Option(window.getComputedStyle(document.documentElement).getPropertyValue(name))
+        .map(_.trim)
+        .filter(_.nonEmpty)
+
+    resolved.getOrElse(fallback)
+  }
 }

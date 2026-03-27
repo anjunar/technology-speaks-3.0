@@ -3,12 +3,6 @@
     width: 100%;
     box-sizing: border-box;
     padding: 16px;
-
-    --relation-surface: var(--color-surface-soft);
-    --relation-surface-border: var(--color-border-strong);
-    --relation-surface-shadow: var(--color-shadow-strong);
-    --relation-chip-bg: var(--color-surface-overlay);
-    --relation-chip-border: var(--color-border-strong);
 }
 
 .relation-ships-page .relation-ship-page-table {
@@ -40,9 +34,9 @@
 .relation-ships-page .relation-ship-groups-editor .jfx-combo-box {
     min-height: 42px;
     padding: 0 12px;
-    border: 1px solid var(--relation-chip-border);
+    border: 1px solid var(--color-border-strong);
     border-radius: 999px;
-    background: var(--relation-chip-bg);
+    background: var(--color-surface-overlay);
     transition: border-color 160ms ease, transform 160ms ease, background-color 160ms ease;
 }
 

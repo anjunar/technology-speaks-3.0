@@ -4,12 +4,6 @@
     width: 100%;
     box-sizing: border-box;
     padding: 8px;
-
-    --doc-panel-bg: var(--color-surface-raised);
-    --doc-panel-border: var(--color-border-subtle);
-    --doc-panel-shadow: var(--color-shadow-soft);
-    --doc-hover-bg: var(--color-surface-subtle);
-    --doc-selected-bg: var(--color-surface-hover);
 }
 
 .document-page .documents-layout {
@@ -19,9 +13,9 @@
 }
 
 .document-page .doc-panel {
-    background: var(--doc-panel-bg);
-    border: 1px solid var(--doc-panel-border);
-    box-shadow: 0 10px 28px var(--doc-panel-shadow);
+    background: var(--color-surface-raised);
+    border: 1px solid var(--color-border-subtle);
+    box-shadow: 0 10px 28px var(--color-shadow-soft);
     overflow: hidden;
     min-height: 0;
 }
@@ -46,7 +40,7 @@
     gap: 10px;
     padding: 10px 12px;
     margin: 0 12px 12px;
-    border: 1px solid var(--doc-panel-border);
+    border: 1px solid var(--color-border-subtle);
 }
 
 .document-page .doc-search .material-icons {
@@ -76,11 +70,11 @@
 }
 
 .document-page .doc-table .jfx-table-row:hover {
-    background: var(--doc-hover-bg);
+    background: var(--color-surface-subtle);
 }
 
 .document-page .doc-table .jfx-table-row.selected {
-    background: var(--doc-selected-bg);
+    background: var(--color-surface-hover);
     border-left: 3px solid var(--color-selected);
 }
 
@@ -89,13 +83,13 @@
     width: calc(100% - 24px);
     padding: 12px 12px;
     border-radius: 12px;
-    background: var(--doc-hover-bg);
-    border: 1px solid var(--doc-panel-border);
+    background: var(--color-surface-subtle);
+    border: 1px solid var(--color-border-subtle);
     transition: background-color 120ms ease, transform 120ms ease, border-color 120ms ease;
 }
 
 .document-page .doc-new-btn:hover {
-    background: var(--doc-selected-bg);
+    background: var(--color-surface-hover);
     border-color: var(--color-selected);
     transform: translateY(-1px);
 }
@@ -110,7 +104,7 @@
     align-items: center;
     gap: 10px;
     padding: 14px 16px;
-    border-bottom: 1px solid var(--doc-panel-border);
+    border-bottom: 1px solid var(--color-border-subtle);
 }
 
 .document-page .doc-titlebar input {
@@ -131,13 +125,13 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: var(--doc-hover-bg);
-    border: 1px solid var(--doc-panel-border);
+    background: var(--color-surface-subtle);
+    border: 1px solid var(--color-border-subtle);
     transition: background-color 120ms ease, transform 120ms ease, border-color 120ms ease;
 }
 
 .document-page .doc-icon-btn:hover {
-    background: var(--doc-selected-bg);
+    background: var(--color-surface-hover);
     border-color: var(--color-selected);
     transform: translateY(-1px);
 }
@@ -157,8 +151,8 @@
 }
 
 .document-page .doc-editor .ProseMirror {
-    border: 1px solid var(--doc-panel-border);
-    background: var(--doc-hover-bg);
+    border: 1px solid var(--color-border-subtle);
+    background: var(--color-surface-subtle);
     padding: 16px 18px;
     box-sizing: border-box;
 }

@@ -31,9 +31,7 @@ final class Drawer extends ManagedElementComponent[HTMLDivElement] {
   private val openObserver = openProperty.observe(syncOpenState)
   addDisposable(openObserver)
 
-  private val widthObserver = widthProperty.observe { width =>
-    css.setProperty("--drawer-width", width)
-  }
+  private val widthObserver = widthProperty.observe(_ => syncPanelWidth())
   addDisposable(widthObserver)
 
   private val scrimClickListener: Event => Unit = _ => {
@@ -95,6 +93,8 @@ final class Drawer extends ManagedElementComponent[HTMLDivElement] {
 
       panelShell.addChild(panel)
       panel.addChild(navigationHost)
+
+      syncPanelWidth()
     }
 
   private[jfx] def navigationHostComponent: Div =
@@ -106,9 +106,19 @@ final class Drawer extends ManagedElementComponent[HTMLDivElement] {
   private def syncOpenState(isOpen: Boolean): Unit =
     if (isOpen) {
       element.classList.add("jfx-drawer--open")
+      syncPanelWidth()
     } else {
       element.classList.remove("jfx-drawer--open")
+      syncPanelWidth()
     }
+
+  private def syncPanelWidth(): Unit = {
+    val widthValue = widthProperty.get
+    val responsiveWidth = s"min(84vw, $widthValue)"
+    panel.element.style.width = widthValue
+    panelShell.element.style.width =
+      if (openProperty.get) responsiveWidth else "0px"
+  }
 }
 
 object Drawer {

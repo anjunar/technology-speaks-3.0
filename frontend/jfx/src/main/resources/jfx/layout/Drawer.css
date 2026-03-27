@@ -1,5 +1,4 @@
 div.jfx-drawer {
-    --drawer-width: 280px;
     position: relative;
     display: flex;
     min-width: 0;
@@ -23,7 +22,7 @@ div.jfx-drawer > .jfx-drawer__panel-shell {
 
 div.jfx-drawer > .jfx-drawer__panel-shell > .jfx-drawer__panel {
     box-sizing: border-box;
-    width: var(--drawer-width);
+    width: 280px;
     height: 100%;
     overflow-y: auto;
     background-color: var(--color-background-secondary);
@@ -35,7 +34,7 @@ div.jfx-drawer > .jfx-drawer__panel-shell > .jfx-drawer__panel {
 }
 
 div.jfx-drawer.jfx-drawer--open > .jfx-drawer__panel-shell {
-    width: var(--drawer-width);
+    width: 280px;
 }
 
 div.jfx-drawer.jfx-drawer--open > .jfx-drawer__panel-shell > .jfx-drawer__panel {
@@ -83,7 +82,7 @@ div.jfx-drawer > .jfx-drawer__content {
         top: 0;
         bottom: 0;
         left: 0;
-        width: min(84vw, var(--drawer-width));
+        width: min(84vw, 280px);
         max-width: 100%;
         overflow: visible;
         pointer-events: none;
@@ -91,7 +90,7 @@ div.jfx-drawer > .jfx-drawer__content {
     }
 
     div.jfx-drawer > .jfx-drawer__panel-shell > .jfx-drawer__panel {
-        width: min(84vw, var(--drawer-width));
+        width: min(84vw, 280px);
     }
 
     div.jfx-drawer.jfx-drawer--open > .jfx-drawer__scrim {

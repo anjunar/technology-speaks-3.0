@@ -94,7 +94,6 @@ html[data-theme="light"] {
     --gradient-surface-strong: linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.66));
     --gradient-chrome-top: linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.58));
     --gradient-chrome-bottom: linear-gradient(180deg, rgba(255, 255, 255, 0.58), rgba(255, 255, 255, 0.74));
-    --image-app-background: none;
 
     --glass-bg: var(--color-surface-raised);
     --glass-border: var(--color-border-inverse-strong);
@@ -208,7 +207,6 @@ html[data-theme="dark"] {
     --gradient-surface-strong: linear-gradient(180deg, rgba(14, 19, 31, 0.74), rgba(10, 13, 22, 0.58));
     --gradient-chrome-top: linear-gradient(180deg, rgba(10, 10, 10, 0.42), rgba(10, 10, 10, 0.18));
     --gradient-chrome-bottom: linear-gradient(180deg, rgba(10, 10, 10, 0.18), rgba(10, 10, 10, 0.44));
-    --image-app-background: none;
 
     --glass-bg: var(--color-surface-raised);
     --glass-border: var(--color-border-inverse-strong);
