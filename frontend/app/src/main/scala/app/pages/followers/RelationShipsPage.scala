@@ -14,7 +14,8 @@ import jfx.core.state.{Property, RemoteListProperty}
 import jfx.domain.Media
 import jfx.dsl.*
 import jfx.form.ComboBox
-import jfx.form.ComboBox.{comboBox, comboItem, comboItemSelected, comboSelectedItems}
+import jfx.form.ComboBox.*
+import jfx.form.Control.placeholder
 import jfx.layout.Div.div
 import jfx.layout.HBox
 import jfx.layout.HBox.hbox
@@ -232,22 +233,20 @@ private final class RelationShipGroupsCell(availableGroups: RemoteListProperty[G
     classes = "relation-ship-groups-editor"
 
     selectorRef = comboBox[Group]("relationGroups", standalone = true) {
-      val current = summon[ComboBox[Group]]
-      current.placeholder = "Keine Gruppe"
+      placeholder = "Keine Gruppe"
 
-      current.items = availableGroups
-      current.multipleSelection = true
-      current.rowHeightPx = 40.0
-      current.dropdownHeightPx = 280.0
-
-      current.valueRenderer = {
+      ComboBox.items = availableGroups
+//      multipleSelection = true
+      rowHeightPx = 40.0
+      dropdownHeightPx = 280.0
+      valueRenderer = {
         div {
           classes = "relation-ship-groups-value"
           text = RelationShipsPage.groupNames(comboSelectedItems[Group].iterator)
         }
       }
 
-      current.itemRenderer = {
+      itemRenderer = {
         val group = comboItem[Group]
         val selected = comboItemSelected
 
@@ -270,6 +269,7 @@ private final class RelationShipGroupsCell(availableGroups: RemoteListProperty[G
         }
       }
 
+/*
       current.dropdownFooterRenderer = {
         link("/followers/groups") {
           classes = Seq("jfx-combo-box__footer-link", "relation-ship-manage-groups-link")
@@ -277,6 +277,7 @@ private final class RelationShipGroupsCell(availableGroups: RemoteListProperty[G
           element.setAttribute("data-jfx-combo-box-action", "true")
         }
       }
+*/
     }
   }
 
