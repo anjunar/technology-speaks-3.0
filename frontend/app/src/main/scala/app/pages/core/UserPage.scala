@@ -111,21 +111,6 @@ class UserPage(val payload: Data[User]) extends PageComposite("User", pageResiza
                   outputMaxHeight = 512
                 }
 
-                div {
-                  classes = "user-page-profile-card"
-
-                  span {
-                    classes = "user-page-section-eyebrow"
-                    text = "Profilname"
-                  }
-
-                  inputContainer("Nickname") {
-                    input("nickName") {
-                      classes = "user-page-input"
-                    }
-                  }
-                }
-
                 renderByRel("update", model.links) { () =>
                   div {
                     classes = "user-page-profile-card"
@@ -147,6 +132,21 @@ class UserPage(val payload: Data[User]) extends PageComposite("User", pageResiza
 
               vbox {
                 classes = "user-page-details"
+
+                div {
+                  classes = "user-page-section"
+
+                  span {
+                    classes = "user-page-section-eyebrow"
+                    text = "Profilname"
+                  }
+
+                  inputContainer("Nickname") {
+                    input("nickName") {
+                      classes = "user-page-input"
+                    }
+                  }
+                }
 
                 div {
                   classes = "user-page-section"

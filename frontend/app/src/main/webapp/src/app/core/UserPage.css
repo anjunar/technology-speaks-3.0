@@ -166,6 +166,11 @@
     border-radius: 16px;
 }
 
+.user-page .user-page-avatar .preview {
+    object-fit: cover;
+    object-position: center;
+}
+
 .user-page .user-page-profile-card {
     display: flex;
     flex-direction: column;
