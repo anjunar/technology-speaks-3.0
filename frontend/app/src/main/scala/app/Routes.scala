@@ -1,8 +1,9 @@
 package app
 
-import app.domain.core.{Data, User}
+import app.domain.core.{Data, Link, User}
 import app.domain.documents.{Document, Issue}
 import app.domain.followers.{Group, RelationShip}
+import app.domain.security.Account
 import app.domain.timeline.Post
 import app.pages.HomePage.homePage
 import app.pages.core.{UserPage, UsersPage}
@@ -125,6 +126,11 @@ object Routes {
     },
     route("/security/logout") {
       LogoutPage.logoutPage()
+    },
+    asyncRoute("/security/account") {
+      Account.read().map { account =>
+        AccountPage.accountPage(account)
+      }
     },
     route("/security/confirm") {
       ConfirmPage.confirmPage()

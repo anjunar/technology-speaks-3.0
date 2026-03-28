@@ -126,6 +126,22 @@ class UserPage(val payload: Data[User]) extends PageComposite("User", pageResiza
                   }
                 }
 
+                renderByRel("update", model.links) { () =>
+                  div {
+                    classes = "user-page-profile-card"
+
+                    span {
+                      classes = "user-page-section-eyebrow"
+                      text = "Account"
+                    }
+
+                    link("/security/account") {
+                      classes = "user-page-manage-link"
+                      text = "Passwort und Zugang verwalten"
+                    }
+                  }
+                }
+
                 UserFollowAction.action(model)
               }
 

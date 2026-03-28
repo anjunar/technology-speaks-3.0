@@ -48,6 +48,10 @@ class ApplicationController(val identityHolder: IdentityHolder) {
         .withId(true)
         .withRel("login")
         .build(),
+      LinkBuilder.create[AccountController](_.read())
+        .withId(true)
+        .withRel("account")
+        .build(),
       LinkBuilder.create[PasswordRegisterController](_.register(new JsonObject()))
         .withId(true)
         .withRel("register")
