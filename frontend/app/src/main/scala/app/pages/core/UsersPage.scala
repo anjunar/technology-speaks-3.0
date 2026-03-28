@@ -127,6 +127,8 @@ class UsersPage(usersProperty: RemoteListProperty[Data[User], RemotePageQuery], 
               column[Data[User], String]("Nickname") {
                 val current = summon[jfx.control.TableColumn[Data[User], String]]
                 current.setPrefWidth(260.0)
+                current.setSortable(true)
+                current.setSortKey("nickName")
                 current.setCellValueFactory(features => features.value.data.nickName)
               }
 
@@ -139,6 +141,8 @@ class UsersPage(usersProperty: RemoteListProperty[Data[User], RemotePageQuery], 
               column[Data[User], String]("Vorname") {
                 val current = summon[jfx.control.TableColumn[Data[User], String]]
                 current.setPrefWidth(220.0)
+                current.setSortable(true)
+                current.setSortKey("info.firstName")
                 current.setCellValueFactory(features => {
                   val info = features.value.data.info.get
                   Property(if (info == null) "" else info.firstName.get)
@@ -148,6 +152,8 @@ class UsersPage(usersProperty: RemoteListProperty[Data[User], RemotePageQuery], 
               column[Data[User], String]("Nachname") {
                 val current = summon[jfx.control.TableColumn[Data[User], String]]
                 current.setPrefWidth(220.0)
+                current.setSortable(true)
+                current.setSortKey("info.lastName")
                 current.setCellValueFactory(features => {
                   val info = features.value.data.info.get
                   Property(if (info == null) "" else info.lastName.get)

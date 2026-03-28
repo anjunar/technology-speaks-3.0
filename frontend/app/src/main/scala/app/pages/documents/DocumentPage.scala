@@ -45,14 +45,14 @@ class DocumentPage(val model: Document) extends PageComposite("Dokument") {
   private val leftSidebarExpandedProperty: Property[Boolean] = Property(true)
   private val rightSidebarExpandedProperty: Property[Boolean] = Property(true)
   private val documentsProperty: RemoteListProperty[Data[Document], RemotePageQuery] =
-    RemoteTableList.create[Data[Document]](pageSize = documentsPageSize) { (index, limit) =>
-      Document.list(index, limit, searchQueryProperty.get)
+    RemoteTableList.create[Data[Document]](pageSize = documentsPageSize) { query =>
+      Document.list(query.index, query.limit, searchQueryProperty.get, sorting = query.effectiveSortSpecs(Seq("created:desc")))
     }
   private val issuesProperty: RemoteListProperty[Issue, RemotePageQuery] =
-    RemoteTableList.createMapped[Data[Issue], Issue](pageSize = issuesPageSize) { (index, limit) =>
+    RemoteTableList.createMapped[Data[Issue], Issue](pageSize = issuesPageSize) { query =>
       val document = currentDocumentProperty.get
       if (document.id.get != null) {
-        Issue.list(index, limit, document)
+        Issue.list(query.index, query.limit, document)
       } else {
         Future.successful(new Table[Data[Issue]]())
       }
@@ -285,10 +285,13 @@ private final class DocumentListPanel(
           val table = tableView[Data[Document]] {
             items = documents
             fixedCellSize = 64.0
-            showHeader = false
+            showHeader = true
 
             column[Data[Document], String]("Titel") {
+              val current = summon[TableColumn[Data[Document], String]]
               prefWidth = 400.0
+              current.setSortable(true)
+              current.setSortKey("title")
               cellValueFactory = (features: TableColumn.CellDataFeatures[Data[Document], String]) => features.value.data.title
               cellFactory = (column: TableColumn[Data[Document], String]) => new DocumentSummaryCell()
             }

@@ -74,12 +74,19 @@ object User {
   def read(id: String): Future[Data[User]] =
     Api.get(s"/service/core/users/user/$id")
 
-  def list(index: Int, limit: Int, query: String = ""): Future[Table[Data[User]]] = {
+  def list(index: Int, limit: Int, query: String = "", sorting: Seq[String] = Seq("created:desc")): Future[Table[Data[User]]] = {
     val normalizedQuery = Option(query).map(_.trim).getOrElse("")
     val queryParameter =
       if (normalizedQuery.isEmpty) ""
       else s"&name=${encodeURIComponent(normalizedQuery)}"
+    val sortParameter = renderSortParameters(sorting)
 
-    Api.get(s"/service/core/users?index=$index&limit=$limit&sort=created:desc$queryParameter")
+    Api.get(s"/service/core/users?index=$index&limit=$limit$sortParameter$queryParameter")
+  }
+
+  private def renderSortParameters(sorting: Seq[String]): String = {
+    val normalizedSorting = sorting.iterator.map(_.trim).filter(_.nonEmpty).toVector
+    if (normalizedSorting.isEmpty) ""
+    else normalizedSorting.map(value => s"&sort=${encodeURIComponent(value)}").mkString
   }
 }

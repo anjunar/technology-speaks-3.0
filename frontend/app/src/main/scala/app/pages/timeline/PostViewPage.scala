@@ -35,9 +35,9 @@ class PostViewPage(val model: Post) extends PageComposite("Post") {
 
   private val itemsProperty: ListProperty[Data[? <: AbstractEntity[?]]] = ListProperty()
   private val commentsProperty: RemoteListProperty[FirstComment, RemotePageQuery] =
-    RemoteTableList.createMapped[Data[FirstComment], FirstComment](pageSize = pageSize) { (index, limit) =>
+    RemoteTableList.createMapped[Data[FirstComment], FirstComment](pageSize = pageSize) { query =>
       if (model.id.get != null) {
-        FirstComment.list(index, limit, model)
+        FirstComment.list(query.index, query.limit, model)
       } else {
         Future.successful(new Table[Data[FirstComment]]())
       }

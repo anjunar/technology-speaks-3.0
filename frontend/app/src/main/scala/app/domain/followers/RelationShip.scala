@@ -64,11 +64,18 @@ object RelationShip {
   def read(id: String): Future[Data[RelationShip]] =
     Api.get(s"/service/followers/relationships/relationship/$id")
 
-  def list(index: Int, limit: Int, query: String = "", groups: Seq[Group] = Seq.empty): Future[Table[Data[RelationShip]]] = {
+  def list(
+    index: Int,
+    limit: Int,
+    query: String = "",
+    groups: Seq[Group] = Seq.empty,
+    sorting: Seq[String] = Seq("created:desc")
+  ): Future[Table[Data[RelationShip]]] = {
     val normalizedQuery = Option(query).map(_.trim).getOrElse("")
     val queryParameter =
       if (normalizedQuery.isEmpty) ""
       else s"&name=${encodeURIComponent(normalizedQuery)}"
+    val sortParameter = renderSortParameters(sorting)
 
     val groupParameters =
       groups.iterator
@@ -80,7 +87,13 @@ object RelationShip {
       if (groupParameters.isEmpty) ""
       else s"&$groupParameters"
 
-    Api.get(s"/service/followers/relationships?index=$index&limit=$limit&sort=created:desc$queryParameter$groupsSuffix")
+    Api.get(s"/service/followers/relationships?index=$index&limit=$limit$sortParameter$queryParameter$groupsSuffix")
+  }
+
+  private def renderSortParameters(sorting: Seq[String]): String = {
+    val normalizedSorting = sorting.iterator.map(_.trim).filter(_.nonEmpty).toVector
+    if (normalizedSorting.isEmpty) ""
+    else normalizedSorting.map(value => s"&sort=${encodeURIComponent(value)}").mkString
   }
 
   private def deserializeAssignedGroups(raw: js.Any): Seq[Group] =

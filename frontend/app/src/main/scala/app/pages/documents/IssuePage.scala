@@ -41,9 +41,9 @@ class IssuePage(val model: Issue) extends PageComposite("Aufgabe", pageResizable
   private val itemsProperty: ListProperty[Data[? <: AbstractEntity[?]]] = ListProperty()
 
   private val commentsProperty: RemoteListProperty[FirstComment, RemotePageQuery] =
-    RemoteTableList.createMapped[Data[FirstComment], FirstComment](pageSize = pageSize) { (index, limit) =>
+    RemoteTableList.createMapped[Data[FirstComment], FirstComment](pageSize = pageSize) { query =>
       if (canLoadComments) {
-        FirstComment.list(index, limit, model)
+        FirstComment.list(query.index, query.limit, model)
       } else {
         Future.successful(new Table[Data[FirstComment]]())
       }

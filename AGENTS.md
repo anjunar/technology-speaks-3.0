@@ -4,6 +4,8 @@ Führe Headless tests mit 1980x1080 aus
 
 Server ist localhost:5173
 
+Für Server Neustarts frage den Nutzer immer an
+
 User: p_bittner@gmx.de
 
 Passwort: test

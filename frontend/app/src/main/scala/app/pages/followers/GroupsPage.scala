@@ -34,8 +34,8 @@ class GroupsPage extends PageComposite("Groups") {
 
   private val pageSize = 100
   private val groupsProperty: RemoteListProperty[Data[Group], RemotePageQuery] =
-    RemoteTableList.create[Data[Group]](pageSize = pageSize) { (index, limit) =>
-      Group.list(index, limit)
+    RemoteTableList.create[Data[Group]](pageSize = pageSize) { query =>
+      Group.list(query.index, query.limit, sorting = query.effectiveSortSpecs(Seq("created:desc")))
     }
   private val currentGroupProperty: Property[Group] = Property(new Group())
 
@@ -112,13 +112,15 @@ class GroupsPage extends PageComposite("Groups") {
                 val table = tableView[Data[Group]] {
                   items = groupsProperty
                   fixedCellSize = 62.0
-                  showHeader = false
+                  showHeader = true
 
-                column[Data[Group], String]("Name") {
-                  val current = summon[TableColumn[Data[Group], String]]
-                  current.setPrefWidth(260.0)
-                  current.setCellValueFactory(features => features.value.data.name)
-                }
+                  column[Data[Group], String]("Name") {
+                    val current = summon[TableColumn[Data[Group], String]]
+                    current.setPrefWidth(260.0)
+                    current.setSortable(true)
+                    current.setSortKey("name")
+                    current.setCellValueFactory(features => features.value.data.name)
+                  }
                 }
 
                 table.classProperty += "groups-table"

@@ -44,8 +44,8 @@ class RelationShipsPage(
   private val pageSize = 200
   private var pendingReload: SetTimeoutHandle | Null = null
   private val availableGroupsProperty: RemoteListProperty[Group, RemotePageQuery] =
-    RemoteTableList.createMapped[Data[Group], Group](pageSize = pageSize) { (index, limit) =>
-      Group.list(index, limit)
+    RemoteTableList.createMapped[Data[Group], Group](pageSize = pageSize) { query =>
+      Group.list(query.index, query.limit, sorting = query.effectiveSortSpecs(Seq("created:desc")))
     }(_.data)
 
   addDisposable(
@@ -199,18 +199,24 @@ class RelationShipsPage(
               column[Data[RelationShip], String]("Nickname") {
                 val current = summon[TableColumn[Data[RelationShip], String]]
                 current.setPrefWidth(200.0)
+                current.setSortable(true)
+                current.setSortKey("follower.nickName")
                 current.setCellValueFactory(features => Property(RelationShipsPage.nickName(features.value)))
               }
 
               column[Data[RelationShip], String]("Vorname") {
                 val current = summon[TableColumn[Data[RelationShip], String]]
                 current.setPrefWidth(150.0)
+                current.setSortable(true)
+                current.setSortKey("follower.info.firstName")
                 current.setCellValueFactory(features => Property(RelationShipsPage.firstName(features.value)))
               }
 
               column[Data[RelationShip], String]("Nachname") {
                 val current = summon[TableColumn[Data[RelationShip], String]]
                 current.setPrefWidth(150.0)
+                current.setSortable(true)
+                current.setSortKey("follower.info.lastName")
                 current.setCellValueFactory(features => Property(RelationShipsPage.lastName(features.value)))
               }
 
