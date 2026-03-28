@@ -1,0 +1,13 @@
+{
+  "name": "cloudflare-dyndns",
+  "version": "1.0.0",
+  "description": "DynDNS Update für Cloudflare über Node.js",
+  "main": "update-ip.js",
+  "scripts": {
+    "start": "node update-ip.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "dotenv": "^16.0.0"
+  }
+}
