@@ -32,7 +32,7 @@ class ApplicationController(val identityHolder: IdentityHolder) {
         .withId(true)
         .withRel("users")
         .build(),
-      LinkBuilder.create[FollowersController](_.list(new RelationShipSearch()))
+      LinkBuilder.create[FollowersController](_.list(new RelationShipSearch("", new java.util.ArrayList())))
         .withId(true)
         .withRel("followers")
         .build(),

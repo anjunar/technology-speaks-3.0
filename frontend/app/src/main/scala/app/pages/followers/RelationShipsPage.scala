@@ -10,12 +10,14 @@ import jfx.control.TableColumn.column
 import jfx.control.TableView.{fixedCellSize, items, rowFactory, tableView}
 import jfx.control.{TableCell, TableColumn, TableRow, TableView}
 import jfx.core.component.ElementComponent.*
-import jfx.core.state.{Property, RemoteListProperty}
+import jfx.core.state.Property.subscribeBidirectional
+import jfx.core.state.{ListProperty, Property, RemoteListProperty}
 import jfx.domain.Media
 import jfx.dsl.*
 import jfx.form.ComboBox
 import jfx.form.ComboBox.*
 import jfx.form.Control.placeholder
+import jfx.form.Input.{input, inputType, stringValueProperty}
 import jfx.layout.Div.div
 import jfx.layout.HBox
 import jfx.layout.HBox.hbox
@@ -26,19 +28,37 @@ import jfx.statement.Conditional.{conditional, elseDo, thenDo}
 
 import scala.concurrent.ExecutionContext
 import scala.scalajs.js.JSConverters.*
+import scala.scalajs.js.timers.{SetTimeoutHandle, clearTimeout, setTimeout}
 import scala.util.{Failure, Success}
 
-class RelationShipsPage(val relationShipsProperty: RemoteListProperty[Data[RelationShip], RemotePageQuery]) extends PageComposite("Following") {
+class RelationShipsPage(
+  val relationShipsProperty: RemoteListProperty[Data[RelationShip], RemotePageQuery],
+  searchQuery: Property[String],
+  selectedGroups: ListProperty[Group]
+) extends PageComposite("Following") {
 
   override def pageWidth: Int = 1040
   override def pageHeight: Int = 860
 
   private given ExecutionContext = ExecutionContext.global
   private val pageSize = 200
+  private var pendingReload: SetTimeoutHandle | Null = null
   private val availableGroupsProperty: RemoteListProperty[Group, RemotePageQuery] =
     RemoteTableList.createMapped[Data[Group], Group](pageSize = pageSize) { (index, limit) =>
       Group.list(index, limit)
     }(_.data)
+
+  addDisposable(
+    searchQuery.observeWithoutInitial { _ =>
+      scheduleReload()
+    }
+  )
+  addDisposable(
+    selectedGroups.observeWithoutInitial { _ =>
+      scheduleReload()
+    }
+  )
+  addDisposable(() => cancelScheduledReload())
 
   override protected def compose(using DslContext): Unit = {
     classProperty += "relation-ships-page"
@@ -93,6 +113,70 @@ class RelationShipsPage(val relationShipsProperty: RemoteListProperty[Data[Relat
             }
           }
 
+          hbox {
+            classes = "relation-ships-page__filters"
+
+            div {
+              classes = "relation-ships-page__search"
+
+              span {
+                classes = "material-icons"
+                text = "search"
+              }
+
+              input("search") {
+                placeholder = "Nach Nickname, Vorname oder Nachname suchen..."
+                inputType = "search"
+                subscribeBidirectional(searchQuery, stringValueProperty)
+              }
+            }
+
+            div {
+              classes = "relation-ships-page__group-filter"
+
+              val groupFilterRef = comboBox[Group]("relationshipGroupFilter", standalone = true) {
+                ComboBox.items = availableGroupsProperty
+                placeholder = "Alle Gruppen"
+                identityBy = { (group: Group) => Option(group.id.get).getOrElse(group) }
+                multipleSelection = true
+                rowHeightPx = 40.0
+                dropdownHeightPx = 220.0
+
+                valueRenderer = {
+                  div {
+                    classes = "relation-ships-page__group-filter-value"
+                    text = RelationShipsPage.groupFilterValue(comboSelectedItems[Group].iterator)
+                  }
+                }
+
+                itemRenderer = {
+                  val group = comboItem[Group]
+                  val selected = comboItemSelected
+
+                  hbox {
+                    classes = "relation-ships-page__group-filter-option"
+
+                    div {
+                      classes = Seq(
+                        "material-icons",
+                        "relation-ships-page__group-filter-option-icon",
+                        if (selected) "is-selected" else "is-unselected"
+                      )
+                      text = if (selected) "check_circle" else "radio_button_unchecked"
+                    }
+
+                    div {
+                      classes = "relation-ships-page__group-filter-option-text"
+                      text = Option(group.name.get).filter(_.trim.nonEmpty).getOrElse("(Ohne Namen)")
+                    }
+                  }
+                }
+              }
+
+              addDisposable(ListProperty.subscribeBidirectional(groupFilterRef.valueProperty, selectedGroups))
+            }
+          }
+
           div {
             classes = "relation-ships-page__table-shell"
             style {
@@ -134,7 +218,7 @@ class RelationShipsPage(val relationShipsProperty: RemoteListProperty[Data[Relat
                 val current = summon[TableColumn[Data[RelationShip], Data[RelationShip]]]
                 current.setPrefWidth(260.0)
                 current.setCellValueFactory(features => Property(features.value))
-                current.setCellFactory(_ => new RelationShipGroupsCell(availableGroupsProperty))
+                current.setCellFactory(_ => new RelationShipGroupsCell(availableGroupsProperty, reloadRelationShips))
               }
             }
 
@@ -144,11 +228,31 @@ class RelationShipsPage(val relationShipsProperty: RemoteListProperty[Data[Relat
       }
     }
   }
+
+  private def scheduleReload(): Unit = {
+    cancelScheduledReload()
+    pendingReload = setTimeout(250) {
+      reloadRelationShips()
+    }
+  }
+
+  private def reloadRelationShips(): Unit =
+    RemoteTableList.reloadFirstPage(relationShipsProperty, pageSize = pageSize)
+
+  private def cancelScheduledReload(): Unit =
+    if (pendingReload != null) {
+      clearTimeout(pendingReload.nn)
+      pendingReload = null
+    }
 }
 
 object RelationShipsPage {
-  def relationShipsPage(relationShipsProperty: RemoteListProperty[Data[RelationShip], RemotePageQuery])(init: RelationShipsPage ?=> Unit = {})(using Scope): RelationShipsPage =
-    CompositeSupport.buildPage(new RelationShipsPage(relationShipsProperty))(init)
+  def relationShipsPage(
+    relationShipsProperty: RemoteListProperty[Data[RelationShip], RemotePageQuery],
+    searchQuery: Property[String],
+    selectedGroups: ListProperty[Group]
+  )(init: RelationShipsPage ?=> Unit = {})(using Scope): RelationShipsPage =
+    CompositeSupport.buildPage(new RelationShipsPage(relationShipsProperty, searchQuery, selectedGroups))(init)
 
   private def follower(data: Data[RelationShip]): User | Null =
     data.data.follower.get
@@ -188,6 +292,12 @@ object RelationShipsPage {
 
     if (values.isEmpty) "Keine Gruppe"
     else values.mkString(", ")
+  }
+
+  def groupFilterValue(groups: IterableOnce[Group]): String = {
+    val values = groups.iterator.toVector
+    if (values.isEmpty) "Alle Gruppen"
+    else groupNames(values)
   }
 }
 
@@ -259,7 +369,10 @@ private final class RelationShipImageCell extends TableCell[Data[RelationShip], 
   }
 }
 
-private final class RelationShipGroupsCell(availableGroups: RemoteListProperty[Group, RemotePageQuery])
+private final class RelationShipGroupsCell(
+  availableGroups: RemoteListProperty[Group, RemotePageQuery],
+  onGroupsUpdated: () => Unit
+)
     extends TableCell[Data[RelationShip], Data[RelationShip]] {
 
   private given ExecutionContext = ExecutionContext.global
@@ -376,6 +489,7 @@ private final class RelationShipGroupsCell(availableGroups: RemoteListProperty[G
         if (currentRelationShip eq relationShip) {
           syncSelection(relationShip.data.groups.iterator.toVector)
         }
+        onGroupsUpdated()
         Option(getTableView).foreach(_.refresh())
         applyBusyState()
 

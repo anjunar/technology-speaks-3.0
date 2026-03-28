@@ -7,9 +7,11 @@ import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.TransactionDefinition
 import org.springframework.transaction.support.DefaultTransactionDefinition
 import org.springframework.web.bind.annotation.{ExceptionHandler, RestControllerAdvice}
+import org.springframework.web.server.ResponseStatusException
 
 import java.io.{PrintWriter, StringWriter}
 import java.time.OffsetDateTime
+import java.util
 import java.util.{LinkedHashMap, Map as JavaMap}
 
 @RestControllerAdvice
@@ -25,6 +27,25 @@ class GlobalExceptionHandler(val txManager: PlatformTransactionManager) {
       .status(HttpStatus.BAD_REQUEST)
       .contentType(MediaType.APPLICATION_JSON)
       .body(ex.errors)
+  }
+
+  @ExceptionHandler(Array(classOf[ResponseStatusException]))
+  def handleResponseStatusException(ex: ResponseStatusException, request: HttpServletRequest): ResponseEntity[JavaMap[String, Object]] = {
+    rollbackCurrentTransaction()
+
+    val status = HttpStatus.valueOf(ex.getStatusCode.value())
+    val body = new util.LinkedHashMap[String, Object]()
+    body.put("timestamp", OffsetDateTime.now().toString)
+    body.put("status", Int.box(status.value()))
+    body.put("error", status.getReasonPhrase)
+    body.put("exception", ex.getClass.getName)
+    body.put("message", Option(ex.getReason).filter(! _.isBlank).getOrElse(status.getReasonPhrase))
+    body.put("path", request.getRequestURI)
+
+    ResponseEntity
+      .status(status)
+      .contentType(MediaType.APPLICATION_JSON)
+      .body(body)
   }
 
   @ExceptionHandler(Array(classOf[Throwable]))

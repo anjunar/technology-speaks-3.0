@@ -2,7 +2,7 @@ package app
 
 import app.domain.core.{Data, User}
 import app.domain.documents.{Document, Issue}
-import app.domain.followers.RelationShip
+import app.domain.followers.{Group, RelationShip}
 import app.domain.timeline.Post
 import app.pages.HomePage.homePage
 import app.pages.core.{UserPage, UsersPage}
@@ -11,7 +11,7 @@ import app.pages.followers.{GroupsPage, RelationShipsPage}
 import app.pages.security.*
 import app.pages.timeline.{PostEditPage, PostViewPage, PostsPage}
 import app.support.{RemotePageQuery, RemoteTableList}
-import jfx.core.state.{Property, RemoteListProperty}
+import jfx.core.state.{ListProperty, Property, RemoteListProperty}
 import jfx.dsl.{DslRuntime, Scope}
 import jfx.router.{Route, RouteContext}
 
@@ -66,13 +66,20 @@ object Routes {
       }
     },
     asyncRoute("/followers/relationships") {
+      val searchQueryProperty = Property("")
+      val selectedGroupsProperty = ListProperty[Group]()
       val relationShipsProperty: RemoteListProperty[Data[RelationShip], RemotePageQuery] =
         RemoteTableList.create[Data[RelationShip]](pageSize = 200) { (index, limit) =>
-          RelationShip.list(index, limit)
+          RelationShip.list(
+            index,
+            limit,
+            query = searchQueryProperty.get,
+            groups = selectedGroupsProperty.iterator.toSeq
+          )
         }
 
       relationShipsProperty.reload(RemotePageQuery.first(200)).toFuture.map(_ => {
-        RelationShipsPage.relationShipsPage(relationShipsProperty) {}
+        RelationShipsPage.relationShipsPage(relationShipsProperty, searchQueryProperty, selectedGroupsProperty) {}
       })
     },
     route("/followers/groups") {

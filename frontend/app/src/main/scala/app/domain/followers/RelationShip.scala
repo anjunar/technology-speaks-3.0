@@ -10,6 +10,7 @@ import java.util.UUID
 import scala.concurrent.Future
 import scala.scalajs.js
 import scala.scalajs.js.JSConverters.*
+import scala.scalajs.js.URIUtils.encodeURIComponent
 
 class RelationShip extends AbstractEntity[RelationShip] {
 
@@ -63,8 +64,24 @@ object RelationShip {
   def read(id: String): Future[Data[RelationShip]] =
     Api.get(s"/service/followers/relationships/relationship/$id")
 
-  def list(index: Int, limit: Int): Future[Table[Data[RelationShip]]] =
-    Api.get(s"/service/followers/relationships?index=$index&limit=$limit&sort=created:desc")
+  def list(index: Int, limit: Int, query: String = "", groups: Seq[Group] = Seq.empty): Future[Table[Data[RelationShip]]] = {
+    val normalizedQuery = Option(query).map(_.trim).getOrElse("")
+    val queryParameter =
+      if (normalizedQuery.isEmpty) ""
+      else s"&name=${encodeURIComponent(normalizedQuery)}"
+
+    val groupParameters =
+      groups.iterator
+        .flatMap(group => Option(group.id.get).map(_.toString))
+        .map(id => s"groups=${encodeURIComponent(id)}")
+        .mkString("&")
+
+    val groupsSuffix =
+      if (groupParameters.isEmpty) ""
+      else s"&$groupParameters"
+
+    Api.get(s"/service/followers/relationships?index=$index&limit=$limit&sort=created:desc$queryParameter$groupsSuffix")
+  }
 
   private def deserializeAssignedGroups(raw: js.Any): Seq[Group] =
     if (raw == null || js.isUndefined(raw) || !js.Array.isArray(raw)) {

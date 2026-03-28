@@ -80,6 +80,110 @@
     padding: 0 4px;
 }
 
+.relation-ships-page .relation-ships-page__filters {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    padding: 0 4px;
+}
+
+.relation-ships-page .relation-ships-page__search,
+.relation-ships-page .relation-ships-page__group-filter .jfx-combo-box {
+    min-height: 48px;
+    border: 1px solid color-mix(in srgb, var(--glass-border) 14%, transparent);
+    border-radius: 999px;
+    background: transparent !important;
+    box-shadow: inset 0 1px 0 color-mix(in srgb, white 4%, transparent);
+    backdrop-filter: blur(8px) saturate(118%);
+    -webkit-backdrop-filter: blur(8px) saturate(118%);
+}
+
+.relation-ships-page .relation-ships-page__search {
+    flex: 1 1 320px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 16px;
+}
+
+.relation-ships-page .relation-ships-page__search .material-icons {
+    font-size: 20px;
+    color: color-mix(in srgb, var(--color-text-secondary) 82%, white 18%);
+}
+
+.relation-ships-page .relation-ships-page__search input {
+    width: 100%;
+    min-width: 0;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: var(--color-text-primary);
+    font-size: 14px;
+}
+
+.relation-ships-page .relation-ships-page__search input:focus {
+    outline: none;
+}
+
+.relation-ships-page .relation-ships-page__group-filter {
+    flex: 0 1 320px;
+    min-width: 220px;
+}
+
+.relation-ships-page .relation-ships-page__group-filter .jfx-combo-box {
+    width: 100%;
+    padding: 0 14px;
+    transition: border-color 160ms ease, opacity 160ms ease;
+}
+
+.relation-ships-page .relation-ships-page__search:focus-within,
+.relation-ships-page .relation-ships-page__group-filter .jfx-combo-box:hover,
+.relation-ships-page .relation-ships-page__group-filter .jfx-combo-box:focus-visible,
+.relation-ships-page .relation-ships-page__group-filter .jfx-combo-box.jfx-combo-box-open {
+    border-color: color-mix(in srgb, var(--color-selected) 28%, white 10%);
+}
+
+.relation-ships-page .relation-ships-page__group-filter-value {
+    min-width: 0;
+    width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.relation-ships-page .relation-ships-page__group-filter-option {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    align-items: center;
+    gap: 10px;
+}
+
+.relation-ships-page .relation-ships-page__group-filter-option-icon {
+    flex: 0 0 auto;
+    font-size: 18px;
+}
+
+.relation-ships-page .relation-ships-page__group-filter-option-icon.is-selected {
+    color: var(--color-selected);
+}
+
+.relation-ships-page .relation-ships-page__group-filter-option-icon.is-unselected {
+    opacity: 0.34;
+}
+
+.relation-ships-page .relation-ships-page__group-filter-option-text {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: 14px;
+    font-weight: 600;
+}
+
 .relation-ships-page .relation-ships-page__panel-title {
     font-size: 20px;
     line-height: 1.1;
@@ -285,5 +389,14 @@
 
     .relation-ships-page .relation-ships-page__table-shell {
         border-radius: 16px;
+    }
+
+    .relation-ships-page .relation-ships-page__filters {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .relation-ships-page .relation-ships-page__group-filter {
+        min-width: 0;
     }
 }
