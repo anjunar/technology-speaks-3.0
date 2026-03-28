@@ -12,8 +12,5 @@ def listPlugin(init: ListPlugin ?=> Unit = {}): ListPlugin =
 def linkPlugin(init: LinkPlugin ?=> Unit = {}): LinkPlugin =
   LinkPlugin.linkPlugin(init)
 
-def documentLinkPlugin(init: DocumentLinkPlugin ?=> Unit = {}): DocumentLinkPlugin =
-  DocumentLinkPlugin.documentLinkPlugin(init)
-
 def imagePlugin(init: ImagePlugin ?=> Unit = {}): ImagePlugin =
   ImagePlugin.imagePlugin(init)

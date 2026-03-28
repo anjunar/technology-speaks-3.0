@@ -4,6 +4,8 @@ import app.components.shared.ComponentHeader.componentHeader
 import app.components.shared.LoadingCard.loadingCard
 import app.domain.core.{Data, Table}
 import app.domain.documents.{Document, Issue, IssueCreated, IssueUpdated}
+import app.editor.plugins.{DocumentLinkPlugin, DocumentLinkSuggestion}
+import app.editor.plugins.DocumentLinkPlugin.documentLinkPlugin
 import app.services.ApplicationService
 import app.support.{Navigation, RemotePageQuery, RemoteTableList, TimeAgo}
 import app.ui.{CompositeSupport, DivComposite, PageComposite}

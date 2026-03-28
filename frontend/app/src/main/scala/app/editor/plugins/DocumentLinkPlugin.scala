@@ -1,4 +1,4 @@
-package jfx.form.editor.plugins
+package app.editor.plugins
 
 import jfx.action.Button
 import jfx.core.component.CompositeComponent
@@ -7,6 +7,7 @@ import jfx.core.state.Property.subscribeBidirectional
 import jfx.core.state.{ListProperty, Property}
 import jfx.dsl.*
 import jfx.form.Input
+import jfx.form.editor.plugins.{LinkPlugin, PluginFactory}
 import jfx.layout.{Div, HBox, VBox, Viewport}
 import jfx.statement.ForEach.forEach
 import org.scalajs.dom.HTMLDivElement
@@ -62,20 +63,7 @@ class DocumentLinkPlugin extends LinkPlugin {
 object DocumentLinkPlugin {
 
   def documentLinkPlugin(init: DocumentLinkPlugin ?=> Unit = {}): DocumentLinkPlugin =
-    DslRuntime.currentScope { currentScope =>
-      val currentContext = DslRuntime.currentComponentContext()
-      val component = new DocumentLinkPlugin()
-      component.captureScope(currentScope)
-
-      DslRuntime.withComponentContext(ComponentContext(Some(component), currentContext.enclosingForm)) {
-        given Scope = currentScope
-        given DocumentLinkPlugin = component
-        init
-      }
-
-      DslRuntime.attach(component, currentContext)
-      component
-    }
+    PluginFactory.build(new DocumentLinkPlugin())(init)
 }
 
 private final class DocumentLinkDialog(
