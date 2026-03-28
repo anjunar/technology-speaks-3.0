@@ -18,6 +18,10 @@ class ManagedRule[E <: OwnerProvider & EntityProvider] extends VisibilityRule[E]
       return false
     }
 
+    if (!holder.isAuthenticated() || holder.user == null) {
+      return false
+    }
+
     val owner = User.find(instance.owner().id)
     if (owner == null) {
       return false

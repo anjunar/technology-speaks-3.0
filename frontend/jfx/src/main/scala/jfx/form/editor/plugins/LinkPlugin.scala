@@ -18,60 +18,58 @@ class LinkPlugin extends AbstractEditorPlugin("link-plugin") {
   private var structureInitialized = false
   private var linkButton: Button | Null = null
 
-  var onOpenLink: js.Function1[js.Dynamic, Unit] | Null =
-    ((attrs: js.Dynamic) => {
-      given Scope = currentPluginScope
+  protected def openLinkEditor(attrs: js.Dynamic): Unit = {
+    given Scope = currentPluginScope
 
-      Viewport.addWindow(
-        new Viewport.WindowConf(
-          title = "Add Link",
-          component = Viewport.captureComponent {
-            
-            Form.form(new LinkDescriptor()) {
-              val formComponent = summon[Form[LinkDescriptor]]
+    Viewport.addWindow(
+      new Viewport.WindowConf(
+        title = "Add Link",
+        component = Viewport.captureComponent {
+          Form.form(new LinkDescriptor()) {
+            val formComponent = summon[Form[LinkDescriptor]]
 
-              formComponent.onSubmit = { _ =>
-                val href = formComponent.valueProperty.get.href.get.trim
-                val title = formComponent.valueProperty.get.title.get.trim
+            formComponent.onSubmit = { _ =>
+              val href = formComponent.valueProperty.get.href.get.trim
+              val title = formComponent.valueProperty.get.title.get.trim
 
-                if (href.isBlank) {
+              if (href.isBlank) {
+                removeLink()
+              } else {
+                insertLink(href, if (title.isBlank) null else title)
+              }
+            }
+
+            Input.input("href") {
+              val current = summon[Input]
+              current.placeholder = "https://example.com"
+              attrString(attrs, "href").foreach(current.valueProperty.set)
+            }
+
+            Input.input("title") {
+              val current = summon[Input]
+              current.placeholder = "Title (optional)"
+              attrString(attrs, "title").foreach(current.valueProperty.set)
+            }
+
+            HBox.hbox {
+              Button.button("Save") {
+                summon[Button].element.style.marginLeft = "10px"
+              }
+
+              Button.button("Remove") {
+                val current = summon[Button]
+                current.buttonType = "button"
+                current.element.style.marginLeft = "10px"
+                current.addClick { _ =>
                   removeLink()
-                } else {
-                  insertLink(href, if (title.isBlank) null else title)
-                }
-              }
-
-              Input.input("href") {
-                val current = summon[Input]
-                current.placeholder = "https://example.com"
-                attrString(attrs, "href").foreach(current.valueProperty.set)
-              }
-
-              Input.input("title") {
-                val current = summon[Input]
-                current.placeholder = "Title (optional)"
-                attrString(attrs, "title").foreach(current.valueProperty.set)
-              }
-
-              HBox.hbox {
-                Button.button("Save") {
-                  summon[Button].element.style.marginLeft = "10px"
-                }
-
-                Button.button("Remove") {
-                  val current = summon[Button]
-                  current.buttonType = "button"
-                  current.element.style.marginLeft = "10px"
-                  current.addClick { _ =>
-                    removeLink()
-                  }
                 }
               }
             }
           }
-        )
+        }
       )
-    }): js.Function1[js.Dynamic, Unit]
+    )
+  }
 
   override protected def mountContent(): Unit =
     if (!structureInitialized) {
@@ -134,7 +132,7 @@ class LinkPlugin extends AbstractEditorPlugin("link-plugin") {
   override protected def onEditorStateUpdated(): Unit =
     updateUiFromState()
 
-  private def insertLink(href: String, title: String | Null): Unit =
+  protected final def insertLink(href: String, title: String | Null): Unit =
     selectMarkType(view.state.schema.marks, "link").foreach { linkType =>
       Commands.toggleMark(
         linkType,
@@ -151,7 +149,43 @@ class LinkPlugin extends AbstractEditorPlugin("link-plugin") {
       updateUiFromState()
     }
 
-  private def removeLink(): Unit =
+  protected final def insertLinkText(href: String, title: String | Null, label: String): Unit =
+    selectMarkType(view.state.schema.marks, "link").foreach { linkType =>
+      val normalizedLabel = Option(label).map(_.trim).getOrElse("")
+
+      if (view.state.selection.empty && normalizedLabel.nonEmpty) {
+        val attrs = js.Dynamic.literal(
+          "href" -> href,
+          "title" -> title
+        )
+
+        val linkMark =
+          linkType
+            .asInstanceOf[js.Dynamic]
+            .create(attrs)
+            .asInstanceOf[Mark]
+
+        val textNode =
+          view.state.schema
+            .asInstanceOf[js.Dynamic]
+            .text(normalizedLabel, js.Array(linkMark))
+            .asInstanceOf[PMNode]
+
+        val transaction =
+          view.state.tr
+            .replaceSelectionWith(textNode, false)
+            .scrollIntoView()
+
+        view.dispatch(transaction)
+      } else {
+        insertLink(href, title)
+      }
+
+      view.focus()
+      updateUiFromState()
+    }
+
+  protected final def removeLink(): Unit =
     selectMarkType(view.state.schema.marks, "link").foreach { linkType =>
       if (isMarkActive("link", view.state.selection)) {
         Commands.toggleMark(linkType)(
@@ -184,7 +218,7 @@ class LinkPlugin extends AbstractEditorPlugin("link-plugin") {
     }
   }
 
-  private def activeLinkAttrs(): js.Dynamic = {
+  protected final def activeLinkAttrs(): js.Dynamic = {
     val state = view.state
     val selection = state.selection
     val linkType = selectMarkType(state.schema.marks, "link").orNull
@@ -206,7 +240,7 @@ class LinkPlugin extends AbstractEditorPlugin("link-plugin") {
             selection.to,
             { (node, _, _, _) =>
               val current = linkType.isInSet(node.marks)
-              if (current != null) {
+              if (current != null && !js.isUndefined(current.asInstanceOf[js.Any])) {
                 found = current
                 false
               } else {
@@ -218,7 +252,7 @@ class LinkPlugin extends AbstractEditorPlugin("link-plugin") {
           found
         }
 
-      if (mark == null) {
+      if (mark == null || js.isUndefined(mark.asInstanceOf[js.Any])) {
         js.Dynamic.literal()
       } else {
         mark.attrs
@@ -233,11 +267,11 @@ class LinkPlugin extends AbstractEditorPlugin("link-plugin") {
     }
 
   private def openFromSelection(): Unit =
-    if (onOpenLink != null && viewIsReady) {
-      onOpenLink.nn.apply(activeLinkAttrs())
+    if (viewIsReady) {
+      openLinkEditor(activeLinkAttrs())
     }
 
-  private def attrString(attrs: js.Dynamic, key: String): scala.Option[String] = {
+  protected final def attrString(attrs: js.Dynamic, key: String): scala.Option[String] = {
     val value = attrs.selectDynamic(key).asInstanceOf[js.Any]
     if (value == null || js.isUndefined(value)) scala.None
     else scala.Some(value.toString)

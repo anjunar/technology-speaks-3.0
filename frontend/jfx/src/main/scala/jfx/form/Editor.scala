@@ -6,7 +6,7 @@ import jfx.dsl.*
 import jfx.form.editor.plugins.EditorPlugin
 import jfx.form.editor.prosemirror.*
 import jfx.layout.{Div, HBox, HorizontalLine, VBox}
-import org.scalajs.dom.{HTMLDivElement, HTMLElement, Node}
+import org.scalajs.dom.{Element, Event, HTMLDivElement, HTMLElement, MouseEvent, Node, window}
 
 import scala.collection.mutable
 import scala.scalajs.js
@@ -43,6 +43,8 @@ class Editor(val name: String, override val standalone: Boolean = false)
   private var readOnlyMount: HTMLDivElement | Null = null
   private var lastSeenValue: js.Any | Null = null
   private var editorDomCleanup: (() => Unit) | Null = null
+
+  var onInternalDocumentLinkNavigate: js.Function1[String, Unit] | Null = null
 
   addDisposable(valueProperty.observe(syncExternalValue))
   addDisposable(editableProperty.observe(_ => refreshMode()))
@@ -181,13 +183,16 @@ class Editor(val name: String, override val standalone: Boolean = false)
 
     val focusInListener: org.scalajs.dom.Event => Unit = _ => focusedProperty.set(true)
     val focusOutListener: org.scalajs.dom.Event => Unit = _ => focusedProperty.set(false)
+    val linkClickListener: Event => Unit = event => handleInternalDocumentLink(event)
 
     mount.addEventListener("focusin", focusInListener)
     mount.addEventListener("focusout", focusOutListener)
+    mount.addEventListener("click", linkClickListener)
 
     editorDomCleanup = () => {
       mount.removeEventListener("focusin", focusInListener)
       mount.removeEventListener("focusout", focusOutListener)
+      mount.removeEventListener("click", linkClickListener)
     }
 
     val initialValue = valueProperty.get
@@ -238,6 +243,11 @@ class Editor(val name: String, override val standalone: Boolean = false)
     val mount = newElement("div")
     mount.classList.add("ProseMirror")
     mount.setAttribute("contenteditable", "false")
+    val linkClickListener: Event => Unit = event => handleInternalDocumentLink(event)
+    mount.addEventListener("click", linkClickListener)
+    editorDomCleanup = () => {
+      mount.removeEventListener("click", linkClickListener)
+    }
     contentHost.nn.element.appendChild(mount)
     readOnlyMount = mount
     lastSeenValue = valueProperty.get
@@ -410,6 +420,38 @@ class Editor(val name: String, override val standalone: Boolean = false)
 
   private def sameValue(left: js.Any | Null, right: js.Any | Null): Boolean =
     js.special.strictEquals(left.asInstanceOf[js.Any], right.asInstanceOf[js.Any])
+
+  private def handleInternalDocumentLink(event: Event): Unit = {
+    val mouseEvent = event.asInstanceOf[MouseEvent]
+    val rawTarget = mouseEvent.target
+
+    if (rawTarget == null || js.isUndefined(rawTarget.asInstanceOf[js.Any])) {
+      return
+    }
+
+    val targetElement =
+      rawTarget match {
+        case element: Element => element
+        case _ => return
+      }
+
+    val anchor = targetElement.closest("a")
+    if (anchor == null) {
+      return
+    }
+
+    val href = anchor.getAttribute("href")
+    if (href != null && href.startsWith("/document/documents/document/")) {
+      mouseEvent.preventDefault()
+      mouseEvent.stopPropagation()
+      if (onInternalDocumentLinkNavigate != null) {
+        onInternalDocumentLinkNavigate.nn.apply(href)
+      } else {
+        window.history.pushState(null, "", href)
+        window.dispatchEvent(new Event("popstate"))
+      }
+    }
+  }
 
   private def setElementVisible(component: jfx.core.component.ElementComponent[?] | Null, visible: Boolean): Unit =
     if (component != null) {

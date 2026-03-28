@@ -15,6 +15,8 @@ object DeserializerRegistry {
       case _: JsonObject =>
         if (classOf[java.util.Map[?, ?]].isAssignableFrom(clazz)) {
           new MapDeserializer
+        } else if (clazz == classOf[Object] || clazz == classOf[java.lang.Object]) {
+          new BeanDeserializer
         } else {
           new BeanDeserializer
         }
@@ -33,6 +35,8 @@ object DeserializerRegistry {
           new TemporalDeserializer
         } else if (classOf[UUID].isAssignableFrom(clazz)) {
           new UUIDDeserializer
+        } else if (clazz == classOf[Object] || clazz == classOf[java.lang.Object]) {
+          new StringDeserializer
         } else {
           throw new IllegalArgumentException(s"Unsupported type: $clazz")
         }

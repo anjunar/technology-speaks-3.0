@@ -6,6 +6,8 @@ import com.anjunar.technologyspeaks.rest.types.Data
 import com.anjunar.technologyspeaks.security.{IdentityHolder, LinkBuilder}
 import com.anjunar.technologyspeaks.shared.editor.Node
 import jakarta.annotation.security.RolesAllowed
+import org.springframework.http.HttpStatus
+import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.bind.annotation.{GetMapping, PathVariable, PostMapping, PutMapping, RequestBody, RestController}
 
 @RestController
@@ -118,16 +120,25 @@ class DocumentController(val identityHolder: IdentityHolder) {
   @RolesAllowed(Array("User", "Administrator"))
   @EntityGraph("Document.full")
   def update(@RequestBody entity: Document): Data[Document] = {
-    entity.user = identityHolder.user
+    val managed = Document.find(entity.id)
+    if (managed == null) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Document not found")
+    }
+    if (managed.user != identityHolder.user) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied")
+    }
 
-    val form = new Data(entity, SchemaHateoas.enhance(entity, Document.schema))
+    managed.title = entity.title
+    managed.editor = entity.editor
 
-    entity.addLinks(
+    val form = new Data(managed, SchemaHateoas.enhance(managed, Document.schema))
+
+    managed.addLinks(
       LinkBuilder.create[DocumentController](_.update(null))
         .build(),
-      LinkBuilder.create[IssuesController](_.list(new IssueSearch(entity)))
+      LinkBuilder.create[IssuesController](_.list(new IssueSearch(managed)))
         .build(),
-      LinkBuilder.create[IssueController](_.create(entity))
+      LinkBuilder.create[IssueController](_.create(managed))
         .build()
     )
 

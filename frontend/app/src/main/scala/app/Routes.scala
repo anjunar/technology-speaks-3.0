@@ -45,6 +45,12 @@ object Routes {
         DocumentPage.documentPage(root.data)
       }
     },
+    asyncRoute("/document/documents/document/:id") {
+      val id = pathParam("id")
+      Document.read(id).map { document =>
+        DocumentPage.documentPage(document.data)
+      }
+    },
     asyncRoute("/document/documents/document/:documentId/issues/issue") {
       val docId = pathParam("documentId")
       Issue.read(docId).map { issue =>

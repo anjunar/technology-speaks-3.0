@@ -396,6 +396,17 @@
     font-weight: 500;
 }
 
+.document-page .doc-editor .ProseMirror a,
+.document-page .issue-card .ProseMirror a {
+    color: color-mix(in srgb, #2f9e44 78%, white 12%);
+    text-decoration-color: color-mix(in srgb, #2f9e44 48%, transparent);
+}
+
+.document-page .doc-editor .ProseMirror a:hover,
+.document-page .issue-card .ProseMirror a:hover {
+    color: color-mix(in srgb, #37b24d 84%, white 10%);
+}
+
 .document-page .issue-card {
     border-radius: 14px;
     background: transparent !important;
@@ -416,6 +427,157 @@
     padding: 0;
     font-size: 13px;
     line-height: 1.55;
+}
+
+.jfx-window:has(.document-link-dialog) .jfx-window__surface {
+    background: color-mix(in srgb, var(--glass-bg) 96%, transparent);
+    border: 1px solid color-mix(in srgb, var(--glass-border) 12%, transparent);
+    box-shadow:
+            0 14px 34px color-mix(in srgb, var(--glass-shadow) 26%, transparent),
+            inset 0 1px 0 color-mix(in srgb, white 8%, transparent);
+    backdrop-filter: blur(16px) saturate(132%);
+    -webkit-backdrop-filter: blur(16px) saturate(132%);
+}
+
+.jfx-window:has(.document-link-dialog) .jfx-window__header {
+    border-bottom: 1px solid color-mix(in srgb, var(--glass-border) 10%, transparent);
+}
+
+.document-link-dialog {
+    height: 100%;
+    box-sizing: border-box;
+    padding: 16px;
+}
+
+.document-link-dialog__shell {
+    height: 100%;
+}
+
+.document-link-dialog__intro {
+    opacity: 0.68;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.document-link-dialog__section-title {
+    font-size: 10px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    opacity: 0.46;
+}
+
+.document-link-dialog__search,
+.document-link-dialog__manual {
+    display: flex;
+    align-items: center;
+    column-gap: 12px;
+    background: transparent !important;
+    border: 1px solid color-mix(in srgb, var(--glass-border) 10%, transparent);
+    border-radius: 16px;
+    padding: 12px 14px;
+    box-shadow: none;
+    backdrop-filter: blur(8px) saturate(120%);
+    -webkit-backdrop-filter: blur(8px) saturate(120%);
+}
+
+.document-link-dialog__manual {
+    display: block;
+}
+
+.document-link-dialog__search-icon {
+    font-size: 16px;
+    opacity: 0.46;
+}
+
+.document-link-dialog__search input,
+.document-link-dialog__manual input {
+    width: 100%;
+    border: none;
+    background: transparent !important;
+    box-shadow: none;
+}
+
+.document-link-dialog__search input:focus,
+.document-link-dialog__manual input:focus {
+    outline: none;
+}
+
+.document-link-dialog__results {
+    overflow-y: auto;
+    border: 1px solid color-mix(in srgb, var(--glass-border) 8%, transparent);
+    border-radius: 18px;
+    padding: 8px 10px;
+    background: transparent !important;
+    box-shadow: none;
+    backdrop-filter: blur(8px) saturate(120%);
+    -webkit-backdrop-filter: blur(8px) saturate(120%);
+}
+
+.document-link-dialog__result {
+    border-bottom: 1px solid color-mix(in srgb, var(--glass-border) 8%, transparent);
+    padding: 10px 2px;
+    transition: transform 140ms ease, opacity 140ms ease;
+}
+
+.document-link-dialog__result:last-child {
+    border-bottom: none;
+}
+
+.document-link-dialog__result:hover {
+    transform: translateX(2px);
+}
+
+.document-link-dialog__result-row {
+    width: 100%;
+}
+
+.document-link-dialog__result-title {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+}
+
+.document-link-dialog__result-subtitle,
+.document-link-dialog__status {
+    font-size: 12px;
+    opacity: 0.64;
+    line-height: 1.5;
+}
+
+.document-link-dialog__status {
+    padding: 0 2px;
+}
+
+.document-link-dialog__status--error {
+    color: var(--color-error);
+    opacity: 0.92;
+}
+
+.document-link-dialog__pick {
+    width: auto !important;
+    min-width: 118px;
+    padding-inline: 12px;
+}
+
+.document-link-dialog__actions {
+    margin-top: 2px;
+}
+
+.document-link-dialog__actions .doc-new-btn {
+    width: auto !important;
+    min-width: 132px;
+}
+
+.document-link-dialog__remove {
+    min-height: 40px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--glass-border) 10%, transparent);
+    background: transparent !important;
+    box-shadow: none;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
 }
 
 @media (max-width: 1440px) {

@@ -98,7 +98,8 @@ class DocumentPage(val model: Document) extends PageComposite("Dokument") {
           currentDocumentProperty,
           searchQueryProperty,
           leftSidebarExpandedProperty,
-          createNewDocument
+          createNewDocument,
+          openDocument
         )
 
         div {
@@ -130,7 +131,7 @@ class DocumentPage(val model: Document) extends PageComposite("Dokument") {
           }
 
           observeRender(currentDocumentProperty) { document =>
-            DocumentEditorPanel.panel(document, handleDocumentSaved)
+            DocumentEditorPanel.panel(document, handleDocumentSaved, openDocumentByHref)
           }
         }
 
@@ -160,6 +161,37 @@ class DocumentPage(val model: Document) extends PageComposite("Dokument") {
     currentDocumentProperty.set(document)
   }
 
+  private def openDocument(document: Document): Unit = {
+    val selectedId = document.id.get
+    val currentId = currentDocumentProperty.get.id.get
+
+    if (selectedId == null) {
+      currentDocumentProperty.set(document)
+    } else if (selectedId == currentId) {
+      if (currentDocumentProperty.get.links.isEmpty && document.links.nonEmpty) {
+        currentDocumentProperty.set(document)
+      }
+    } else {
+      Document
+        .read(selectedId.toString)
+        .map(_.data)
+        .foreach(currentDocumentProperty.set)
+    }
+  }
+
+  private def openDocumentByHref(href: String): Unit = {
+    val prefix = "/document/documents/document/"
+    if (href != null && href.startsWith(prefix)) {
+      val documentId = href.drop(prefix.length).takeWhile(_ != '/')
+      if (documentId.nonEmpty) {
+        Document
+          .read(documentId)
+          .map(_.data)
+          .foreach(currentDocumentProperty.set)
+      }
+    }
+  }
+
   private def handleDocumentSaved(saved: Data[Document]): Unit = {
     RemoteTableList.reloadFirstPage(documentsProperty, pageSize = documentsPageSize)
     saved.data.editable.set(false)
@@ -184,7 +216,8 @@ private final class DocumentListPanel(
                                        currentDocument: Property[Document],
                                        searchQuery: Property[String],
                                        expanded: Property[Boolean],
-                                       createNewDocument: () => Unit
+                                       createNewDocument: () => Unit,
+                                       openDocument: Document => Unit
                                      ) extends DivComposite {
 
   override protected def compose(using DslContext): Unit = {
@@ -264,7 +297,7 @@ private final class DocumentListPanel(
           addDisposable(
             table.getSelectionModel.selectedItemProperty.observe { selected =>
               if (selected != null) {
-                currentDocument.set(selected.data)
+                openDocument(selected.data)
               }
             }
           )
@@ -312,8 +345,9 @@ private object DocumentListPanel {
             currentDocument: Property[Document],
             searchQuery: Property[String],
             expanded: Property[Boolean],
-            createNewDocument: () => Unit)(using Scope): DocumentListPanel =
-    CompositeSupport.buildComposite(new DocumentListPanel(documents, currentDocument, searchQuery, expanded, createNewDocument))
+            createNewDocument: () => Unit,
+            openDocument: Document => Unit)(using Scope): DocumentListPanel =
+    CompositeSupport.buildComposite(new DocumentListPanel(documents, currentDocument, searchQuery, expanded, createNewDocument, openDocument))
 }
 
 private final class DocumentSummaryCell extends TableCell[Data[Document], String] {
@@ -375,7 +409,11 @@ private final class DocumentSummaryCell extends TableCell[Data[Document], String
   }
 }
 
-private final class DocumentEditorPanel(document: Document, onSaved: Data[Document] => Unit) extends DivComposite {
+private final class DocumentEditorPanel(
+                                         document: Document,
+                                         onSaved: Data[Document] => Unit,
+                                         onOpenDocumentLink: String => Unit
+                                       ) extends DivComposite {
 
   private given ExecutionContext = ExecutionContext.global
 
@@ -459,13 +497,28 @@ private final class DocumentEditorPanel(document: Document, onSaved: Data[Docume
           basePlugin {}
           headingPlugin {}
           listPlugin {}
-          linkPlugin {}
+          documentLinkPlugin {
+            val current = summon[DocumentLinkPlugin]
+            current.searchDocuments = (query, limit) =>
+              Document
+                .list(0, limit, query)
+                .map(_.rows.iterator.map { data =>
+                  val document = data.data
+                  DocumentLinkSuggestion(
+                    href = s"/document/documents/document/${document.id.get}",
+                    title = Option(document.title.get).filter(_.trim.nonEmpty).getOrElse("(Ohne Titel)"),
+                    subtitle = document.created.get
+                  )
+                }.toSeq)
+          }
           imagePlugin {}
 
           button("save") {
             classes = Seq("material-icons", "doc-icon-btn")
           }
         }
+
+        editorField.onInternalDocumentLinkNavigate = href => onOpenDocumentLink(href)
 
         subscribeBidirectional(document.editable, editorField.editableProperty)
       }
@@ -474,8 +527,8 @@ private final class DocumentEditorPanel(document: Document, onSaved: Data[Docume
 }
 
 private object DocumentEditorPanel {
-  def panel(document: Document, onSaved: Data[Document] => Unit)(using Scope): DocumentEditorPanel =
-    CompositeSupport.buildComposite(new DocumentEditorPanel(document, onSaved))
+  def panel(document: Document, onSaved: Data[Document] => Unit, onOpenDocumentLink: String => Unit)(using Scope): DocumentEditorPanel =
+    CompositeSupport.buildComposite(new DocumentEditorPanel(document, onSaved, onOpenDocumentLink))
 }
 
 private final class IssuesPanel(

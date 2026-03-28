@@ -16,7 +16,7 @@ class OwnerRule[E <: OwnerProvider & EntityProvider] extends VisibilityRule[E] {
     if (instance.version == -1L) {
       true
     } else {
-      holder.user.id == instance.owner().id
+      holder.isAuthenticated() && holder.user != null && holder.user.id == instance.owner().id
     }
   }
 

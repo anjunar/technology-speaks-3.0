@@ -46,6 +46,9 @@ object Document {
   def root(): Future[Data[Document]] =
     Api.post("/service/document/documents/document/root")
 
+  def read(id: String): Future[Data[Document]] =
+    Api.get(s"/service/document/documents/document/$id")
+
   def list(index: Int, limit: Int, query: String = ""): Future[Table[Data[Document]]] = {
     val normalizedQuery = Option(query).map(_.trim).getOrElse("")
     val queryParameter =

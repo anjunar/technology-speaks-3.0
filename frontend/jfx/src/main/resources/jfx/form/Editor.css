@@ -387,3 +387,169 @@ img.ProseMirror-separator {
 .ProseMirror p {
     margin-bottom: 1em
 }
+
+.ProseMirror p:has(> img:only-child) {
+    max-width: 100% !important;
+    text-align: center;
+}
+
+.ProseMirror img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 1.4em auto;
+    border-radius: 18px;
+    border: 1px solid color-mix(in srgb, var(--glass-border) 10%, transparent);
+    box-shadow:
+            0 14px 32px color-mix(in srgb, var(--glass-shadow) 14%, transparent),
+            inset 0 1px 0 color-mix(in srgb, white 6%, transparent);
+}
+
+.jfx-window:has(.image-plugin-dialog) .jfx-window__surface {
+    background: color-mix(in srgb, var(--glass-bg) 96%, transparent);
+    border: 1px solid color-mix(in srgb, var(--glass-border) 12%, transparent);
+    box-shadow:
+            0 14px 34px color-mix(in srgb, var(--glass-shadow) 26%, transparent),
+            inset 0 1px 0 color-mix(in srgb, white 8%, transparent);
+    backdrop-filter: blur(16px) saturate(132%);
+    -webkit-backdrop-filter: blur(16px) saturate(132%);
+}
+
+.jfx-window:has(.image-plugin-dialog) .jfx-window__header {
+    border-bottom: 1px solid color-mix(in srgb, var(--glass-border) 10%, transparent);
+}
+
+.image-plugin-dialog {
+    height: 100%;
+    box-sizing: border-box;
+    padding: 16px;
+}
+
+.image-plugin-dialog__shell {
+    height: 100%;
+}
+
+.image-plugin-dialog__intro {
+    opacity: 0.72;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.image-plugin-dialog__section-title {
+    font-size: 10px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    opacity: 0.46;
+}
+
+.image-plugin-dialog__preview-shell,
+.image-plugin-dialog__field-group {
+    border: 1px solid color-mix(in srgb, var(--glass-border) 10%, transparent);
+    border-radius: 18px;
+    padding: 14px;
+    background: transparent !important;
+    box-shadow: none;
+    backdrop-filter: blur(8px) saturate(120%);
+    -webkit-backdrop-filter: blur(8px) saturate(120%);
+}
+
+.image-plugin-dialog__preview-shell {
+    min-height: 260px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.image-plugin-dialog__preview-image {
+    display: block;
+    max-width: 100%;
+    width: auto;
+    margin: 0 auto;
+    border-radius: 18px;
+}
+
+.image-plugin-dialog__preview-placeholder {
+    width: 100%;
+    min-height: 232px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 18px;
+    color: var(--color-text-faint);
+    opacity: 0.74;
+}
+
+.image-plugin-dialog__field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.image-plugin-dialog__actions-row,
+.image-plugin-dialog__preset-row,
+.image-plugin-dialog__footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.image-plugin-dialog__input {
+    width: 100%;
+}
+
+.image-plugin-dialog__input input {
+    width: 100%;
+    border: none;
+    background: transparent !important;
+    box-shadow: none;
+}
+
+.image-plugin-dialog__input input:focus {
+    outline: none;
+}
+
+.image-plugin-dialog__button,
+.image-plugin-dialog__chip {
+    min-height: 38px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--glass-border) 10%, transparent);
+    background: transparent !important;
+    box-shadow: none;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.image-plugin-dialog__button--primary {
+    border-color: color-mix(in srgb, var(--color-selected) 22%, white 8%);
+}
+
+.image-plugin-dialog__button--ghost {
+    opacity: 0.82;
+}
+
+.image-plugin-dialog__chip {
+    min-height: 34px;
+    padding: 6px 12px;
+    font-size: 11px;
+}
+
+.image-plugin-dialog__meta {
+    padding: 0 2px;
+    font-size: 12px;
+    opacity: 0.68;
+    line-height: 1.5;
+}
+
+.image-plugin-dialog__meta--error {
+    color: var(--color-error);
+    opacity: 0.92;
+}
+
+.image-plugin-dialog__file-host,
+.image-plugin-dialog__file-input {
+    display: none !important;
+}
