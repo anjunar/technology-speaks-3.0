@@ -11,9 +11,9 @@ object WebAuthnManagerProvider {
 
   val challengeStore: ConcurrentHashMap[String, Challenge] = new ConcurrentHashMap[String, Challenge]()
 
-  var ORIGIN: String = "http://localhost:5173"
+  var ORIGIN: String = "https://technologyspeaks.com"
 
-  var RP_ID: String = "localhost"
+  var RP_ID: String = "technologyspeaks.com"
 
   val RP_NAME: String = "Technology Speaks"
 
