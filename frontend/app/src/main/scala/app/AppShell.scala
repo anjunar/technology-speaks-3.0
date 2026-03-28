@@ -55,6 +55,28 @@ class AppShell extends DivComposite {
                 }
               }))
 
+              link("/") {
+                classes = "app-shell-nav-link"
+
+                vbox {
+                  classes = "app-shell-nav-item"
+
+                  style {
+                    alignItems = "center"
+                  }
+
+                  span {
+                    classes = Seq("material-icons", "icon")
+                    text = "home"
+                  }
+
+                  span {
+                    classes = "app-shell-nav-text"
+                    text = "Home"
+                  }
+                }
+              }
+
               observeRender(service.app) { app =>
                 app.links.foreach { currentLink =>
                   link(currentLink.url) {
