@@ -12,6 +12,7 @@ import scala.jdk.CollectionConverters.*
 class ManagedRule[E <: OwnerProvider & EntityProvider] extends VisibilityRule[E] {
 
   val holder = SpringContext.getBean(classOf[IdentityHolder])
+  val bootstrapService = SpringContext.getBean(classOf[ManagedPropertyBootstrapService])
 
   override def isVisible(instance: E, property: AbstractProperty): Boolean = {
     if (instance == null) {
@@ -32,20 +33,15 @@ class ManagedRule[E <: OwnerProvider & EntityProvider] extends VisibilityRule[E]
     }
 
     var entityView = User.findViewByUser(owner)
-
-    if (entityView == null) {
-      entityView = new User.View
-      entityView.user = owner
-      entityView.persist()
-    }
-
-    var managedProperty = entityView.properties.stream().filter(propertyValue => propertyValue.name == property.name).findFirst().orElse(null)
+    var managedProperty =
+      if (entityView == null) null
+      else entityView.properties.stream().filter(propertyValue => propertyValue.name == property.name).findFirst().orElse(null)
 
     if (managedProperty == null) {
-      managedProperty = new ManagedProperty(property.name, false)
-      managedProperty.view = entityView
-      entityView.properties.add(managedProperty)
-      managedProperty.persist()
+      managedProperty = bootstrapService.findOrCreateManagedProperty(owner.id, property.name)
+      if (managedProperty == null) {
+        return false
+      }
     }
 
     if (managedProperty.visibleForAll) {

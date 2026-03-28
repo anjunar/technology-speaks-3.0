@@ -9,6 +9,9 @@ import com.anjunar.technologyspeaks.security.IdentityHolder
 
 object SchemaHateoas {
 
+  private def bootstrapService: ManagedPropertyBootstrapService =
+    SpringContext.getBean(classOf[ManagedPropertyBootstrapService])
+
   def enhance[E](entity: E, schema: EntitySchema[?]): EntitySchema[?] = {
     if (schema == null) {
       return null
@@ -71,10 +74,12 @@ object SchemaHateoas {
 
     if (containerOwner != null && containerOwner.id == currentUser.id && source.rule.isInstanceOf[ManagedRule[?]]) {
       val managedProperty = findOrCreateManagedProperty(containerOwner, source.name)
-      copy.addLinks(
-        new Link("property", s"/core/properties/property/${managedProperty.id}", "GET", null),
-        new Link("updateProperty", "/core/properties/property", "PUT", null)
-      )
+      if (managedProperty != null && managedProperty.id != null) {
+        copy.addLinks(
+          new Link("property", s"/core/properties/property/${managedProperty.id}", "GET", null),
+          new Link("updateProperty", "/core/properties/property", "PUT", null)
+        )
+      }
     }
 
     copy
@@ -117,24 +122,11 @@ object SchemaHateoas {
   }
 
   private def findOrCreateManagedProperty(owner: User, propertyName: String): ManagedProperty = {
-    var entityView = User.findViewByUser(owner)
-
-    if (entityView == null) {
-      entityView = new User.View
-      entityView.user = owner
-      entityView.persist()
+    if (owner == null || owner.id == null) {
+      return null
     }
 
-    var managedProperty = entityView.properties.stream().filter(_.name == propertyName).findFirst().orElse(null)
-
-    if (managedProperty == null) {
-      managedProperty = new ManagedProperty(propertyName, false)
-      managedProperty.view = entityView
-      entityView.properties.add(managedProperty)
-      managedProperty.persist()
-    }
-
-    managedProperty
+    bootstrapService.findOrCreateManagedProperty(owner.id, propertyName)
   }
 
   private def instantiateSchemaCopy(source: EntitySchema[Any]): EntitySchema[Any] = {
