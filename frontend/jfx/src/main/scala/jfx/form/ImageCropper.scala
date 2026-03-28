@@ -14,6 +14,7 @@ import scala.util.control.NonFatal
 class ImageCropper(val name: String, override val standalone: Boolean = false) extends Control[Media, HTMLDivElement] {
 
   override val valueProperty: Property[Media] = Property(null)
+  initControlValidation()
 
   val sourceProperty: Property[Media] = Property(null)
   val fileProperty: Property[File] = Property(null)

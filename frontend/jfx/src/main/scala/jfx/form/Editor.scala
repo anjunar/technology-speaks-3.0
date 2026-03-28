@@ -16,6 +16,7 @@ class Editor(val name: String, override val standalone: Boolean = false)
     with Control[js.Any | Null, HTMLDivElement] {
 
   override val valueProperty: Property[js.Any | Null] = Property(null)
+  initControlValidation()
 
   override val element: HTMLDivElement = {
     val divElement = newElement("div")

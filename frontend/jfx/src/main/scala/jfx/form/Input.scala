@@ -7,6 +7,7 @@ import org.scalajs.dom.{Event, HTMLInputElement}
 class Input(val name: String, override val standalone: Boolean = false) extends Control[String | Boolean | Double, HTMLInputElement] {
 
   override val valueProperty: Property[String | Boolean | Double] = Property(null)
+  initControlValidation()
 
   override val element: HTMLInputElement = {
     val inputElement = newElement("input")

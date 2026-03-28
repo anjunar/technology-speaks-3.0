@@ -15,7 +15,7 @@ import com.anjunar.technologyspeaks.core.EMail.Schema
 
 @Entity
 @Table(name = "Core#Email")
-class EMail(@(JsonbProperty @field) @Email @(NotBlank @field) @Column(unique = true) var value: String)
+class EMail(@(JsonbProperty @field) @(Email @field) @(NotBlank @field) @Column(unique = true) var value: String)
   extends AbstractEntity, OwnerProvider, EntityContext[EMail] {
 
   def this() = this(null)

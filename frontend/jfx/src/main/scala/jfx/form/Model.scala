@@ -10,9 +10,11 @@ trait Model[M] {
   
     def properties : js.Array[PropertyAccess[M, ?]]
 
+    def findPropertyAccessOption(name: String): Option[PropertyAccess[M, ?]] =
+      properties.find(_.name == name)
+
     def findPropertyOption[V](name: String): Option[V] =
-      properties
-        .find(_.name == name)
+      findPropertyAccessOption(name)
         .flatMap(_.get(this))
         .map(_.asInstanceOf[V])
 

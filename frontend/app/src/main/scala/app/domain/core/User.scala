@@ -4,6 +4,7 @@ import app.support.{Api, Navigation}
 import jfx.core.macros.{property, typedProperty}
 import jfx.core.state.{ListProperty, Property, PropertyAccess}
 import jfx.domain.Media
+import jfx.form.validators.{NotBlankValidator, SizeValidator}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import java.util.UUID
@@ -63,7 +64,9 @@ object User {
     typedProperty[User, Property[UUID], UUID](_.id),
     typedProperty[User, Property[String | Null], String | Null](_.modified),
     typedProperty[User, Property[String | Null], String | Null](_.created),
-    typedProperty[User, Property[String], String](_.nickName),
+    typedProperty[User, Property[String], String](_.nickName)
+      .withValidator(NotBlankValidator())
+      .withValidator(SizeValidator(2, 80)),
     typedProperty[User, Property[Media | Null], Media | Null](_.image),
     typedProperty[User, Property[UserInfo | Null], UserInfo | Null](_.info),
     typedProperty[User, Property[Address | Null], Address | Null](_.address),

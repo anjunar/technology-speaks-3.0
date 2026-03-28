@@ -15,6 +15,7 @@ class ComboBox[S](val name: String, override val standalone: Boolean = false)
     extends ManagedElementComponent[HTMLDivElement], Control[js.Array[S], HTMLDivElement] {
 
   override val valueProperty: ListProperty[S] = ListProperty()
+  initControlValidation()
 
   private val itemsRefProperty: Property[ListProperty[S]] = Property(ListProperty())
   private val openProperty: Property[Boolean] = Property(false)

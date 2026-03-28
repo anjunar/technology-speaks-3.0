@@ -10,6 +10,7 @@ class Select(val name: String, override val standalone: Boolean = false)
     with Control[String | Null, HTMLSelectElement] {
 
   override val valueProperty: Property[String | Null] = Property(null)
+  initControlValidation()
 
   override val element: HTMLSelectElement = {
     val selectElement = newElement("select")

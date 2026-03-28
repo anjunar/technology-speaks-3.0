@@ -3,6 +3,7 @@ package jfx.form
 import jfx.core.component.{ChildrenComponent, NodeComponent}
 import jfx.core.state.{CompositeDisposable, Disposable, ListProperty, Property, ReadOnlyProperty}
 import jfx.core.state.ListProperty.{Clear, Patch, RemoveAt, RemoveRange, UpdateAt}
+import jfx.form.validators.Validator
 import org.scalajs.dom.{HTMLElement, Node, console}
 
 import scala.collection.mutable
@@ -23,6 +24,9 @@ trait Formular[M <: Model[M], N <: Node] extends NodeComponent[N], Editable {
   addDisposable(editableObserver)
 
   private val bindingsByControl: mutable.Map[AnyControl, CompositeDisposable] =
+    mutable.Map.empty
+
+  private val boundValidatorsByControl: mutable.Map[AnyControl, Vector[Validator[Any]]] =
     mutable.Map.empty
 
   private val controlObserver = controls.observeChanges(onFieldsChange)
@@ -67,6 +71,13 @@ trait Formular[M <: Model[M], N <: Node] extends NodeComponent[N], Editable {
   private def disposeBinding(control: AnyControl): Unit =
     bindingsByControl.remove(control).foreach(_.dispose())
 
+  private def clearBoundValidators(control: AnyControl): Unit = {
+    val previousValidators = boundValidatorsByControl.remove(control).getOrElse(Vector.empty)
+    if (previousValidators.nonEmpty) {
+      previousValidators.foreach(removeValidator(control, _))
+    }
+  }
+
   private def bindOrDefer(control: AnyControl, binding: CompositeDisposable): Unit = {
     val currentModel = valueProperty.get
     if (currentModel != null) {
@@ -90,25 +101,38 @@ trait Formular[M <: Model[M], N <: Node] extends NodeComponent[N], Editable {
   private def bindNow(control: AnyControl): jfx.core.state.Disposable = {
     val controlName = control.name
 
-    val modelPropertyOption: Option[Any] = control match {
+    val (modelPropertyOption, accessValidators) = control match {
       case subForm: SubForm[?] =>
         if (subForm.index > -1) {
           val parent = control.findParentForm().name
-          valueProperty.get
-            .findPropertyOption[ListProperty[?]](parent)
-            .flatMap(list => Option(list.get(subForm.index)))
-            .map(Property(_))
+          (
+            valueProperty.get
+              .findPropertyOption[ListProperty[?]](parent)
+              .flatMap(list => Option(list.get(subForm.index)))
+              .map(Property(_)),
+            Vector.empty
+          )
         } else {
-          valueProperty.get.findPropertyOption[Any](controlName)
+          val accessOption = valueProperty.get.findPropertyAccessOption(controlName)
+          (
+            accessOption.flatMap(_.get(valueProperty.get)).map(_.asInstanceOf[Any]),
+            accessOption.map(_.validators.asInstanceOf[Vector[Validator[Any]]]).getOrElse(Vector.empty)
+          )
         }
       case _ =>
-        valueProperty.get.findPropertyOption[Any](controlName)
+        val accessOption = valueProperty.get.findPropertyAccessOption(controlName)
+        (
+          accessOption.flatMap(_.get(valueProperty.get)).map(_.asInstanceOf[Any]),
+          accessOption.map(_.validators.asInstanceOf[Vector[Validator[Any]]]).getOrElse(Vector.empty)
+        )
     }
 
     if (modelPropertyOption.isEmpty) {
       console.warn(s"Skipping form binding for control '$controlName' because no matching model property was found.")
       return () => ()
     }
+
+    syncControlValidators(control, accessValidators)
 
     val modelProperty: Any = modelPropertyOption.get
 
@@ -121,22 +145,50 @@ trait Formular[M <: Model[M], N <: Node] extends NodeComponent[N], Editable {
     }
   }
 
+  private def syncControlValidators(control: AnyControl, validators: Vector[Validator[Any]]): Unit = {
+    clearBoundValidators(control)
+    if (validators.nonEmpty) {
+      validators.foreach(addValidatorIfMissing(control, _))
+      boundValidatorsByControl.put(control, validators)
+    }
+  }
+
+  private def addValidatorIfMissing(control: AnyControl, validator: Validator[Any]): Unit =
+    if (!rawValidators(control).exists(existing => existing == validator)) {
+      rawValidators(control) += validator
+    }
+
+  private def removeValidator(control: AnyControl, validator: Validator[Any]): Unit = {
+    val index = rawValidators(control).indexWhere(existing => existing == validator)
+    if (index >= 0) {
+      rawValidators(control).remove(index)
+    }
+  }
+
+  private def rawValidators(control: AnyControl): ListProperty[Validator[Any]] =
+    control.validators.asInstanceOf[ListProperty[Validator[Any]]]
+
   private def onFieldsChange(change: ListProperty.Change[Control[?, ? <: HTMLElement]]): Unit =
     change match {
       case RemoveAt(_, control, _) =>
         disposeBinding(control)
+        clearBoundValidators(control)
         detachControl(control)
       case RemoveRange(_, removed, _) =>
         removed.foreach(disposeBinding)
+        removed.foreach(clearBoundValidators)
         removed.foreach(detachControl)
       case Patch(_, removed, _, _) =>
         removed.foreach(disposeBinding)
+        removed.foreach(clearBoundValidators)
         removed.foreach(detachControl)
       case UpdateAt(_, oldControl, _, _) =>
         disposeBinding(oldControl)
+        clearBoundValidators(oldControl)
         detachControl(oldControl)
       case Clear(removed, _) =>
         removed.foreach(disposeBinding)
+        removed.foreach(clearBoundValidators)
         removed.foreach(detachControl)
       case _ => ()
     }
