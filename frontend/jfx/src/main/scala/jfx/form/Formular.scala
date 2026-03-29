@@ -19,7 +19,9 @@ trait Formular[M <: Model[M], N <: Node] extends NodeComponent[N], Editable {
   val controls : ListProperty[AnyControl] = new ListProperty[AnyControl]()
 
   private val editableObserver = editableProperty.observe(editable => {
-      controls.foreach(control => control.editable = editable)
+      controls.foreach(control => {
+        control.editable = editable
+      })
     })
   addDisposable(editableObserver)
 
@@ -166,6 +168,7 @@ trait Formular[M <: Model[M], N <: Node] extends NodeComponent[N], Editable {
       validators.foreach(addValidatorIfMissing(control, _))
       boundValidatorsByControl.put(control, validators)
     }
+    clearErrors()
   }
 
   private def addValidatorIfMissing(control: AnyControl, validator: Validator[Any]): Unit =

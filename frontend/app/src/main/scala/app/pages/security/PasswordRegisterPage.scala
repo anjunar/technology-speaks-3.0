@@ -57,8 +57,8 @@ class PasswordRegisterPage extends PageComposite("Register", pageResizable = fal
               case Failure(e: ErrorResponseException) =>
                 Viewport.notify("Fehler während Registierung", Viewport.NotificationKind.Error)
                 event.setErrorResponses(e.errors)
-
-              case _ => ()
+              case Failure(e : Throwable) =>
+                Viewport.notify(e.getMessage, Viewport.NotificationKind.Error)
             }
         }
 

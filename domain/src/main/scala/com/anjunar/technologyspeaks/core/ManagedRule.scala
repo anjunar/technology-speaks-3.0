@@ -19,7 +19,7 @@ class ManagedRule[E <: OwnerProvider & EntityProvider] extends VisibilityRule[E]
       return false
     }
 
-    if (!holder.isAuthenticated() || holder.user == null) {
+    if (!holder.isAuthenticated || holder.user == null) {
       return false
     }
 

@@ -1,6 +1,7 @@
 package com.anjunar.technologyspeaks.security
 
 import com.anjunar.technologyspeaks.core.{Credential, PasswordCredential, User}
+import com.typesafe.scalalogging.Logger
 import jakarta.annotation.PostConstruct
 import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Component
@@ -13,26 +14,29 @@ import java.util
 @RequestScope
 class IdentityHolder(val sessionHolder: SessionHolder, val entityManager: EntityManager) {
 
+  val log = Logger[IdentityHolder]
+  
   var user: User = uninitialized
 
   var roles: java.util.List[String] = null
 
   var credential: Credential = uninitialized
 
-  def isAuthenticated(): Boolean = sessionHolder.user != null
+  def isAuthenticated: Boolean = sessionHolder.user != null
 
   def hasRole(role: String): Boolean = roles.contains(role)
 
   @PostConstruct
   def postConstruct(): Unit = {
     if (sessionHolder.user == null || sessionHolder.credentials == null) {
+      log.debug("Anonymous user")
       user = new User("Anonymous")
-      roles = new util.ArrayList(util.List.of("Anonymous"))
+      roles = util.List.of("Anonymous")
       credential = new PasswordCredential("Anonymous", "Anonymous")
     } else {
       user = User.find(sessionHolder.user)
       credential = entityManager.find(classOf[Credential], sessionHolder.credentials)
-      roles = new util.ArrayList(credential.roles.stream().map[String](role => role.name).toList)
+      roles = credential.roles.stream().map[String](role => role.name).toList
     }
   }
 

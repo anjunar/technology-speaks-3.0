@@ -9,7 +9,13 @@ import scala.scalajs.js.Dynamic
 class JsonMapper(val registry: JsonRegistry) {
 
   def deserialize[M <: Model[M]](dynamic: Dynamic): M = {
-    val entityType = dynamic.selectDynamic("@type").asInstanceOf[String]
+    val entityTypeDynamic = dynamic.selectDynamic("@type")
+    
+    if (entityTypeDynamic == null || js.isUndefined(entityTypeDynamic)) {
+      return null.asInstanceOf[M]
+    }
+    
+    val entityType = entityTypeDynamic.asInstanceOf[String]
     val factory =
       registry.classes
         .get(entityType)
