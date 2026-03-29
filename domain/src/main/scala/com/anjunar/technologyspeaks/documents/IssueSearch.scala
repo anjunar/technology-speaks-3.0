@@ -2,22 +2,20 @@ package com.anjunar.technologyspeaks.documents
 
 import com.anjunar.technologyspeaks.hibernate.search.annotations.RestPredicate
 import com.anjunar.technologyspeaks.hibernate.search.{AbstractSearch, Context, PredicateProvider}
+import jakarta.json.bind.annotation.JsonbProperty
 import org.springframework.stereotype.Component
 
 import java.util.UUID
+import scala.annotation.meta.field
 import scala.beans.BeanProperty
 
-class IssueSearch(
-  idValue: Document = null,
-  sort: java.util.List[String] = new java.util.ArrayList[String](),
-  index: Int = 0,
-  limit: Int = 5
-) extends AbstractSearch(sort, index, limit) {
-
-  @RestPredicate(classOf[IssueSearch.DocumentPredicate])
-    val id: Document = idValue
-
-}
+class IssueSearch(@(RestPredicate @field)(classOf[IssueSearch.DocumentPredicate])
+                  @(JsonbProperty @field)
+                  val id: Document,
+                  sort: java.util.List[String] = new java.util.ArrayList[String](),
+                  index: Int = 0,
+                  limit: Int = 5
+                 ) extends AbstractSearch(sort, index, limit)
 
 object IssueSearch {
 

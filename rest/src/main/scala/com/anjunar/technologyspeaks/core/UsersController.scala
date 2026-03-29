@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.{GetMapping, RestController}
 import scala.annotation.meta.field
 import scala.beans.BeanProperty
 import scala.jdk.CollectionConverters.*
+import java.util
 
 @RestController
 class UsersController(val query: HibernateSearch) {
@@ -21,7 +22,7 @@ class UsersController(val query: HibernateSearch) {
   def list(search: UserSearch): Table[UsersController.UserRow] = {
     val searchContext = query.searchContext(search)
 
-    val entities = query.entities(
+    val entities : util.List[UsersController.UserRow] = query.entities(
       search.index,
       search.limit,
       classOf[User],

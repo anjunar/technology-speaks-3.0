@@ -67,8 +67,7 @@ object Api {
 
     val init = js.Dynamic.literal(
       method = method,
-      headers = headers,
-      credentials = "include"
+      headers = headers
     )
 
     if (!js.isUndefined(body)) {
