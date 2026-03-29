@@ -4,6 +4,7 @@ import app.domain.core.MediaHelper
 import app.services.ApplicationService
 import app.ui.{CompositeSupport, DivComposite}
 import jfx.control.Image.{image, src}
+import jfx.control.Link.link
 import jfx.core.component.ElementComponent.*
 import jfx.layout.Div.div
 import jfx.dsl.*
@@ -26,41 +27,43 @@ class LoggedInUser extends DivComposite {
             .map(info => s"${info.firstName.get} ${info.lastName.get}".trim)
             .filter(_.nonEmpty)
             .getOrElse(app.user.nickName.get)
+        
+        link(s"/core/users/user/${app.user.id.get}") {
+          hbox {
+            classes = "logged-in-user-inner"
 
-        hbox {
-          classes = "logged-in-user-inner"
-
-          style {
-            alignItems = "center"
-            columnGap = "10px"
-          }
-
-          if (app.user.image.get != null) {
-            image {
-              classes = "logged-in-user-avatar"
-              style {
-                width = "32px"
-                height = "32px"
-              }
-
-              src = MediaHelper.thumbnailLink(app.user.image.get)
+            style {
+              alignItems = "center"
+              columnGap = "10px"
             }
-          } else {
+
+            if (app.user.image.get != null) {
+              image {
+                classes = "logged-in-user-avatar"
+                style {
+                  width = "32px"
+                  height = "32px"
+                }
+
+                src = MediaHelper.thumbnailLink(app.user.image.get)
+              }
+            } else {
+              div {
+                classes = Seq("material-icons", "logged-in-user-avatar")
+                style {
+                  fontSize = "32px"
+                }
+
+                text = "account_circle"
+              }
+            }
+
             div {
-              classes = Seq("material-icons", "logged-in-user-avatar")
-              style {
-                fontSize = "32px"
-              }
-
-              text = "account_circle"
+              classes = "logged-in-user-label"
+              text = label
             }
           }
-
-          div {
-            classes = "logged-in-user-label"
-            text = label
-          }
-        }
+        }       
       }
     }
   }
