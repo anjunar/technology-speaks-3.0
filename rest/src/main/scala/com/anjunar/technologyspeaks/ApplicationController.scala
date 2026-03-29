@@ -58,7 +58,7 @@ class ApplicationController(val identityHolder: IdentityHolder) {
         .withId(true)
         .withRel("register")
         .build(),
-      LinkBuilder.create[LogoutController](_.logout())
+      LinkBuilder.create[LogoutController](_.logout(null))
         .withId(true)
         .withRel("logout")
         .build(),
