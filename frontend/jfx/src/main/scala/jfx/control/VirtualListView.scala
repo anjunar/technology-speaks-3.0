@@ -227,7 +227,7 @@ class VirtualListView[T](
 
     val maxCount = maxRenderableCount
     if (maxCount <= 0) {
-      hideUnusedSlots(from = 0)
+      hideUnusedSlots(from = 0, clearContent = true)
       return
     }
 
@@ -262,6 +262,7 @@ class VirtualListView[T](
       val loaded = rowItem != null
 
       slot.element.style.top = s"${topPx}px"
+      slot.element.style.display = ""
       slot.element.classList.remove("is-hidden")
 
       if (slot.boundIndex != rowIndex || slot.loaded != loaded || !sameRenderedItem(slot.renderedItem, rowItem)) {
@@ -310,6 +311,7 @@ class VirtualListView[T](
   private def hideUnusedSlots(from: Int, clearContent: Boolean = false): Unit =
     (from until slotPool.length).foreach { index =>
       val slot = slotPool(index)
+      slot.element.style.display = "none"
       slot.element.classList.add("is-hidden")
       slot.boundIndex = -1
       slot.loaded = false
