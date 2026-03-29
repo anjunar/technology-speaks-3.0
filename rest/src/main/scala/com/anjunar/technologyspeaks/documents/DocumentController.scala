@@ -72,7 +72,7 @@ class DocumentController(val identityHolder: IdentityHolder) {
   }
 
   @GetMapping(value = Array("/document/documents/document/{id}"), produces = Array("application/json"))
-  @RolesAllowed(Array("User", "Administrator"))
+  @RolesAllowed(Array("Anonymous", "Guest", "User", "Administrator"))
   @EntityGraph("Document.full")
   def read(@PathVariable("id") entity: Document): Data[Document] = {
     val form = new Data(entity, SchemaHateoas.enhance(entity, Document.schema))
