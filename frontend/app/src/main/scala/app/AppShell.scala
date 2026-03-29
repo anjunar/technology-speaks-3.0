@@ -36,7 +36,7 @@ class AppShell extends DivComposite {
           }
 
           hbox {
-            classes = "app-header-bar"
+            classes = "app-header-bar glass"
 
             loggedInUser {
               classes += "app-header-user"
@@ -109,7 +109,7 @@ class AppShell extends DivComposite {
           }
 
           hbox {
-            classes = "app-footer-bar"
+            classes = "app-footer-bar glass"
 
             hbox {
               classes = "app-footer-tabs"

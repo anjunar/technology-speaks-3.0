@@ -66,8 +66,8 @@
     box-shadow:
             inset 0 1px 0 color-mix(in srgb, white 6%, transparent),
             inset 0 0 0 1px color-mix(in srgb, black 12%, transparent);
-    backdrop-filter: blur(10px) saturate(124%);
-    -webkit-backdrop-filter: blur(10px) saturate(124%);
+    backdrop-filter: blur(10px) saturate(180%);
+    -webkit-backdrop-filter: blur(10px) saturate(180%);
     color: var(--color-text-primary) !important;
     font-size: 17px !important;
     font-weight: 500;
@@ -102,8 +102,8 @@
     box-shadow:
             inset 0 1px 0 color-mix(in srgb, white 5%, transparent),
             inset 0 0 0 1px color-mix(in srgb, black 10%, transparent) !important;
-    backdrop-filter: blur(8px) saturate(120%);
-    -webkit-backdrop-filter: blur(8px) saturate(120%);
+    backdrop-filter: blur(8px) saturate(180%);
+    -webkit-backdrop-filter: blur(8px) saturate(180%);
 }
 
 .post-card__body {
@@ -146,8 +146,8 @@
     border: 1px solid color-mix(in srgb, var(--glass-border) 14%, transparent);
     background: transparent !important;
     box-shadow: inset 0 1px 0 color-mix(in srgb, white 5%, transparent);
-    backdrop-filter: blur(6px) saturate(118%);
-    -webkit-backdrop-filter: blur(6px) saturate(118%);
+    backdrop-filter: blur(6px) saturate(180%);
+    -webkit-backdrop-filter: blur(6px) saturate(180%);
 }
 
 .posts-page .component-header a:first-child .material-icons {
@@ -310,8 +310,8 @@
     box-shadow:
             inset 0 1px 0 color-mix(in srgb, white 4%, transparent),
             inset 0 0 0 1px color-mix(in srgb, black 8%, transparent);
-    backdrop-filter: blur(6px) saturate(118%);
-    -webkit-backdrop-filter: blur(6px) saturate(118%);
+    backdrop-filter: blur(6px) saturate(180%);
+    -webkit-backdrop-filter: blur(6px) saturate(180%);
 }
 
 .posts-page input[name="comment"]::placeholder,
@@ -324,8 +324,8 @@
     box-shadow:
             0 14px 34px color-mix(in srgb, var(--glass-shadow) 26%, transparent),
             inset 0 1px 0 color-mix(in srgb, white 5%, transparent);
-    backdrop-filter: blur(14px) saturate(130%);
-    -webkit-backdrop-filter: blur(14px) saturate(130%);
+    backdrop-filter: blur(14px) saturate(180%);
+    -webkit-backdrop-filter: blur(14px) saturate(180%);
 }
 
 .jfx-window:has(.posts-page) .jfx-window__header {
@@ -430,8 +430,8 @@
     border: 1px solid color-mix(in srgb, var(--glass-border) 14%, transparent);
     background: transparent !important;
     box-shadow: inset 0 1px 0 color-mix(in srgb, white 5%, transparent);
-    backdrop-filter: blur(6px) saturate(118%);
-    -webkit-backdrop-filter: blur(6px) saturate(118%);
+    backdrop-filter: blur(6px) saturate(180%);
+    -webkit-backdrop-filter: blur(6px) saturate(180%);
 }
 
 .post-edit-page .component-header a:first-child .material-icons {
@@ -472,8 +472,8 @@
     box-shadow:
             inset 0 1px 0 color-mix(in srgb, white 5%, transparent),
             inset 0 0 0 1px color-mix(in srgb, black 10%, transparent);
-    backdrop-filter: blur(8px) saturate(120%);
-    -webkit-backdrop-filter: blur(8px) saturate(120%);
+    backdrop-filter: blur(8px) saturate(180%);
+    -webkit-backdrop-filter: blur(8px) saturate(180%);
     overflow: hidden;
 }
 
@@ -531,8 +531,8 @@
     border: 1px solid color-mix(in srgb, var(--glass-border) 14%, transparent);
     background: transparent !important;
     box-shadow: inset 0 1px 0 color-mix(in srgb, white 4%, transparent);
-    backdrop-filter: blur(6px) saturate(118%);
-    -webkit-backdrop-filter: blur(6px) saturate(118%);
+    backdrop-filter: blur(6px) saturate(180%);
+    -webkit-backdrop-filter: blur(6px) saturate(180%);
     font-size: 12px;
     font-weight: 600;
     letter-spacing: 0.08em;
@@ -618,8 +618,8 @@
     box-shadow:
             inset 0 1px 0 color-mix(in srgb, white 4%, transparent),
             inset 0 0 0 1px color-mix(in srgb, black 8%, transparent);
-    backdrop-filter: blur(6px) saturate(118%);
-    -webkit-backdrop-filter: blur(6px) saturate(118%);
+    backdrop-filter: blur(6px) saturate(180%);
+    -webkit-backdrop-filter: blur(6px) saturate(180%);
     color: var(--color-text-soft) !important;
     font-size: 15px !important;
 }
@@ -638,8 +638,8 @@
     box-shadow:
             inset 0 1px 0 color-mix(in srgb, white 4%, transparent),
             inset 0 0 0 1px color-mix(in srgb, black 8%, transparent) !important;
-    backdrop-filter: blur(8px) saturate(120%);
-    -webkit-backdrop-filter: blur(8px) saturate(120%);
+    backdrop-filter: blur(8px) saturate(180%);
+    -webkit-backdrop-filter: blur(8px) saturate(180%);
 }
 
 .post-view-page .glass-border > .vbox {

@@ -406,13 +406,13 @@ img.ProseMirror-separator {
 }
 
 .jfx-window:has(.image-plugin-dialog) .jfx-window__surface {
-    background: color-mix(in srgb, var(--glass-bg) 96%, transparent);
+    background: var(--glass-bg);
     border: 1px solid color-mix(in srgb, var(--glass-border) 12%, transparent);
     box-shadow:
             0 14px 34px color-mix(in srgb, var(--glass-shadow) 26%, transparent),
             inset 0 1px 0 color-mix(in srgb, white 8%, transparent);
-    backdrop-filter: blur(16px) saturate(132%);
-    -webkit-backdrop-filter: blur(16px) saturate(132%);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
 }
 
 .jfx-window:has(.image-plugin-dialog) .jfx-window__header {
@@ -449,8 +449,8 @@ img.ProseMirror-separator {
     padding: 14px;
     background: transparent !important;
     box-shadow: none;
-    backdrop-filter: blur(8px) saturate(120%);
-    -webkit-backdrop-filter: blur(8px) saturate(120%);
+    backdrop-filter: blur(8px) saturate(180%);
+    -webkit-backdrop-filter: blur(8px) saturate(180%);
 }
 
 .image-plugin-dialog__preview-shell {
