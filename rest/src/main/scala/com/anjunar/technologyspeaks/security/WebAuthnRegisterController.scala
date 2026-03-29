@@ -1,7 +1,8 @@
 package com.anjunar.technologyspeaks.security
 
-import com.anjunar.json.mapper.intermediate.model.{JsonArray, JsonNode, JsonObject}
-import com.anjunar.technologyspeaks.core.Role
+import com.anjunar.json.mapper.ErrorRequest
+import com.anjunar.json.mapper.intermediate.model.{JsonArray, JsonNode, JsonObject, JsonString}
+import com.anjunar.technologyspeaks.core.{EMail, Role, User}
 import com.anjunar.technologyspeaks.security.WebAuthnManagerProvider.{ORIGIN, RP_ID, RP_NAME, challengeStore, webAuthnManager}
 import com.webauthn4j.data.{PublicKeyCredentialParameters, PublicKeyCredentialType, RegistrationParameters}
 import com.webauthn4j.data.attestation.statement.COSEAlgorithmIdentifier
@@ -10,9 +11,12 @@ import com.webauthn4j.data.client.challenge.DefaultChallenge
 import com.webauthn4j.server.ServerProperty
 import com.webauthn4j.util.Base64UrlUtil
 import jakarta.annotation.security.RolesAllowed
+import org.springframework.http.{HttpStatus, ResponseEntity}
+import org.springframework.web.ErrorResponse
 import org.springframework.web.bind.annotation.{PostMapping, RequestBody, RestController}
 
 import java.security.SecureRandom
+import java.util
 import java.util.Arrays
 import scala.jdk.CollectionConverters.*
 
@@ -21,15 +25,50 @@ class WebAuthnRegisterController(val store: CredentialStore, val registerService
 
   @PostMapping(value = Array("/security/register/options"), produces = Array("application/json"), consumes = Array("application/json"))
   @RolesAllowed(Array("Anonymous"))
-  def options(@RequestBody body: JsonObject): JsonObject = {
-    val username = body.getString("email")
+  def options(@RequestBody body: JsonObject): ResponseEntity[JsonNode] = {
+    val nickName = body.getString("nickName")
+    val email = body.getString("email")
+
+    val user = User.query("nickName" -> nickName)
+
+    if (user == null) {
+
+      // New Registration of non-existing user
+
+    }  else {
+
+      val eMail = EMail.query("value" -> email)
+
+      if (eMail == null) {
+
+        return new ResponseEntity(new JsonArray()
+          .add(new JsonObject()
+            .put("path", new JsonArray().add(new JsonString("email")))
+            .put("message", "Email wurde nicht gefunden.")), HttpStatus.BAD_REQUEST)
+
+      } else {
+
+        if (user.emails.contains(eMail)) {
+
+          // New Registration of existing user with same email
+
+        } else {
+          return new ResponseEntity(new JsonArray()
+            .add(new JsonObject()
+              .put("path", new JsonArray().add(new JsonString("email")))
+              .put("message", "Email passt nicht zum Nickname.")), HttpStatus.BAD_REQUEST)
+        }
+
+      }
+
+    }
 
     val challengeBytes = new Array[Byte](32)
     new SecureRandom().nextBytes(challengeBytes)
     val challenge = new DefaultChallenge(challengeBytes)
-    challengeStore.put(username, challenge)
+    challengeStore.put(email, challenge)
 
-    val credentials = store.loadByUsername(username)
+    val credentials = store.loadByUsername(email)
 
     val excludeCredentials = new java.util.ArrayList[JsonNode]()
     for (credential <- credentials.asScala) {
@@ -40,7 +79,7 @@ class WebAuthnRegisterController(val store: CredentialStore, val registerService
       )
     }
 
-    new JsonObject()
+    new ResponseEntity(new JsonObject()
       .put("challenge", Base64UrlUtil.encodeToString(challengeBytes))
       .put(
         "rp",
@@ -51,9 +90,9 @@ class WebAuthnRegisterController(val store: CredentialStore, val registerService
       .put(
         "user",
         new JsonObject()
-          .put("id", Base64UrlUtil.encodeToString(username.getBytes()))
-          .put("name", username)
-          .put("displayName", username)
+          .put("id", Base64UrlUtil.encodeToString(email.getBytes()))
+          .put("name", email)
+          .put("displayName", email)
       )
       .put(
         "pubKeyCredParams",
@@ -69,7 +108,7 @@ class WebAuthnRegisterController(val store: CredentialStore, val registerService
       )
       .put("attestation", "none")
       .put("timeout", 60000)
-      .put("excludeCredentials", new JsonArray(excludeCredentials))
+      .put("excludeCredentials", new JsonArray(excludeCredentials)), HttpStatus.OK)
   }
 
   @PostMapping(value = Array("/security/register/finish"), produces = Array("application/json"), consumes = Array("application/json"))

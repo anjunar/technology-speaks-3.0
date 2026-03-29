@@ -10,7 +10,7 @@ import jfx.control.Heading.heading
 import jfx.control.Image.{image, src_=}
 import jfx.core.component.ElementComponent.*
 import jfx.dsl.*
-import jfx.form.Form
+import jfx.form.{ErrorResponseException, Form}
 import jfx.form.Form.{form, onSubmit_=}
 import jfx.form.Input.{input, inputType_=}
 import jfx.form.InputContainer.inputContainer
@@ -21,6 +21,7 @@ import jfx.layout.VBox.vbox
 import jfx.layout.Viewport
 
 import scala.concurrent.ExecutionContext
+import scala.util.{Failure, Success}
 
 class PasswordRegisterPage extends PageComposite("Register", pageResizable = false) {
 
@@ -43,24 +44,22 @@ class PasswordRegisterPage extends PageComposite("Register", pageResizable = fal
         onSubmit_= { (event : Form[PasswordRegister])  =>
           registerForm
             .save()
-            .foreach(response =>
-              if (response != null && response.status == "success") {
-                Viewport.notify("Registrierung abgeschlossen.", Viewport.NotificationKind.Success)
-                
+            .onComplete {
+              case Success(_) =>
+                Viewport.notify("Registierung erfolgreich!", Viewport.NotificationKind.Success)
+
                 service.invoke()
-                
+
                 Navigation.navigate("/security/confirm", replace = true)
-                
+
                 close()
-              } else {
-                Viewport.notify(
-                  Option(response)
-                    .flatMap(value => Option(value.message))
-                    .getOrElse("Registrierung fehlgeschlagen."),
-                  Viewport.NotificationKind.Error
-                )
-              }
-            )
+
+              case Failure(e: ErrorResponseException) =>
+                Viewport.notify("Fehler während Registierung", Viewport.NotificationKind.Error)
+                event.setErrorResponses(e.errors)
+
+              case _ => ()
+            }
         }
 
         vbox {

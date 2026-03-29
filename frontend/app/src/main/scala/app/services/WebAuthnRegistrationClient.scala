@@ -23,6 +23,7 @@ object WebAuthnRegistrationClient {
     for {
       optionsJsonText <- Api.postText(optionsUrl, js.JSON.stringify(request))
       optionsDyn = js.JSON.parse(optionsJsonText)
+      
       registrationResponse <- SimpleWebAuthnBrowser
         .startRegistration(
           js.Dynamic.literal(

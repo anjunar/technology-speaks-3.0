@@ -10,7 +10,7 @@ import jfx.control.Heading.heading
 import jfx.control.Image.{image, src_=}
 import jfx.core.component.ElementComponent.*
 import jfx.dsl.*
-import jfx.form.Form
+import jfx.form.{ErrorResponseException, Form}
 import jfx.form.Form.{form, onSubmit_=}
 import jfx.form.Input.{input, inputType_=}
 import jfx.form.InputContainer.inputContainer
@@ -18,8 +18,10 @@ import jfx.layout.Div.div
 import jfx.layout.HBox.hbox
 import jfx.layout.Span.span
 import jfx.layout.VBox.vbox
+import jfx.layout.Viewport
 
 import scala.concurrent.ExecutionContext
+import scala.util.{Failure, Success}
 
 class WebAuthnRegisterPage extends PageComposite("Register mit WebAuthn", pageResizable = false) {
 
@@ -42,14 +44,22 @@ class WebAuthnRegisterPage extends PageComposite("Register mit WebAuthn", pageRe
         onSubmit_= { (event : Form[WebAuthnRegister])  =>
           WebAuthnRegistrationClient
             .register(registerForm.email.get, registerForm.nickName.get)
-            .foreach(_ => {
+            .onComplete {
+              case Success(_) =>
+                Viewport.notify("Registierung erfolgreich!", Viewport.NotificationKind.Success)
 
-              service.invoke()
+                service.invoke()
 
-              Navigation.navigate("/security/confirm", replace = true)
+                Navigation.navigate("/security/confirm", replace = true)
 
-              close()
-            })
+                close()
+
+              case Failure(e: ErrorResponseException) =>
+                Viewport.notify("Fehler während Registierung", Viewport.NotificationKind.Error)
+                event.setErrorResponses(e.errors)
+
+              case _ => ()
+            }
         }
 
         vbox {
