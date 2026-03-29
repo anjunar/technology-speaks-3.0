@@ -85,6 +85,9 @@ object Api {
       response.text().toFuture.flatMap { text =>
         if (response.ok) {
           Future.successful(text)
+        } else if (response.status == 428) {
+          Navigation.navigate("/security/confirm", replace = true)
+          Future.failed(RuntimeException("Request was rejected with 428"))
         } else if (response.status == 403) {
           Navigation.redirectToLogin()
           Future.failed(RuntimeException("Request was rejected with 403"))

@@ -3,6 +3,7 @@ package app.pages.security
 import app.domain.documents.Document
 import app.domain.security.PasswordRegister
 import app.services.ApplicationService
+import app.support.Navigation
 import app.ui.{CompositeSupport, PageComposite}
 import jfx.action.Button.{button, buttonType_=, onClick}
 import jfx.control.Heading.heading
@@ -45,6 +46,11 @@ class PasswordRegisterPage extends PageComposite("Register", pageResizable = fal
             .foreach(response =>
               if (response != null && response.status == "success") {
                 Viewport.notify("Registrierung abgeschlossen.", Viewport.NotificationKind.Success)
+                
+                service.invoke()
+                
+                Navigation.navigate("/security/confirm", replace = true)
+                
                 close()
               } else {
                 Viewport.notify(

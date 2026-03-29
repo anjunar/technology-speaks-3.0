@@ -18,7 +18,13 @@ class SecurityInterceptor(val identityHolder: IdentityHolder) extends HandlerInt
         if (rolesAllowed == null) {
           true
         } else if (!rolesAllowed.value().exists(role => identityHolder.hasRole(role))) {
-          throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied")
+
+          if (identityHolder.hasRole("Guest")) {
+            throw new ResponseStatusException(HttpStatus.PRECONDITION_REQUIRED, "Access denied")
+          } else {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied")
+          }
+
         } else {
           true
         }

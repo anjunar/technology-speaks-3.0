@@ -3,6 +3,7 @@ package app.pages.security
 import app.domain.documents.Document
 import app.domain.security.WebAuthnRegister
 import app.services.{ApplicationService, WebAuthnRegistrationClient}
+import app.support.Navigation
 import app.ui.{CompositeSupport, PageComposite}
 import jfx.action.Button.{button, buttonType_=, onClick}
 import jfx.control.Heading.heading
@@ -41,7 +42,14 @@ class WebAuthnRegisterPage extends PageComposite("Register mit WebAuthn", pageRe
         onSubmit_= { (event : Form[WebAuthnRegister])  =>
           WebAuthnRegistrationClient
             .register(registerForm.email.get, registerForm.nickName.get)
-            .foreach(_ => close())
+            .foreach(_ => {
+
+              service.invoke()
+
+              Navigation.navigate("/security/confirm", replace = true)
+
+              close()
+            })
         }
 
         vbox {
