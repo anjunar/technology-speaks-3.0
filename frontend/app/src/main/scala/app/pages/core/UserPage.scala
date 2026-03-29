@@ -5,6 +5,7 @@ import app.domain.followers.{Group, RelationShip}
 import app.support.Navigation.renderByRel
 import app.support.{Api, Navigation}
 import app.ui.{CompositeSupport, DivComposite, PageComposite}
+import jfx.action.Button
 import jfx.action.Button.{button, buttonType, onClick}
 import jfx.control.Link.link
 import jfx.core.component.ElementComponent.*
@@ -169,9 +170,14 @@ class UserPage(val payload: Data[User]) extends PageComposite("User", pageResiza
                     }
 
                     renderByRel("update", model.links) { () =>
-                      button("close") {
+                      button(infoToggleIcon(infoDisabled.get)) {
                         buttonType = "button"
                         classes = Seq("material-icons", "user-page-toggle")
+
+                        val btn = summon[Button]
+                        addDisposable(infoDisabled.observe(disabled => {
+                          btn.textContent = infoToggleIcon(disabled)
+                        }))
 
                         onClick { _ =>
                           infoDisabled.set(!infoDisabled.get)
@@ -267,9 +273,14 @@ class UserPage(val payload: Data[User]) extends PageComposite("User", pageResiza
                     }
 
                     renderByRel("update", model.links) { () =>
-                      button("close") {
+                      button(addressToggleIcon(addressDisabled.get)) {
                         buttonType = "button"
                         classes = Seq("material-icons", "user-page-toggle")
+
+                        val btn = summon[Button]
+                        addDisposable(addressDisabled.observe(disabled => {
+                          btn.textContent = addressToggleIcon(disabled)
+                        }))
 
                         onClick { _ =>
                           addressDisabled.set(!addressDisabled.get)
@@ -390,6 +401,12 @@ class UserPage(val payload: Data[User]) extends PageComposite("User", pageResiza
       .flatMap(parent => Option(parent.schema))
       .flatMap(schema => Option(schema.findProperty(propertyName)))
       .orNull
+
+  private def infoToggleIcon(disabled: Boolean): String =
+    if (disabled) "person_add" else "person_remove"
+
+  private def addressToggleIcon(disabled: Boolean): String =
+    if (disabled) "add_location_alt" else "location_off"
 
   private def loadVisibilityCatalog(): Unit = {
     UserPage.loadVisibilityCatalog().onComplete {
