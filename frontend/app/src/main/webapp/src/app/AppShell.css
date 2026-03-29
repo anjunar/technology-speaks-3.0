@@ -269,11 +269,6 @@
     letter-spacing: 0.02em;
 }
 
-.app-shell-body {
-    position: relative;
-    padding: 0 0 18px;
-}
-
 .app-shell-body:has(.app-shell-nav-center)::before {
     content: "";
     position: absolute;

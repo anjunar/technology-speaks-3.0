@@ -28,119 +28,119 @@ class AppShell extends DivComposite {
 
       vbox {
 
-        viewport {
+        style {
+          display = "flex"
+          flexDirection = "column"
+        }
+
+        div {
+          classes = "app-shell-body"
+
+          viewport {}
+
+          div {
+            addDisposable(Viewport.windows.observe(windows => {
+              if (windows.nonEmpty) {
+                classes = Seq("glass", "app-shell-nav", "app-shell-nav-left")
+              } else {
+                classes = Seq("glass", "app-shell-nav", "app-shell-nav-center")
+              }
+            }))
+
+            link("/") {
+              classes = "app-shell-nav-link"
+
+              vbox {
+                classes = "app-shell-nav-item"
+
+                style {
+                  alignItems = "center"
+                }
+
+                span {
+                  classes = Seq("material-icons", "icon")
+                  text = "home"
+                }
+
+                span {
+                  classes = "app-shell-nav-text"
+                  text = "Home"
+                }
+              }
+            }
+
+            observeRender(service.app) { app =>
+              app.links.foreach { currentLink =>
+                link(currentLink.url) {
+                  classes = "app-shell-nav-link"
+
+                  vbox {
+                    classes = "app-shell-nav-item"
+
+                    style {
+                      alignItems = "center"
+                    }
+
+                    span {
+                      classes = Seq("material-icons", "icon")
+                      text = currentLink.icon
+                    }
+
+                    span {
+                      classes = "app-shell-nav-text"
+                      text = currentLink.name
+                    }
+                  }
+                }
+              }
+
+            }
+
+            windowRouter(Routes.routes) {}
+          }
+        }
+
+        hbox {
+          classes = "app-footer-bar glass"
 
           style {
-            display = "flex"
-            flexDirection = "column"
+            justifyContent = "space-between"
           }
 
           hbox {
-            classes = "app-header-bar glass"
+            classes = "app-footer-tabs"
+
+            forEach(Viewport.windows) { window =>
+              button(window.title) {
+                buttonType = "button"
+                classes =
+                  if (Viewport.isActive(window)) Seq("app-footer-window", "is-active")
+                  else Seq("app-footer-window", "is-inactive")
+                onClick { _ =>
+                  Viewport.touchWindow(window)
+                }
+              }
+            }
+          }
+
+          hbox {
+            classes = "app-footer-actions"
+            style {
+              justifyContent = "flex-end"
+              gap = "10px"
+            }
+
+            button("dark_mode") {
+              classes = Seq("material-icons", "app-footer-control")
+              onClick { _ =>
+                service.darkMode.set(!service.darkMode.get)
+              }
+            }
 
             loggedInUser {
               classes += "app-header-user"
             }
-          }
 
-          div {
-            classes = "app-shell-body"
-
-            div {
-              addDisposable(Viewport.windows.observe(windows => {
-                if (windows.nonEmpty) {
-                  classes = Seq("glass", "app-shell-nav", "app-shell-nav-left")
-                } else {
-                  classes = Seq("glass", "app-shell-nav", "app-shell-nav-center")
-                }
-              }))
-
-              link("/") {
-                classes = "app-shell-nav-link"
-
-                vbox {
-                  classes = "app-shell-nav-item"
-
-                  style {
-                    alignItems = "center"
-                  }
-
-                  span {
-                    classes = Seq("material-icons", "icon")
-                    text = "home"
-                  }
-
-                  span {
-                    classes = "app-shell-nav-text"
-                    text = "Home"
-                  }
-                }
-              }
-
-              observeRender(service.app) { app =>
-                app.links.foreach { currentLink =>
-                  link(currentLink.url) {
-                    classes = "app-shell-nav-link"
-
-                    vbox {
-                      classes = "app-shell-nav-item"
-
-                      style {
-                        alignItems = "center"
-                      }
-
-                      span {
-                        classes = Seq("material-icons", "icon")
-                        text = currentLink.icon
-                      }
-
-                      span {
-                        classes = "app-shell-nav-text"
-                        text = currentLink.name
-                      }
-                    }
-                  }
-                }
-
-              }
-
-              windowRouter(Routes.routes) {}
-            }
-          }
-
-          hbox {
-            classes = "app-footer-bar glass"
-
-            hbox {
-              classes = "app-footer-tabs"
-
-              forEach(Viewport.windows) { window =>
-                button(window.title) {
-                  buttonType = "button"
-                  classes =
-                    if (Viewport.isActive(window)) Seq("app-footer-window", "is-active")
-                    else Seq("app-footer-window", "is-inactive")
-                  onClick { _ =>
-                    Viewport.touchWindow(window)
-                  }
-                }
-              }
-            }
-
-            hbox {
-              classes = "app-footer-actions"
-              style {
-                justifyContent = "flex-end"
-                flex = "1"
-              }
-
-              button("dark_mode") {
-                classes = Seq("material-icons", "app-footer-control")
-                onClick { _ =>
-                  service.darkMode.set(!service.darkMode.get)
-                }
-              }
-            }
           }
         }
 
