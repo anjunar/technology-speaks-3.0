@@ -17,7 +17,7 @@ import java.security.SecureRandom
 import scala.jdk.CollectionConverters._
 
 @RestController
-class WebAuthnLoginController(val store: CredentialStore, val entityManager: EntityManager, val identityHolder: SessionHolder) {
+class WebAuthnLoginController(val store: CredentialStore, val entityManager: EntityManager, val sessionHolder: SessionHolder) {
 
   @PostMapping(value = Array("/security/login/options"), produces = Array("application/json"), consumes = Array("application/json"))
   @RolesAllowed(Array("Anonymous"))
@@ -93,8 +93,8 @@ class WebAuthnLoginController(val store: CredentialStore, val entityManager: Ent
 
       val user = store.loadUser(credentialId)
 
-      identityHolder.user = user.id
-      identityHolder.credentials = entity.id
+      sessionHolder.user = user.id
+      sessionHolder.credentials = entity.id
 
       new JsonObject()
         .put("status", "success")

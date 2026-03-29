@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.{PostMapping, RequestBody, RestCo
 import java.security.SecureRandom
 
 @RestController
-class PasswordRegisterController(val registerService: RegisterService, val identityHolder: IdentityHolder) {
+class PasswordRegisterController(val registerService: RegisterService, val sessionHolder: SessionHolder) {
 
   @PostMapping(value = Array("/security/register"), produces = Array("application/json"), consumes = Array("application/json"))
   @RolesAllowed(Array("Anonymous"))
@@ -40,9 +40,10 @@ class PasswordRegisterController(val registerService: RegisterService, val ident
       user.persist()
 
       registerService.register(email, code, nickName)
-      
-      identityHolder.postConstruct()
-      
+
+      sessionHolder.user = passwordCredential.email.user.id
+      sessionHolder.credentials = passwordCredential.id
+
       new JsonObject()
         .put("status", "success")
     } else {

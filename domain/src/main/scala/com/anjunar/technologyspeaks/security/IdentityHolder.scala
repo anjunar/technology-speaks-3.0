@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.context.annotation.RequestScope
 
 import scala.compiletime.uninitialized
+import java.util
 
 @Component
 @RequestScope
@@ -26,12 +27,12 @@ class IdentityHolder(val sessionHolder: SessionHolder, val entityManager: Entity
   def postConstruct(): Unit = {
     if (sessionHolder.user == null || sessionHolder.credentials == null) {
       user = new User("Anonymous")
-      roles = java.util.List.of("Anonymous")
+      roles = new util.ArrayList(util.List.of("Anonymous"))
       credential = new PasswordCredential("Anonymous", "Anonymous")
     } else {
       user = User.find(sessionHolder.user)
       credential = entityManager.find(classOf[Credential], sessionHolder.credentials)
-      roles = credential.roles.stream().map[String](role => role.name).toList()
+      roles = new util.ArrayList(credential.roles.stream().map[String](role => role.name).toList)
     }
   }
 

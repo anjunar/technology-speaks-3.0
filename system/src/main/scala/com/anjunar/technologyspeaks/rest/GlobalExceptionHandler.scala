@@ -1,6 +1,7 @@
 package com.anjunar.technologyspeaks.rest
 
 import com.anjunar.json.mapper.{ErrorRequest, ErrorRequestException}
+import com.typesafe.scalalogging.Logger
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.http.{HttpStatus, MediaType, ResponseEntity}
 import org.springframework.transaction.PlatformTransactionManager
@@ -16,6 +17,8 @@ import java.util.{LinkedHashMap, Map as JavaMap}
 
 @RestControllerAdvice
 class GlobalExceptionHandler(val txManager: PlatformTransactionManager) {
+
+  val log = Logger[GlobalExceptionHandler]
 
   @ExceptionHandler(Array(classOf[ErrorRequestException]))
   def handleBusinessException(ex: ErrorRequestException): ResponseEntity[java.util.List[ErrorRequest]] = {
@@ -42,6 +45,8 @@ class GlobalExceptionHandler(val txManager: PlatformTransactionManager) {
     body.put("message", Option(ex.getReason).filter(! _.isBlank).getOrElse(status.getReasonPhrase))
     body.put("path", request.getRequestURI)
 
+    log.error(s"[$status] ${ex.getMessage}", ex)
+
     ResponseEntity
       .status(status)
       .contentType(MediaType.APPLICATION_JSON)
@@ -60,6 +65,8 @@ class GlobalExceptionHandler(val txManager: PlatformTransactionManager) {
     body.put("message", Option(ex.getMessage).getOrElse(ex.getClass.getSimpleName))
     body.put("path", request.getRequestURI)
     body.put("trace", stackTraceOf(ex))
+
+    log.error(ex.getMessage, ex)
 
     ResponseEntity
       .status(HttpStatus.INTERNAL_SERVER_ERROR)

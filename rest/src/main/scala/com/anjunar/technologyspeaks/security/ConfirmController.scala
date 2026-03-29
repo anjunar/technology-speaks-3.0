@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.{PostMapping, RequestParam, RestC
 import org.springframework.web.server.ResponseStatusException
 
 @RestController
-class ConfirmController(val identityHolder: IdentityHolder) {
+class ConfirmController(val sessionHolder: SessionHolder, val identityHolder: IdentityHolder) {
 
   @PostMapping(Array("/security/confirm"))
   @RolesAllowed(Array("Guest"))
@@ -20,7 +20,7 @@ class ConfirmController(val identityHolder: IdentityHolder) {
     } else {
       throw new ResponseStatusException(
         HttpStatus.FORBIDDEN,
-        "Access denied"
+        "Code not right, Access denied"
       )
     }
   }

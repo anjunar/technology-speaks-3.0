@@ -1,6 +1,7 @@
 package com.anjunar.technologyspeaks.security
 
 import com.anjunar.json.mapper.intermediate.model.{JsonArray, JsonNode, JsonObject}
+import com.anjunar.technologyspeaks.core.Role
 import com.anjunar.technologyspeaks.security.WebAuthnManagerProvider.{ORIGIN, RP_ID, RP_NAME, challengeStore, webAuthnManager}
 import com.webauthn4j.data.{PublicKeyCredentialParameters, PublicKeyCredentialType, RegistrationParameters}
 import com.webauthn4j.data.attestation.statement.COSEAlgorithmIdentifier
@@ -13,10 +14,10 @@ import org.springframework.web.bind.annotation.{PostMapping, RequestBody, RestCo
 
 import java.security.SecureRandom
 import java.util.Arrays
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 
 @RestController
-class WebAuthnRegisterController(val store: CredentialStore, val registerService: RegisterService) {
+class WebAuthnRegisterController(val store: CredentialStore, val registerService: RegisterService, val sessionHolder: SessionHolder) {
 
   @PostMapping(value = Array("/security/register/options"), produces = Array("application/json"), consumes = Array("application/json"))
   @RolesAllowed(Array("Anonymous"))
@@ -109,8 +110,11 @@ class WebAuthnRegisterController(val store: CredentialStore, val registerService
       val n = secure.nextInt(1000000)
       val code = String.format(s"$n%06d", Int.box(n))
 
-      store.saveRecord(username, nickName, code, webAuthnCredentialRecord)
+      val entity = store.saveRecord(username, nickName, code, webAuthnCredentialRecord)
       registerService.register(username, code, nickName)
+
+      sessionHolder.user = entity.email.user.id
+      sessionHolder.credentials = entity.id
 
       new JsonObject()
         .put("status", "success")

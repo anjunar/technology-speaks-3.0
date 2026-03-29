@@ -13,7 +13,7 @@ class CredentialStore {
   def loadUser(credentialId: String): User =
     WebAuthnCredential.loadByCredentialId(credentialId).email.user
 
-  def saveRecord(email: String, nickName: String, code: String, record: WebAuthnCredentialRecord): Unit = {
+  def saveRecord(email: String, nickName: String, code: String, record: WebAuthnCredentialRecord): WebAuthnCredential = {
     val roleAction = Role.query("name" -> "Guest")
     val existingEmail = EMail.query("value" -> email)
 
@@ -44,6 +44,7 @@ class CredentialStore {
     credential.email = targetEmailFuture
     targetEmailFuture.credentials.add(credential)
     credential.persist()
+    credential
   }
 
   def loadByUsername(username: String): java.util.List[CredentialRecord] =
