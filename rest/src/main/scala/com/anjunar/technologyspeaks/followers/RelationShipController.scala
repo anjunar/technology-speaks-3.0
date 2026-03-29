@@ -45,14 +45,15 @@ class RelationShipController {
   @RolesAllowed(Array("User", "Administrator"))
   @EntityGraph("RelationShip.full")
   def update(@RequestBody entity: RelationShip): Data[RelationShip] = {
-    entity.addLinks(
+    val managed = entity.merge()
+    managed.addLinks(
       LinkBuilder.create[RelationShipController](_.update(null))
         .build(),
       LinkBuilder.create[RelationShipController](_.delete(null))
         .build()
     )
 
-    new Data(entity, SchemaHateoas.enhance(entity, RelationShip.schema))
+    new Data(managed, SchemaHateoas.enhance(managed, RelationShip.schema))
   }
 
   @DeleteMapping(value = Array("/followers/relationships/relationship"), consumes = Array("application/json"))

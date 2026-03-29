@@ -12,7 +12,7 @@ class ManagedPropertyController {
 
   @PutMapping(value = Array("/core/properties/property"), produces = Array("application/json"), consumes = Array("application/json"))
   def update(@RequestBody managedProperty: ManagedProperty): ManagedProperty =
-    enrich(managedProperty)
+    enrich(managedProperty.merge())
 
   private def enrich(managedProperty: ManagedProperty): ManagedProperty = {
     managedProperty.addLinks(

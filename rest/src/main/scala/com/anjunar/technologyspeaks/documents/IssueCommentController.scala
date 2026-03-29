@@ -34,9 +34,10 @@ class IssueCommentController(val identityHolder: IdentityHolder) {
       comment.user = identityHolder.user
     }
 
-    post.comments.add(body)
+    val managed = body.merge()
+    post.comments.add(managed)
 
-    new Data(body, SchemaHateoas.enhance(body, FirstComment.schema))
+    new Data(managed, SchemaHateoas.enhance(managed, FirstComment.schema))
   }
 
   @DeleteMapping(value = Array("/document/documents/document/issues/issue/{id}/comment"), produces = Array("application/json"), consumes = Array("application/json"))

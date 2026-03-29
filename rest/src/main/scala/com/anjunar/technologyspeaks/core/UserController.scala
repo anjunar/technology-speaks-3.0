@@ -61,9 +61,10 @@ class UserController(val identityHolder: IdentityHolder) {
   @RolesAllowed(Array("User", "Administrator"))
   @EntityGraph("User.full")
   def update(@RequestBody user: User): Data[User] = {
-    val form = new Data(user, SchemaHateoas.enhance(user, User.schema))
+    val managedUser = user.merge()
+    val form = new Data(managedUser, SchemaHateoas.enhance(managedUser, User.schema))
 
-    user.addLinks(
+    managedUser.addLinks(
       LinkBuilder.create[UserController](_.update(new User("")))
         .build(),
       LinkBuilder.create[ManagedPropertyController](_.read(new ManagedProperty("")))

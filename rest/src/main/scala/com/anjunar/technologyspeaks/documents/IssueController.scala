@@ -73,14 +73,16 @@ class IssueController(val identityHolder: IdentityHolder) {
     entity.document = document
     entity.user = identityHolder.user
 
-    entity.addLinks(
-      LinkBuilder.create[IssueController](_.update(entity.document, null))
+    val managed = entity.merge()
+
+    managed.addLinks(
+      LinkBuilder.create[IssueController](_.update(managed.document, null))
         .build(),
       LinkBuilder.create[IssueController](_.delete(null))
         .build()
     )
 
-    new Data(entity, SchemaHateoas.enhance(entity, Issue.schema))
+    new Data(managed, SchemaHateoas.enhance(managed, Issue.schema))
   }
 
   @DeleteMapping(value = Array("/document/documents/document/issues/issue"), consumes = Array("application/json"))
