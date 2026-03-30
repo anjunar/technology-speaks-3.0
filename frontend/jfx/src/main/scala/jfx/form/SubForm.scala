@@ -20,6 +20,13 @@ class SubForm[V <: Model[V]](val name: String = "", val index : Int = -1) extend
 
 object SubForm {
 
+  private def replaceValueAndResetState[V <: Model[V]](nextValue: V)(using subForm: SubForm[V]): Unit = {
+    subForm.valueProperty.asInstanceOf[Property[V]].set(nextValue)
+    subForm.setDirty(false)
+    subForm.setErrors(Nil)
+    subForm.resetInteractionState()
+  }
+
   def subForm[M <: Model[M]](name: String)(init: SubForm[M] ?=> Unit): SubForm[M] =
     DslRuntime.currentScope { currentScope =>
       val currentContext = DslRuntime.currentComponentContext()
@@ -37,9 +44,11 @@ object SubForm {
 
   def factory_=[V <: Model[V]](value: () => V)(using subForm: SubForm[V]): Unit = subForm.factoryHandler = value
 
-  def newInstance[V <: Model[V]]()(using subForm: SubForm[V]): Unit = subForm.valueProperty.asInstanceOf[Property[V]].set(subForm.factoryHandler())
+  def newInstance[V <: Model[V]]()(using subForm: SubForm[V]): Unit =
+    replaceValueAndResetState(subForm.factoryHandler())
 
-  def clearForm[V <: Model[V]]()(using subForm: SubForm[V]): Unit = subForm.valueProperty.asInstanceOf[Property[V]].set(null.asInstanceOf[V])
+  def clearForm[V <: Model[V]]()(using subForm: SubForm[V]): Unit =
+    replaceValueAndResetState(null.asInstanceOf[V])
 
 
 }

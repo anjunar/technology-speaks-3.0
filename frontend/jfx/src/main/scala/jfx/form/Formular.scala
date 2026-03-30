@@ -73,6 +73,17 @@ trait Formular[M <: Model[M], N <: Node] extends NodeComponent[N], Editable {
     }
   }
 
+  def resetInteractionState(): Unit = {
+    controls.foreach { control =>
+      control.setDirty(false)
+      control.setErrors(Nil)
+      control match {
+        case nestedForm: Formular[?, ?] => nestedForm.resetInteractionState()
+        case _ => ()
+      }
+    }
+  }
+
   override protected def afterMount(): Unit = {
     super.afterMount()
     clearErrors()
@@ -168,7 +179,6 @@ trait Formular[M <: Model[M], N <: Node] extends NodeComponent[N], Editable {
       validators.foreach(addValidatorIfMissing(control, _))
       boundValidatorsByControl.put(control, validators)
     }
-    clearErrors()
   }
 
   private def addValidatorIfMissing(control: AnyControl, validator: Validator[Any]): Unit =
