@@ -12,7 +12,3 @@ trait ParameterizedType extends Type {
 trait GenericArrayType extends Type {
   def getGenericComponentType: Type
 }
-
-class SimpleClass[T](val runtimeClass: Class[T]) extends Type {
-  override def getTypeName: String = runtimeClass.getName
-}

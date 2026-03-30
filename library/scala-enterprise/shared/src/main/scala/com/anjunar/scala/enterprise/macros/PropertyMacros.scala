@@ -56,9 +56,7 @@ object PropertyMacros {
           val genericTypeExpr = runtimeTypeExpr(propertyType)
           val isWriteableExpr = Expr(isWriteable)
 
-          val annotationsExpr = '{
-            Array.empty[Annotation]
-          }
+          val annotationsExpr = extractAnnotations(s)
 
           val getterExpr = Lambda(
             Symbol.spliceOwner,
@@ -77,6 +75,8 @@ object PropertyMacros {
               override val annotations: Array[Annotation] = $annotationsExpr
               override val genericType: JType = $genericTypeExpr
               override val isWriteable: Boolean = $isWriteableExpr
+              def propertyType: Class[?] = null
+              def valueType: Class[?] = null
               override def get(instance: E): v = $getterExpr(instance)
               override def set(instance: E, value: v): Unit = $setterLambdaExpr(instance, value)
             }
@@ -85,6 +85,50 @@ object PropertyMacros {
     }
 
     Expr.ofList(propertyExprs)
+  }
+
+  private def extractAnnotations(using Quotes)(symbol: quotes.reflect.Symbol): Expr[Array[Annotation]] = {
+    import quotes.reflect.*
+    
+    val annotationExprs = symbol.annotations.flatMap { ann =>
+      ann.tpe match {
+        case AnnotatedType(_, _) | TypeRef(_, _) =>
+          val className = ann.tpe.typeSymbol.fullName
+          val params = extractAnnotationParams(ann)
+          if params.isEmpty then
+            Some('{ Annotation(${ Expr(className) }, Map.empty) })
+          else
+            val paramsExpr = '{ Map(${ Varargs(params.map { case (k, v) => '{ (${ Expr(k) }, $v) } }) }*) }
+            Some('{ Annotation(${ Expr(className) }, $paramsExpr) })
+        case _ => None
+      }
+    }
+    
+    '{ Array(${ Varargs(annotationExprs) }*) }
+  }
+
+  private def extractAnnotationParams(using Quotes)(ann: quotes.reflect.Term): List[(String, Expr[Any])] = {
+    import quotes.reflect.*
+    
+    ann match {
+      case Apply(_, args) =>
+        val paramNames = ann.tpe.typeSymbol.primaryConstructor.paramSymss.flatten.map(_.name)
+        args.zip(paramNames).collect {
+          case (Literal(StringConstant(v)), name) =>
+            (name, Expr(v).asExprOf[Any])
+          case (Literal(IntConstant(v)), name) =>
+            (name, Expr(v).asExprOf[Any])
+          case (Literal(LongConstant(v)), name) =>
+            (name, Expr(v).asExprOf[Any])
+          case (Literal(DoubleConstant(v)), name) =>
+            (name, Expr(v).asExprOf[Any])
+          case (Literal(FloatConstant(v)), name) =>
+            (name, Expr(v).asExprOf[Any])
+          case (Literal(BooleanConstant(v)), name) =>
+            (name, Expr(v).asExprOf[Any])
+        }
+      case _ => Nil
+    }
   }
 
   private def makePropertyAccessImpl[E: Type, V: Type](
@@ -198,9 +242,7 @@ object PropertyMacros {
     val isWriteable = selected.qualifierType.typeSymbol.methodMember(s"${propertyName}_=").nonEmpty
     val isWriteableExpr = Expr(isWriteable)
 
-    val annotationsArrayExpr = '{
-      Array.empty[Annotation]
-    }
+    val annotationsArrayExpr = extractAnnotations(selected.symbol)
 
     '{
       new PropertyAccess[E, V] {
@@ -216,6 +258,9 @@ object PropertyMacros {
 
         override val isWriteable: Boolean =
           $isWriteableExpr
+
+        def propertyType: Class[?] = null
+        def valueType: Class[?] = null
 
         override def get(instance: E): V =
           $selectorExpr(instance)

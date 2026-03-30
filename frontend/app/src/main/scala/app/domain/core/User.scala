@@ -15,6 +15,7 @@ import scala.scalajs.js.URIUtils.encodeURIComponent
 
 class User extends AbstractEntity[User] {
 
+  @schemaName("test")
   val nickName: Property[String] = Property("")
   val image: Property[Media | Null] = Property(null)
   val info: Property[UserInfo | Null] = Property(null)
@@ -62,9 +63,7 @@ class User extends AbstractEntity[User] {
 
 object User {
 
-  val test: js.Array[com.anjunar.scala.enterprise.macros.PropertyAccess[User, ?]] = js.Array(
-    makePropertyAccess[User, Property[String]](_.nickName)
-  )
+  println(makePropertyAccess[User, Property[String]](_.nickName))
 
   val properties: js.Array[PropertyAccess[User, ?]] = js.Array(
     typedProperty[User, Property[UUID], UUID](_.id),

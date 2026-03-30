@@ -5,24 +5,7 @@ import com.anjunar.scala.enterprise.macros.reflection.{GenericArrayType, Paramet
 object RuntimeTypeResolver {
 
   def resolveClass(name: String): SimpleClass[?] = {
-    val underlying = name match {
-      case "scala.Int" => classOf[Int]
-      case "scala.Long" => classOf[Long]
-      case "scala.Double" => classOf[Double]
-      case "scala.Float" => classOf[Float]
-      case "scala.Boolean" => classOf[Boolean]
-      case "scala.Byte" => classOf[Byte]
-      case "scala.Short" => classOf[Short]
-      case "scala.Char" => classOf[Char]
-      case "scala.Unit" => classOf[Unit]
-      case "scala.Any" | "scala.AnyRef" => classOf[Any]
-      case "java.util.UUID" => classOf[java.util.UUID]
-      case "java.lang.String" => classOf[String]
-      case other =>
-        classOf[Any]
-    }
-
-    new SimpleClass(underlying)
+    new SimpleClass(name)
   }
 
   def parameterized(raw: SimpleClass[?], args: Array[Type]): ParameterizedType =
