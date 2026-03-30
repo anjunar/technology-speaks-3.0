@@ -1,8 +1,8 @@
 package com.anjunar.json.mapper.schema.property
 
-import com.anjunar.json.mapper.macros.PropertyAccess
 import com.anjunar.json.mapper.schema.VisibilityRule
 import com.anjunar.json.mapper.schema.jpa.JPASingularAttribute
+import com.anjunar.scala.enterprise.macros.PropertyAccess
 import jakarta.persistence.metamodel.SingularAttribute
 import org.hibernate.metamodel.model.domain.PersistentAttribute
 import org.hibernate.query.sqm.SqmPathSource

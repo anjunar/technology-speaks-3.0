@@ -12,7 +12,13 @@ lazy val commonJsSettings = Seq(
     )
 )
 
+lazy val scalaEnterprise = (project in file("library/scala-enterprise"))
+  .settings(
+    libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.19" % Test
+  )
+
 lazy val jfx = (project in file("frontend/jfx"))
+  .dependsOn(scalaEnterprise)
   .enablePlugins(ScalaJSPlugin)
   .settings(
     libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "2.8.1",
@@ -34,12 +40,8 @@ lazy val root = (project in file("."))
     publish / skip := true
   )
 
-lazy val scalaEnterprise = (project in file("library/scala-enterprise"))
-  .settings(
-    libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.19" % Test
-  )
-
 lazy val scalaUniverse2 = (project in file("library/scala-universe"))
+  .dependsOn(scalaEnterprise)
   .settings(
     libraryDependencies ++= Seq(
       "com.google.guava" % "guava" % "33.5.0-jre",
@@ -67,7 +69,7 @@ lazy val jsonMapper2 = (project in file("library/json-mapper"))
   )
 
 lazy val system = (project in file("system"))
-  .dependsOn(jsonMapper2, scalaEnterprise)
+  .dependsOn(jsonMapper2)
   .settings(
     libraryDependencies ++= Seq(
       "org.springframework.boot" % "spring-boot-starter-web" % "4.0.4",

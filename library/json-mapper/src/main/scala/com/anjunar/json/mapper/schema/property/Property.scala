@@ -1,12 +1,12 @@
 package com.anjunar.json.mapper.schema.property
 
-import com.anjunar.json.mapper.macros.PropertyAccess
 import com.anjunar.json.mapper.schema.{EntitySchema, Helper, Link, SchemaProvider, VisibilityRule}
+import com.anjunar.scala.enterprise.macros.{PropertyAccess, TypeHelper}
+import com.anjunar.scala.enterprise.macros.reflection.Type
 import com.anjunar.scala.universe.TypeResolver
 import jakarta.json.bind.annotation.JsonbProperty
 
 import java.lang.annotation.Annotation
-import java.lang.reflect.Type
 import java.util
 
 class Property[T, V](val propertyAccess : PropertyAccess[T, V], val rule: VisibilityRule[T]) {
@@ -15,8 +15,6 @@ class Property[T, V](val propertyAccess : PropertyAccess[T, V], val rule: Visibi
   
   val isWriteable : Boolean = propertyAccess.isWriteable
 
-  val propertyType: Class[?] = TypeResolver.rawType(propertyAccess.genericType)
-  
   val genericType : Type = propertyAccess.genericType
   
   def get(instance: T): V = propertyAccess.get(instance)
@@ -33,11 +31,11 @@ class Property[T, V](val propertyAccess : PropertyAccess[T, V], val rule: Visibi
   }
 
   @JsonbProperty("type")
-  val typeName: String = TypeResolver.rawType(propertyAccess.genericType).getSimpleName
+  val typeName: String = TypeHelper.rawType(propertyAccess.genericType).getSimpleName
 
   @JsonbProperty
   var schema: EntitySchema[?] =
-    val value = Helper.entityType(propertyAccess.genericType)
+    val value = TypeHelper.entityTypeResolve(propertyAccess.genericType)
 
     if (value == null) {
       null

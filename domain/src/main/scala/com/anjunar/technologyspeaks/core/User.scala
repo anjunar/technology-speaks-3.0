@@ -1,7 +1,5 @@
 package com.anjunar.technologyspeaks.core
 
-import com.anjunar.json.mapper.macros.PropertyAccess
-import com.anjunar.json.mapper.macros.PropertyMacros.describeProperties
 import com.anjunar.json.mapper.provider.{EntityProvider, OwnerProvider}
 import com.anjunar.json.mapper.schema.property.Property
 import com.anjunar.json.mapper.schema.{EntitySchema, SchemaProvider}
@@ -69,8 +67,6 @@ object User extends RepositoryContext[User] with SchemaProvider[Schema] {
     @JsonbProperty val emails: Property[User, java.util.Set[EMail]] = property(_.emails, new OwnerRule[User]())
   }
   
-  val properties: Seq[PropertyAccess[User, ?]] = describeProperties[User]
-
   @Entity(name = "UserView")
   class View extends EntityView
 

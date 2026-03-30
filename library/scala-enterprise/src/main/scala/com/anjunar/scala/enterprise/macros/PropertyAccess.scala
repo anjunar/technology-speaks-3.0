@@ -1,7 +1,8 @@
 package com.anjunar.scala.enterprise.macros
 
+import com.anjunar.scala.enterprise.macros.reflection.Type
+
 import java.lang.annotation.Annotation
-import java.lang.reflect.Type
 
 trait PropertyAccess[E, V] {
 

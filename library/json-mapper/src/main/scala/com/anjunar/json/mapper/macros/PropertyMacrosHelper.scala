@@ -2,6 +2,7 @@ package com.anjunar.json.mapper.macros
 
 import com.anjunar.json.mapper.schema.DefaultRule
 import com.anjunar.json.mapper.schema.property.Property
+import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
 
 import scala.collection.mutable
 
