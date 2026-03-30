@@ -62,4 +62,26 @@ abstract class RepositoryContext[E] {
     }
   }
 
+  def queryAll(parameters: (String, Any)*): java.util.List[E] = {
+    val entityManager = this.entityManager()
+
+    val entityAnnotation = clazz.getAnnotation(classOf[Entity])
+    var entityName =
+      if (entityAnnotation == null) "" else entityAnnotation.name()
+
+    if (entityName.isEmpty) {
+      entityName = clazz.getSimpleName
+    }
+
+    val sqlParams = parameters.map(parameter => s"e.${parameter._1} = :${parameter._1}").mkString(" and ")
+    val jpql = s"select e from $entityName e where $sqlParams"
+    val typedQuery = entityManager.createQuery(jpql, clazz)
+
+    parameters.foreach { case (key, value) =>
+      typedQuery.setParameter(key, value)
+    }
+
+    typedQuery.getResultList
+  }
+
 }

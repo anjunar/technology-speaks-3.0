@@ -13,6 +13,7 @@ Diese Datei beschreibt nicht nur Arbeitsregeln, sondern die tragenden Architektu
   - User: `p_bittner@gmx.de`
   - Passwort: `test`
 - Fuer sbt das bereits laufende `sbtn-x86_64-pc-win32.exe` bzw. den vorhandenen sbt-Server nutzen.
+- Keine Kommentare im Code!
 
 ## Architekturueberblick
 - Das Projekt ist ein SBT-Monorepo mit bewusst getrennten Schichten fuer Frontend, Backend, Domain und Infrastruktur.

@@ -31,6 +31,7 @@ import jfx.statement.ObserveRender.observeRender
 
 import java.util.UUID
 import scala.concurrent.ExecutionContext
+import scala.scalajs.js
 import scala.util.{Failure, Success}
 
 class UserPage(val payload: Data[User]) extends PageComposite("User", pageResizable = false) {
@@ -388,6 +389,34 @@ class UserPage(val payload: Data[User]) extends PageComposite("User", pageResiza
               renderByRel("update", model.links) { () =>
                 button("Speichern") {
                   classes = "user-page-save-btn"
+                }
+              }
+
+
+              // Add Delete User Button
+              renderByRel("delete", model.links) { () =>
+                val deleteLink = model.links.find(_.rel == "delete").orNull
+
+                if (deleteLink != null) {
+                  button("Benutzer löschen") {
+                    buttonType = "button"
+                    classes = Seq("user-page-delete-btn", "destructive-action")
+
+                    onClick { _ =>
+                      Api.delete("/service" + deleteLink.url, model).onComplete {
+                        case Success(_) =>
+                          Viewport.notify("Benutzer erfolgreich gelöscht.", Viewport.NotificationKind.Success)
+                        // Example: Navigation.goto("/users")
+
+                        case Failure(e: ErrorResponseException) =>
+                          Viewport.notify(s"Fehler beim Löschen des Benutzers: ${e.errors.mkString(", ")}", Viewport.NotificationKind.Error)
+
+                        case Failure(error) =>
+                          Api.logFailure("Delete user", error)
+                          Viewport.notify("Fehler beim Löschen des Benutzers.", Viewport.NotificationKind.Error)
+                      }
+                    }
+                  }
                 }
               }
             }

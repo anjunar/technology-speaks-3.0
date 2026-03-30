@@ -5,7 +5,7 @@ import com.anjunar.technologyspeaks.SpringContext
 import com.anjunar.technologyspeaks.followers.Group
 import com.anjunar.technologyspeaks.hibernate.EntityContext
 import jakarta.json.bind.annotation.JsonbProperty
-import jakarta.persistence.{Entity, ManyToMany, ManyToOne, Table}
+import jakarta.persistence.{Entity, FetchType, ManyToMany, ManyToOne, Table}
 
 import scala.annotation.meta.field
 import scala.beans.BeanProperty

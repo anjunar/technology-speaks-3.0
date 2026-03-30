@@ -6,10 +6,11 @@ import com.anjunar.technologyspeaks.rest.EntityGraph
 import com.anjunar.technologyspeaks.rest.types.Data
 import com.anjunar.technologyspeaks.security.{IdentityHolder, LinkBuilder}
 import jakarta.annotation.security.RolesAllowed
-import org.springframework.web.bind.annotation.{GetMapping, PathVariable, PutMapping, RequestBody, RestController}
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.{DeleteMapping, GetMapping, PathVariable, PutMapping, RequestBody, RestController}
 
 @RestController
-class UserController(val identityHolder: IdentityHolder) {
+class UserController(val identityHolder: IdentityHolder, val userService: UserService) {
 
   @GetMapping(value = Array("/core/users/user/{id}"), produces = Array("application/json"))
   @RolesAllowed(Array("User", "Administrator"))
@@ -17,6 +18,12 @@ class UserController(val identityHolder: IdentityHolder) {
   def read(@PathVariable("id") user: User): Data[User] = {
     val isOwnProfile = identityHolder.user != null && identityHolder.user.id == user.id
     val form = new Data(user, SchemaHateoas.enhance(user, User.schema))
+
+
+    user.addLinks(
+      LinkBuilder.create[UserController](_.delete(new User("")))
+        .build()
+    )
 
     if (isOwnProfile) {
       user.addLinks(
@@ -73,5 +80,16 @@ class UserController(val identityHolder: IdentityHolder) {
 
     form
   }
+
+  @DeleteMapping(value = Array("/core/users/user"), consumes = Array("application/json"))
+  @RolesAllowed(Array("Administrator"))
+  @EntityGraph("User.full")
+  def delete(@RequestBody user: User): ResponseEntity[Unit] = {
+
+    userService.deleteUser(user)
+    ResponseEntity.ok().build()
+
+  }
+
 
 }
