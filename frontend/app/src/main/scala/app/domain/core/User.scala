@@ -1,6 +1,7 @@
 package app.domain.core
 
 import app.support.{Api, Navigation}
+import com.anjunar.scala.enterprise.macros.PropertyMacros.makePropertyAccess
 import jfx.core.macros.{property, typedProperty}
 import jfx.core.state.{ListProperty, Property, PropertyAccess}
 import jfx.domain.Media
@@ -60,6 +61,11 @@ class User extends AbstractEntity[User] {
 }
 
 object User {
+
+  val test: js.Array[com.anjunar.scala.enterprise.macros.PropertyAccess[User, ?]] = js.Array(
+    makePropertyAccess[User, Property[String]](_.nickName)
+  )
+
   val properties: js.Array[PropertyAccess[User, ?]] = js.Array(
     typedProperty[User, Property[UUID], UUID](_.id),
     typedProperty[User, Property[String | Null], String | Null](_.modified),

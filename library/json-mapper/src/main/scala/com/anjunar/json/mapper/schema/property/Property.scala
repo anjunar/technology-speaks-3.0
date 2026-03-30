@@ -1,12 +1,11 @@
 package com.anjunar.json.mapper.schema.property
 
 import com.anjunar.json.mapper.schema.{EntitySchema, Helper, Link, SchemaProvider, VisibilityRule}
-import com.anjunar.scala.enterprise.macros.{PropertyAccess, TypeHelper}
+import com.anjunar.scala.enterprise.macros.{Annotation, PropertyAccess, TypeHelper}
 import com.anjunar.scala.enterprise.macros.reflection.Type
 import com.anjunar.scala.universe.TypeResolver
 import jakarta.json.bind.annotation.JsonbProperty
 
-import java.lang.annotation.Annotation
 import java.util
 
 class Property[T, V](val propertyAccess : PropertyAccess[T, V], val rule: VisibilityRule[T]) {
@@ -22,7 +21,7 @@ class Property[T, V](val propertyAccess : PropertyAccess[T, V], val rule: Visibi
   def set(instance: T, value: V): Unit = propertyAccess.set(instance, value)
   
   def findAnnotation[A <: Annotation](clazz: Class[A]): A = {
-    val option = propertyAccess.annotations.find(_.annotationType == clazz)
+    val option = propertyAccess.annotations.find(_.annotationClass == clazz)
     if (option.isEmpty) {
       null.asInstanceOf[A]
     } else {

@@ -1,5 +1,6 @@
 import org.scalajs.linker.interface.{ESVersion, ModuleKind}
 import org.scalajs.sbtplugin.ScalaJSPlugin
+import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 
 ThisBuild / version := "0.1.0-SNAPSHOT"
 
@@ -12,13 +13,21 @@ lazy val commonJsSettings = Seq(
     )
 )
 
-lazy val scalaEnterprise = (project in file("library/scala-enterprise"))
-  .settings(
-    libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.19" % Test
+lazy val scalaEnterprise = crossProject(JSPlatform, JVMPlatform)
+  .crossType(CrossType.Full)
+  .in(file("library/scala-enterprise"))
+  .jsSettings(commonJsSettings)
+  .jvmSettings(
+    libraryDependencies ++= Seq(
+      "org.scalatest" %% "scalatest" % "3.2.19" % Test
+    )
   )
 
+lazy val scalaEnterpriseJS = scalaEnterprise.js
+lazy val scalaEnterpriseJVM = scalaEnterprise.jvm
+
 lazy val jfx = (project in file("frontend/jfx"))
-  .dependsOn(scalaEnterprise)
+  .dependsOn(scalaEnterpriseJS)
   .enablePlugins(ScalaJSPlugin)
   .settings(
     libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "2.8.1",
@@ -35,13 +44,13 @@ lazy val app = (project in file("frontend/app"))
   .settings(commonJsSettings)
 
 lazy val root = (project in file("."))
-  .aggregate(jfx, app)
+  .aggregate(jfx, app, scalaEnterpriseJVM)
   .settings(
     publish / skip := true
   )
 
 lazy val scalaUniverse2 = (project in file("library/scala-universe"))
-  .dependsOn(scalaEnterprise)
+  .dependsOn(scalaEnterpriseJVM)
   .settings(
     libraryDependencies ++= Seq(
       "com.google.guava" % "guava" % "33.5.0-jre",
