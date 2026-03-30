@@ -64,8 +64,7 @@ class CredentialStore {
       )
       .toList()
 
-  def loadByCredentialId(credentialId: String): CredentialRecord = {
-    val entity = WebAuthnCredential.loadByCredentialId(credentialId)
+  def loadByCredentialId(entity: WebAuthnCredential): CredentialRecord = {
     WebAuthnCredentialRecord.fromRequiredPersistedData(
       new WebAuthnCredentialRecord.RequiredPersistedData(
         entity.email.value,

@@ -113,7 +113,7 @@ class WebAuthnRegisterController(val store: CredentialStore, val registerService
 
   @PostMapping(value = Array("/security/register/finish"), produces = Array("application/json"), consumes = Array("application/json"))
   @RolesAllowed(Array("Anonymous"))
-  def finish(@RequestBody body: JsonObject): JsonObject = {
+  def finish(@RequestBody body: JsonObject): ResponseEntity[JsonNode] = {
     val publicKeyCredential = body.getJsonObject("optionsJSON")
     val credentialId = publicKeyCredential.getString("id")
     val username = body.getString("email")
@@ -150,19 +150,23 @@ class WebAuthnRegisterController(val store: CredentialStore, val registerService
       val code = String.format(s"$n%06d", Int.box(n))
 
       val entity = store.saveRecord(username, nickName, code, webAuthnCredentialRecord)
-      registerService.register(username, code, nickName)
 
       sessionHolder.user = entity.email.user.id
       sessionHolder.credentials = entity.id
 
-      new JsonObject()
+      registerService.register(username, code, nickName)
+
+      new ResponseEntity[JsonNode](new JsonObject()
         .put("status", "success")
-        .put("credentialId", credentialId)
+        .put("credentialId", credentialId), HttpStatus.OK)
     } catch {
       case ex: Exception =>
-        new JsonObject()
-          .put("status", "error")
-          .put("message", ex.getMessage)
+        new ResponseEntity[JsonNode](new JsonArray()
+          .add(new JsonObject()
+            .put("path", new JsonArray().add(new JsonString("email")))
+            .put("message", ex.getMessage)
+          )
+        , HttpStatus.BAD_REQUEST)
     }
   }
 

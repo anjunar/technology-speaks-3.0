@@ -1,6 +1,7 @@
 package app.pages.core
 
-import app.domain.core.{Data, MediaHelper, User}
+import app.domain.core.{Data, MediaHelper, User, UserUpdated}
+import app.services.ApplicationService
 import app.support.{Navigation, RemotePageQuery, RemoteTableList}
 import app.ui.{CompositeSupport, PageComposite}
 import jfx.control.TableColumn.{cellFactory, cellValueFactory, column, prefWidth}
@@ -43,6 +44,17 @@ class UsersPage(usersProperty: RemoteListProperty[Data[User], RemotePageQuery], 
     classProperty += "users-page"
 
     withDslContext {
+      val service = inject[ApplicationService]
+
+      addDisposable(
+        service.messageBus.subscribe {
+          case message: UserUpdated =>
+            applyUserUpdateIfLoaded(message.user)
+          case _ =>
+            ()
+        }
+      )
+
       vbox {
         classes = "users-page__layout"
 
@@ -180,6 +192,23 @@ class UsersPage(usersProperty: RemoteListProperty[Data[User], RemotePageQuery], 
       clearTimeout(pendingReload.nn)
       pendingReload = null
     }
+
+  private def applyUserUpdateIfLoaded(saved: Data[User]): Unit = {
+    val savedId = Option(saved.data).flatMap(user => Option(user.id.get))
+    if (savedId.isEmpty) return
+
+    val loadedIndex =
+      usersProperty.indexWhere { row =>
+        Option(row)
+          .flatMap(data => Option(data.data))
+          .flatMap(user => Option(user.id.get))
+          .contains(savedId.get)
+      }
+
+    if (loadedIndex >= 0) {
+      usersProperty.update(loadedIndex, saved)
+    }
+  }
 }
 
 object UsersPage {

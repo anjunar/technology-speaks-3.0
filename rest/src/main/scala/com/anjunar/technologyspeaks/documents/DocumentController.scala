@@ -11,7 +11,7 @@ import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.bind.annotation.{GetMapping, PathVariable, PostMapping, PutMapping, RequestBody, RestController}
 
 @RestController
-class DocumentController(val identityHolder: IdentityHolder) {
+class DocumentController(val identityHolder: IdentityHolder, val documentImportService: DocumentImportService) {
 
   @GetMapping(value = Array("/document/documents/document"), produces = Array("application/json"))
   @RolesAllowed(Array("User", "Administrator"))
@@ -61,6 +61,14 @@ class DocumentController(val identityHolder: IdentityHolder) {
         .build()
     )
 
+    if (identityHolder.hasRole("Administrator")) {
+      entity.addLinks(
+        LinkBuilder.create[DocumentController](_.importFromDirectory(null))
+          .withRel("import-documents")
+          .build()
+      )
+    }
+
     if (identityHolder.user == entity.user) {
       entity.addLinks(
         LinkBuilder.create[DocumentController](_.update(null))
@@ -83,6 +91,14 @@ class DocumentController(val identityHolder: IdentityHolder) {
       LinkBuilder.create[IssueController](_.create(entity))
         .build()
     )
+
+    if (identityHolder.hasRole("Administrator")) {
+      entity.addLinks(
+        LinkBuilder.create[DocumentController](_.importFromDirectory(null))
+          .withRel("import-documents")
+          .build()
+      )
+    }
 
     if (identityHolder.user == entity.user) {
       entity.addLinks(
@@ -144,5 +160,10 @@ class DocumentController(val identityHolder: IdentityHolder) {
 
     form
   }
+
+  @PostMapping(value = Array("/document/documents/import"), produces = Array("application/json"), consumes = Array("application/json"))
+  @RolesAllowed(Array("Administrator"))
+  def importFromDirectory(@RequestBody request: DocumentImportService.ImportRequest): DocumentImportService.ImportResult =
+    documentImportService.importDirectory(request)
 
 }

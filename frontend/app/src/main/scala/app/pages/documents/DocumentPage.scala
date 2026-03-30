@@ -2,12 +2,12 @@ package app.pages.documents
 
 import app.components.shared.ComponentHeader.componentHeader
 import app.components.shared.LoadingCard.loadingCard
-import app.domain.core.{Data, Table}
+import app.domain.core.{Data, Link, Table}
 import app.domain.documents.{Document, Issue, IssueCreated, IssueUpdated}
 import app.editor.plugins.{DocumentLinkPlugin, DocumentLinkSuggestion}
 import app.editor.plugins.DocumentLinkPlugin.documentLinkPlugin
 import app.services.ApplicationService
-import app.support.{Navigation, RemotePageQuery, RemoteTableList, TimeAgo}
+import app.support.{Api, Navigation, RemotePageQuery, RemoteTableList, TimeAgo}
 import app.ui.{CompositeSupport, DivComposite, PageComposite}
 import jfx.action.Button.{button, buttonType, onClick}
 import jfx.control.TableColumn.{cellFactory, cellValueFactory, column, prefWidth}
@@ -22,16 +22,19 @@ import jfx.form.Editable.editable
 import jfx.form.Editor.editor
 import jfx.form.Form
 import jfx.form.Form.{form, onSubmit}
-import jfx.form.Input.{input, inputType, placeholder, stringValueProperty}
+import jfx.form.Input.{booleanValueProperty, input, inputType, placeholder, standaloneInput, stringValueProperty}
 import jfx.form.editor.plugins.*
 import jfx.layout.Div.div
 import jfx.layout.HBox.hbox
 import jfx.layout.Span.span
 import jfx.layout.VBox.vbox
+import jfx.layout.Viewport
 import jfx.statement.ObserveRender.observeRender
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.scalajs.js
 import scala.scalajs.js.timers.{SetTimeoutHandle, clearTimeout, setTimeout}
+import scala.util.{Failure, Success}
 
 class DocumentPage(val model: Document) extends PageComposite("Dokument") {
 
@@ -46,7 +49,7 @@ class DocumentPage(val model: Document) extends PageComposite("Dokument") {
   private val rightSidebarExpandedProperty: Property[Boolean] = Property(true)
   private val documentsProperty: RemoteListProperty[Data[Document], RemotePageQuery] =
     RemoteTableList.create[Data[Document]](pageSize = documentsPageSize) { query =>
-      Document.list(query.index, query.limit, searchQueryProperty.get, sorting = query.effectiveSortSpecs(Seq("created:desc")))
+      Document.list(query.index, query.limit, searchQueryProperty.get, sorting = query.effectiveSortSpecs(Seq("bookname:asc", "title:asc")))
     }
   private val issuesProperty: RemoteListProperty[Issue, RemotePageQuery] =
     RemoteTableList.createMapped[Data[Issue], Issue](pageSize = issuesPageSize) { query =>
@@ -101,7 +104,8 @@ class DocumentPage(val model: Document) extends PageComposite("Dokument") {
           searchQueryProperty,
           leftSidebarExpandedProperty,
           createNewDocument,
-          openDocument
+          openDocument,
+          handleDocumentsImported
         )
 
         div {
@@ -200,6 +204,9 @@ class DocumentPage(val model: Document) extends PageComposite("Dokument") {
     currentDocumentProperty.set(saved.data)
   }
 
+  private def handleDocumentsImported(): Unit =
+    RemoteTableList.reloadFirstPage(documentsProperty, pageSize = documentsPageSize)
+
   private def reloadIssues(): Unit =
     if (currentDocumentProperty.get.id.get != null) {
       RemoteTableList.reloadFirstPage(issuesProperty, pageSize = issuesPageSize)
@@ -219,7 +226,8 @@ private final class DocumentListPanel(
                                        searchQuery: Property[String],
                                        expanded: Property[Boolean],
                                        createNewDocument: () => Unit,
-                                       openDocument: Document => Unit
+                                       openDocument: Document => Unit,
+                                       onDocumentsImported: () => Unit
                                      ) extends DivComposite {
 
   override protected def compose(using DslContext): Unit = {
@@ -274,6 +282,13 @@ private final class DocumentListPanel(
             subscribeBidirectional(searchQuery, stringValueProperty)
           }
         }
+
+        observeRender(currentDocument) { document =>
+          Navigation.renderByRel("import-documents", document.links) { () =>
+            DocumentImportPanel.panel(document, onDocumentsImported)
+          }
+        }
+
 
         div {
           classes = "doc-table-shell"
@@ -351,8 +366,158 @@ private object DocumentListPanel {
             searchQuery: Property[String],
             expanded: Property[Boolean],
             createNewDocument: () => Unit,
-            openDocument: Document => Unit)(using Scope): DocumentListPanel =
-    CompositeSupport.buildComposite(new DocumentListPanel(documents, currentDocument, searchQuery, expanded, createNewDocument, openDocument))
+            openDocument: Document => Unit,
+            onDocumentsImported: () => Unit)(using Scope): DocumentListPanel =
+    CompositeSupport.buildComposite(new DocumentListPanel(documents, currentDocument, searchQuery, expanded, createNewDocument, openDocument, onDocumentsImported))
+}
+
+private final class DocumentImportPanel(document: Document, onImported: () => Unit) extends DivComposite {
+
+  private given ExecutionContext = ExecutionContext.global
+
+  private val expandedProperty = Property(false)
+  private val importPathProperty = Property("")
+  private val overwriteExistingProperty = Property(false)
+  private val importingProperty = Property(false)
+
+  override protected def compose(using DslContext): Unit = {
+    classes = "doc-import"
+
+    withDslContext {
+      vbox {
+        classes = "doc-import__shell"
+
+        hbox {
+          classes = "doc-import__header"
+
+          vbox {
+            classes = "doc-import__copy"
+
+            span {
+              classes = "doc-import__eyebrow"
+              text = "Admin"
+            }
+
+            span {
+              classes = "doc-import__title"
+              text = "Import"
+            }
+          }
+
+          button("toggle-import-panel") {
+            buttonType = "button"
+            classes = Seq("material-icons", "doc-icon-btn")
+            text = "upload_file"
+            onClick(_ => expandedProperty.set(!expandedProperty.get))
+          }
+        }
+
+        div {
+          classes = "doc-import__panel"
+          style {
+            display <-- expandedProperty.map(expanded => if (expanded) "block" else "none")
+          }
+
+          vbox {
+            classes = "doc-import__fields"
+
+            span {
+              classes = "doc-import__intro"
+              text = "Rekursiv nach Text.md suchen und Markdown als Dokumentinhalt importieren."
+            }
+
+            div {
+              classes = "doc-import__path"
+
+              standaloneInput("import-path") {
+                placeholder = "C:\\docs\\wissen"
+                subscribeBidirectional(importPathProperty, stringValueProperty)
+              }
+            }
+
+            hbox {
+              classes = "doc-import__options"
+
+              input("overwrite-existing") {
+                inputType = "checkbox"
+                subscribeBidirectional(overwriteExistingProperty, booleanValueProperty)
+              }
+
+              span {
+                classes = "doc-import__option-label"
+                text = "Vorhandene Titel ueberschreiben"
+              }
+            }
+
+            button("Import starten") {
+              buttonType = "button"
+              classes = "doc-new-btn"
+              onClick(_ => triggerImport())
+            }
+          }
+        }
+      }
+    }
+  }
+
+  private def triggerImport(): Unit = {
+    val importLink = Navigation.linkByRel("import-documents", document.links).orNull
+    val normalizedPath = importPathProperty.get.trim
+
+    if (normalizedPath.isEmpty) {
+      Viewport.notify("Bitte ein Importverzeichnis angeben.", Viewport.NotificationKind.Error)
+      return
+    }
+    if (importLink == null) {
+      Viewport.notify("Import-Link ist nicht verfuegbar.", Viewport.NotificationKind.Error)
+      return
+    }
+    if (importingProperty.get) {
+      return
+    }
+
+    importingProperty.set(true)
+
+    Api.requestJson(
+      importLink.method,
+      Navigation.prefixedServiceUrl(importLink.url),
+      js.Dynamic.literal(
+        path = normalizedPath,
+        overwriteExisting = overwriteExistingProperty.get
+      )
+    ).onComplete {
+      case Success(raw) =>
+        importingProperty.set(false)
+        val result = raw.asInstanceOf[js.Dynamic]
+        val files = readInt(result, "files")
+        val created = readInt(result, "created")
+        val updated = readInt(result, "updated")
+        val skipped = readInt(result, "skipped")
+
+        Viewport.notify(
+          s"Import abgeschlossen: $files Dateien, $created neu, $updated aktualisiert, $skipped uebersprungen.",
+          Viewport.NotificationKind.Success
+        )
+        expandedProperty.set(false)
+        onImported()
+
+      case Failure(error) =>
+        importingProperty.set(false)
+        Api.logFailure("document import", error)
+        Viewport.notify(s"Import fehlgeschlagen: ${error.getMessage}", Viewport.NotificationKind.Error)
+    }
+  }
+
+  private def readInt(dynamic: js.Dynamic, key: String): Int = {
+    val value = dynamic.selectDynamic(key)
+    if (js.isUndefined(value) || value == null) 0
+    else value.asInstanceOf[Int]
+  }
+}
+
+private object DocumentImportPanel {
+  def panel(document: Document, onImported: () => Unit)(using Scope): DocumentImportPanel =
+    CompositeSupport.buildComposite(new DocumentImportPanel(document, onImported))
 }
 
 private final class DocumentSummaryCell extends TableCell[Data[Document], String] {
@@ -408,7 +573,7 @@ private final class DocumentSummaryCell extends TableCell[Data[Document], String
       val document = rowValue.get.data
       element.classList.remove("jfx-table-cell-empty")
       titleProperty.set(Option(document.title.get).filter(_.trim.nonEmpty).getOrElse("(Ohne Titel)"))
-      subtitleProperty.set(TimeAgo.format(document.created.get))
+      subtitleProperty.set(s"${document.bookname.get} - ${TimeAgo.format(document.created.get)}")
       visibleProperty.set(true)
     }
   }

@@ -1,7 +1,8 @@
 package app.pages.core
 
-import app.domain.core.{Address, Data, Link, ManagedProperty, Schema, SchemaProperty, User, UserInfo}
+import app.domain.core.{Address, Data, Link, ManagedProperty, Schema, SchemaProperty, User, UserInfo, UserUpdated}
 import app.domain.followers.{Group, RelationShip}
+import app.services.ApplicationService
 import app.support.Navigation.renderByRel
 import app.support.{Api, Navigation}
 import app.ui.{CompositeSupport, DivComposite, PageComposite}
@@ -50,6 +51,8 @@ class UserPage(val payload: Data[User]) extends PageComposite("User", pageResiza
     loadVisibilityCatalog()
 
     withDslContext {
+      val service = inject[ApplicationService]
+
       hbox {
         classes = "user-page-shell"
 
@@ -59,7 +62,8 @@ class UserPage(val payload: Data[User]) extends PageComposite("User", pageResiza
           onSubmit = { (event: Form[User]) =>
 
             model.update().onComplete {
-              case Success(_) =>
+              case Success(saved) =>
+                service.messageBus.publish(new UserUpdated(saved))
                 Viewport.notify("Benutzer gespeichert!", Viewport.NotificationKind.Success)
 
               case Failure(e: ErrorResponseException) =>

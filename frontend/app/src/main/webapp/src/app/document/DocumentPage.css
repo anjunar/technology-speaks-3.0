@@ -156,6 +156,85 @@
     outline: none;
 }
 
+.document-page .doc-import {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px 14px;
+    border: 1px solid color-mix(in srgb, var(--glass-border) 10%, transparent);
+    border-radius: 16px;
+    background: transparent !important;
+    box-shadow: none;
+    backdrop-filter: blur(8px) saturate(180%);
+    -webkit-backdrop-filter: blur(8px) saturate(180%);
+}
+
+.document-page .doc-import__shell,
+.document-page .doc-import__fields,
+.document-page .doc-import__copy {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.document-page .doc-import__header,
+.document-page .doc-import__options {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.document-page .doc-import__eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    opacity: 0.42;
+}
+
+.document-page .doc-import__title {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+}
+
+.document-page .doc-import__intro {
+    font-size: 12px;
+    line-height: 1.5;
+    opacity: 0.7;
+}
+
+.document-page .doc-import__path {
+    display: block;
+    padding: 10px 12px;
+    border: 1px solid color-mix(in srgb, var(--glass-border) 10%, transparent);
+    border-radius: 14px;
+    background: transparent !important;
+}
+
+.document-page .doc-import__path input {
+    width: 100%;
+    border: none;
+    background: transparent !important;
+    box-shadow: none;
+}
+
+.document-page .doc-import__path input:focus {
+    outline: none;
+}
+
+.document-page .doc-import__options input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+}
+
+.document-page .doc-import__option-label {
+    flex: 1 1 auto;
+    font-size: 12px;
+    opacity: 0.78;
+}
+
 .document-page .doc-table-shell,
 .document-page .issues-list-shell {
     position: relative;

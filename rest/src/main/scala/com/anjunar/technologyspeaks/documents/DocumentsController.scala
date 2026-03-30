@@ -4,7 +4,7 @@ import com.anjunar.technologyspeaks.core.SchemaHateoas
 import com.anjunar.technologyspeaks.hibernate.search.HibernateSearch
 import com.anjunar.technologyspeaks.rest.EntityGraph
 import com.anjunar.technologyspeaks.rest.types.{Data, Table}
-import com.anjunar.technologyspeaks.security.LinkBuilder
+import com.anjunar.technologyspeaks.security.{IdentityHolder, LinkBuilder}
 import jakarta.annotation.security.RolesAllowed
 import jakarta.json.bind.annotation.{JsonbProperty, JsonbSubtype}
 import org.springframework.web.bind.annotation.{GetMapping, RestController}
@@ -14,7 +14,7 @@ import scala.beans.BeanProperty
 import scala.jdk.CollectionConverters.*
 
 @RestController
-class DocumentsController(val query: HibernateSearch) {
+class DocumentsController(val query: HibernateSearch, val identityHolder: IdentityHolder) {
 
   @GetMapping(value = Array("/document/documents"), produces = Array("application/json"))
   @RolesAllowed(Array("Anonymous", "Guest", "User", "Administrator"))
@@ -53,6 +53,14 @@ class DocumentsController(val query: HibernateSearch) {
       LinkBuilder.create[DocumentController](_.create())
         .build()
     )
+
+    if (identityHolder.hasRole("Administrator")) {
+      table.addLinks(
+        LinkBuilder.create[DocumentController](_.importFromDirectory(null))
+          .withRel("import-documents")
+          .build()
+      )
+    }
 
     table
   }

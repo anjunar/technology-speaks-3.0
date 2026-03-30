@@ -56,6 +56,7 @@ import com.anjunar.technologyspeaks.documents.Document.Schema
         new NamedAttributeNode("created"),
         new NamedAttributeNode(value = "user", subgraph = "user"),
         new NamedAttributeNode("editor"),
+        new NamedAttributeNode("bookname"),
         new NamedAttributeNode("title")
       )
     )
@@ -70,6 +71,10 @@ class Document(@(Column @field)(nullable = false) @(JsonbProperty @field) var ti
   @JsonbProperty
   var user: User = uninitialized
 
+  @(Column @field)
+  @JsonbProperty
+  var bookname: String = null
+
   @Column(columnDefinition = "jsonb")
   @Type(value = classOf[NodeType])
   @JsonbProperty
@@ -83,6 +88,7 @@ object Document extends RepositoryContext[Document] with SchemaProvider[Schema] 
 
   class Schema extends AbstractEntitySchema[Document](SpringContext.entityManager()) {
     @JsonbProperty val title = property(_.title, new OwnerRule[Document]())
+    @JsonbProperty val bookname = property(_.bookname, new OwnerRule[Document]())
     @JsonbProperty val user = property(_.user, new OwnerRule[Document]())
     @JsonbProperty val editor = property(_.editor, new OwnerRule[Document]())
   }

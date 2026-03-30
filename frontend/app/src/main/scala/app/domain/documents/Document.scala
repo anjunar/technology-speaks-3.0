@@ -14,6 +14,7 @@ import scala.scalajs.js.URIUtils.encodeURIComponent
 class Document extends AbstractEntity[Document] with OwnerProvider {
 
   val title: Property[String] = Property("")
+  val bookname: Property[String] = Property("")
   val user: Property[User | Null] = Property(null)
   val editor: Property[js.Any | Null] = Property(null)
 
@@ -38,6 +39,7 @@ object Document {
     typedProperty[Document, Property[String], String](_.modified),
     typedProperty[Document, Property[String], String](_.created),
     typedProperty[Document, Property[String], String](_.title),
+    typedProperty[Document, Property[String], String](_.bookname),
     typedProperty[Document, Property[User | Null], User | Null](_.user),
     typedProperty[Document, Property[js.Any | Null], js.Any | Null](_.editor),
     typedProperty[Document, ListProperty[Link], Link](_.links)

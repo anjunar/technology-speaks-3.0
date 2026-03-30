@@ -60,7 +60,15 @@ class WebAuthnLoginController(val store: CredentialStore, val entityManager: Ent
 
     val authenticationData = webAuthnManager.parseAuthenticationResponseJSON(publicKeyCredential.encode())
 
-    val credentialRecord = store.loadByCredentialId(credentialId)
+    val credential = WebAuthnCredential.loadByCredentialId(credentialId)
+    
+    if (credential == null) {
+      return new JsonObject()
+        .put("status", "error")
+        .put("message", "Credential not found.")
+    }
+    
+    val credentialRecord = store.loadByCredentialId(credential)
 
     val challenge = challengeStore.get(username)
 
