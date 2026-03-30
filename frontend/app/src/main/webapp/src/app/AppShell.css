@@ -167,7 +167,7 @@
 .app-shell-nav-left {
     flex-direction: column;
     top: 50%;
-    left: 0;
+    left: 14px;
     transform: translateY(-50%);
     min-width: 154px;
     padding: 12px;
@@ -428,6 +428,7 @@
 .app-footer-bar {
     align-self: center;
     height: 54px;
+    padding: 0 14px;
     border: 1px solid var(--color-border-inverse-strong);
     background: var(--glass-bg);
     box-shadow:
