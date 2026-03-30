@@ -14,7 +14,7 @@ class EntityView extends AbstractEntity with EntityContext[EntityView] {
   @ManyToOne(optional = false)
   var user: User = uninitialized
 
-  @OneToMany
+  @OneToMany(cascade = Array(CascadeType.ALL), orphanRemoval = true)
   val properties: java.util.Set[ManagedProperty] = new java.util.HashSet[ManagedProperty]()
 
 }

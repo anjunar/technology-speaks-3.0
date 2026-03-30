@@ -34,11 +34,6 @@ class UserService(private val entityManager: EntityManager) {
     Document.queryAll("user" -> user).asScala.foreach(_.remove())
     Issue.queryAll("user" -> user).asScala.foreach(_.remove())
 
-    val userView = User.findViewByUser(user)
-    if (userView != null) {
-      entityManager.remove(userView)
-    }
-
     entityManager.createQuery("select mp from ManagedProperty mp left join fetch mp.view join mp.users u where u = :user", classOf[ManagedProperty])
       .setParameter("user", user)
       .getResultList
@@ -46,6 +41,16 @@ class UserService(private val entityManager: EntityManager) {
       .foreach { mp =>
         mp.users.remove(user)
       }
+
+    val userView = User.findViewByUser(user)
+    if (userView != null) {
+      userView.properties.asScala.toList.foreach { managedProperty =>
+        managedProperty.users.clear()
+        managedProperty.groups.clear()
+        userView.properties.remove(managedProperty)
+      }
+      entityManager.remove(userView)
+    }
 
     user.remove()
   }
