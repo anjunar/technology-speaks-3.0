@@ -1,7 +1,8 @@
 package app.domain.core
 
-import jfx.core.macros.{property, typedProperty}
-import jfx.core.state.{ListProperty, Property, PropertyAccess}
+import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
+import jfx.core.state.{ListProperty, Property}
+import jfx.form.editor.plugins.Dimensions
 import jfx.form.validators.{NotBlankValidator, NotNullValidator, SizeValidator}
 
 import java.util.UUID
@@ -13,23 +14,9 @@ class UserInfo extends AbstractEntity[UserInfo] {
   val lastName: Property[String] = Property("")
   val birthDate: Property[String] = Property("")
 
-  override def properties: js.Array[PropertyAccess[UserInfo, ?]] =
-    UserInfo.properties
+  override def properties: Seq[PropertyAccess[UserInfo, ?]] = UserInfo.properties
 }
 
 object UserInfo {
-  val properties: js.Array[PropertyAccess[UserInfo, ?]] = js.Array(
-    typedProperty[UserInfo, Property[UUID], UUID](_.id),
-    typedProperty[UserInfo, Property[String], String](_.modified),
-    typedProperty[UserInfo, Property[String], String](_.created),
-    typedProperty[UserInfo, Property[String], String](_.firstName)
-      .withValidator(NotBlankValidator())
-      .withValidator(SizeValidator(2, 80)),
-    typedProperty[UserInfo, Property[String], String](_.lastName)
-      .withValidator(NotBlankValidator())
-      .withValidator(SizeValidator(2, 80)),
-    typedProperty[UserInfo, Property[String], String](_.birthDate)
-      .withValidator(NotNullValidator()),
-    typedProperty[UserInfo, ListProperty[Link], Link](_.links)
-  )
+  val properties: Seq[PropertyAccess[UserInfo, ?]] = PropertyMacros.describeProperties[UserInfo]
 }

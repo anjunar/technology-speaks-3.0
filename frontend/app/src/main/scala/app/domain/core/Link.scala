@@ -1,8 +1,7 @@
 package app.domain.core
 
 import app.support.JsonModel
-import jfx.core.macros.property
-import jfx.core.state.PropertyAccess
+import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
 
 import scala.scalajs.js
 
@@ -13,15 +12,9 @@ case class Link(
   var id: String = ""
 ) extends JsonModel[Link] {
 
-  override def properties: js.Array[PropertyAccess[Link, ?]] =
-    Link.properties
+  override def properties: Seq[PropertyAccess[Link, ?]] = Link.properties
 }
 
 object Link {
-  val properties: js.Array[PropertyAccess[Link, ?]] = js.Array(
-    property(_.rel),
-    property(_.url),
-    property(_.method),
-    property(_.id)
-  )
+  val properties: Seq[PropertyAccess[Link, ?]] = PropertyMacros.describeProperties[Link]
 }

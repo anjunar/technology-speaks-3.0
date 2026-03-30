@@ -2,8 +2,7 @@ package app.domain.security
 
 import app.domain.core.AbstractLink
 import app.support.JsonModel
-import jfx.core.macros.property
-import jfx.core.state.PropertyAccess
+import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
 
 import scala.scalajs.js
 
@@ -13,8 +12,7 @@ class AccountLink(
   var method: String = "GET"
 ) extends JsonModel[AccountLink] with AbstractLink {
 
-  override def properties: js.Array[PropertyAccess[AccountLink, ?]] =
-    AccountLink.properties
+  override def properties: Seq[PropertyAccess[AccountLink, ?]] = AccountLink.properties
 
   override def name: String = "Account"
 
@@ -22,9 +20,4 @@ class AccountLink(
 }
 
 object AccountLink {
-  val properties: js.Array[PropertyAccess[AccountLink, ?]] = js.Array(
-    property(_.rel),
-    property(_.url),
-    property(_.method)
-  )
-}
+  val properties: Seq[PropertyAccess[AccountLink, ?]]= PropertyMacros.describeProperties[AccountLink]}

@@ -1,7 +1,6 @@
 package app.support
 
-import jfx.core.macros.property
-import jfx.core.state.PropertyAccess
+import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
 
 import scala.scalajs.js
 
@@ -10,13 +9,8 @@ class JsonResponse(
   var message: String | Null = null
 ) extends JsonModel[JsonResponse] {
 
-  override def properties: js.Array[PropertyAccess[JsonResponse, ?]] =
-    JsonResponse.properties
+  override def properties: Seq[PropertyAccess[JsonResponse, ?]] = JsonResponse.properties
 }
 
 object JsonResponse {
-  val properties: js.Array[PropertyAccess[JsonResponse, ?]] = js.Array(
-    property(_.status),
-    property(_.message)
-  )
-}
+  val properties: Seq[PropertyAccess[JsonResponse, ?]] = PropertyMacros.describeProperties[JsonResponse]}

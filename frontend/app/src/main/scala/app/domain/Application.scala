@@ -3,8 +3,8 @@ package app.domain
 import app.domain.core.AbstractLink
 import app.domain.core.User
 import app.support.{Api, JsonModel}
-import jfx.core.macros.{property, typedProperty}
-import jfx.core.state.{ListProperty, PropertyAccess}
+import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
+import jfx.core.state.ListProperty
 
 import scala.concurrent.Future
 import scala.scalajs.js
@@ -14,16 +14,11 @@ class Application(
   val links: ListProperty[AbstractLink] = ListProperty()
 ) extends JsonModel[Application] {
 
-  override def properties: js.Array[PropertyAccess[Application, ?]] =
-    Application.properties
+  override def properties: Seq[PropertyAccess[Application, ?]] = Application.properties
 }
 
 object Application {
-  val properties: js.Array[PropertyAccess[Application, ?]] = js.Array(
-    property(_.user),
-    typedProperty[Application, ListProperty[AbstractLink], AbstractLink](_.links)
-  )
-
+  val properties: Seq[PropertyAccess[Application, ?]]= PropertyMacros.describeProperties[Application]
   def read(): Future[Application] =
     Api.get("/service")
 }

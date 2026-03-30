@@ -1,23 +1,20 @@
 package jfx.form.editor.plugins
 
-import jfx.core.macros.{property, typedProperty}
-import jfx.core.state.{Property, PropertyAccess}
+import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
+import com.anjunar.scala.enterprise.macros.PropertyMacros.makePropertyAccess
+import jfx.core.state.Property
 import jfx.form.Model
 
 import scala.scalajs.js
 
-class LinkDescriptor(
-  val href: Property[String] = Property(""),
-  val title: Property[String] = Property("")
+final case class LinkDescriptor(
+    val href: Property[String] = Property(""),
+    val title: Property[String] = Property("")
 ) extends Model[LinkDescriptor] {
 
-  override def properties: js.Array[PropertyAccess[LinkDescriptor, ?]] =
-    LinkDescriptor.properties
+  override def properties: Seq[PropertyAccess[LinkDescriptor, ?]] = LinkDescriptor.properties
 }
 
 object LinkDescriptor {
-  val properties: js.Array[PropertyAccess[LinkDescriptor, ?]] = js.Array(
-    typedProperty[LinkDescriptor, Property[String], String](_.href),
-    typedProperty[LinkDescriptor, Property[String], String](_.title)
-  )
+  val properties: Seq[PropertyAccess[LinkDescriptor, ?]] = PropertyMacros.describeProperties[LinkDescriptor]
 }

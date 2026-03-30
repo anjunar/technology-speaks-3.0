@@ -1,8 +1,8 @@
 package app.domain.security
 
 import app.support.JsonModel
-import jfx.core.macros.typedProperty
-import jfx.core.state.{Property, PropertyAccess}
+import com.anjunar.scala.enterprise.macros.{PropertyMacros, PropertyAccess}
+import jfx.core.state.Property
 
 import scala.scalajs.js
 
@@ -11,13 +11,8 @@ class CreatePassword(
   val confirmPassword: Property[String] = Property("")
 ) extends JsonModel[CreatePassword] {
 
-  override def properties: js.Array[PropertyAccess[CreatePassword, ?]] =
-    CreatePassword.properties
+  override def properties: Seq[PropertyAccess[CreatePassword, ?]] = CreatePassword.properties
 }
 
 object CreatePassword {
-  val properties: js.Array[PropertyAccess[CreatePassword, ?]] = js.Array(
-    typedProperty[CreatePassword, Property[String], String](_.newPassword),
-    typedProperty[CreatePassword, Property[String], String](_.confirmPassword)
-  )
-}
+  val properties: Seq[PropertyAccess[CreatePassword, ?]]= PropertyMacros.describeProperties[CreatePassword]}

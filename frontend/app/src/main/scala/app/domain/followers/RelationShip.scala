@@ -3,8 +3,8 @@ package app.domain.followers
 import app.domain.core.{AbstractEntity, Data, Link, Table, User}
 import app.support.{Api, AppJson}
 import app.support.Api.given
-import jfx.core.macros.{property, typedProperty}
-import jfx.core.state.{ListProperty, Property, PropertyAccess}
+import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
+import jfx.core.state.{ListProperty, Property}
 
 import java.util.UUID
 import scala.concurrent.Future
@@ -18,8 +18,7 @@ class RelationShip extends AbstractEntity[RelationShip] {
   val users: ListProperty[User] = ListProperty()
   val groups: ListProperty[Group] = ListProperty()
 
-  override def properties: js.Array[PropertyAccess[RelationShip, ?]] =
-    RelationShip.properties
+  override def properties: Seq[PropertyAccess[RelationShip, ?]] = RelationShip.properties
 
   def save(): Future[Data[RelationShip]] =
     Api.post("/service/followers/relationships/relationship", this)
@@ -51,16 +50,7 @@ class RelationShip extends AbstractEntity[RelationShip] {
 }
 
 object RelationShip {
-  val properties: js.Array[PropertyAccess[RelationShip, ?]] = js.Array(
-    typedProperty[RelationShip, Property[UUID], UUID](_.id),
-    typedProperty[RelationShip, Property[String], String](_.modified),
-    typedProperty[RelationShip, Property[String], String](_.created),
-    typedProperty[RelationShip, Property[User | Null], User | Null](_.follower),
-    typedProperty[RelationShip, ListProperty[User], User](_.users),
-    typedProperty[RelationShip, ListProperty[Group], Group](_.groups),
-    typedProperty[RelationShip, ListProperty[Link], Link](_.links)
-  )
-
+  val properties: Seq[PropertyAccess[RelationShip, ?]] = PropertyMacros.describeProperties[RelationShip]
   def read(id: String): Future[Data[RelationShip]] =
     Api.get(s"/service/followers/relationships/relationship/$id")
 

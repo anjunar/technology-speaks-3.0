@@ -2,8 +2,7 @@ package app.domain.security
 
 import app.domain.core.AbstractLink
 import app.support.JsonModel
-import jfx.core.macros.property
-import jfx.core.state.PropertyAccess
+import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
 
 import scala.scalajs.js
 
@@ -13,8 +12,7 @@ class PasswordRegisterLink(
   var method: String = "GET"
 ) extends JsonModel[PasswordRegisterLink] with AbstractLink {
 
-  override def properties: js.Array[PropertyAccess[PasswordRegisterLink, ?]] =
-    PasswordRegisterLink.properties
+  override def properties: Seq[PropertyAccess[PasswordRegisterLink, ?]] = PasswordRegisterLink.properties
 
   override def name: String = "Registrierung mit Passwort"
 
@@ -22,9 +20,5 @@ class PasswordRegisterLink(
 }
 
 object PasswordRegisterLink {
-  val properties: js.Array[PropertyAccess[PasswordRegisterLink, ?]] = js.Array(
-    property(_.rel),
-    property(_.url),
-    property(_.method)
-  )
+  val properties: Seq[PropertyAccess[PasswordRegisterLink, ?]] = PropertyMacros.describeProperties[PasswordRegisterLink]
 }

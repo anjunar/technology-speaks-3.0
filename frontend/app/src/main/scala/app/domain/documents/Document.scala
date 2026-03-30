@@ -3,8 +3,8 @@ package app.domain.documents
 import app.domain.core.{AbstractEntity, Data, Link, Table, User}
 import app.domain.shared.OwnerProvider
 import app.support.Api
-import jfx.core.macros.{property, typedProperty}
-import jfx.core.state.{ListProperty, Property, PropertyAccess}
+import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
+import jfx.core.state.{ListProperty, Property}
 
 import java.util.UUID
 import scala.concurrent.Future
@@ -20,8 +20,7 @@ class Document extends AbstractEntity[Document] with OwnerProvider {
 
   val editable: Property[Boolean] = Property(false)
 
-  override def properties: js.Array[PropertyAccess[Document, ?]] =
-    Document.properties
+  override def properties: Seq[PropertyAccess[Document, ?]] = Document.properties
 
   def save(): Future[Data[Document]] =
     Api.post("/service/document/documents/document", this)
@@ -34,17 +33,7 @@ class Document extends AbstractEntity[Document] with OwnerProvider {
 }
 
 object Document {
-  val properties: js.Array[PropertyAccess[Document, ?]] = js.Array(
-    typedProperty[Document, Property[UUID], UUID](_.id),
-    typedProperty[Document, Property[String], String](_.modified),
-    typedProperty[Document, Property[String], String](_.created),
-    typedProperty[Document, Property[String], String](_.title),
-    typedProperty[Document, Property[String], String](_.bookname),
-    typedProperty[Document, Property[User | Null], User | Null](_.user),
-    typedProperty[Document, Property[js.Any | Null], js.Any | Null](_.editor),
-    typedProperty[Document, ListProperty[Link], Link](_.links)
-  )
-
+  val properties: Seq[PropertyAccess[Document, ?]] = PropertyMacros.describeProperties[Document]
   def root(): Future[Data[Document]] =
     Api.post("/service/document/documents/document/root")
 

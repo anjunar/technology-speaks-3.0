@@ -1,7 +1,9 @@
 package app.domain.core
 
-import jfx.core.macros.{property, typedProperty}
-import jfx.core.state.{ListProperty, Property, PropertyAccess}
+import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
+import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
+import jfx.core.state.{ListProperty, Property}
+import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
 import jfx.form.validators.{EmailValidator, NotBlankValidator}
 
 import java.util.UUID
@@ -11,18 +13,9 @@ class Email extends AbstractEntity[Email] {
 
   val value: Property[String] = Property("")
 
-  override def properties: js.Array[PropertyAccess[Email, ?]] =
-    Email.properties
+  override def properties: Seq[PropertyAccess[Email, ?]] = Email.properties
 }
 
 object Email {
-  val properties: js.Array[PropertyAccess[Email, ?]] = js.Array(
-    typedProperty[Email, Property[UUID], UUID](_.id),
-    typedProperty[Email, Property[String | Null], String | Null](_.modified),
-    typedProperty[Email, Property[String | Null], String | Null](_.created),
-    typedProperty[Email, Property[String], String](_.value)
-      .withValidator(NotBlankValidator())
-      .withValidator(EmailValidator()),
-    typedProperty[Email, ListProperty[Link], Link](_.links)
-  )
+  val properties: Seq[PropertyAccess[Email, ?]] = PropertyMacros.describeProperties[Email]
 }

@@ -1,6 +1,7 @@
 package jfx.json
 
-import jfx.core.state.{ListProperty, Property, PropertyAccess, ReadOnlyProperty}
+import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
+import jfx.core.state.{ListProperty, Property, ReadOnlyProperty}
 import jfx.form.Model
 
 import scala.scalajs.js
@@ -10,11 +11,11 @@ class JsonMapper(val registry: JsonRegistry) {
 
   def deserialize[M <: Model[M]](dynamic: Dynamic): M = {
     val entityTypeDynamic = dynamic.selectDynamic("@type")
-    
+
     if (entityTypeDynamic == null || js.isUndefined(entityTypeDynamic)) {
       return null.asInstanceOf[M]
     }
-    
+
     val entityType = entityTypeDynamic.asInstanceOf[String]
     val factory =
       registry.classes
@@ -27,13 +28,13 @@ class JsonMapper(val registry: JsonRegistry) {
 
   def deserialize[M <: Model[M]](dynamic: Dynamic, factory: () => M): M = {
     val entity = factory()
-    val props = entity.properties.asInstanceOf[js.Array[PropertyAccess[M, Any]]]
+    val props = entity.properties.asInstanceOf[Seq[PropertyAccess[M, Any]]]
 
     props.foreach { access =>
       val raw = readField(dynamic, access.name)
 
       if (raw != null && !js.isUndefined(raw)) {
-        val currentValue = access.get(entity).orNull
+        val currentValue = access.get(entity)
         val decoded = deserializeForAccess(raw, access, currentValue)
         assign(entity, access, decoded)
       } else if (shouldCreateValue(access, entity)) {
@@ -58,46 +59,36 @@ class JsonMapper(val registry: JsonRegistry) {
                                        access: PropertyAccess[M, Any],
                                        currentValue: Any
                                      ): Any = {
-    val effectiveTargetType = effectiveTargetTypeOf(access, currentValue)
-    deserializeValue(raw, effectiveTargetType, currentValue)
-  }
-
-  private def effectiveTargetTypeOf[M](
-                                        access: PropertyAccess[M, Any],
-                                        currentValue: Any
-                                      ): Class[?] =
     currentValue match {
-      case _: Property[?] =>
-        innerValueTypeOf(access).getOrElse(classOf[Object])
+      case property: Property[Any @unchecked] =>
+        deserializeValue(raw, property.get)
 
-      case _: ListProperty[?] =>
-        innerValueTypeOf(access).getOrElse(classOf[Object])
+      case list: ListProperty[Any @unchecked] =>
+        deserializeValue(raw, null)
 
       case _ =>
-        rawTargetTypeOf(access)
+        deserializeValue(raw, null)
     }
+  }
 
-  private def rawTargetTypeOf[M](access: PropertyAccess[M, Any]): Class[?] =
-    Option(access.propertyType).getOrElse(classOf[Object])
-
-  private def innerValueTypeOf[M](access: PropertyAccess[M, Any]): Option[Class[?]] =
-    Option(access.valueType)
-
-  private def createDefaultForAccess[M](access: PropertyAccess[M, Any]): Option[Any] =
-    innerValueTypeOf(access)
-      .flatMap(registry.createValue)
-      .orElse(Option(rawTargetTypeOf(access)).flatMap(registry.createValue))
+  private def createDefaultForAccess[M](access: PropertyAccess[M, Any]): Option[Any] = {
+    // In the frontend, properties are already initialized with default values
+    // in the case class constructors, so we don't need to create defaults here.
+    None
+  }
 
   private def assign[M](
                          entity: M,
                          access: PropertyAccess[M, Any],
                          decoded: Any
-                       ): Unit =
-    access.get(entity) match {
-      case Some(property: Property[Any @unchecked]) =>
+                       ): Unit = {
+    val accessValue = access.get(entity)
+
+    accessValue match {
+      case property: Property[Any @unchecked] =>
         property.set(decoded)
 
-      case Some(list: ListProperty[Any @unchecked]) =>
+      case list: ListProperty[Any @unchecked] =>
         decoded match {
           case same: ListProperty[Any @unchecked] if same.eq(list) =>
             ()
@@ -118,21 +109,20 @@ class JsonMapper(val registry: JsonRegistry) {
       case _ =>
         access.set(entity, decoded)
     }
+  }
 
-  private def deserializeValue(raw: js.Any, targetType: Class[?], currentValue: Any): Any =
+  private def deserializeValue(raw: js.Any, currentValue: Any): Any =
     if (raw == null || js.isUndefined(raw)) {
-      raw
+      null
     } else {
+      val targetType = currentValue match {
+        case null => classOf[Object]
+        case _ => currentValue.getClass
+      }
+      
       registry.deserializeValue(raw, targetType).getOrElse {
         if (raw.isInstanceOf[js.Array[?]]) {
-          val items = raw.asInstanceOf[js.Array[js.Any]].map(value => deserializeArrayElement(value))
-          currentValue match {
-            case list: ListProperty[Any @unchecked] =>
-              list.setAll(items.asInstanceOf[js.Array[Any]])
-              list
-            case _ =>
-              items
-          }
+          raw.asInstanceOf[js.Array[js.Any]].map(value => deserializeArrayElement(value))
         } else {
           val dynamicValue = raw.asInstanceOf[Dynamic]
 
@@ -146,7 +136,7 @@ class JsonMapper(val registry: JsonRegistry) {
     }
 
   private def shouldCreateValue[M](access: PropertyAccess[M, Any], entity: M): Boolean = {
-    val currentValue = access.get(entity).orNull
+    val currentValue = access.get(entity)
     createDefaultForAccess(access).nonEmpty && isEmptyValue(currentValue)
   }
 
@@ -159,7 +149,7 @@ class JsonMapper(val registry: JsonRegistry) {
 
   private def deserializeArrayElement(value: js.Any): Any =
     if (value == null || js.isUndefined(value)) {
-      value
+      null
     } else {
       val dynamicValue = value.asInstanceOf[Dynamic]
 
@@ -183,18 +173,16 @@ class JsonMapper(val registry: JsonRegistry) {
 
     out.update("@type", model.getClass.getSimpleName)
 
-    val props = model.properties.asInstanceOf[js.Array[PropertyAccess[Any, Any]]]
+    val props = model.properties.asInstanceOf[Seq[PropertyAccess[Any, Any]]]
     props
       .filter(access => access.name != "links")
       .foreach { access =>
-        access.get(model) match {
-          case Some(propertyOrValue) =>
-            val serialized = serializeValue(propertyOrValue)
-            if (serialized != null && !js.isUndefined(serialized)) {
-              out.update(registry.serializeFieldName(access.name), serialized)
-            }
-          case None =>
-            ()
+        val value = access.get(model)
+        if (value != null) {
+          val serialized = serializeValue(value)
+          if (serialized != null && !js.isUndefined(serialized)) {
+            out.update(registry.serializeFieldName(access.name), serialized)
+          }
         }
       }
 

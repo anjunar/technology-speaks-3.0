@@ -1,8 +1,9 @@
 package app.domain.security
 
+import app.domain.core.UserInfo
 import app.support.{Api, JsonModel, JsonResponse}
-import jfx.core.macros.{property, typedProperty}
-import jfx.core.state.{Property, PropertyAccess}
+import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
+import jfx.core.state.Property
 import jfx.form.validators.{EmailValidator, NotBlankValidator, SizeValidator}
 
 import scala.concurrent.Future
@@ -14,21 +15,12 @@ class PasswordRegister(
   val password: Property[String] = Property("")
 ) extends JsonModel[PasswordRegister] {
 
-  override def properties: js.Array[PropertyAccess[PasswordRegister, ?]] =
-    PasswordRegister.properties
+  override def properties: Seq[PropertyAccess[PasswordRegister, ?]] = PasswordRegister.properties
 
   def save(): Future[JsonResponse] =
     Api.post("/service/security/register", this)
 }
 
 object PasswordRegister {
-  val properties: js.Array[PropertyAccess[PasswordRegister, ?]] = js.Array(
-    typedProperty[PasswordRegister, Property[String], String](_.email)
-      .withValidator(NotBlankValidator())
-      .withValidator(EmailValidator()),
-    typedProperty[PasswordRegister, Property[String], String](_.nickName)
-      .withValidator(NotBlankValidator())
-      .withValidator(SizeValidator(2, 80)),
-    typedProperty[PasswordRegister, Property[String], String](_.password)
-  )
+  val properties: Seq[PropertyAccess[PasswordRegister, ?]] = PropertyMacros.describeProperties[PasswordRegister]
 }

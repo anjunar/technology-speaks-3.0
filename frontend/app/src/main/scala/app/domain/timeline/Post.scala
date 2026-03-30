@@ -3,8 +3,8 @@ package app.domain.timeline
 import app.domain.core.{AbstractEntity, Data, Link, Table, User}
 import app.domain.shared.{Like, OwnerProvider}
 import app.support.Api
-import jfx.core.macros.{property, typedProperty}
-import jfx.core.state.{ListProperty, Property, PropertyAccess}
+import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
+import jfx.core.state.{ListProperty, Property}
 
 import java.util.UUID
 import scala.concurrent.Future
@@ -16,8 +16,7 @@ class Post extends AbstractEntity[Post] with OwnerProvider {
   val editor: Property[js.Any | Null] = Property(null)
   val likes: ListProperty[Like] = ListProperty()
 
-  override def properties: js.Array[PropertyAccess[Post, ?]] =
-    Post.properties
+  override def properties: Seq[PropertyAccess[Post, ?]] = Post.properties
 
   def save(): Future[Data[Post]] =
     Api.post("/service/timeline/posts/post", this)
@@ -30,16 +29,7 @@ class Post extends AbstractEntity[Post] with OwnerProvider {
 }
 
 object Post {
-  val properties: js.Array[PropertyAccess[Post, ?]] = js.Array(
-    typedProperty[Post, Property[UUID], UUID](_.id),
-    typedProperty[Post, Property[String], String](_.modified),
-    typedProperty[Post, Property[String], String](_.created),
-    typedProperty[Post, Property[User | Null], User | Null](_.user),
-    typedProperty[Post, Property[js.Any | Null], js.Any | Null](_.editor),
-    typedProperty[Post, ListProperty[Like], Like](_.likes),
-    typedProperty[Post, ListProperty[Link], Link](_.links)
-  )
-
+  val properties: Seq[PropertyAccess[Post, ?]] = PropertyMacros.describeProperties[Post]
   def read(id: String): Future[Data[Post]] =
     Api.get(s"/service/timeline/posts/post/$id")
 

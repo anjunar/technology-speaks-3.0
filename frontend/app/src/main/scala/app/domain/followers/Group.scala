@@ -2,8 +2,8 @@ package app.domain.followers
 
 import app.domain.core.{AbstractEntity, Data, Link, Table, User}
 import app.support.Api
-import jfx.core.macros.{property, typedProperty}
-import jfx.core.state.{ListProperty, Property, PropertyAccess}
+import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
+import jfx.core.state.{ListProperty, Property}
 import jfx.form.validators.SizeValidator
 
 import java.util.UUID
@@ -18,8 +18,7 @@ class Group extends AbstractEntity[Group] {
 
   val editable: Property[Boolean] = Property(false)
 
-  override def properties: js.Array[PropertyAccess[Group, ?]] =
-    Group.properties
+  override def properties: Seq[PropertyAccess[Group, ?]] = Group.properties
 
   def save(): Future[Data[Group]] =
     Api.post("/service/followers/groups/groups", this)
@@ -32,16 +31,7 @@ class Group extends AbstractEntity[Group] {
 }
 
 object Group {
-  val properties: js.Array[PropertyAccess[Group, ?]] = js.Array(
-    typedProperty[Group, Property[UUID], UUID](_.id),
-    typedProperty[Group, Property[String], String](_.name)
-      .withValidator(SizeValidator(3, 80)),
-    typedProperty[Group, Property[String], String](_.modified),
-    typedProperty[Group, Property[String], String](_.created),
-    typedProperty[Group, ListProperty[User], User](_.users),
-    typedProperty[Group, ListProperty[Link], Link](_.links)
-  )
-
+  val properties: Seq[PropertyAccess[Group, ?]]= PropertyMacros.describeProperties[Group]
   def read(id: String): Future[Data[Group]] =
     Api.get(s"/service/followers/groups/groups/$id")
 

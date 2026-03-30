@@ -2,8 +2,7 @@ package app.domain.shared
 
 import app.domain.core.User
 import app.support.JsonModel
-import jfx.core.macros.property
-import jfx.core.state.PropertyAccess
+import com.anjunar.scala.enterprise.macros.{PropertyMacros, PropertyAccess}
 
 import scala.scalajs.js
 
@@ -11,12 +10,9 @@ class Like(
   var user: User = new User()
 ) extends JsonModel[Like] {
 
-  override def properties: js.Array[PropertyAccess[Like, ?]] =
-    Like.properties
+  override def properties: Seq[PropertyAccess[Like, ?]] = Like.properties
 }
 
 object Like {
-  val properties: js.Array[PropertyAccess[Like, ?]] = js.Array(
-    property(_.user)
-  )
+  val properties: Seq[PropertyAccess[Like, ?]] = PropertyMacros.describeProperties[Like]
 }

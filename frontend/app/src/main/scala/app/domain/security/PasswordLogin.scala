@@ -1,8 +1,8 @@
 package app.domain.security
 
 import app.support.{Api, JsonModel, JsonResponse}
-import jfx.core.macros.{property, typedProperty}
-import jfx.core.state.{Property, PropertyAccess}
+import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
+import jfx.core.state.Property
 import jfx.form.validators.{EmailValidator, NotBlankValidator}
 
 import scala.concurrent.Future
@@ -13,18 +13,11 @@ class PasswordLogin(
   val password: Property[String] = Property("")
 ) extends JsonModel[PasswordLogin] {
 
-  override def properties: js.Array[PropertyAccess[PasswordLogin, ?]] =
-    PasswordLogin.properties
+  override def properties: Seq[PropertyAccess[PasswordLogin, ?]] = PasswordLogin.properties
 
   def save(): Future[JsonResponse] =
     Api.post("/service/security/login", this)
 }
 
 object PasswordLogin {
-  val properties: js.Array[PropertyAccess[PasswordLogin, ?]] = js.Array(
-    typedProperty[PasswordLogin, Property[String], String](_.email)
-      .withValidator(NotBlankValidator())
-      .withValidator(EmailValidator()),
-    typedProperty[PasswordLogin, Property[String], String](_.password)
-  )
-}
+  val properties: Seq[PropertyAccess[PasswordLogin, ?]]= PropertyMacros.describeProperties[PasswordLogin]}

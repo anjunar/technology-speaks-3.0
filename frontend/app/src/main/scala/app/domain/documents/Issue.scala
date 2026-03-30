@@ -3,8 +3,8 @@ package app.domain.documents
 import app.domain.core.{AbstractEntity, Data, Link, Table, User}
 import app.domain.shared.OwnerProvider
 import app.support.Api
-import jfx.core.macros.{property, typedProperty}
-import jfx.core.state.{ListProperty, Property, PropertyAccess}
+import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
+import jfx.core.state.{ListProperty, Property}
 
 import java.util.UUID
 import scala.concurrent.Future
@@ -18,21 +18,11 @@ class Issue extends AbstractEntity[Issue] with OwnerProvider {
 
   val editable: Property[Boolean] = Property(false)
 
-  override def properties: js.Array[PropertyAccess[Issue, ?]] =
-    Issue.properties
+  override def properties: Seq[PropertyAccess[Issue, ?]] = Issue.properties
 }
 
 object Issue {
-  val properties: js.Array[PropertyAccess[Issue, ?]] = js.Array(
-    typedProperty[Issue, Property[UUID], UUID](_.id),
-    typedProperty[Issue, Property[String], String](_.modified),
-    typedProperty[Issue, Property[String], String](_.created),
-    typedProperty[Issue, Property[String], String](_.title),
-    typedProperty[Issue, Property[User | Null], User | Null](_.user),
-    typedProperty[Issue, Property[js.Any | Null], js.Any | Null](_.editor),
-    typedProperty[Issue, ListProperty[Link], Link](_.links)
-  )
-
+  val properties: Seq[PropertyAccess[Issue, ?]] = PropertyMacros.describeProperties[Issue]
   def read(id: String): Future[Data[Issue]] =
     Api.get(s"/service/document/documents/document/$id/issues/issue")
 

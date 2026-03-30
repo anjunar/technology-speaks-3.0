@@ -4,8 +4,8 @@ import app.domain.core.{AbstractEntity, Data, Link, Table, User}
 import app.domain.documents.Issue
 import app.domain.timeline.Post
 import app.support.Api
-import jfx.core.macros.{property, typedProperty}
-import jfx.core.state.{ListProperty, Property, PropertyAccess}
+import jfx.core.state.{ListProperty, Property}
+import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
 
 import java.util.UUID
 import scala.concurrent.Future
@@ -20,8 +20,7 @@ class FirstComment extends AbstractEntity[FirstComment] with OwnerProvider {
 
   val editable: Property[Boolean] = Property(false)
 
-  override def properties: js.Array[PropertyAccess[FirstComment, ?]] =
-    FirstComment.properties
+  override def properties: Seq[PropertyAccess[FirstComment, ?]] = FirstComment.properties
 
   def save(entity: AbstractEntity[?]): Future[Data[FirstComment]] =
     entity match {
@@ -55,16 +54,7 @@ class FirstComment extends AbstractEntity[FirstComment] with OwnerProvider {
 }
 
 object FirstComment {
-  val properties: js.Array[PropertyAccess[FirstComment, ?]] = js.Array(
-    typedProperty[FirstComment, Property[UUID], UUID](_.id),
-    typedProperty[FirstComment, Property[String], String](_.modified),
-    typedProperty[FirstComment, Property[String], String](_.created),
-    typedProperty[FirstComment, Property[User | Null], User | Null](_.user),
-    typedProperty[FirstComment, Property[js.Any | Null], js.Any | Null](_.editor),
-    typedProperty[FirstComment, ListProperty[Like], Like](_.likes),
-    typedProperty[FirstComment, ListProperty[SecondComment], SecondComment](_.comments),
-    typedProperty[FirstComment, ListProperty[Link], Link](_.links)
-  )
+  val properties: Seq[PropertyAccess[FirstComment, ?]] = PropertyMacros.describeProperties[FirstComment]
 
   def list(index: Int, limit: Int, post: Post): Future[Table[Data[FirstComment]]] =
     Api.get(s"/service/timeline/posts/post/${post.id.get}/comments?index=$index&limit=$limit&sort=created:desc")

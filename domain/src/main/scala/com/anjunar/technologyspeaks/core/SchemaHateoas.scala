@@ -3,7 +3,7 @@ package com.anjunar.technologyspeaks.core
 import com.anjunar.json.mapper.provider.OwnerProvider
 import com.anjunar.json.mapper.schema.property.Property
 import com.anjunar.json.mapper.schema.{EntitySchema, Link, VisibilityRule}
-import com.anjunar.scala.enterprise.macros.PropertyAccess
+import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
 import com.anjunar.technologyspeaks.SpringContext
 import com.anjunar.technologyspeaks.security.IdentityHolder
 

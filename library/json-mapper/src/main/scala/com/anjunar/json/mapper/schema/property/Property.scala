@@ -21,7 +21,7 @@ class Property[T, V](val propertyAccess : PropertyAccess[T, V], val rule: Visibi
   def set(instance: T, value: V): Unit = propertyAccess.set(instance, value)
   
   def findAnnotation[A <: Annotation](clazz: Class[A]): A = {
-    val option = propertyAccess.annotations.find(_.annotationClass == clazz)
+    val option = propertyAccess.annotations.find(_.annotationClassName == clazz.getName)
     if (option.isEmpty) {
       null.asInstanceOf[A]
     } else {

@@ -1,9 +1,8 @@
 package app.domain.core
 
 import app.support.JsonModel
-import jfx.core.macros.property
-import jfx.core.state.PropertyAccess
-
+import com.anjunar.scala.enterprise.macros.{PropertyMacros, PropertyAccess}
+import com.anjunar.scala.enterprise.macros.PropertyMacros.makePropertyAccess
 import scala.scalajs.js
 import scala.reflect.ClassTag
 
@@ -13,14 +12,14 @@ class Data[E: ClassTag](
   var schema: Schema | Null = null
 ) extends JsonModel[Data[E]] {
 
-  override def properties: js.Array[PropertyAccess[Data[E], ?]] =
+  override def properties: Seq[PropertyAccess[Data[E], ?]] =
     Data.properties[E]
 }
 
 object Data {
-  def properties[E: ClassTag]: js.Array[PropertyAccess[Data[E], ?]] = js.Array(
-    property(_.data),
-    property(_.score),
-    property(_.schema)
+  def properties[E: ClassTag]: Seq[PropertyAccess[Data[E], ?]] = Seq(
+    makePropertyAccess[Data[E], E](_.data),
+    makePropertyAccess[Data[E], Double](_.score),
+    makePropertyAccess[Data[E], Schema | Null](_.schema)
   )
 }

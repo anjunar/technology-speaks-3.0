@@ -3,7 +3,7 @@ package jfx.form
 import jfx.core.component.{ChildrenComponent, NodeComponent}
 import jfx.core.state.{CompositeDisposable, Disposable, ListProperty, Property, ReadOnlyProperty}
 import jfx.core.state.ListProperty.{Clear, Patch, RemoveAt, RemoveRange, UpdateAt}
-import jfx.form.validators.Validator
+import jfx.form.validators.{Validator, ValidatorFactory}
 import org.scalajs.dom.{HTMLElement, Node, console}
 
 import scala.collection.mutable
@@ -143,15 +143,15 @@ trait Formular[M <: Model[M], N <: Node] extends NodeComponent[N], Editable {
         } else {
           val accessOption = valueProperty.get.findPropertyAccessOption(controlName)
           (
-            accessOption.flatMap(_.get(valueProperty.get)).map(_.asInstanceOf[Any]),
-            accessOption.map(_.validators.asInstanceOf[Vector[Validator[Any]]]).getOrElse(Vector.empty)
+            accessOption.map(_.get(valueProperty.get)),
+            accessOption.map(access => ValidatorFactory.createValidators(access.annotations)).getOrElse(Vector.empty)
           )
         }
       case _ =>
         val accessOption = valueProperty.get.findPropertyAccessOption(controlName)
         (
-          accessOption.flatMap(_.get(valueProperty.get)).map(_.asInstanceOf[Any]),
-          accessOption.map(_.validators.asInstanceOf[Vector[Validator[Any]]]).getOrElse(Vector.empty)
+          accessOption.map(_.get(valueProperty.get)),
+          accessOption.map(access => ValidatorFactory.createValidators(access.annotations)).getOrElse(Vector.empty)
         )
     }
 

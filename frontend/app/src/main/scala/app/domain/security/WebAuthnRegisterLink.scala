@@ -1,9 +1,8 @@
 package app.domain.security
 
-import app.domain.core.AbstractLink
+import app.domain.core.{AbstractLink, UserInfo}
 import app.support.JsonModel
-import jfx.core.macros.property
-import jfx.core.state.PropertyAccess
+import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
 
 import scala.scalajs.js
 
@@ -13,8 +12,7 @@ class WebAuthnRegisterLink(
   var method: String = "GET"
 ) extends JsonModel[WebAuthnRegisterLink] with AbstractLink {
 
-  override def properties: js.Array[PropertyAccess[WebAuthnRegisterLink, ?]] =
-    WebAuthnRegisterLink.properties
+  override def properties: Seq[PropertyAccess[WebAuthnRegisterLink, ?]] = WebAuthnRegisterLink.properties
 
   override def name: String = "Registrierung mit WebAuthn"
 
@@ -22,9 +20,5 @@ class WebAuthnRegisterLink(
 }
 
 object WebAuthnRegisterLink {
-  val properties: js.Array[PropertyAccess[WebAuthnRegisterLink, ?]] = js.Array(
-    property(_.rel),
-    property(_.url),
-    property(_.method)
-  )
+  val properties: Seq[PropertyAccess[WebAuthnRegisterLink, ?]] = PropertyMacros.describeProperties[WebAuthnRegisterLink]
 }

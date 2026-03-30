@@ -2,8 +2,7 @@ package app.domain.security
 
 import app.domain.core.AbstractLink
 import app.support.JsonModel
-import jfx.core.macros.property
-import jfx.core.state.PropertyAccess
+import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
 
 import scala.scalajs.js
 
@@ -13,8 +12,7 @@ class ConfirmLink(
   var method: String = "GET"
 ) extends JsonModel[ConfirmLink] with AbstractLink {
 
-  override def properties: js.Array[PropertyAccess[ConfirmLink, ?]] =
-    ConfirmLink.properties
+  override def properties: Seq[PropertyAccess[ConfirmLink, ?]] = ConfirmLink.properties
 
   override def name: String = "Bestaetigen"
 
@@ -22,9 +20,4 @@ class ConfirmLink(
 }
 
 object ConfirmLink {
-  val properties: js.Array[PropertyAccess[ConfirmLink, ?]] = js.Array(
-    property(_.rel),
-    property(_.url),
-    property(_.method)
-  )
-}
+  val properties: Seq[PropertyAccess[ConfirmLink, ?]]= PropertyMacros.describeProperties[ConfirmLink]}

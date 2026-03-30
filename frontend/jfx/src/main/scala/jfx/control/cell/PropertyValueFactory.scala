@@ -1,7 +1,8 @@
 package jfx.control.cell
 
 import jfx.control.TableColumn
-import jfx.core.state.{Property, PropertyAccess, ReadOnlyProperty}
+import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
+import jfx.core.state.{Property, ReadOnlyProperty}
 import jfx.form.Model
 
 class PropertyValueFactory[S, T](val property: String)
@@ -17,11 +18,11 @@ class PropertyValueFactory[S, T](val property: String)
     rowValue match {
       case model: Model[?] =>
         val typedModel = model.asInstanceOf[Model[Any]]
-        typedModel.properties
-          .find(_.name == property)
-          .flatMap(_.asInstanceOf[PropertyAccess[Any, Any]].get(rowValue.asInstanceOf[Any]))
-          .map(wrapValue)
-          .orNull
+        val access = typedModel.properties.find(_.name == property)
+        access match {
+          case Some(a) => wrapValue(a.asInstanceOf[PropertyAccess[Any, Any]].get(rowValue.asInstanceOf[Any]))
+          case None => null
+        }
 
       case _ => null
     }

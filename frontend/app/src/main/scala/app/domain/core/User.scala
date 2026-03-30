@@ -1,9 +1,9 @@
 package app.domain.core
 
 import app.support.{Api, Navigation}
+import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
 import com.anjunar.scala.enterprise.macros.PropertyMacros.makePropertyAccess
-import jfx.core.macros.{property, typedProperty}
-import jfx.core.state.{ListProperty, Property, PropertyAccess}
+import jfx.core.state.{ListProperty, Property}
 import jfx.domain.Media
 import jfx.form.validators.{NotBlankValidator, SizeValidator}
 
@@ -22,7 +22,7 @@ class User extends AbstractEntity[User] {
   val address: Property[Address | Null] = Property(null)
   val emails: ListProperty[Email] = ListProperty()
 
-  override def properties: js.Array[PropertyAccess[User, ?]] =
+  override def properties: Seq[PropertyAccess[User, ?]] =
     User.properties
 
   def save(): Future[Data[User]] =
@@ -63,21 +63,7 @@ class User extends AbstractEntity[User] {
 
 object User {
 
-  println(makePropertyAccess[User, Property[String]](_.nickName))
-
-  val properties: js.Array[PropertyAccess[User, ?]] = js.Array(
-    typedProperty[User, Property[UUID], UUID](_.id),
-    typedProperty[User, Property[String | Null], String | Null](_.modified),
-    typedProperty[User, Property[String | Null], String | Null](_.created),
-    typedProperty[User, Property[String], String](_.nickName)
-      .withValidator(NotBlankValidator())
-      .withValidator(SizeValidator(2, 80)),
-    typedProperty[User, Property[Media | Null], Media | Null](_.image),
-    typedProperty[User, Property[UserInfo | Null], UserInfo | Null](_.info),
-    typedProperty[User, Property[Address | Null], Address | Null](_.address),
-    typedProperty[User, ListProperty[Email], Email](_.emails),
-    typedProperty[User, ListProperty[Link], Link](_.links)
-  )
+  val properties: Seq[PropertyAccess[User, ?]] = PropertyMacros.describeProperties[User]
 
   def read(id: String): Future[Data[User]] =
     Api.get(s"/service/core/users/user/$id")
