@@ -72,6 +72,14 @@ class JsonMapper(val registry: JsonRegistry) {
       .getOrElse(access.name)
   }
 
+  private def isIgnored(access: PropertyAccess[?, ?]): Boolean = {
+    access.annotations.exists {
+      case Annotation(className, _) =>
+        className == "jfx.json.JsonIgnore"
+      case _ => false
+    }
+  }
+
   @tailrec
   private def typeNameFromType(tpe: Type): String = {
     val types = Seq("jfx.core.state.Property", "jfx.core.state.ListProperty")
@@ -210,11 +218,13 @@ class JsonMapper(val registry: JsonRegistry) {
 
     val props = model.properties.asInstanceOf[Seq[PropertyAccess[Any, Any]]]
     props.foreach { access =>
-      val value = access.get(model)
-      if (value != null) {
-        val serialized = serializeValue(value)
-        if (serialized != null && !js.isUndefined(serialized)) {
-          out.update(getJsonFieldName(access), serialized)
+      if (!isIgnored(access)) {
+        val value = access.get(model)
+        if (value != null) {
+          val serialized = serializeValue(value)
+          if (serialized != null && !js.isUndefined(serialized)) {
+            out.update(getJsonFieldName(access), serialized)
+          }
         }
       }
     }

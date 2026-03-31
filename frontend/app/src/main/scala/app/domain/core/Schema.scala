@@ -2,6 +2,7 @@ package app.domain.core
 
 import app.support.JsonModel
 import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
+import jfx.json.JsonIgnore
 
 import scala.scalajs.js
 
@@ -22,7 +23,9 @@ object Schema {
 class SchemaProperty(
   var name: String = "",
   var `type`: String = "",
+  @JsonIgnore
   var schema: Schema | Null = null,
+  @JsonIgnore
   var links: js.Array[Link] = js.Array()
 ) extends JsonModel[SchemaProperty] {
 
