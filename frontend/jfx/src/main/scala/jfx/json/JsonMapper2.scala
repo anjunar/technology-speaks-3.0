@@ -10,22 +10,15 @@ import scala.scalajs.js.Dynamic
 
 class JsonMapper2 {
   
-  def deserialize[E](json: Dynamic, javaType : Class[E]) : E = {
-
-    val scalaType = MetaClassLoader.classes(javaType)
-    
-    DeserializerFactory.build(javaType)
-      .deserialize(json, new JsonContext(scalaType))
+  def deserialize[E](json: Dynamic, javaType : Type) : E = {
+    DeserializerFactory.build(TypeHelper.rawType(javaType))
+      .deserialize(json, new JsonContext(javaType))
       .asInstanceOf[E]
   }
   
-  def serialize[E](model: E) : Dynamic = {
-    val javaType = model.getClass.asInstanceOf[Class[E]]
-
-    val scalaType = MetaClassLoader.classes(javaType)
-    
-    SerializerFactory.build(javaType)
-      .serialize(model, new JavaContext(scalaType))
+  def serialize[E](model: E, javaType : Type) : Dynamic = {
+    SerializerFactory.build(TypeHelper.rawType(javaType).asInstanceOf[Class[Any]])
+      .serialize(model, new JavaContext(javaType))
   }
 
 }
