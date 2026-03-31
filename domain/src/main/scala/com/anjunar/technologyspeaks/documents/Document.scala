@@ -7,6 +7,7 @@ import com.anjunar.technologyspeaks.hibernate.{EntityContext, RepositoryContext}
 import com.anjunar.technologyspeaks.shared.editor.{Node, NodeType}
 import jakarta.json.bind.annotation.JsonbProperty
 import jakarta.persistence.*
+import jakarta.validation.constraints.{NotBlank, NotNull}
 import org.hibernate.annotations.Type
 
 import scala.annotation.meta.field
@@ -62,7 +63,10 @@ import com.anjunar.technologyspeaks.documents.Document.Schema
     )
   )
 )
-class Document(@(Column @field)(nullable = false) @(JsonbProperty @field) var title: String) 
+class Document(@(NotBlank @field)
+               @(Column @field)(nullable = false)
+               @(JsonbProperty @field)
+               var title: String)
   extends AbstractEntity, EntityContext[Document], OwnerProvider {
 
   def this() = this(null)
@@ -75,6 +79,7 @@ class Document(@(Column @field)(nullable = false) @(JsonbProperty @field) var ti
   @JsonbProperty
   var bookname: String = null
 
+  @NotNull
   @Column(columnDefinition = "jsonb")
   @Type(value = classOf[NodeType])
   @JsonbProperty

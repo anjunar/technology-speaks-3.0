@@ -4,6 +4,7 @@ import app.domain.core.{AbstractEntity, Data, Link, Table, User}
 import app.domain.shared.OwnerProvider
 import app.support.Api
 import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
+import com.anjunar.scala.enterprise.macros.validation.{NotBlank, NotNull}
 import jfx.core.state.{ListProperty, Property}
 
 import java.util.UUID
@@ -13,9 +14,12 @@ import scala.scalajs.js.URIUtils.encodeURIComponent
 
 class Document extends AbstractEntity[Document] with OwnerProvider {
 
+  @NotBlank(message = "Titel ist erforderlich")
   val title: Property[String] = Property("")
   val bookname: Property[String] = Property("")
   val user: Property[User | Null] = Property(null)
+
+  @NotNull(message = "Inhalt ist erforderlich")
   val editor: Property[js.Any | Null] = Property(null)
 
   val editable: Property[Boolean] = Property(false)

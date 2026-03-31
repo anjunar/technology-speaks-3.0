@@ -3,9 +3,9 @@ package app.domain.core
 import app.support.{Api, Navigation}
 import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
 import com.anjunar.scala.enterprise.macros.PropertyMacros.makePropertyAccess
+import com.anjunar.scala.enterprise.macros.validation.{NotBlank, Size}
 import jfx.core.state.{ListProperty, Property}
 import jfx.domain.Media
-import jfx.form.validators.{NotBlankValidator, SizeValidator}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import java.util.UUID
@@ -15,7 +15,8 @@ import scala.scalajs.js.URIUtils.encodeURIComponent
 
 class User extends AbstractEntity[User] {
 
-  @schemaName("test")
+  @NotBlank(message = "NickName ist erforderlich")
+  @Size(min = 2, max = 80, message = "NickName muss zwischen 2 und 80 Zeichen haben")
   val nickName: Property[String] = Property("")
   val image: Property[Media | Null] = Property(null)
   val info: Property[UserInfo | Null] = Property(null)

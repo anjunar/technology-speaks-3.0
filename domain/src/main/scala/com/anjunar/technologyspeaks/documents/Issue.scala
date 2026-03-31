@@ -9,6 +9,7 @@ import com.anjunar.technologyspeaks.shared.editor.{Node, NodeType}
 import com.anjunar.technologyspeaks.shared.likeable.{Like, LikeContainer}
 import jakarta.json.bind.annotation.JsonbProperty
 import jakarta.persistence.*
+import jakarta.validation.constraints.{NotBlank, NotNull}
 import org.hibernate.annotations.Type
 
 import scala.annotation.meta.field
@@ -62,7 +63,10 @@ import com.anjunar.technologyspeaks.documents.Issue.Schema
     )
   )
 )
-class Issue(@(Column @field)(nullable = false) @(JsonbProperty @field) var title: String)
+class Issue(@(NotBlank @field)
+            @(Column @field)(nullable = false)
+            @(JsonbProperty @field)
+            var title: String)
   extends AbstractEntity, OwnerProvider, EntityContext[Issue], LikeContainer.Interface, CommentContainer.Interface {
 
   def this() = this(null)
@@ -75,6 +79,7 @@ class Issue(@(Column @field)(nullable = false) @(JsonbProperty @field) var title
   @JsonbProperty
   var user: User = uninitialized
 
+  @NotNull
   @Column(columnDefinition = "jsonb")
   @Type(value = classOf[NodeType])
   @JsonbProperty

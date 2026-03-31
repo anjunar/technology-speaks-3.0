@@ -3,17 +3,19 @@ package com.anjunar.technologyspeaks.core
 import com.anjunar.technologyspeaks.SpringContext
 import com.anjunar.technologyspeaks.hibernate.{EntityContext, RepositoryContext}
 import jakarta.persistence.{Entity, NoResultException}
+import jakarta.validation.constraints.{NotBlank, NotNull}
 
 import java.util.UUID
+import scala.annotation.meta.field
 import scala.beans.BeanProperty
 import scala.compiletime.uninitialized
 
 @Entity
-class WebAuthnCredential(var credentialId: String,
-                         var publicKey: Array[Byte] = null,
+class WebAuthnCredential(@(NotBlank @field) var credentialId: String,
+                         @(NotNull @field) var publicKey: Array[Byte] = null,
                          var publicKeyAlgorithm: Long = 0L,
                          var counter: Long = 0L,
-                         var aaguid: UUID,
+                         @(NotNull @field) var aaguid: UUID,
                          code: String = null)
   extends Credential(code), EntityContext[WebAuthnCredential] {
 

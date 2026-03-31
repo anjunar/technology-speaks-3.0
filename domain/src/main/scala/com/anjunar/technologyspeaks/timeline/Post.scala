@@ -10,6 +10,7 @@ import com.anjunar.technologyspeaks.shared.editor.{Node, NodeType}
 import com.anjunar.technologyspeaks.shared.likeable.{Like, LikeContainer}
 import jakarta.json.bind.annotation.JsonbProperty
 import jakarta.persistence.*
+import jakarta.validation.constraints.NotNull
 import org.hibernate.annotations.Type
 
 import java.util
@@ -70,6 +71,7 @@ class Post extends AbstractEntity, EntityContext[Post], OwnerProvider, LikeConta
   @JsonbProperty
   var user: User = uninitialized
 
+  @NotNull
   @Column(columnDefinition = "jsonb")
   @Type(value = classOf[NodeType])
   @JsonbProperty

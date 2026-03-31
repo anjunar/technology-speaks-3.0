@@ -3,8 +3,8 @@ package app.domain.followers
 import app.domain.core.{AbstractEntity, Data, Link, Table, User}
 import app.support.Api
 import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
+import com.anjunar.scala.enterprise.macros.validation.{NotBlank, Size}
 import jfx.core.state.{ListProperty, Property}
-import jfx.form.validators.SizeValidator
 
 import java.util.UUID
 import scala.concurrent.Future
@@ -13,6 +13,8 @@ import scala.scalajs.js.URIUtils.encodeURIComponent
 
 class Group extends AbstractEntity[Group] {
 
+  @NotBlank(message = "Name ist erforderlich")
+  @Size(min = 3, max = 80, message = "Name muss zwischen 3 und 80 Zeichen haben")
   val name: Property[String] = Property("")
   val users: ListProperty[User] = ListProperty()
 

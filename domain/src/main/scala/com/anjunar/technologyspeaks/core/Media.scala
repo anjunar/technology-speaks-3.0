@@ -3,7 +3,9 @@ package com.anjunar.technologyspeaks.core
 import com.anjunar.json.mapper.schema.{DefaultWritableRule, EntitySchema, SchemaProvider}
 import jakarta.json.bind.annotation.JsonbProperty
 import jakarta.persistence.*
+import jakarta.validation.constraints.{NotBlank, NotNull, Size}
 
+import scala.annotation.meta.field
 import scala.beans.BeanProperty
 import scala.compiletime.uninitialized
 import com.anjunar.technologyspeaks.SpringContext
@@ -18,7 +20,19 @@ import com.anjunar.technologyspeaks.core.Media.Schema
     new NamedAttributeNode("thumbnail")
   )
 )
-class Media(name: String, contentType: String, data: Array[Byte])
+class Media(@(NotBlank @field)
+            @(Size @field)(min = 2, max = 80)
+            @(JsonbProperty @field)
+            name: String,
+
+            @(NotBlank @field)
+            @(Size @field)(min = 2, max = 80)
+            @(JsonbProperty @field)
+            contentType: String,
+
+            @(NotNull @field)
+            @(JsonbProperty @field)
+            data: Array[Byte])
   extends Thumbnail(name, contentType, data) {
 
   def this() = this(null, null, null)

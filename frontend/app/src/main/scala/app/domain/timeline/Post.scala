@@ -4,6 +4,7 @@ import app.domain.core.{AbstractEntity, Data, Link, Table, User}
 import app.domain.shared.{Like, OwnerProvider}
 import app.support.Api
 import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
+import com.anjunar.scala.enterprise.macros.validation.NotNull
 import jfx.core.state.{ListProperty, Property}
 
 import java.util.UUID
@@ -13,6 +14,8 @@ import scala.scalajs.js
 class Post extends AbstractEntity[Post] with OwnerProvider {
 
   val user: Property[User | Null] = Property(null)
+
+  @NotNull(message = "Inhalt ist erforderlich")
   val editor: Property[js.Any | Null] = Property(null)
   val likes: ListProperty[Like] = ListProperty()
 

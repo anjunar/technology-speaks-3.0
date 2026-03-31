@@ -41,4 +41,4 @@ final case class Pattern(
   message: String = "Hat ein ungueltiges Format"
 ) extends StaticAnnotation
 
-final case class Email(message: String = "Muss eine gueltige E-Mail-Adresse sein") extends StaticAnnotation
+final case class EmailConstraint(message: String = "Muss eine gueltige E-Mail-Adresse sein") extends StaticAnnotation
