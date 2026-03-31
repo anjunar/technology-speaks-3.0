@@ -2,11 +2,7 @@ package app.domain.core
 
 import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
 import com.anjunar.scala.enterprise.macros.validation.{NotBlank, NotNull, Size}
-import jfx.core.state.{ListProperty, Property}
-import jfx.form.editor.plugins.Dimensions
-
-import java.util.UUID
-import scala.scalajs.js
+import jfx.core.state.Property
 
 class UserInfo extends AbstractEntity[UserInfo] {
 

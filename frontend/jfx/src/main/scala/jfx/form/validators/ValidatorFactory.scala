@@ -55,7 +55,7 @@ object ValidatorFactory {
         val message = annotation.parameters.getOrElse("message", "Hat ein ungueltiges Format").asInstanceOf[String]
         Some(PatternValidator(new Regex(regex), message).asInstanceOf[jfx.form.validators.Validator[Any]])
 
-      case "com.anjunar.scala.enterprise.macros.validation.Email" =>
+      case "com.anjunar.scala.enterprise.macros.validation.EmailConstraint" =>
         val message = annotation.parameters.getOrElse("message", "Muss eine gueltige E-Mail-Adresse sein").asInstanceOf[String]
         Some(EmailValidator(message).asInstanceOf[jfx.form.validators.Validator[Any]])
 
