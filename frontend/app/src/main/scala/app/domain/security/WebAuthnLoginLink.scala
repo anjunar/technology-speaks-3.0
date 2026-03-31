@@ -2,7 +2,7 @@ package app.domain.security
 
 import app.domain.core.AbstractLink
 import app.support.JsonModel
-import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
+import jfx.core.meta.Meta
 
 import scala.scalajs.js
 
@@ -12,7 +12,7 @@ class WebAuthnLoginLink(
   var method: String = "GET"
 ) extends JsonModel[WebAuthnLoginLink] with AbstractLink {
 
-  override def properties: Seq[PropertyAccess[WebAuthnLoginLink, ?]] = WebAuthnLoginLink.properties
+  override def meta: Meta[WebAuthnLoginLink] = WebAuthnLoginLink.meta
 
   override def name: String = "Login mit WebAuthn"
 
@@ -20,5 +20,5 @@ class WebAuthnLoginLink(
 }
 
 object WebAuthnLoginLink {
-  val properties: Seq[PropertyAccess[WebAuthnLoginLink, ?]] = PropertyMacros.describeProperties[WebAuthnLoginLink]
+  val meta: Meta[WebAuthnLoginLink] = Meta()
 }

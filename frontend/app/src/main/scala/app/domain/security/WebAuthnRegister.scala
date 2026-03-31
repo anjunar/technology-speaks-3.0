@@ -2,7 +2,7 @@ package app.domain.security
 
 import app.domain.core.UserInfo
 import app.support.JsonModel
-import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
+import jfx.core.meta.Meta
 import jfx.core.state.Property
 import jfx.form.validators.{EmailValidator, NotBlankValidator, SizeValidator}
 
@@ -13,9 +13,9 @@ class WebAuthnRegister(
   val nickName: Property[String] = Property("")
 ) extends JsonModel[WebAuthnRegister] {
 
-  override def properties: Seq[PropertyAccess[WebAuthnRegister, ?]] = WebAuthnRegister.properties
+  override def meta: Meta[WebAuthnRegister] = WebAuthnRegister.meta
 }
 
 object WebAuthnRegister {
-  val properties: Seq[PropertyAccess[WebAuthnRegister, ?]] = PropertyMacros.describeProperties[WebAuthnRegister]
+  val meta: Meta[WebAuthnRegister] = Meta()
 }

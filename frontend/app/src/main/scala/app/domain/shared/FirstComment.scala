@@ -5,7 +5,7 @@ import app.domain.documents.Issue
 import app.domain.timeline.Post
 import app.support.Api
 import jfx.core.state.{ListProperty, Property}
-import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
+import jfx.core.meta.Meta
 
 import java.util.UUID
 import scala.concurrent.Future
@@ -20,7 +20,7 @@ class FirstComment extends AbstractEntity[FirstComment] with OwnerProvider {
 
   val editable: Property[Boolean] = Property(false)
 
-  override def properties: Seq[PropertyAccess[FirstComment, ?]] = FirstComment.properties
+  override def meta: Meta[FirstComment] = FirstComment.meta
 
   def save(entity: AbstractEntity[?]): Future[Data[FirstComment]] =
     entity match {
@@ -54,7 +54,7 @@ class FirstComment extends AbstractEntity[FirstComment] with OwnerProvider {
 }
 
 object FirstComment {
-  val properties: Seq[PropertyAccess[FirstComment, ?]] = PropertyMacros.describeProperties[FirstComment]
+  val meta: Meta[FirstComment] = Meta()
 
   def list(index: Int, limit: Int, post: Post): Future[Table[Data[FirstComment]]] =
     Api.get(s"/service/timeline/posts/post/${post.id.get}/comments?index=$index&limit=$limit&sort=created:desc")

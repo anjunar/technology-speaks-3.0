@@ -2,7 +2,7 @@ package com.anjunar.json.mapper.schema.property
 
 import com.anjunar.json.mapper.schema.VisibilityRule
 import com.anjunar.json.mapper.schema.jpa.{JPAListAttribute, JPASetAttribute}
-import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
+import com.anjunar.scala.enterprise.macros.PropertyAccess
 import jakarta.persistence.metamodel.{ListAttribute, SetAttribute}
 
 import java.lang.reflect.Type

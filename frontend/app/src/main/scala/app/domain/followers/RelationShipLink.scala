@@ -2,7 +2,7 @@ package app.domain.followers
 
 import app.domain.core.AbstractLink
 import app.support.JsonModel
-import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
+import jfx.core.meta.Meta
 
 import scala.scalajs.js
 
@@ -12,7 +12,7 @@ class RelationShipLink(
   var method: String = "GET"
 ) extends JsonModel[RelationShipLink] with AbstractLink {
 
-  override def properties: Seq[PropertyAccess[RelationShipLink, ?]] = RelationShipLink.properties
+  override def meta: Meta[RelationShipLink] = RelationShipLink.meta
 
   override def name: String = "Followers"
 
@@ -20,4 +20,4 @@ class RelationShipLink(
 }
 
 object RelationShipLink {
-  val properties: Seq[PropertyAccess[RelationShipLink, ?]]= PropertyMacros.describeProperties[RelationShipLink]}
+  val meta : Meta[RelationShipLink] = Meta()}

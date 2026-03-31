@@ -3,7 +3,7 @@ package app.domain.timeline
 import app.domain.core.{AbstractEntity, Data, Link, Table, User}
 import app.domain.shared.{Like, OwnerProvider}
 import app.support.Api
-import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
+import jfx.core.meta.Meta
 import com.anjunar.scala.enterprise.macros.validation.NotNull
 import jfx.core.state.{ListProperty, Property}
 
@@ -19,7 +19,7 @@ class Post extends AbstractEntity[Post] with OwnerProvider {
   val editor: Property[js.Any | Null] = Property(null)
   val likes: ListProperty[Like] = ListProperty()
 
-  override def properties: Seq[PropertyAccess[Post, ?]] = Post.properties
+  override def meta: Meta[Post] = Post.meta
 
   def save(): Future[Data[Post]] =
     Api.post("/service/timeline/posts/post", this)
@@ -32,7 +32,7 @@ class Post extends AbstractEntity[Post] with OwnerProvider {
 }
 
 object Post {
-  val properties: Seq[PropertyAccess[Post, ?]] = PropertyMacros.describeProperties[Post]
+  val meta: Meta[Post] = Meta()
   def read(id: String): Future[Data[Post]] =
     Api.get(s"/service/timeline/posts/post/$id")
 

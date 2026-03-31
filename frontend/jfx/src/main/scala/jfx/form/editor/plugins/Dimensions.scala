@@ -1,6 +1,6 @@
 package jfx.form.editor.plugins
 
-import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
+import jfx.core.meta.Meta
 import com.anjunar.scala.enterprise.macros.PropertyMacros.makePropertyAccess
 import jfx.core.state.Property
 import jfx.form.Model
@@ -13,9 +13,9 @@ final case class Dimensions(
     val height: Property[Double] = Property(0.0)
 ) extends Model[Dimensions] {
 
-  override def properties: Seq[PropertyAccess[Dimensions, ?]] = Dimensions.properties
+  override def meta: Meta[Dimensions] = Dimensions.meta
 }
 
 object Dimensions {
-  val properties: Seq[PropertyAccess[Dimensions, ?]] = PropertyMacros.describeProperties[Dimensions]
+  val meta: Meta[Dimensions] = Meta()
 }

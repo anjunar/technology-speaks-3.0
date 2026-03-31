@@ -1,6 +1,6 @@
 package jfx.domain
 
-import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
+import jfx.core.meta.Meta
 import com.anjunar.scala.enterprise.macros.PropertyMacros.makePropertyAccess
 import jfx.core.state.Property
 import jfx.form.Model
@@ -16,9 +16,9 @@ class Media(
     val data: Property[String] = Property("")
 ) extends Model[Media] {
 
-  override def properties: Seq[PropertyAccess[Media, ?]] = Media.properties
+  override def meta: Meta[Media] = Media.meta
 }
 
 object Media {
-  val properties: Seq[PropertyAccess[Media, ?]] = PropertyMacros.describeProperties[Media]
+  val meta: Meta[Media] = Meta()
 }

@@ -1,6 +1,6 @@
 package jfx.form.editor.plugins
 
-import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
+import jfx.core.meta.Meta
 import com.anjunar.scala.enterprise.macros.PropertyMacros.makePropertyAccess
 import jfx.core.state.Property
 import jfx.form.Model
@@ -12,9 +12,9 @@ final case class LinkDescriptor(
     val title: Property[String] = Property("")
 ) extends Model[LinkDescriptor] {
 
-  override def properties: Seq[PropertyAccess[LinkDescriptor, ?]] = LinkDescriptor.properties
+  override def meta: Meta[LinkDescriptor] = LinkDescriptor.meta
 }
 
 object LinkDescriptor {
-  val properties: Seq[PropertyAccess[LinkDescriptor, ?]] = PropertyMacros.describeProperties[LinkDescriptor]
+  val meta: Meta[LinkDescriptor] = Meta()
 }

@@ -3,7 +3,7 @@ package app.domain.documents
 import app.domain.core.{AbstractEntity, Data, Link, Table, User}
 import app.domain.shared.OwnerProvider
 import app.support.Api
-import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
+import jfx.core.meta.Meta
 import com.anjunar.scala.enterprise.macros.validation.{NotBlank, NotNull}
 import jfx.core.state.{ListProperty, Property}
 
@@ -22,11 +22,11 @@ class Issue extends AbstractEntity[Issue] with OwnerProvider {
 
   val editable: Property[Boolean] = Property(false)
 
-  override def properties: Seq[PropertyAccess[Issue, ?]] = Issue.properties
+  override def meta: Meta[Issue] = Issue.meta
 }
 
 object Issue {
-  val properties: Seq[PropertyAccess[Issue, ?]] = PropertyMacros.describeProperties[Issue]
+  val meta: Meta[Issue] = Meta()
   def read(id: String): Future[Data[Issue]] =
     Api.get(s"/service/document/documents/document/$id/issues/issue")
 

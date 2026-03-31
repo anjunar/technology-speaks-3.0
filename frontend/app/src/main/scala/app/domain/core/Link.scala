@@ -1,7 +1,7 @@
 package app.domain.core
 
 import app.support.JsonModel
-import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
+import jfx.core.meta.Meta
 
 import scala.scalajs.js
 
@@ -12,9 +12,9 @@ case class Link(
   var id: String = ""
 ) extends JsonModel[Link] {
 
-  override def properties: Seq[PropertyAccess[Link, ?]] = Link.properties
+  override def meta: Meta[Link] = Link.meta
 }
 
 object Link {
-  val properties: Seq[PropertyAccess[Link, ?]] = PropertyMacros.describeProperties[Link]
+  val meta: Meta[Link] = Meta()
 }

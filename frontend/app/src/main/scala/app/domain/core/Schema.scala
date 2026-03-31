@@ -1,7 +1,7 @@
 package app.domain.core
 
 import app.support.JsonModel
-import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
+import jfx.core.meta.Meta
 import jfx.json.JsonIgnore
 
 import scala.scalajs.js
@@ -10,28 +10,27 @@ class Schema(
   var entries: js.Dictionary[SchemaProperty] = js.Dictionary()
 ) extends JsonModel[Schema] {
 
-  override def properties: Seq[PropertyAccess[Schema, ?]] = Schema.properties
+  override def meta: Meta[Schema] = Schema.meta
 
   def findProperty(name: String): SchemaProperty | Null =
     entries.get(name).orNull
 }
 
 object Schema {
-  val properties: Seq[PropertyAccess[Schema, ?]] = PropertyMacros.describeProperties[Schema]
+  val meta: Meta[Schema] = Meta()
 }
 
 class SchemaProperty(
   var name: String = "",
   var `type`: String = "",
-  @JsonIgnore
   var schema: Schema | Null = null,
   @JsonIgnore
   var links: js.Array[Link] = js.Array()
 ) extends JsonModel[SchemaProperty] {
 
-  override def properties: Seq[PropertyAccess[SchemaProperty, ?]] = SchemaProperty.properties
+  override def meta: Meta[SchemaProperty] = SchemaProperty.meta
 }
 
 object SchemaProperty {
-  val properties: Seq[PropertyAccess[SchemaProperty, ?]] = PropertyMacros.describeProperties[SchemaProperty]
+  val meta: Meta[SchemaProperty] = Meta()
 }

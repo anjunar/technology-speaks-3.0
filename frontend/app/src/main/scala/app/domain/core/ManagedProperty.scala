@@ -2,9 +2,9 @@ package app.domain.core
 
 import app.domain.followers.Group
 import app.support.Api
-import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
+import jfx.core.meta.Meta
 import jfx.core.state.{ListProperty, Property}
-import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
+import jfx.core.meta.Meta
 
 import java.util.UUID
 import scala.concurrent.Future
@@ -17,7 +17,7 @@ class ManagedProperty extends AbstractEntity[ManagedProperty] {
   val users: ListProperty[User] = ListProperty()
   val groups: ListProperty[Group] = ListProperty()
 
-  override def properties: Seq[PropertyAccess[ManagedProperty, ?]] = ManagedProperty.properties
+  override def meta: Meta[ManagedProperty] = ManagedProperty.meta
 
   def updateFromLink(): Future[ManagedProperty] =
     links.find(_.rel == "update") match {
@@ -28,5 +28,5 @@ class ManagedProperty extends AbstractEntity[ManagedProperty] {
 
 object ManagedProperty {
 
-  val properties: Seq[PropertyAccess[ManagedProperty, ?]] = PropertyMacros.describeProperties[ManagedProperty]
+  val meta: Meta[ManagedProperty] = Meta()
 }

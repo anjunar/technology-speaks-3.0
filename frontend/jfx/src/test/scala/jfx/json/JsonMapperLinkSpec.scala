@@ -2,11 +2,14 @@ package jfx.json
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+
 import scala.scalajs.js
-import scala.scalajs.js.Dynamic.{literal => jsObj}
+import scala.scalajs.js.Dynamic.literal as jsObj
 import jfx.core.state.{ListProperty, Property}
 import com.anjunar.scala.enterprise.macros.PropertyAccess
 import com.anjunar.scala.enterprise.macros.PropertyMacros.makePropertyAccess
+import jfx.core.meta.Meta
+
 import java.util.UUID
 import jfx.form.ErrorResponse
 
@@ -14,7 +17,7 @@ class JsonMapperLinkSpec extends AnyFlatSpec with Matchers {
 
   "JsonMapper" should "deserialize Link objects from $links field" in {
     val registry = new TestJsonRegistry()
-    registry.classes.update("Link", () => new TestLink())
+    registry.classes.update("TestLink", () => new TestLink())
     registry.classes.update("TestEntityWithLinks", () => new TestEntityWithLinks())
     val jsonMapper = new JsonMapper(registry)
 
@@ -37,11 +40,11 @@ class JsonMapperLinkSpec extends AnyFlatSpec with Matchers {
 
   it should "deserialize single Link object" in {
     val registry = new TestJsonRegistry()
-    registry.classes.update("Link", () => new TestLink())
+    registry.classes.update("TestLink", () => new TestLink())
     val jsonMapper = new JsonMapper(registry)
 
     val linkJson = jsObj(
-      "@type" -> "Link",
+      "@type" -> "TestLink",
       "rel" -> "self",
       "url" -> "/api/test",
       "method" -> "GET",
@@ -58,7 +61,7 @@ class JsonMapperLinkSpec extends AnyFlatSpec with Matchers {
 
   it should "serialize and deserialize TestEntity with links" in {
     val registry = new TestJsonRegistry()
-    registry.classes.update("Link", () => new TestLink())
+    registry.classes.update("TestLink", () => new TestLink())
     registry.classes.update("TestEntityWithLinks", () => new TestEntityWithLinks())
     val jsonMapper = new JsonMapper(registry)
 
@@ -165,40 +168,33 @@ class TestLink(
   var id: String = ""
 ) extends jfx.form.Model[TestLink] {
 
-  override def properties: Seq[PropertyAccess[TestLink, ?]] = TestLink.properties
+  override def meta: Meta[TestLink] = TestLink.meta
 }
 
 object TestLink {
-  val properties: Seq[PropertyAccess[TestLink, ?]] = Seq(
-    makePropertyAccess[TestLink, String](_.rel),
-    makePropertyAccess[TestLink, String](_.url),
-    makePropertyAccess[TestLink, String](_.method),
-    makePropertyAccess[TestLink, String](_.id)
-  )
+  val meta: Meta[TestLink] = Meta()
 }
 
 class TestEntityWithLinks extends jfx.form.Model[TestEntityWithLinks] {
   val links: ListProperty[TestLink] = ListProperty()
 
-  override def properties: Seq[PropertyAccess[TestEntityWithLinks, ?]] =
-    TestEntityWithLinks.properties
+  override def meta: Meta[TestEntityWithLinks] = TestEntityWithLinks.meta
 }
 
 object TestEntityWithLinks {
-  val properties: Seq[PropertyAccess[TestEntityWithLinks, ?]] = Seq(
-    makePropertyAccess[TestEntityWithLinks, ListProperty[TestLink]](_.links)
-  )
+
+  val meta : Meta[TestEntityWithLinks] = Meta()
+
 }
 
 class TestEntityWithUuid extends jfx.form.Model[TestEntityWithUuid] {
   val id: Property[UUID] = Property(null.asInstanceOf[UUID])
 
-  override def properties: Seq[PropertyAccess[TestEntityWithUuid, ?]] =
-    TestEntityWithUuid.properties
+  override def meta: Meta[TestEntityWithUuid] = TestEntityWithUuid.meta
 }
 
 object TestEntityWithUuid {
-  val properties: Seq[PropertyAccess[TestEntityWithUuid, ?]] = Seq(
-    makePropertyAccess[TestEntityWithUuid, Property[UUID]](_.id)
-  )
+
+  val meta: Meta[TestEntityWithUuid] = Meta()
+
 }

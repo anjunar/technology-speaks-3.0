@@ -1,7 +1,7 @@
 package app.domain.security
 
 import app.support.JsonModel
-import com.anjunar.scala.enterprise.macros.{PropertyMacros, PropertyAccess}
+import jfx.core.meta.Meta
 import com.anjunar.scala.enterprise.macros.validation.{NotBlank, Size}
 import jfx.core.state.Property
 
@@ -19,8 +19,8 @@ class PasswordChange(
   val confirmPassword: Property[String] = Property("")
 ) extends JsonModel[PasswordChange] {
 
-  override def properties: Seq[PropertyAccess[PasswordChange, ?]] = PasswordChange.properties
+  override def meta: Meta[PasswordChange] = PasswordChange.meta
 }
 
 object PasswordChange {
-  val properties: Seq[PropertyAccess[PasswordChange, ?]]= PropertyMacros.describeProperties[PasswordChange]}
+  val meta : Meta[PasswordChange] = Meta()}

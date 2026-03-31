@@ -3,7 +3,7 @@ package app.domain.security
 import app.domain.core.Data
 import app.domain.core.Link
 import app.support.{AppJson, JsonModel}
-import com.anjunar.scala.enterprise.macros.{PropertyMacros, PropertyAccess}
+import jfx.core.meta.Meta
 import jfx.core.state.ListProperty
 import org.scalajs.dom.{RequestInit, fetch}
 
@@ -15,13 +15,14 @@ class Account(
   val links: ListProperty[Link] = ListProperty()
 ) extends JsonModel[Account] {
 
-  override def properties: Seq[PropertyAccess[Account, ?]] = Account.properties
+  override def meta: Meta[Account] = Account.meta
 }
 
 object Account {
   private given ExecutionContext = ExecutionContext.global
 
-  val properties: Seq[PropertyAccess[Account, ?]]= PropertyMacros.describeProperties[Account]
+  val meta : Meta[Account] = Meta()
+
   def read(): Future[Data[Account]] =
     fetch(
       "/service/security/account",

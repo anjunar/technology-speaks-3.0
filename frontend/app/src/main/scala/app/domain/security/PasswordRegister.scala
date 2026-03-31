@@ -2,7 +2,7 @@ package app.domain.security
 
 import app.domain.core.UserInfo
 import app.support.{Api, JsonModel, JsonResponse}
-import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
+import jfx.core.meta.Meta
 import com.anjunar.scala.enterprise.macros.validation.{EmailConstraint, NotBlank, Size}
 import jfx.core.state.Property
 
@@ -22,12 +22,12 @@ class PasswordRegister(
   val password: Property[String] = Property("")
 ) extends JsonModel[PasswordRegister] {
 
-  override def properties: Seq[PropertyAccess[PasswordRegister, ?]] = PasswordRegister.properties
+  override def meta: Meta[PasswordRegister] = PasswordRegister.meta
 
   def save(): Future[JsonResponse] =
     Api.post("/service/security/register", this)
 }
 
 object PasswordRegister {
-  val properties: Seq[PropertyAccess[PasswordRegister, ?]] = PropertyMacros.describeProperties[PasswordRegister]
+  val meta: Meta[PasswordRegister] = Meta()
 }

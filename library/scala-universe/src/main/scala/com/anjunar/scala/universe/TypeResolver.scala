@@ -17,13 +17,19 @@ object TypeResolver {
     }
   }
   
-  def companionInstance[E](clazz : Class[?]) : E = {
+  inline def companionInstance[E](clazz : Class[?]) : E = {
     try {
       val value = companionClass(clazz)
       if (value == null) {
         null.asInstanceOf[E]
       } else {
-        value.getField("MODULE$").get(null).asInstanceOf[E]
+        val companion = value.getField("MODULE$").get(null)
+        companion match {
+          case e: E =>
+            e
+          case _ =>
+            null.asInstanceOf[E]
+        }
       }
     } catch {
       case e : NoSuchFieldException => null.asInstanceOf[E]

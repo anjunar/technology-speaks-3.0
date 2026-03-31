@@ -2,7 +2,7 @@ package app.domain.security
 
 import app.domain.core.AbstractLink
 import app.support.JsonModel
-import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
+import jfx.core.meta.Meta
 
 import scala.scalajs.js
 
@@ -12,7 +12,7 @@ class LogoutLink(
   var method: String = "GET"
 ) extends JsonModel[LogoutLink] with AbstractLink {
 
-  override def properties: Seq[PropertyAccess[LogoutLink, ?]] = LogoutLink.properties
+  override def meta: Meta[LogoutLink] = LogoutLink.meta
 
   override def name: String = "Logout"
 
@@ -20,4 +20,4 @@ class LogoutLink(
 }
 
 object LogoutLink {
-  val properties: Seq[PropertyAccess[LogoutLink, ?]]= PropertyMacros.describeProperties[LogoutLink]}
+  val meta : Meta[LogoutLink] = Meta()}

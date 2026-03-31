@@ -34,7 +34,12 @@ class Property[T, V](val propertyAccess : PropertyAccess[T, V], val rule: Visibi
 
   @JsonbProperty
   var schema: EntitySchema[?] =
-    val value = TypeHelper.entityTypeResolve(propertyAccess.genericType)
+    val value =
+      try {
+        TypeHelper.rawType(propertyAccess.genericType)
+      } catch {
+        case _: Throwable => null
+      }
 
     if (value == null) {
       null

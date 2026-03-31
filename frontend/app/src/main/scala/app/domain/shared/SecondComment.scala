@@ -4,7 +4,7 @@ import app.domain.core.{AbstractEntity, Data, Link, User}
 import app.domain.documents.Issue
 import app.domain.timeline.Post
 import app.support.Api
-import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
+import jfx.core.meta.Meta
 import jfx.core.state.{ListProperty, Property}
 
 import java.util.UUID
@@ -19,7 +19,7 @@ class SecondComment extends AbstractEntity[SecondComment] with OwnerProvider {
 
   val editable: Property[Boolean] = Property(false)
 
-  override def properties: Seq[PropertyAccess[SecondComment, ?]] = SecondComment.properties
+  override def meta: Meta[SecondComment] = SecondComment.meta
 
   def save(issue: Issue): Future[Data[FirstComment]] =
     Api.post(s"/service/document/documents/document/issues/issue/${issue.id.get}/comment", this)
@@ -35,4 +35,4 @@ class SecondComment extends AbstractEntity[SecondComment] with OwnerProvider {
 }
 
 object SecondComment {
-  val properties: Seq[PropertyAccess[SecondComment, ?]] = PropertyMacros.describeProperties[SecondComment]}
+  val meta: Meta[SecondComment] = Meta()}

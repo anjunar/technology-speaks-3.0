@@ -1,6 +1,6 @@
 package app.domain.core
 
-import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
+import jfx.core.meta.Meta
 import com.anjunar.scala.enterprise.macros.validation.{NotBlank, Size}
 import jfx.core.state.Property
 
@@ -22,9 +22,9 @@ class Address extends AbstractEntity[Address] {
   @Size(min = 2, max = 80, message = "Land muss zwischen 2 und 80 Zeichen haben")
   val country: Property[String] = Property("")
 
-  override def properties: Seq[PropertyAccess[Address, ?]] = Address.properties
+  override def meta: Meta[Address] = Address.meta
 }
 
 object Address {
-  val properties: Seq[PropertyAccess[Address, ?]] = PropertyMacros.describeProperties[Address]
+  val meta: Meta[Address] = Meta()
 }

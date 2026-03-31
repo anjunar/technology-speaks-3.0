@@ -2,7 +2,7 @@ package app.domain.timeline
 
 import app.domain.core.AbstractLink
 import app.support.JsonModel
-import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
+import jfx.core.meta.Meta
 
 import scala.scalajs.js
 
@@ -12,7 +12,7 @@ class PostsLink(
   var method: String = "GET"
 ) extends JsonModel[PostsLink] with AbstractLink {
 
-  override def properties: Seq[PropertyAccess[PostsLink, ?]] = PostsLink.properties
+  override def meta: Meta[PostsLink] = PostsLink.meta
 
   override def name: String = "Posts"
 
@@ -20,4 +20,4 @@ class PostsLink(
 }
 
 object PostsLink {
-  val properties: Seq[PropertyAccess[PostsLink, ?]]= PropertyMacros.describeProperties[PostsLink]}
+  val meta : Meta[PostsLink] = Meta()}

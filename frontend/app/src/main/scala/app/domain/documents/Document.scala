@@ -3,7 +3,7 @@ package app.domain.documents
 import app.domain.core.{AbstractEntity, Data, Link, Table, User}
 import app.domain.shared.OwnerProvider
 import app.support.Api
-import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
+import jfx.core.meta.Meta
 import com.anjunar.scala.enterprise.macros.validation.{NotBlank, NotNull}
 import jfx.core.state.{ListProperty, Property}
 
@@ -24,7 +24,7 @@ class Document extends AbstractEntity[Document] with OwnerProvider {
 
   val editable: Property[Boolean] = Property(false)
 
-  override def properties: Seq[PropertyAccess[Document, ?]] = Document.properties
+  override def meta: Meta[Document] = Document.meta
 
   def save(): Future[Data[Document]] =
     Api.post("/service/document/documents/document", this)
@@ -37,7 +37,7 @@ class Document extends AbstractEntity[Document] with OwnerProvider {
 }
 
 object Document {
-  val properties: Seq[PropertyAccess[Document, ?]] = PropertyMacros.describeProperties[Document]
+  val meta: Meta[Document] = Meta()
   def root(): Future[Data[Document]] =
     Api.post("/service/document/documents/document/root")
 

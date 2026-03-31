@@ -1,7 +1,7 @@
 package app.domain.core
 
 import app.support.{Api, Navigation}
-import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
+import jfx.core.meta.Meta
 import com.anjunar.scala.enterprise.macros.PropertyMacros.makePropertyAccess
 import com.anjunar.scala.enterprise.macros.validation.{NotBlank, Size}
 import jfx.core.state.{ListProperty, Property}
@@ -23,8 +23,7 @@ class User extends AbstractEntity[User] {
   val address: Property[Address | Null] = Property(null)
   val emails: ListProperty[Email] = ListProperty()
 
-  override def properties: Seq[PropertyAccess[User, ?]] =
-    User.properties
+  override def meta: Meta[User] = User.meta
 
   def save(): Future[Data[User]] =
     Api.post("/service/core/users/user", this)
@@ -64,7 +63,7 @@ class User extends AbstractEntity[User] {
 
 object User {
 
-  val properties: Seq[PropertyAccess[User, ?]] = PropertyMacros.describeProperties[User]
+  val meta: Meta[User] = Meta()
 
   def read(id: String): Future[Data[User]] =
     Api.get(s"/service/core/users/user/$id")

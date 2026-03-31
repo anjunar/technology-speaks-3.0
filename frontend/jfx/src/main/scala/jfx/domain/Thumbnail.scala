@@ -1,6 +1,6 @@
 package jfx.domain
 
-import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
+import jfx.core.meta.Meta
 import com.anjunar.scala.enterprise.macros.PropertyMacros.makePropertyAccess
 import jfx.core.state.Property
 import jfx.form.Model
@@ -15,9 +15,9 @@ class Thumbnail(
     val data: Property[String] = Property("")
 ) extends Model[Thumbnail] {
 
-  override def properties: Seq[PropertyAccess[Thumbnail, ?]] = Thumbnail.properties
+  override def meta: Meta[Thumbnail] = Thumbnail.meta
 }
 
 object Thumbnail {
-  val properties: Seq[PropertyAccess[Thumbnail, ?]] = PropertyMacros.describeProperties[Thumbnail]
+  val meta: Meta[Thumbnail] = Meta()
 }

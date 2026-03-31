@@ -1,7 +1,7 @@
 package app.domain.security
 
 import app.support.JsonModel
-import com.anjunar.scala.enterprise.macros.{PropertyMacros, PropertyAccess}
+import jfx.core.meta.Meta
 import jfx.core.state.Property
 
 import scala.scalajs.js
@@ -11,8 +11,8 @@ class CreatePassword(
   val confirmPassword: Property[String] = Property("")
 ) extends JsonModel[CreatePassword] {
 
-  override def properties: Seq[PropertyAccess[CreatePassword, ?]] = CreatePassword.properties
+  override def meta: Meta[CreatePassword] = CreatePassword.meta
 }
 
 object CreatePassword {
-  val properties: Seq[PropertyAccess[CreatePassword, ?]]= PropertyMacros.describeProperties[CreatePassword]}
+  val meta : Meta[CreatePassword] = Meta()}

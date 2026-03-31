@@ -77,7 +77,7 @@ class AppJsonRegistry extends JsonRegistry {
 
     js.Object.keys(dynamic.asInstanceOf[js.Object]).foreach { key =>
       if (key != "@type") {
-        val property = mapper.deserialize(dynamic.selectDynamic(key).asInstanceOf[Dynamic]).asInstanceOf[SchemaProperty]
+        val property = mapper.deserialize(dynamic.selectDynamic(key)).asInstanceOf[SchemaProperty]
         property.name = key
         entries.update(key, property)
       }

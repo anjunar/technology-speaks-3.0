@@ -1,7 +1,7 @@
 package app.domain.core
 
 import app.support.JsonModel
-import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
+import jfx.core.meta.Meta
 
 import scala.scalajs.js
 
@@ -11,7 +11,7 @@ class UsersLink(
   var method: String = "GET"
 ) extends JsonModel[UsersLink] with AbstractLink {
 
-  override def properties: Seq[PropertyAccess[UsersLink, ?]] = UsersLink.properties
+  override def meta: Meta[UsersLink] = UsersLink.meta
 
   override def name: String = "Benutzer"
 
@@ -19,4 +19,4 @@ class UsersLink(
 }
 
 object UsersLink {
-  val properties: Seq[PropertyAccess[UsersLink, ?]]= PropertyMacros.describeProperties[UsersLink]}
+  val meta : Meta[UsersLink] = Meta()}

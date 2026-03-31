@@ -10,5 +10,5 @@ object PropertyMacrosHelper {
 
   inline def describeProperties[E]: mutable.LinkedHashMap[String, Property[E, Any]] =
     mutable.LinkedHashMap[String, Property[E, Any]](PropertyMacros.describeProperties[E].map(property => (property.name, new Property(property.asInstanceOf[PropertyAccess[E, Any]], new DefaultRule[E])))*)
-  
+
 }

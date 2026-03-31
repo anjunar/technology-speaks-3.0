@@ -1,7 +1,7 @@
 package app.domain.core
 
 import app.support.JsonModel
-import com.anjunar.scala.enterprise.macros.{PropertyMacros, PropertyAccess}
+import jfx.core.meta.Meta
 import com.anjunar.scala.enterprise.macros.PropertyMacros.makePropertyAccess
 import jfx.json.JsonIgnore
 
@@ -15,14 +15,9 @@ class Table[E: ClassTag](
   var schema: Schema | Null = null
 ) extends JsonModel[Table[E]] {
 
-  override def properties: Seq[PropertyAccess[Table[E], ?]] =
-    Table.properties[E]
+  override def meta: Meta[Table[E]] = Table.meta
 }
 
 object Table {
-  def properties[E: ClassTag]: Seq[PropertyAccess[Table[E], ?]] = Seq(
-    makePropertyAccess[Table[E], js.Array[E]](_.rows),
-    makePropertyAccess[Table[E], Int](_.size),
-    makePropertyAccess[Table[E], Schema | Null](_.schema)
-  )
+  def meta[E : ClassTag]: Meta[Table[E]] = Meta()
 }

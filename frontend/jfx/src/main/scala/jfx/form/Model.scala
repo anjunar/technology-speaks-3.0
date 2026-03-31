@@ -1,6 +1,7 @@
 package jfx.form
 
-import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
+import com.anjunar.scala.enterprise.macros.PropertyAccess
+import jfx.core.meta.Meta
 
 import scala.scalajs.js
 
@@ -8,10 +9,10 @@ trait Model[M] {
 
   this : M =>
 
-    def properties : Seq[PropertyAccess[M, ?]]
+    def meta : Meta[M]
 
     def findPropertyAccessOption(name: String): Option[PropertyAccess[M, ?]] =
-      properties.find(_.name == name)
+      meta.properties.find(_.name == name)
 
     def findPropertyOption[V](name: String): Option[V] =
       findPropertyAccessOption(name)

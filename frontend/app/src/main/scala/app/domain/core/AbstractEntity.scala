@@ -12,6 +12,5 @@ abstract class AbstractEntity[M] extends JsonModel[M] { self: M =>
   val modified: Property[String | Null] = Property(null)
   val created: Property[String | Null] = Property(null)
   @JsonName("$links")
-  @JsonIgnore
   val links: ListProperty[Link] = ListProperty()
 }

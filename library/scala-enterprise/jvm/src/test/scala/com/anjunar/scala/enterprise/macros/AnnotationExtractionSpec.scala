@@ -2,7 +2,7 @@ package jfx.json
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import com.anjunar.scala.enterprise.macros.{PropertyAccess, PropertyMacros}
+import jfx.core.meta.Meta
 import com.anjunar.scala.enterprise.macros.validation.{NotBlank, Size}
 
 class AnnotationExtractionSpec extends AnyFlatSpec with Matchers {
