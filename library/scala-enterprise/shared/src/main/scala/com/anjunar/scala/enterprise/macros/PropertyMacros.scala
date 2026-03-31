@@ -16,39 +16,47 @@ object PropertyMacros {
     import quotes.reflect.*
 
     val typeRepr = TypeRepr.of[E]
-    val symbol = typeRepr.typeSymbol
 
-    val propertySymbols = symbol.declarations.collect {
-      case s: Symbol if s.isTerm => s
-    }.filter { s =>
-      !s.flags.is(Flags.Private) && !s.flags.is(Flags.Protected) &&
-      !s.name.contains("$") &&
-      !s.name.endsWith("_=") &&
-      s.name != "hashCode" && s.name != "toString" && s.name != "getClass" && s.name != "clone" && s.name != "notify" && s.name != "notifyAll" && s.name != "wait" && s.name != "finalize" &&
-      !s.isClassConstructor &&
-      !s.flags.is(Flags.Macro) &&
-      !s.flags.is(Flags.Artifact)
-    }.filter { s =>
-      val isField = !s.isDefDef
-      val isMethod = s.isDefDef
+    // Collect property symbols from the class and all base classes
+    def collectPropertySymbols(tpe: TypeRepr): List[Symbol] = {
+      val allSymbols = tpe.baseClasses.flatMap { baseClass =>
+        baseClass.declarations.collect {
+          case s: Symbol if s.isTerm => s
+        }.filter { s =>
+          !s.flags.is(Flags.Private) && !s.flags.is(Flags.Protected) &&
+          !s.name.contains("$") &&
+          !s.name.endsWith("_=") &&
+          s.name != "hashCode" && s.name != "toString" && s.name != "getClass" && s.name != "clone" && s.name != "notify" && s.name != "notifyAll" && s.name != "wait" && s.name != "finalize" &&
+          !s.isClassConstructor &&
+          !s.flags.is(Flags.Macro) &&
+          !s.flags.is(Flags.Artifact)
+        }.filter { s =>
+          val isField = !s.isDefDef
+          val isMethod = s.isDefDef
 
-      if (isField) {
-        true
-      } else if (isMethod) {
-        val methodType = normalizeType(typeRepr.memberType(s))
-        val isParameterless = s.paramSymss.isEmpty
-        val returnsUnit = methodType =:= TypeRepr.of[Unit]
+          if (isField) {
+            true
+          } else if (isMethod) {
+            val methodType = normalizeType(tpe.memberType(s))
+            val isParameterless = s.paramSymss.isEmpty
+            val returnsUnit = methodType =:= TypeRepr.of[Unit]
 
-        isParameterless && !returnsUnit
-      } else {
-        false
+            isParameterless && !returnsUnit
+          } else {
+            false
+          }
+        }
       }
-    }.distinctBy(_.name)
+      allSymbols.distinctBy(_.name)
+    }
+
+    val propertySymbols = collectPropertySymbols(typeRepr)
 
     val propertyExprs = propertySymbols.map { s =>
       val name = s.name
       val propertyType = normalizeType(typeRepr.memberType(s))
-      val isWriteable = symbol.methodMember(s"${name}_=").nonEmpty
+      val isWriteable = typeRepr.typeSymbol.methodMember(s"${name}_=").nonEmpty || 
+        typeRepr.baseClasses.exists(_.methodMember(s"${name}_=").nonEmpty)
 
       propertyType.asType match {
         case '[v] =>

@@ -8,14 +8,14 @@ trait JsonRegistry {
 
   val classes : js.Map[String, () => Any]
 
-  protected val valueFactories: mutable.Map[Class[?], () => Any] =
+  protected val valueFactories: mutable.Map[String, () => Any] =
     mutable.Map(
-      classOf[UUID] -> (() => UUID.randomUUID())
+      classOf[UUID].getName -> (() => UUID.randomUUID())
     )
 
-  protected val valueDeserializers: mutable.Map[Class[?], js.Any => Any] =
+  protected val valueDeserializers: mutable.Map[String, js.Any => Any] =
     mutable.Map(
-      classOf[UUID] -> ((raw: js.Any) => UUID.fromString(raw.toString))
+      classOf[UUID].getName -> ((raw: js.Any) => UUID.fromString(raw.toString))
     )
 
   protected val valueSerializers: mutable.Map[Class[?], Any => js.Any] =
@@ -23,12 +23,12 @@ trait JsonRegistry {
       classOf[UUID] -> ((value: Any) => value.asInstanceOf[UUID].toString.asInstanceOf[js.Any])
     )
 
-  def createValue(targetType: Class[?]): Option[Any] =
-    Option(targetType).flatMap(findByTargetType(valueFactories, _).map(_()))
+  def createValueByTypeName(targetTypeName: String): Option[Any] =
+    valueFactories.get(targetTypeName).map(_())
 
-  def deserializeValue(raw: js.Any, targetType: Class[?]): Option[Any] =
+  def deserializeValueByTypeName(raw: js.Any, targetTypeName: String): Option[Any] =
     if (raw == null || js.isUndefined(raw)) None
-    else Option(targetType).flatMap(findByTargetType(valueDeserializers, _).map(_(raw)))
+    else valueDeserializers.get(targetTypeName).map(_(raw))
 
   def serializeValue(value: Any): Option[js.Any] =
     if (value == null || js.isUndefined(value.asInstanceOf[js.Any])) None
@@ -40,11 +40,6 @@ trait JsonRegistry {
       } catch {
         case _: Throwable => None
       }
-    }
-
-  private def findByTargetType[V](entries: mutable.Map[Class[?], V], targetType: Class[?]): Option[V] =
-    entries.collectFirst {
-      case (registeredType, handler) if registeredType.isAssignableFrom(targetType) => handler
     }
 
   private def findByRuntimeType[V](entries: mutable.Map[Class[?], V], runtimeType: Class[?]): Option[V] =

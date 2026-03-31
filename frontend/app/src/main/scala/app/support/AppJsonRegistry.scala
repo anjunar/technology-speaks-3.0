@@ -19,8 +19,8 @@ class AppJsonRegistry extends JsonRegistry {
 
   private val mapper = new JsonMapper(this)
 
-  valueFactories += classOf[Schema] -> (() => new Schema())
-  valueDeserializers += classOf[Schema] -> deserializeSchema
+  valueFactories += classOf[Schema].getName -> (() => new Schema())
+  valueDeserializers += classOf[Schema].getName -> deserializeSchema
   valueSerializers += classOf[Schema] -> serializeSchema
 
   override val classes: js.Map[String, () => Any] = js.Map(

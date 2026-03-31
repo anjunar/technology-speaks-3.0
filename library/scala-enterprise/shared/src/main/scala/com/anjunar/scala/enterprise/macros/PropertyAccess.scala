@@ -12,10 +12,6 @@ trait PropertyAccess[E, V] {
 
   val genericType: Type
 
-  def propertyType: Class[?]
-
-  def valueType: Class[?]
-
   def get(instance: E): V
 
   def set(instance: E, value: V): Unit

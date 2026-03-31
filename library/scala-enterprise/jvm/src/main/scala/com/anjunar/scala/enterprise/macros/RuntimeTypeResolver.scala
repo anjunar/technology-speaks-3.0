@@ -20,7 +20,7 @@ object RuntimeTypeResolver {
         Class.forName(other)
     }
 
-    new SimpleClass(underlying)
+    new SimpleClass(underlying.getName)
   }
 
   def parameterized(raw: SimpleClass[?], args: Array[Type]): ParameterizedType =
