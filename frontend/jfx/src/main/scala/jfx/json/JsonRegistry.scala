@@ -48,16 +48,4 @@ trait JsonRegistry {
       case (registeredType, handler) if registeredType.isAssignableFrom(runtimeType) => handler
     }
 
-  def normalizeFieldName(name: String): String =
-    name match {
-      case "$links" => "links"
-      case other    => other
-    }
-
-  def serializeFieldName(name: String): String =
-    name match {
-      case "links" => "$links"
-      case other   => other
-    }
-
 }
