@@ -11,13 +11,6 @@ import scala.scalajs.js.JSConverters.*
 
 class JsonMapper(val registry: JsonRegistry) {
 
-  private def getTypeName(clazz: Class[?]): String = {
-    ClassLoader.classes.get(clazz) match {
-      case Some((_, typeName)) => typeName
-      case None => clazz.getSimpleName
-    }
-  }
-
   def deserialize[M <: Model[M]](dynamic: Dynamic): M = {
     val entityType = dynamic.selectDynamic("@type").asInstanceOf[String]
     if (entityType == null || js.isUndefined(entityType)) return null.asInstanceOf[M]
@@ -31,8 +24,7 @@ class JsonMapper(val registry: JsonRegistry) {
 
   private def findFactory(entityType: String): Option[() => Any] = {
     registry.classes.get(entityType).orElse {
-      ClassLoader.classes
-        .collectFirst { case (_, (factory, typeName)) if typeName == entityType => factory }
+      ClassLoader.getFactory(entityType)
     }
   }
 
@@ -41,7 +33,7 @@ class JsonMapper(val registry: JsonRegistry) {
       val factory = registry.classes
         .get(clazz.getSimpleName)
         .orElse {
-          ClassLoader.classes.get(clazz).map { case ((f, _)) => f }
+          ClassLoader.getFactory(clazz.getSimpleName)
         }
         .getOrElse(throw IllegalStateException(s"No factory for class = '${clazz.getName}'"))
         .asInstanceOf[() => M]
@@ -171,8 +163,7 @@ class JsonMapper(val registry: JsonRegistry) {
       if (canDeserialize(dynamicValue)) deserialize(dynamicValue)
       else {
         val factory = registry.classes.get(elementTypeName).orElse {
-          ClassLoader.classes
-            .collectFirst { case (_, (factory, typeName)) if typeName == elementTypeName => factory }
+          ClassLoader.getFactory(elementTypeName)
         }
         factory match {
           case Some(factory) =>
@@ -208,7 +199,7 @@ class JsonMapper(val registry: JsonRegistry) {
       }
 
     val classLoaderResults = ClassLoader.classes.toSeq
-      .flatMap { case (_, (factory, _)) =>
+      .flatMap { case (_, (clazz, factory)) =>
         try {
           factory() match {
             case model: Model[?] =>
@@ -243,13 +234,16 @@ class JsonMapper(val registry: JsonRegistry) {
     val rawType = value.selectDynamic("@type")
     rawType != null && !js.isUndefined(rawType) && (
       registry.classes.get(rawType.asInstanceOf[String]).isDefined ||
-      ClassLoader.classes.exists { case (_, (_, typeName)) => typeName == rawType.asInstanceOf[String] }
+      ClassLoader.containsTypeName(rawType.asInstanceOf[String])
     )
   }
 
   def serialize(model: Model[?]): Dynamic = {
     val out = js.Dictionary[js.Any]()
-    out.update("@type", getTypeName(model.getClass))
+    val typeName = ClassLoader.classes.toSeq
+      .collectFirst { case (name, (clazz, _)) if clazz == model.getClass => name }
+      .getOrElse(model.getClass.getSimpleName)
+    out.update("@type", typeName)
 
     model.meta.properties.foreach { access =>
       if (!isIgnored(access)) {

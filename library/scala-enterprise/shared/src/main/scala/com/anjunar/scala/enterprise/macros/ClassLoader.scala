@@ -1,6 +1,7 @@
-package jfx.core.meta
+package com.anjunar.scala.enterprise.macros
 
 import com.anjunar.scala.enterprise.macros.reflection.SimpleClass
+
 import scala.collection.mutable
 import scala.reflect.ClassTag
 
