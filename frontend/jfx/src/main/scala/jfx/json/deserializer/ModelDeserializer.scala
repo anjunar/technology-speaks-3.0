@@ -1,6 +1,6 @@
 package jfx.json.deserializer
 
-import com.anjunar.scala.enterprise.macros.{MetaClassLoader, PropertyAccess}
+import com.anjunar.scala.enterprise.macros.{Annotation, MetaClassLoader, PropertyAccess}
 import com.anjunar.scala.enterprise.macros.reflection.{ParameterizedType, SimpleClass}
 import jfx.core.state.{ListProperty, Property}
 import jfx.form.Model
@@ -30,15 +30,34 @@ class ModelDeserializer extends Deserializer[Model[?]] {
 
   private def populateModel(model: Model[?], json: Dynamic, parentContext: JsonContext): Unit = {
     model.meta.properties.foreach { property =>
-      val fieldName = property.name
-      val rawValue = json.selectDynamic(fieldName).asInstanceOf[js.Any]
+      if (!isIgnored(property)) {
+        val fieldName = getJsonFieldName(property)
+        val rawValue = json.selectDynamic(fieldName).asInstanceOf[js.Any]
 
-      if (rawValue != null && !js.isUndefined(rawValue)) {
-        val deserializer = DeserializerFactory.buildFromType(property.genericType)
-        val elemContext = new JsonContext(property.genericType)
-        val decoded = deserializer.deserialize(rawValue.asInstanceOf[Dynamic], elemContext)
-        assignValue(model, property.asInstanceOf[PropertyAccess[Any, Any]], decoded)
+        if (rawValue != null && !js.isUndefined(rawValue)) {
+          val deserializer = DeserializerFactory.buildFromType(property.genericType)
+          val elemContext = new JsonContext(property.genericType)
+          val decoded = deserializer.deserialize(rawValue.asInstanceOf[Dynamic], elemContext)
+          assignValue(model, property.asInstanceOf[PropertyAccess[Any, Any]], decoded)
+        }
       }
+    }
+  }
+
+  private def getJsonFieldName(access: PropertyAccess[?, ?]): String = {
+    access.annotations
+      .collectFirst {
+        case Annotation(className, params) if className == "jfx.json.JsonType" =>
+          params.getOrElse("value", access.name).asInstanceOf[String]
+      }
+      .getOrElse(access.name)
+  }
+
+  private def isIgnored(access: PropertyAccess[?, ?]): Boolean = {
+    val name = access.name
+    name == "meta" || name == "##" || name.startsWith("$") || access.annotations.exists {
+      case Annotation(className, _) => className == "jfx.json.JsonIgnore"
+      case null => false
     }
   }
 

@@ -6,15 +6,15 @@ object ReflectionSupport {
 
   def resolveClass(name: String): SimpleClass[?] = {
     val underlying = name match {
-      case "scala.Int" => classOf[Int]
-      case "scala.Long" => classOf[Long]
-      case "scala.Double" => classOf[Double]
-      case "scala.Float" => classOf[Float]
-      case "scala.Boolean" => classOf[Boolean]
-      case "scala.Byte" => classOf[Byte]
-      case "scala.Short" => classOf[Short]
-      case "scala.Char" => classOf[Char]
-      case "scala.Unit" => classOf[Unit]
+      case "scala.Int" | "int" => classOf[Int]
+      case "scala.Long" | "long" => classOf[Long]
+      case "scala.Double" | "double" => classOf[Double]
+      case "scala.Float" | "float" => classOf[Float]
+      case "scala.Boolean" | "boolean" => classOf[Boolean]
+      case "scala.Byte" | "byte" => classOf[Byte]
+      case "scala.Short" | "short" => classOf[Short]
+      case "scala.Char" | "char" => classOf[Char]
+      case "scala.Unit" | "void" => classOf[Unit]
       case "scala.Any" | "scala.AnyRef" => classOf[Any]
       case other =>
         Class.forName(other)

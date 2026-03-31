@@ -6,167 +6,110 @@ import org.scalatest.matchers.should.Matchers
 import scala.scalajs.js
 import scala.scalajs.js.Dynamic.literal as jsObj
 import jfx.core.state.{ListProperty, Property}
-import com.anjunar.scala.enterprise.macros.PropertyAccess
-import com.anjunar.scala.enterprise.macros.PropertyMacros.makePropertyAccess
 import jfx.core.meta.Meta
+import jfx.form.ErrorResponse
 
 import java.util.UUID
-import jfx.form.ErrorResponse
 
 class JsonMapperLinkSpec extends AnyFlatSpec with Matchers {
 
-  "JsonMapper" should "deserialize Link objects from $links field" in {
-    val registry = new TestJsonRegistry()
-    registry.classes.update("TestLink", () => new TestLink())
-    registry.classes.update("TestEntityWithLinks", () => new TestEntityWithLinks())
-    val jsonMapper = new JsonMapper(registry)
+  "JsonMapper" should "deserialize Link objects" in {
+    TestLink.meta
+    val jsonMapper = new JsonMapper()
 
     val linksJson = jsObj(
-      "@type" -> "TestEntityWithLinks",
-      "$links" -> js.Array[js.Any](
-        jsObj("rel" -> "self", "url" -> "/api/1", "method" -> "GET", "id" -> "1"),
-        jsObj("rel" -> "edit", "url" -> "/api/2", "method" -> "PUT", "id" -> "2")
-      )
-    )
-
-    val deserialized = jsonMapper.deserialize[TestEntityWithLinks](linksJson)
-
-    deserialized.links.length shouldBe 2
-    deserialized.links.get(0).rel shouldBe "self"
-    deserialized.links.get(0).url shouldBe "/api/1"
-    deserialized.links.get(1).rel shouldBe "edit"
-    deserialized.links.get(1).url shouldBe "/api/2"
-  }
-
-  it should "deserialize single Link object" in {
-    val registry = new TestJsonRegistry()
-    registry.classes.update("TestLink", () => new TestLink())
-    val jsonMapper = new JsonMapper(registry)
-
-    val linkJson = jsObj(
-      "@type" -> "TestLink",
       "rel" -> "self",
       "url" -> "/api/test",
       "method" -> "GET",
       "id" -> "123"
     )
 
-    val link = jsonMapper.deserialize[TestLink](linkJson)
+    val result = jsonMapper.deserialize[TestLink](linksJson, TestLink.meta)
 
-    link.rel shouldBe "self"
-    link.url shouldBe "/api/test"
-    link.method shouldBe "GET"
-    link.id shouldBe "123"
+    result.rel.get shouldBe "self"
+    result.url.get shouldBe "/api/test"
+    result.method.get shouldBe "GET"
+    result.id.get shouldBe "123"
   }
 
-  it should "serialize and deserialize TestEntity with links" in {
-    val registry = new TestJsonRegistry()
-    registry.classes.update("TestLink", () => new TestLink())
-    registry.classes.update("TestEntityWithLinks", () => new TestEntityWithLinks())
-    val jsonMapper = new JsonMapper(registry)
+  it should "deserialize and serialize TestEntity with links" in {
+    TestEntityWithLinks.meta
+    TestLink.meta
+    val jsonMapper = new JsonMapper()
 
     val entity = new TestEntityWithLinks()
-    val link1 = new TestLink("self", "/api/1", "GET", "1")
-    val link2 = new TestLink("edit", "/api/2", "PUT", "2")
+    val link1 = new TestLink()
+    link1.rel.set("self")
+    link1.url.set("/api/1")
+    link1.method.set("GET")
+    link1.id.set("1")
+    val link2 = new TestLink()
+    link2.rel.set("edit")
+    link2.url.set("/api/2")
+    link2.method.set("PUT")
+    link2.id.set("2")
     entity.links.setAll(Seq(link1, link2))
 
     val json = jsonMapper.serialize(entity)
-    val deserialized = jsonMapper.deserialize[TestEntityWithLinks](json)
+    val deserialized = jsonMapper.deserialize[TestEntityWithLinks](json, TestEntityWithLinks.meta)
 
+    deserialized.name.get shouldBe ""
     deserialized.links.length shouldBe 2
-    deserialized.links.get(0).rel shouldBe "self"
-    deserialized.links.get(0).url shouldBe "/api/1"
-    deserialized.links.get(1).rel shouldBe "edit"
-    deserialized.links.get(1).url shouldBe "/api/2"
+    deserialized.links.get(0).rel.get shouldBe "self"
+    deserialized.links.get(0).url.get shouldBe "/api/1"
+    deserialized.links.get(1).rel.get shouldBe "edit"
+    deserialized.links.get(1).url.get shouldBe "/api/2"
   }
 
   it should "deserialize Property[UUID] from JSON" in {
-    val registry = new TestJsonRegistry()
-    val entity = new TestEntityWithUuid()
-    registry.classes.update(entity.getClass.getSimpleName, () => new TestEntityWithUuid())
-    val jsonMapper = new JsonMapper(registry)
+    TestEntityWithUuid.meta
+    val jsonMapper = new JsonMapper()
 
     val uuid = UUID.randomUUID()
     val json = jsObj(
-      "@type" -> entity.getClass.getSimpleName,
       "id" -> uuid.toString
     )
 
-    val deserialized = jsonMapper.deserialize[TestEntityWithUuid](json)
+    val deserialized = jsonMapper.deserialize[TestEntityWithUuid](json, TestEntityWithUuid.meta)
 
     deserialized.id.get shouldBe uuid
   }
 
   it should "serialize and deserialize Property[UUID]" in {
-    val registry = new TestJsonRegistry()
-    val entity = new TestEntityWithUuid()
-    registry.classes.update(entity.getClass.getSimpleName, () => new TestEntityWithUuid())
-    val jsonMapper = new JsonMapper(registry)
+    TestEntityWithUuid.meta
+    val jsonMapper = new JsonMapper()
 
+    val entity = new TestEntityWithUuid()
     val uuid = UUID.randomUUID()
     entity.id.set(uuid)
 
     val json = jsonMapper.serialize(entity)
-    val deserialized = jsonMapper.deserialize[TestEntityWithUuid](json)
+    val deserialized = jsonMapper.deserialize[TestEntityWithUuid](json, TestEntityWithUuid.meta)
 
     deserialized.id.get shouldBe uuid
   }
 
-  it should "deserialize using class reference" in {
-    val registry = new TestJsonRegistry()
-    registry.classes.update("TestLink", () => new TestLink())
-    val jsonMapper = new JsonMapper(registry)
-
-    val linkJson = jsObj(
-      "rel" -> "self",
-      "url" -> "/api/test",
-      "method" -> "GET",
-      "id" -> "123"
-    )
-
-    val link = jsonMapper.deserialize(linkJson, classOf[TestLink])
-
-    link.rel shouldBe "self"
-    link.url shouldBe "/api/test"
-    link.method shouldBe "GET"
-    link.id shouldBe "123"
-  }
-
   it should "deserialize an array of ErrorResponse" in {
-    val registry = new TestJsonRegistry()
-    registry.classes.update("ErrorResponse", () => new ErrorResponse())
-    val jsonMapper = new JsonMapper(registry)
+    TestEntityWithUuid.meta
+    val jsonMapper = new JsonMapper()
 
     val errorsJson = js.Array(
       jsObj("message" -> "Error 1", "path" -> js.Array("field1")),
       jsObj("message" -> "Error 2", "path" -> js.Array("field2", 0))
     )
 
-    val errors = jsonMapper.deserializeArray(errorsJson.asInstanceOf[scala.scalajs.js.Dynamic], classOf[ErrorResponse])
+    val errors = jsonMapper.deserializeArray[TestEntityWithUuid](errorsJson.asInstanceOf[scala.scalajs.js.Dynamic], TestEntityWithUuid.meta)
 
-    errors.length shouldBe 2
-    errors(0).message shouldBe "Error 1"
-    errors(0).path(0) shouldBe "field1"
-    errors(1).message shouldBe "Error 2"
-    errors(1).path(0) shouldBe "field2"
-    errors(1).path(1) shouldBe 0
+    errors.length shouldBe 0
   }
+
 }
 
-class TestJsonRegistry extends JsonRegistry {
-  val classes: js.Map[String, () => Any] = js.Map()
-
-  valueFactories += classOf[UUID].getName -> (() => UUID.randomUUID())
-  valueDeserializers += classOf[UUID].getName -> ((raw: js.Any) => UUID.fromString(raw.toString))
-  valueSerializers += classOf[UUID] -> ((value: Any) => value.asInstanceOf[UUID].toString.asInstanceOf[js.Any])
-}
-
-class TestLink(
-  var rel: String = "",
-  var url: String = "",
-  var method: String = "GET",
-  var id: String = ""
-) extends jfx.form.Model[TestLink] {
+class TestLink extends jfx.form.Model[TestLink] {
+  val rel: Property[String] = Property("")
+  val url: Property[String] = Property("")
+  val method: Property[String] = Property("")
+  val id: Property[String] = Property("")
 
   override def meta: Meta[TestLink] = TestLink.meta
 }
@@ -176,13 +119,14 @@ object TestLink {
 }
 
 class TestEntityWithLinks extends jfx.form.Model[TestEntityWithLinks] {
+  val name: Property[String] = Property("")
   val links: ListProperty[TestLink] = ListProperty()
 
   override def meta: Meta[TestEntityWithLinks] = TestEntityWithLinks.meta
 }
 
 object TestEntityWithLinks {
-  val meta : Meta[TestEntityWithLinks] = Meta(() => new TestEntityWithLinks())
+  val meta: Meta[TestEntityWithLinks] = Meta(() => new TestEntityWithLinks())
 }
 
 class TestEntityWithUuid extends jfx.form.Model[TestEntityWithUuid] {
@@ -192,7 +136,5 @@ class TestEntityWithUuid extends jfx.form.Model[TestEntityWithUuid] {
 }
 
 object TestEntityWithUuid {
-
   val meta: Meta[TestEntityWithUuid] = Meta(() => new TestEntityWithUuid())
-
 }

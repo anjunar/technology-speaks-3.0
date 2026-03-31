@@ -3,39 +3,20 @@ package jfx.json
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-import scala.scalajs.js
-import scala.scalajs.js.Dynamic.literal as jsObj
 import jfx.core.state.{ListProperty, Property}
-import com.anjunar.scala.enterprise.macros.reflection.{SimpleClass, Type}
-import com.anjunar.scala.enterprise.macros.MetaClassLoader
 import jfx.core.meta.Meta
 
 import java.util.UUID
-import scala.compiletime.uninitialized
 
-class JsonMapper2Spec extends AnyFlatSpec with Matchers {
+class JsonMapperSpec extends AnyFlatSpec with Matchers {
 
-  private def createType[T](clazz: Class[T]): Type = {
-    val typeName = clazz.getSimpleName
-    MetaClassLoader.factories.find(_._1.typeName == typeName) match {
-      case Some((sc, factory)) => sc.asInstanceOf[SimpleClass[T]]
-      case None =>
-        val sc = new SimpleClass[T](typeName, Array.empty, Array.empty)
-        MetaClassLoader.register(sc, () => null)
-        sc
-    }
-  }
-
-  private def registerTestModel[T](meta: Meta[T], clazz: Class[T]): Unit = {
-    val _ = meta.properties
-  }
-
-  "JsonMapper2" should "deserialize simple object with String properties" in {
-    val jsonMapper = new JsonMapper2()
+  "JsonMapper" should "deserialize simple object with String properties" in {
+    TestPerson.meta
+    val jsonMapper = new JsonMapper()
     val person = new TestPerson()
     person.name.set("Test User")
     person.email.set("test@example.com")
-    val json = jsonMapper.serialize(person, TestPerson.meta)
+    val json = jsonMapper.serialize(person)
 
     val result = jsonMapper.deserialize[TestPerson](json, TestPerson.meta)
 
@@ -44,11 +25,12 @@ class JsonMapper2Spec extends AnyFlatSpec with Matchers {
   }
 
   it should "deserialize numeric values" in {
-    val jsonMapper = new JsonMapper2()
+    TestNumbers.meta
+    val jsonMapper = new JsonMapper()
     val numbers = new TestNumbers()
     numbers.age.set(30)
     numbers.salary.set(50000.50)
-    val json = jsonMapper.serialize(numbers, TestNumbers.meta)
+    val json = jsonMapper.serialize(numbers)
 
     val result = jsonMapper.deserialize[TestNumbers](json, TestNumbers.meta)
 
@@ -57,11 +39,12 @@ class JsonMapper2Spec extends AnyFlatSpec with Matchers {
   }
 
   it should "deserialize boolean values" in {
-    val jsonMapper = new JsonMapper2()
+    TestFlags.meta
+    val jsonMapper = new JsonMapper()
     val flags = new TestFlags()
     flags.active.set(true)
     flags.verified.set(false)
-    val json = jsonMapper.serialize(flags, TestFlags.meta)
+    val json = jsonMapper.serialize(flags)
 
     val result = jsonMapper.deserialize[TestFlags](json, TestFlags.meta)
 
@@ -70,11 +53,12 @@ class JsonMapper2Spec extends AnyFlatSpec with Matchers {
   }
 
   it should "deserialize UUID" in {
-    val jsonMapper = new JsonMapper2()
+    TestWithUuid.meta
+    val jsonMapper = new JsonMapper()
     val uuid = UUID.randomUUID()
     val withUuid = new TestWithUuid()
     withUuid.id.set(uuid)
-    val json = jsonMapper.serialize(withUuid, TestWithUuid.meta)
+    val json = jsonMapper.serialize(withUuid)
 
     val result = jsonMapper.deserialize[TestWithUuid](json, TestWithUuid.meta)
 
@@ -82,10 +66,11 @@ class JsonMapper2Spec extends AnyFlatSpec with Matchers {
   }
 
   it should "deserialize Property[String]" in {
-    val jsonMapper = new JsonMapper2()
+    TestWithProperty.meta
+    val jsonMapper = new JsonMapper()
     val withProperty = new TestWithProperty()
     withProperty.name.set("PropertyValue")
-    val json = jsonMapper.serialize(withProperty, TestWithProperty.meta)
+    val json = jsonMapper.serialize(withProperty)
 
     val result = jsonMapper.deserialize[TestWithProperty](json, TestWithProperty.meta)
 
@@ -93,11 +78,12 @@ class JsonMapper2Spec extends AnyFlatSpec with Matchers {
   }
 
   it should "deserialize Property[UUID]" in {
-    val jsonMapper = new JsonMapper2()
+    TestWithPropertyUuid.meta
+    val jsonMapper = new JsonMapper()
     val uuid = UUID.randomUUID()
     val withPropertyUuid = new TestWithPropertyUuid()
     withPropertyUuid.id.set(uuid)
-    val json = jsonMapper.serialize(withPropertyUuid, TestWithPropertyUuid.meta)
+    val json = jsonMapper.serialize(withPropertyUuid)
 
     val result = jsonMapper.deserialize[TestWithPropertyUuid](json, TestWithPropertyUuid.meta)
 
@@ -105,10 +91,11 @@ class JsonMapper2Spec extends AnyFlatSpec with Matchers {
   }
 
   it should "deserialize ListProperty" in {
-    val jsonMapper = new JsonMapper2()
+    TestWithListProperty.meta
+    val jsonMapper = new JsonMapper()
     val withList = new TestWithListProperty()
     withList.items.setAll(Seq("item1", "item2", "item3"))
-    val json = jsonMapper.serialize(withList, TestWithListProperty.meta)
+    val json = jsonMapper.serialize(withList)
 
     val result = jsonMapper.deserialize[TestWithListProperty](json, TestWithListProperty.meta)
 
@@ -119,7 +106,9 @@ class JsonMapper2Spec extends AnyFlatSpec with Matchers {
   }
 
   it should "deserialize Model with links" in {
-    val jsonMapper = new JsonMapper2()
+    TestModelWithLinks.meta
+    TestLinkFromSpec.meta
+    val jsonMapper = new JsonMapper()
     val entity = new TestModelWithLinks()
     entity.name.set("Entity")
     val link1 = new TestLinkFromSpec()
@@ -131,7 +120,7 @@ class JsonMapper2Spec extends AnyFlatSpec with Matchers {
     link2.url.set("/api/2")
     link2.method.set("PUT")
     entity.links.setAll(Seq(link1, link2))
-    val json = jsonMapper.serialize(entity, TestModelWithLinks.meta)
+    val json = jsonMapper.serialize(entity)
 
     val result = jsonMapper.deserialize[TestModelWithLinks](json, TestModelWithLinks.meta)
 
@@ -144,12 +133,13 @@ class JsonMapper2Spec extends AnyFlatSpec with Matchers {
   }
 
   it should "serialize and deserialize round-trip" in {
-    val jsonMapper = new JsonMapper2()
+    TestPerson.meta
+    val jsonMapper = new JsonMapper()
     val original = new TestPerson()
     original.name.set("Round Trip")
     original.email.set("roundtrip@test.com")
 
-    val json = jsonMapper.serialize(original, TestPerson.meta)
+    val json = jsonMapper.serialize(original)
     val deserialized = jsonMapper.deserialize[TestPerson](json, TestPerson.meta)
 
     deserialized.name.get shouldBe "Round Trip"
@@ -157,7 +147,9 @@ class JsonMapper2Spec extends AnyFlatSpec with Matchers {
   }
 
   it should "serialize and deserialize Model with ListProperty[TestLinkFromSpec] round-trip" in {
-    val jsonMapper = new JsonMapper2()
+    TestModelWithLinks.meta
+    TestLinkFromSpec.meta
+    val jsonMapper = new JsonMapper()
     val entity = new TestModelWithLinks()
     entity.name.set("Linked Entity")
     val link1 = new TestLinkFromSpec()
@@ -170,7 +162,7 @@ class JsonMapper2Spec extends AnyFlatSpec with Matchers {
     link2.method.set("DELETE")
     entity.links.setAll(Seq(link1, link2))
 
-    val json = jsonMapper.serialize(entity, TestModelWithLinks.meta)
+    val json = jsonMapper.serialize(entity)
     val deserialized = jsonMapper.deserialize[TestModelWithLinks](json, TestModelWithLinks.meta)
 
     deserialized.name.get shouldBe "Linked Entity"
@@ -182,11 +174,12 @@ class JsonMapper2Spec extends AnyFlatSpec with Matchers {
   }
 
   it should "handle null values gracefully" in {
-    val jsonMapper = new JsonMapper2()
+    TestPerson.meta
+    val jsonMapper = new JsonMapper()
     val person = new TestPerson()
     person.name.set(null)
     person.email.set("notnull@example.com")
-    val json = jsonMapper.serialize(person, TestPerson.meta)
+    val json = jsonMapper.serialize(person)
 
     val result = jsonMapper.deserialize[TestPerson](json, TestPerson.meta)
 
@@ -195,10 +188,11 @@ class JsonMapper2Spec extends AnyFlatSpec with Matchers {
   }
 
   it should "handle missing optional fields" in {
-    val jsonMapper = new JsonMapper2()
+    TestPerson.meta
+    val jsonMapper = new JsonMapper()
     val person = new TestPerson()
     person.name.set("OnlyName")
-    val json = jsonMapper.serialize(person, TestPerson.meta)
+    val json = jsonMapper.serialize(person)
 
     val result = jsonMapper.deserialize[TestPerson](json, TestPerson.meta)
 
