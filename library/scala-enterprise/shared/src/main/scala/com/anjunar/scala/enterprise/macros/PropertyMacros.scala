@@ -3,6 +3,7 @@ package com.anjunar.scala.enterprise.macros
 import scala.annotation.tailrec
 import scala.quoted.*
 import com.anjunar.scala.enterprise.macros.reflection.{SimpleClass, Type => JType, ParameterizedType, GenericArrayType}
+import com.anjunar.scala.enterprise.macros.ReflectionSupport
 
 object PropertyMacros {
 
@@ -370,7 +371,7 @@ object PropertyMacros {
             s"No runtime class symbol available for type ${normalized.show(using Printer.TypeReprStructure)}"
           )
 
-        '{ RuntimeTypeResolver.resolveClass(${ Expr(sym.fullName) }) }
+        '{ ReflectionSupport.resolveClass(${ Expr(sym.fullName) }) }
     }
   }
 
@@ -379,7 +380,7 @@ object PropertyMacros {
     normalizeType(tpe) match {
       case tr: TypeRef if tr.typeSymbol.flags.is(Flags.Param) =>
         val name = tr.typeSymbol.name
-        '{ RuntimeTypeResolver.typeVariable(${ Expr(name) }) }
+        '{ ReflectionSupport.typeVariable(${ Expr(name) }) }
 
       case AppliedType(rawType, args) =>
         val rawClassExpr = runtimeClassExpr(rawType)
@@ -387,7 +388,7 @@ object PropertyMacros {
         val argArrayExpr: Expr[Array[JType]] = '{ Array[JType](${ Varargs(argExprs) }*) }
 
         '{
-          RuntimeTypeResolver.parameterized(
+          ReflectionSupport.parameterized(
             $rawClassExpr,
             $argArrayExpr
           )
@@ -398,7 +399,7 @@ object PropertyMacros {
           case '[Array[a]] =>
             val componentExpr = runtimeTypeExpr(TypeRepr.of[a])
             '{
-              RuntimeTypeResolver.genericArray($componentExpr)
+              ReflectionSupport.genericArray($componentExpr)
             }
         }
 
