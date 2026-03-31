@@ -15,5 +15,5 @@ class WebAuthnLogin(
 }
 
 object WebAuthnLogin {
-  val meta: Meta[WebAuthnLogin] = Meta()
+  val meta: Meta[WebAuthnLogin] = Meta(() => new WebAuthnLogin())
 }

@@ -20,5 +20,5 @@ class WebAuthnLoginLink(
 }
 
 object WebAuthnLoginLink {
-  val meta: Meta[WebAuthnLoginLink] = Meta()
+  val meta: Meta[WebAuthnLoginLink] = Meta(() => new WebAuthnLoginLink())
 }

@@ -32,7 +32,7 @@ class Post extends AbstractEntity[Post] with OwnerProvider {
 }
 
 object Post {
-  val meta: Meta[Post] = Meta()
+  val meta: Meta[Post] = Meta(() => new Post())
   def read(id: String): Future[Data[Post]] =
     Api.get(s"/service/timeline/posts/post/$id")
 

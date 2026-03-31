@@ -26,5 +26,5 @@ class Address extends AbstractEntity[Address] {
 }
 
 object Address {
-  val meta: Meta[Address] = Meta()
+  val meta: Meta[Address] = Meta(() => new Address())
 }

@@ -35,4 +35,4 @@ class SecondComment extends AbstractEntity[SecondComment] with OwnerProvider {
 }
 
 object SecondComment {
-  val meta: Meta[SecondComment] = Meta()}
+  val meta: Meta[SecondComment] = Meta(() => new SecondComment())}

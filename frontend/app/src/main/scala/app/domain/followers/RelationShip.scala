@@ -50,7 +50,7 @@ class RelationShip extends AbstractEntity[RelationShip] {
 }
 
 object RelationShip {
-  val meta: Meta[RelationShip] = Meta()
+  val meta: Meta[RelationShip] = Meta(() => new RelationShip())
   def read(id: String): Future[Data[RelationShip]] =
     Api.get(s"/service/followers/relationships/relationship/$id")
 

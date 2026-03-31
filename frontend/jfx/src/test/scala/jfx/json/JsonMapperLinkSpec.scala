@@ -172,7 +172,7 @@ class TestLink(
 }
 
 object TestLink {
-  val meta: Meta[TestLink] = Meta()
+  val meta: Meta[TestLink] = Meta(() => new TestLink())
 }
 
 class TestEntityWithLinks extends jfx.form.Model[TestEntityWithLinks] {
@@ -182,9 +182,7 @@ class TestEntityWithLinks extends jfx.form.Model[TestEntityWithLinks] {
 }
 
 object TestEntityWithLinks {
-
-  val meta : Meta[TestEntityWithLinks] = Meta()
-
+  val meta : Meta[TestEntityWithLinks] = Meta(() => new TestEntityWithLinks())
 }
 
 class TestEntityWithUuid extends jfx.form.Model[TestEntityWithUuid] {
@@ -195,6 +193,6 @@ class TestEntityWithUuid extends jfx.form.Model[TestEntityWithUuid] {
 
 object TestEntityWithUuid {
 
-  val meta: Meta[TestEntityWithUuid] = Meta()
+  val meta: Meta[TestEntityWithUuid] = Meta(() => new TestEntityWithUuid())
 
 }

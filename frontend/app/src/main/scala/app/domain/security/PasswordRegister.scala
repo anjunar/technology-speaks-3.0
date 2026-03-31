@@ -29,5 +29,5 @@ class PasswordRegister(
 }
 
 object PasswordRegister {
-  val meta: Meta[PasswordRegister] = Meta()
+  val meta: Meta[PasswordRegister] = Meta(() => new PasswordRegister())
 }

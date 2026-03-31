@@ -26,7 +26,7 @@ class Issue extends AbstractEntity[Issue] with OwnerProvider {
 }
 
 object Issue {
-  val meta: Meta[Issue] = Meta()
+  val meta: Meta[Issue] = Meta(() => new Issue())
   def read(id: String): Future[Data[Issue]] =
     Api.get(s"/service/document/documents/document/$id/issues/issue")
 

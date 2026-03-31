@@ -11,6 +11,7 @@ import jfx.domain.{Media, Thumbnail}
 import jfx.form.ErrorResponse
 import jfx.json.JsonMapper
 import jfx.json.JsonRegistry
+import jfx.core.meta.Meta
 
 import scala.scalajs.js
 import scala.scalajs.js.Dynamic
@@ -24,51 +25,64 @@ class AppJsonRegistry extends JsonRegistry {
   valueDeserializers += classOf[Schema].getName -> deserializeSchema
   valueSerializers += classOf[Schema] -> serializeSchema
 
+  // Registriere alle Model-Klassen im ClassLoader via Meta
+  Meta[Application](() => new Application())
+  Meta[Data[js.Any]](() => new Data[js.Any]())
+  Meta[Table[js.Any]](() => new Table[js.Any]())
+  Meta[Schema](() => new Schema())
+  Meta[SchemaProperty](() => new SchemaProperty())
+  Meta[Link](() => new Link())
+  Meta[ManagedProperty](() => new ManagedProperty())
+  Meta[Address](() => new Address())
+  Meta[Email](() => new Email())
+  Meta[ErrorResponse](() => new ErrorResponse())
+  Meta[Account](() => new Account())
+  Meta[Media](() => new Media())
+  Meta[Thumbnail](() => new Thumbnail())
+  Meta[User](() => new User())
+  Meta[UserInfo](() => new UserInfo())
+  Meta[UsersLink](() => new UsersLink())
+  Meta[Document](() => new Document())
+  Meta[DocumentsLink](() => new DocumentsLink())
+  Meta[Issue](() => new Issue())
+  Meta[Group](() => new Group())
+  Meta[GroupAssignmentRequest](() => new GroupAssignmentRequest())
+  Meta[RelationShip](() => new RelationShip())
+  Meta[RelationShipLink](() => new RelationShipLink())
+  Meta[PasswordLogin](() => new PasswordLogin())
+  Meta[PasswordLoginLink](() => new PasswordLoginLink())
+  Meta[AccountLink](() => new AccountLink())
+  Meta[PasswordChange](() => new PasswordChange())
+  Meta[CreatePassword](() => new CreatePassword())
+  Meta[PasswordRegister](() => new PasswordRegister())
+  Meta[PasswordRegisterLink](() => new PasswordRegisterLink())
+  Meta[WebAuthnLogin](() => new WebAuthnLogin())
+  Meta[WebAuthnLoginLink](() => new WebAuthnLoginLink())
+  Meta[WebAuthnRegister](() => new WebAuthnRegister())
+  Meta[WebAuthnRegisterLink](() => new WebAuthnRegisterLink())
+  Meta[ConfirmLink](() => new ConfirmLink())
+  Meta[LogoutLink](() => new LogoutLink())
+  Meta[Like](() => new Like())
+  Meta[FirstComment](() => new FirstComment())
+  Meta[SecondComment](() => new SecondComment())
+  Meta[Post](() => new Post())
+  Meta[PostsLink](() => new PostsLink())
+  Meta[JsonResponse](() => new JsonResponse())
+
+  // Nur spezielle Keys die keine echten Klassen sind (HATEOAS-Link-Rel-Namen)
   override val classes: js.Map[String, () => Any] = js.Map(
-    "Application" -> (() => new Application()),
-    "Data" -> (() => new Data[js.Any]()),
-    "Table" -> (() => new Table[js.Any]()),
-    "Schema" -> (() => new Schema()),
-    "Property" -> (() => new SchemaProperty()),
-    "Link" -> (() => new Link()),
-    "ManagedProperty" -> (() => new ManagedProperty()),
-    "Address" -> (() => new Address()),
-    "Email" -> (() => new Email()),
-    "EMail" -> (() => new Email()),
-    "ErrorResponse" -> (() => new ErrorResponse()),
-    "Account" -> (() => new Account()),
-    "Media" -> (() => new Media()),
-    "Thumbnail" -> (() => new Thumbnail()),
-    "User" -> (() => new User()),
-    "UserInfo" -> (() => new UserInfo()),
     "users-list" -> (() => new UsersLink()),
-    "Document" -> (() => new Document()),
     "document-root" -> (() => new DocumentsLink()),
-    "Issue" -> (() => new Issue()),
-    "Group" -> (() => new Group()),
-    "GroupAssignmentRequest" -> (() => new GroupAssignmentRequest()),
-    "RelationShip" -> (() => new RelationShip()),
     "followers-list" -> (() => new RelationShipLink()),
-    "PasswordLogin" -> (() => new PasswordLogin()),
     "password-login-login" -> (() => new PasswordLoginLink()),
     "account-read" -> (() => new AccountLink()),
     "password-change-change" -> (() => new AccountLink()),
-    "PasswordChange" -> (() => new PasswordChange()),
-    "CreatePassword" -> (() => new CreatePassword()),
-    "PasswordRegister" -> (() => new PasswordRegister()),
     "password-register-register" -> (() => new PasswordRegisterLink()),
-    "WebAuthnLogin" -> (() => new WebAuthnLogin()),
     "web-authn-login-options" -> (() => new WebAuthnLoginLink()),
-    "WebAuthnRegister" -> (() => new WebAuthnRegister()),
     "web-authn-register-options" -> (() => new WebAuthnRegisterLink()),
     "confirm-confirm" -> (() => new ConfirmLink()),
     "logout-logout" -> (() => new LogoutLink()),
-    "Like" -> (() => new Like()),
-    "FirstComment" -> (() => new FirstComment()),
-    "SecondComment" -> (() => new SecondComment()),
-    "Post" -> (() => new Post()),
-    "posts-list" -> (() => new PostsLink()),
-    "JsonResponse" -> (() => new JsonResponse())
+    "posts-list" -> (() => new PostsLink())
   )
 
   private def deserializeSchema(raw: js.Any): Any = {

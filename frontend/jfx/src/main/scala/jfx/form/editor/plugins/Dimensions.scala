@@ -17,5 +17,5 @@ final case class Dimensions(
 }
 
 object Dimensions {
-  val meta: Meta[Dimensions] = Meta()
+  val meta: Meta[Dimensions] = Meta(() => new Dimensions())
 }

@@ -13,4 +13,4 @@ class JsonResponse(
 }
 
 object JsonResponse {
-  val meta: Meta[JsonResponse] = Meta()}
+  val meta: Meta[JsonResponse] = Meta(() => new JsonResponse())}

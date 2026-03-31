@@ -16,5 +16,5 @@ final case class LinkDescriptor(
 }
 
 object LinkDescriptor {
-  val meta: Meta[LinkDescriptor] = Meta()
+  val meta: Meta[LinkDescriptor] = Meta(() => new LinkDescriptor())
 }

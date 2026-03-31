@@ -17,7 +17,7 @@ class Schema(
 }
 
 object Schema {
-  val meta: Meta[Schema] = Meta()
+  val meta: Meta[Schema] = Meta(() => new Schema())
 }
 
 class SchemaProperty(
@@ -32,5 +32,5 @@ class SchemaProperty(
 }
 
 object SchemaProperty {
-  val meta: Meta[SchemaProperty] = Meta()
+  val meta: Meta[SchemaProperty] = Meta(() => new SchemaProperty(), "Property")
 }

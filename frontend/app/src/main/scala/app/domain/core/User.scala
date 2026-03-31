@@ -63,7 +63,7 @@ class User extends AbstractEntity[User] {
 
 object User {
 
-  val meta: Meta[User] = Meta()
+  val meta: Meta[User] = Meta(() => new User())
 
   def read(id: String): Future[Data[User]] =
     Api.get(s"/service/core/users/user/$id")

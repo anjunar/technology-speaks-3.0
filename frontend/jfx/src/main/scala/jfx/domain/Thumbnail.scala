@@ -19,5 +19,5 @@ class Thumbnail(
 }
 
 object Thumbnail {
-  val meta: Meta[Thumbnail] = Meta()
+  val meta: Meta[Thumbnail] = Meta(() => new Thumbnail())
 }

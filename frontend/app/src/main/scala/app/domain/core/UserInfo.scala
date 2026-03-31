@@ -21,5 +21,5 @@ class UserInfo extends AbstractEntity[UserInfo] {
 }
 
 object UserInfo {
-  val meta: Meta[UserInfo] = Meta()
+  val meta: Meta[UserInfo] = Meta(() => new UserInfo())
 }

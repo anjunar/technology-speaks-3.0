@@ -12,5 +12,5 @@ class ErrorResponse(
 }
 
 object ErrorResponse {
-  val meta: Meta[ErrorResponse] = Meta()
+  val meta: Meta[ErrorResponse] = Meta(() => new ErrorResponse())
 }

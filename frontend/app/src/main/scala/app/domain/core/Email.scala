@@ -13,5 +13,5 @@ class Email extends AbstractEntity[Email] {
 }
 
 object Email {
-  val meta: Meta[Email] = Meta()
+  val meta: Meta[Email] = Meta(() => new Email())
 }

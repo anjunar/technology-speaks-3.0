@@ -37,7 +37,7 @@ class Document extends AbstractEntity[Document] with OwnerProvider {
 }
 
 object Document {
-  val meta: Meta[Document] = Meta()
+  val meta: Meta[Document] = Meta(() => new Document())
   def root(): Future[Data[Document]] =
     Api.post("/service/document/documents/document/root")
 

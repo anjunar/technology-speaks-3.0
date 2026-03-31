@@ -20,5 +20,5 @@ class Media(
 }
 
 object Media {
-  val meta: Meta[Media] = Meta()
+  val meta: Meta[Media] = Meta(() => new Media())
 }

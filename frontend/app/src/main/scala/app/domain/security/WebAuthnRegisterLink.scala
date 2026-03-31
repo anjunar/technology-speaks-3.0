@@ -20,5 +20,5 @@ class WebAuthnRegisterLink(
 }
 
 object WebAuthnRegisterLink {
-  val meta: Meta[WebAuthnRegisterLink] = Meta()
+  val meta: Meta[WebAuthnRegisterLink] = Meta(() => new WebAuthnRegisterLink())
 }

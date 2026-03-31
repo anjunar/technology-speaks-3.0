@@ -54,7 +54,7 @@ class FirstComment extends AbstractEntity[FirstComment] with OwnerProvider {
 }
 
 object FirstComment {
-  val meta: Meta[FirstComment] = Meta()
+  val meta: Meta[FirstComment] = Meta(() => new FirstComment())
 
   def list(index: Int, limit: Int, post: Post): Future[Table[Data[FirstComment]]] =
     Api.get(s"/service/timeline/posts/post/${post.id.get}/comments?index=$index&limit=$limit&sort=created:desc")

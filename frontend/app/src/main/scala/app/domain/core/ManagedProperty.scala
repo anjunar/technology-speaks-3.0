@@ -28,5 +28,5 @@ class ManagedProperty extends AbstractEntity[ManagedProperty] {
 
 object ManagedProperty {
 
-  val meta: Meta[ManagedProperty] = Meta()
+  val meta: Meta[ManagedProperty] = Meta(() => new ManagedProperty())
 }

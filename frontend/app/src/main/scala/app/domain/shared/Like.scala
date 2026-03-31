@@ -14,5 +14,5 @@ class Like(
 }
 
 object Like {
-  val meta: Meta[Like] = Meta()
+  val meta: Meta[Like] = Meta(() => new Like())
 }
