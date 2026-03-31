@@ -8,6 +8,7 @@ import app.domain.security.*
 import app.domain.shared.*
 import app.domain.timeline.*
 import jfx.domain.{Media, Thumbnail}
+import jfx.form.ErrorResponse
 import jfx.json.JsonMapper
 import jfx.json.JsonRegistry
 
@@ -34,6 +35,7 @@ class AppJsonRegistry extends JsonRegistry {
     "Address" -> (() => new Address()),
     "Email" -> (() => new Email()),
     "EMail" -> (() => new Email()),
+    "ErrorResponse" -> (() => new ErrorResponse()),
     "Account" -> (() => new Account()),
     "Media" -> (() => new Media()),
     "Thumbnail" -> (() => new Thumbnail()),

@@ -22,6 +22,22 @@ class JsonMapper(val registry: JsonRegistry) {
     deserialize(dynamic, factory)
   }
 
+  def deserialize[M <: Model[M]](dynamic: Dynamic, clazz: Class[M]): M = {
+    registry.deserializeValueByTypeName(dynamic, clazz.getName).map(_.asInstanceOf[M]).getOrElse {
+      val factory = registry.classes
+        .get(clazz.getSimpleName)
+        .getOrElse(throw IllegalStateException(s"No factory for class = '${clazz.getName}'"))
+        .asInstanceOf[() => M]
+
+      deserialize(dynamic, factory)
+    }
+  }
+
+  def deserializeArray[M <: Model[M]](dynamic: Dynamic, clazz: Class[M]): Seq[M] = {
+    if (dynamic == null || js.isUndefined(dynamic) || !dynamic.isInstanceOf[js.Array[?]]) return Seq.empty
+    dynamic.asInstanceOf[js.Array[Dynamic]].toSeq.map(d => deserialize(d, clazz))
+  }
+
   def deserialize[M <: Model[M]](dynamic: Dynamic, factory: () => M): M = {
     val entity = factory()
     entity.properties.asInstanceOf[Seq[PropertyAccess[M, Any]]].foreach { access =>
@@ -104,11 +120,12 @@ class JsonMapper(val registry: JsonRegistry) {
       case sc: com.anjunar.scala.enterprise.macros.reflection.SimpleClass[?] =>
         sc.typeName
       case pt: com.anjunar.scala.enterprise.macros.reflection.ParameterizedType =>
-        pt.rawType.getTypeName match {
+        val rawTypeName = extractTypeName(pt.rawType)
+        rawTypeName match {
           case "jfx.core.state.Property" | "jfx.core.state.ListProperty" =>
             pt.typeArguments.headOption.map(extractTypeName).getOrElse(classOf[Object].getName)
           case _ =>
-            pt.rawType.getTypeName
+            rawTypeName
         }
       case _ => classOf[Object].getName
     }

@@ -8,6 +8,7 @@ import jfx.core.state.{ListProperty, Property}
 import com.anjunar.scala.enterprise.macros.PropertyAccess
 import com.anjunar.scala.enterprise.macros.PropertyMacros.makePropertyAccess
 import java.util.UUID
+import jfx.form.ErrorResponse
 
 class JsonMapperLinkSpec extends AnyFlatSpec with Matchers {
 
@@ -106,6 +107,46 @@ class JsonMapperLinkSpec extends AnyFlatSpec with Matchers {
     val deserialized = jsonMapper.deserialize[TestEntityWithUuid](json)
 
     deserialized.id.get shouldBe uuid
+  }
+
+  it should "deserialize using class reference" in {
+    val registry = new TestJsonRegistry()
+    registry.classes.update("TestLink", () => new TestLink())
+    val jsonMapper = new JsonMapper(registry)
+
+    val linkJson = jsObj(
+      "rel" -> "self",
+      "url" -> "/api/test",
+      "method" -> "GET",
+      "id" -> "123"
+    )
+
+    val link = jsonMapper.deserialize(linkJson, classOf[TestLink])
+
+    link.rel shouldBe "self"
+    link.url shouldBe "/api/test"
+    link.method shouldBe "GET"
+    link.id shouldBe "123"
+  }
+
+  it should "deserialize an array of ErrorResponse" in {
+    val registry = new TestJsonRegistry()
+    registry.classes.update("ErrorResponse", () => new ErrorResponse())
+    val jsonMapper = new JsonMapper(registry)
+
+    val errorsJson = js.Array(
+      jsObj("message" -> "Error 1", "path" -> js.Array("field1")),
+      jsObj("message" -> "Error 2", "path" -> js.Array("field2", 0))
+    )
+
+    val errors = jsonMapper.deserializeArray(errorsJson.asInstanceOf[scala.scalajs.js.Dynamic], classOf[ErrorResponse])
+
+    errors.length shouldBe 2
+    errors(0).message shouldBe "Error 1"
+    errors(0).path(0) shouldBe "field1"
+    errors(1).message shouldBe "Error 2"
+    errors(1).path(0) shouldBe "field2"
+    errors(1).path(1) shouldBe 0
   }
 }
 

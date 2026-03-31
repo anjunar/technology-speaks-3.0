@@ -2,11 +2,13 @@ package app.support
 
 import app.domain.core.Link
 import jfx.form.{ErrorResponse, ErrorResponseException, Model}
+import jfx.json.JsonMapper
 import org.scalajs.dom.{RequestInit, fetch, window}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.scalajs.js
 import scala.scalajs.js.JSConverters.*
+import scala.scalajs.js.JSON
 
 object Api {
 
@@ -91,32 +93,13 @@ object Api {
           Navigation.redirectToLogin()
           Future.failed(RuntimeException("Request was rejected with 403"))
         } else if (response.status == 400) {
-          Future.failed(new ErrorResponseException(parseErrorResponses(text)))
+          Future.failed(new ErrorResponseException(AppJson.mapper.deserializeArray(JSON.parse(text), classOf[ErrorResponse])))
         } else {
           Future.failed(RuntimeException(s"HTTP ${response.status}: $text"))
         }
       }
     }
   }
-
-  private def parseErrorResponses(text: String): Seq[ErrorResponse] =
-    if (text == null || text.trim.isEmpty) {
-      Seq.empty
-    } else {
-      val raw = js.JSON.parse(text)
-      if (!raw.isInstanceOf[js.Array[?]]) {
-        Seq.empty
-      } else {
-        raw.asInstanceOf[js.Array[js.Dynamic]].toSeq.map { entry =>
-          val message =
-            entry.selectDynamic("message").asInstanceOf[js.UndefOr[String]].getOrElse("")
-          val path =
-            entry.selectDynamic("path").asInstanceOf[js.UndefOr[js.Array[Any]]].getOrElse(js.Array())
-
-          new ErrorResponse(message, path)
-        }
-      }
-    }
 
   def logFailure(label: String, error: Throwable): Unit =
     window.console.error(s"$label failed: ${error.getMessage}")
