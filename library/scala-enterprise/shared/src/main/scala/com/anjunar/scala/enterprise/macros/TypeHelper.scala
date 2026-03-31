@@ -8,8 +8,15 @@ object TypeHelper {
 
   @tailrec
   final def rawType(aType: Type): Class[?] = aType match {
-    case aClass: SimpleClass[?] => Class.forName(aClass.typeName)
+    case aClass: SimpleClass[?] => aClass.runtimeClass
     case parameterizedType: ParameterizedType => rawType(parameterizedType.rawType)
+    case _ => throw new IllegalStateException("Unexpected value: " + aType)
+  }
+
+  @tailrec
+  final def simpleRawType(aType: Type): SimpleClass[?] = aType match {
+    case aClass: SimpleClass[?] => aClass
+    case parameterizedType: ParameterizedType => simpleRawType(parameterizedType.rawType)
     case _ => throw new IllegalStateException("Unexpected value: " + aType)
   }
 
