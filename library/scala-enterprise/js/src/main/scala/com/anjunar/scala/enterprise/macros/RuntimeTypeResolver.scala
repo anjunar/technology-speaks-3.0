@@ -8,6 +8,18 @@ object RuntimeTypeResolver {
     new SimpleClass(name)
   }
 
+  def resolveClassWithAnnotations(name: String, annotations: Array[Annotation]): SimpleClass[?] = {
+    new SimpleClass(name, annotations)
+  }
+
+  def resolveClassWithProperties[T](name: String, properties: Array[PropertyAccess[T, ?]]): SimpleClass[T] = {
+    new SimpleClass(name, properties = properties)
+  }
+
+  def resolveClassFull[T](name: String, annotations: Array[Annotation], properties: Array[PropertyAccess[T, ?]]): SimpleClass[T] = {
+    new SimpleClass(name, annotations, properties)
+  }
+
   def parameterized(raw: SimpleClass[?], args: Array[Type]): ParameterizedType =
     SimpleParameterizedType(raw, args.clone())
 

@@ -12,7 +12,7 @@ object PropertyMacros {
   inline def describeProperties[E]: List[PropertyAccess[E, ?]] =
     ${ describePropertiesImpl[E] }
 
-  private def describePropertiesImpl[E: Type](using Quotes): Expr[List[PropertyAccess[E, ?]]] = {
+  private[macros] def describePropertiesImpl[E: Type](using Quotes): Expr[List[PropertyAccess[E, ?]]] = {
     import quotes.reflect.*
 
     val typeRepr = TypeRepr.of[E]

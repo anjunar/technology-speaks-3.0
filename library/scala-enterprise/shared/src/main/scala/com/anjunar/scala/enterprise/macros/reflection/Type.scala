@@ -1,10 +1,16 @@
 package com.anjunar.scala.enterprise.macros.reflection
 
+import com.anjunar.scala.enterprise.macros.{Annotation, PropertyAccess}
+
 trait Type {
   def getTypeName: String
 }
 
-case class SimpleClass[T](typeName: String) extends Type {
+case class SimpleClass[T](
+  typeName: String,
+  annotations: Array[Annotation] = Array.empty,
+  properties: Array[PropertyAccess[T, ?]] = Array.empty
+) extends Type {
   def runtimeClass: Class[T] = null.asInstanceOf[Class[T]]
   override def getTypeName: String = typeName
 }

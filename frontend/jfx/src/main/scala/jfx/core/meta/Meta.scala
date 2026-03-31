@@ -15,7 +15,7 @@ object Meta {
 
   inline def apply[E](factory: () => E)(using ClassTag[E]) : Meta[E] = {
     val properties = PropertyMacros.describeProperties[E]
-    val typeName = summon[ClassTag[E]].runtimeClass.getSimpleName
+    val typeName = JsonTypeMacro.getJsonTypeName[E]
     ClassLoader.classes.put(summon[ClassTag[E]].runtimeClass, (factory, typeName))
     new Meta[E](properties)
   }

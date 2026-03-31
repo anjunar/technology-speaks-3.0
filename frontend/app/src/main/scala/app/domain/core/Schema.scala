@@ -2,7 +2,7 @@ package app.domain.core
 
 import app.support.JsonModel
 import jfx.core.meta.Meta
-import jfx.json.JsonIgnore
+import jfx.json.{JsonIgnore, JsonType}
 
 import scala.scalajs.js
 
@@ -20,6 +20,7 @@ object Schema {
   val meta: Meta[Schema] = Meta(() => new Schema())
 }
 
+@JsonType("Property")
 class SchemaProperty(
   var name: String = "",
   var `type`: String = "",
@@ -32,5 +33,5 @@ class SchemaProperty(
 }
 
 object SchemaProperty {
-  val meta: Meta[SchemaProperty] = Meta(() => new SchemaProperty(), "Property")
+  val meta: Meta[SchemaProperty] = Meta(() => new SchemaProperty())
 }
