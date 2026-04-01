@@ -90,20 +90,3 @@ class ReflectMacrosSpec extends AnyFlatSpec with Matchers {
     }
   }
 }
-
-case class Person(name: String, age: Int)
-
-class Employee(name: String, age: Int, val department: String) extends Person(name, age)
-
-case class Container[T](value: T)
-
-class AnnotatedClass {
-  @scala.annotation.nowarn("msg=unused")
-  val value: String = ""
-}
-
-class MutableClass {
-  var value: String = ""
-}
-
-case class ImmutableClass(value: String)
