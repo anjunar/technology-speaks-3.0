@@ -745,7 +745,7 @@ private final class ManagedPropertyAccessControl(
   private def loadManagedProperty(): Unit = {
     busyProperty.set(true)
 
-    Api.invokeLink(propertyLink).map(raw => Api.deserialize(raw, ManagedProperty.meta)).onComplete {
+    Api.invokeLink(propertyLink).map(raw => Api.deserialize[ManagedProperty](raw)).onComplete {
       case Success(value) =>
         managedPropertyProperty.set(value)
         syncSelection(value, visibilityCatalogProperty.get)

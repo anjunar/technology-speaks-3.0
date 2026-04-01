@@ -23,10 +23,10 @@ class Post extends AbstractEntity[Post] with OwnerProvider {
   override def meta: Meta[Post] = Post.meta
 
   def save(): Future[Data[Post]] =
-    Api.post("/service/timeline/posts/post", this).map(raw => Api.deserialize(raw, Data.meta[Post]))
+    Api.post("/service/timeline/posts/post", this).map(raw => Api.deserialize[Data[Post]](raw))
 
   def update(): Future[Data[Post]] =
-    Api.put("/service/timeline/posts/post", this).map(raw => Api.deserialize(raw, Data.meta[Post]))
+    Api.put("/service/timeline/posts/post", this).map(raw => Api.deserialize[Data[Post]](raw))
 
   def delete(): Future[Unit] =
     Api.delete("/service/timeline/posts/post", this)
@@ -35,8 +35,8 @@ class Post extends AbstractEntity[Post] with OwnerProvider {
 object Post {
   val meta: Meta[Post] = Meta(() => new Post())
   def read(id: String): Future[Data[Post]] =
-    Api.get(s"/service/timeline/posts/post/$id").map(raw => Api.deserialize(raw, Data.meta[Post]))
+    Api.get(s"/service/timeline/posts/post/$id").map(raw => Api.deserialize[Data[Post]](raw))
 
   def list(index: Int, limit: Int): Future[Table[Data[Post]]] =
-    Api.get(s"/service/timeline/posts?index=$index&limit=$limit&sort=created:desc").map(raw => Api.deserialize(raw, Table.meta[Data[Post]]))
+    Api.get(s"/service/timeline/posts?index=$index&limit=$limit&sort=created:desc").map(raw => Api.deserialize[Table[Data[Post]]](raw))
 }

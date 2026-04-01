@@ -20,7 +20,7 @@ class PasswordLogin(
   override def meta: Meta[PasswordLogin] = PasswordLogin.meta
 
   def save(): Future[JsonResponse] =
-    Api.post("/service/security/login", this).map(raw => Api.deserialize(raw, JsonResponse.meta))
+    Api.post("/service/security/login", this).map(raw => Api.deserialize[JsonResponse](raw))
 }
 
 object PasswordLogin {

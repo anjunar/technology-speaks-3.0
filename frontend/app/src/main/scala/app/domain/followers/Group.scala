@@ -24,10 +24,10 @@ class Group extends AbstractEntity[Group] {
   override def meta: Meta[Group] = Group.meta
 
   def save(): Future[Data[Group]] =
-    Api.post("/service/followers/groups/groups", this).map(raw => Api.deserialize(raw, Data.meta[Group]))
+    Api.post("/service/followers/groups/groups", this).map(raw => Api.deserialize[Data[Group]](raw))
 
   def update(): Future[Data[Group]] =
-    Api.put("/service/followers/groups/groups", this).map(raw => Api.deserialize(raw, Data.meta[Group]))
+    Api.put("/service/followers/groups/groups", this).map(raw => Api.deserialize[Data[Group]](raw))
 
   def delete(): Future[Unit] =
     Api.delete("/service/followers/groups/groups", this)
@@ -36,10 +36,10 @@ class Group extends AbstractEntity[Group] {
 object Group {
   val meta : Meta[Group] = Meta(() => new Group())
   def read(id: String): Future[Data[Group]] =
-    Api.get(s"/service/followers/groups/groups/$id").map(raw => Api.deserialize(raw, Data.meta[Group]))
+    Api.get(s"/service/followers/groups/groups/$id").map(raw => Api.deserialize[Data[Group]](raw))
 
   def list(index: Int, limit: Int, sorting: Seq[String] = Seq("created:desc")): Future[Table[Data[Group]]] =
-    Api.get(s"/service/followers/groups?index=$index&limit=$limit${renderSortParameters(sorting)}").map(raw => Api.deserialize(raw, Table.meta[Data[Group]]))
+    Api.get(s"/service/followers/groups?index=$index&limit=$limit${renderSortParameters(sorting)}").map(raw => Api.deserialize[Table[Data[Group]]](raw))
 
   private def renderSortParameters(sorting: Seq[String]): String = {
     val normalizedSorting = sorting.iterator.map(_.trim).filter(_.nonEmpty).toVector

@@ -29,11 +29,11 @@ class Issue extends AbstractEntity[Issue] with OwnerProvider {
 object Issue {
   val meta: Meta[Issue] = Meta(() => new Issue())
   def read(id: String): Future[Data[Issue]] =
-    Api.get(s"/service/document/documents/document/$id/issues/issue").map(raw => Api.deserialize(raw, Data.meta[Issue]))
+    Api.get(s"/service/document/documents/document/$id/issues/issue").map(raw => Api.deserialize[Data[Issue]](raw))
 
   def read(documentId: String, issueId: String): Future[Data[Issue]] =
-    Api.get(s"/service/document/documents/document/$documentId/issues/issue/$issueId").map(raw => Api.deserialize(raw, Data.meta[Issue]))
+    Api.get(s"/service/document/documents/document/$documentId/issues/issue/$issueId").map(raw => Api.deserialize[Data[Issue]](raw))
 
   def list(index: Int, limit: Int, document: Document): Future[Table[Data[Issue]]] =
-    Api.get(s"/service/document/documents/document/${document.id.get}/issues?index=$index&limit=$limit&sort=created:desc").map(raw => Api.deserialize(raw, Table.meta[Data[Issue]]))
+    Api.get(s"/service/document/documents/document/${document.id.get}/issues?index=$index&limit=$limit&sort=created:desc").map(raw => Api.deserialize[Table[Data[Issue]]](raw))
 }

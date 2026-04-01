@@ -28,10 +28,10 @@ class Document extends AbstractEntity[Document] with OwnerProvider {
   override def meta: Meta[Document] = Document.meta
 
   def save(): Future[Data[Document]] =
-    Api.post("/service/document/documents/document", this).map(raw => Api.deserialize(raw, Data.meta[Document]))
+    Api.post("/service/document/documents/document", this).map(raw => Api.deserialize[Data[Document]](raw))
 
   def update(): Future[Data[Document]] =
-    Api.put("/service/document/documents/document", this).map(raw => Api.deserialize(raw, Data.meta[Document]))
+    Api.put("/service/document/documents/document", this).map(raw => Api.deserialize[Data[Document]](raw))
 
   def delete(): Future[Unit] =
     Api.delete("/service/document/documents/document", this)
@@ -40,10 +40,10 @@ class Document extends AbstractEntity[Document] with OwnerProvider {
 object Document {
   val meta: Meta[Document] = Meta(() => new Document())
   def root(): Future[Data[Document]] =
-    Api.post("/service/document/documents/document/root").map(raw => Api.deserialize(raw, Data.meta[Document]))
+    Api.post("/service/document/documents/document/root").map(raw => Api.deserialize[Data[Document]](raw))
 
   def read(id: String): Future[Data[Document]] =
-    Api.get(s"/service/document/documents/document/$id").map(raw => Api.deserialize(raw, Data.meta[Document]))
+    Api.get(s"/service/document/documents/document/$id").map(raw => Api.deserialize[Data[Document]](raw))
 
   def list(index: Int, limit: Int, query: String = "", sorting: Seq[String] = Seq("created:desc")): Future[Table[Data[Document]]] = {
     val normalizedQuery = Option(query).map(_.trim).getOrElse("")
@@ -52,7 +52,7 @@ object Document {
       else s"&name=${encodeURIComponent(normalizedQuery)}"
     val sortParameter = renderSortParameters(sorting)
 
-    Api.get(s"/service/document/documents?index=$index&limit=$limit$sortParameter$queryParameter").map(raw => Api.deserialize(raw, Table.meta[Data[Document]]))
+    Api.get(s"/service/document/documents?index=$index&limit=$limit$sortParameter$queryParameter").map(raw => Api.deserialize[Table[Data[Document]]](raw))
   }
 
   private def renderSortParameters(sorting: Seq[String]): String = {

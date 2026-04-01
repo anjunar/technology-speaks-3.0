@@ -3,8 +3,9 @@ package app.pages.security
 import app.domain.core.Data
 import app.domain.security.{Account, CreatePassword, PasswordChange}
 import app.services.ApplicationService
-import app.support.{Api, Navigation, JsonResponse}
+import app.support.{Api, JsonResponse, Navigation}
 import app.ui.{CompositeSupport, PageComposite}
+import com.anjunar.scala.enterprise.macros.reflection.TypeMacros.genericType
 import jfx.action.Button.{button, buttonType_=, onClick}
 import jfx.control.Heading.heading
 import jfx.control.Image.{image, src_=}
@@ -178,7 +179,7 @@ class AccountPage(val payload: Data[Account]) extends PageComposite("Account", p
             } else if (newPassword != confirmPassword) {
               Viewport.notify("Die neuen Passwoerter stimmen nicht ueberein.", Viewport.NotificationKind.Error)
             } else {
-              Api.invokeLink(changePasswordLink.get, passwordChangeForm).map(raw => Api.deserialize(raw, JsonResponse.meta))
+              Api.invokeLink(changePasswordLink.get, passwordChangeForm).map(raw => Api.deserialize[JsonResponse](raw))
                 .foreach { response =>
                   if (response != null && response.status == "success") {
                     Viewport.notify("Passwort aktualisiert.", Viewport.NotificationKind.Success)
@@ -212,8 +213,8 @@ class AccountPage(val payload: Data[Account]) extends PageComposite("Account", p
             } else if (newPassword != confirmPassword) {
               Viewport.notify("Die neuen Passwoerter stimmen nicht ueberein.", Viewport.NotificationKind.Error)
             } else {
-              Api.invokeLink(createPasswordLink.get, createPasswordForm).map(raw => Api.deserialize(raw, JsonResponse.meta))
-                .foreach { response =>
+              Api.invokeLink(createPasswordLink.get, createPasswordForm).map(raw => Api.deserialize[JsonResponse](raw))
+                .foreach { (response : JsonResponse) =>
                   if (response != null && response.status == "success") {
                     Viewport.notify("Passwort hinzugefuegt.", Viewport.NotificationKind.Success)
                     Navigation.navigate("/security/account", replace = true)

@@ -26,7 +26,7 @@ class PasswordRegister(
   override def meta: Meta[PasswordRegister] = PasswordRegister.meta
 
   def save(): Future[JsonResponse] =
-    Api.post("/service/security/register", this).map(raw => Api.deserialize(raw, JsonResponse.meta))
+    Api.post("/service/security/register", this).map(raw => Api.deserialize[JsonResponse](raw))
 }
 
 object PasswordRegister {

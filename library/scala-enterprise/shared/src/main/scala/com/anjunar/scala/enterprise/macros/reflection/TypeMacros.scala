@@ -13,6 +13,9 @@ object TypeMacros {
   inline def toSimpleClass[T]: SimpleClass[T] =
     ${ toSimpleClassImpl[T] }
 
+  inline def genericType[T]: JType =
+    ${ genericTypeImpl[T] }
+
   private def toTypeImpl[T](using Type[T], Quotes): Expr[JType] = {
     import quotes.reflect.*
 
@@ -123,6 +126,15 @@ object TypeMacros {
         val clsExpr = runtimeClassExpr(other)
         '{ $clsExpr: JType }
     }
+  }
+
+  private def genericTypeImpl[T](using Type[T], Quotes): Expr[JType] = {
+    import quotes.reflect.*
+
+    val tpe = TypeRepr.of[T]
+    val typeExpr = runtimeTypeExpr(tpe)
+
+    typeExpr
   }
 
 }

@@ -1,6 +1,8 @@
 package app.support
 
 import app.domain.core.Link
+import com.anjunar.scala.enterprise.macros.reflection.Type
+import com.anjunar.scala.enterprise.macros.reflection.TypeMacros.genericType
 import jfx.core.meta.Meta
 import jfx.form.{ErrorResponse, ErrorResponseException, Model}
 import jfx.json.JsonMapper
@@ -39,11 +41,11 @@ object Api {
       else js.JSON.parse(text)
     }
 
-  def deserialize[M <: Model[M]](raw: js.Any, meta: Meta[M]): M =
+  inline def deserialize[M <: Model[M]](raw: js.Any): M =
     if (raw == null || js.isUndefined(raw)) {
       null.asInstanceOf[M]
     } else {
-      AppJson.mapper.deserialize(raw.asInstanceOf[js.Dynamic], meta).asInstanceOf[M]
+      AppJson.mapper.deserialize(raw.asInstanceOf[js.Dynamic], genericType[M]).asInstanceOf[M]
     }
 
   private def serializeBody(body: Any): js.UndefOr[js.Any] =

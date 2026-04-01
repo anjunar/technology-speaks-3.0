@@ -21,10 +21,10 @@ class RelationShip extends AbstractEntity[RelationShip] {
   override def meta: Meta[RelationShip] = RelationShip.meta
 
   def save(): Future[Data[RelationShip]] =
-    Api.post("/service/followers/relationships/relationship", this).map(raw => Api.deserialize(raw, Data.meta[RelationShip]))
+    Api.post("/service/followers/relationships/relationship", this).map(raw => Api.deserialize[Data[RelationShip]](raw))
 
   def update(): Future[Data[RelationShip]] =
-    Api.put("/service/followers/relationships/relationship", this).map(raw => Api.deserialize(raw, Data.meta[RelationShip]))
+    Api.put("/service/followers/relationships/relationship", this).map(raw => Api.deserialize[Data[RelationShip]](raw))
 
   def delete(): Future[Unit] =
     Api.delete("/service/followers/relationships/relationship", this)
@@ -52,7 +52,7 @@ class RelationShip extends AbstractEntity[RelationShip] {
 object RelationShip {
   val meta: Meta[RelationShip] = Meta(() => new RelationShip())
   def read(id: String): Future[Data[RelationShip]] =
-    Api.get(s"/service/followers/relationships/relationship/$id").map(raw => Api.deserialize(raw, Data.meta[RelationShip]))
+    Api.get(s"/service/followers/relationships/relationship/$id").map(raw => Api.deserialize[Data[RelationShip]](raw))
 
   def list(
     index: Int,
@@ -77,7 +77,7 @@ object RelationShip {
       if (groupParameters.isEmpty) ""
       else s"&$groupParameters"
 
-    Api.get(s"/service/followers/relationships?index=$index&limit=$limit$sortParameter$queryParameter$groupsSuffix").map(raw => Api.deserialize(raw, Table.meta[Data[RelationShip]]))
+    Api.get(s"/service/followers/relationships?index=$index&limit=$limit$sortParameter$queryParameter$groupsSuffix").map(raw => Api.deserialize[Table[Data[RelationShip]]](raw))
   }
 
   private def renderSortParameters(sorting: Seq[String]): String = {

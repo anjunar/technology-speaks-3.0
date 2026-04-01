@@ -44,6 +44,6 @@ object Application {
 
   val meta: Meta[Application] = Meta[Application](() => new Application())
 
-  def read(): Future[Application] = Api.get("/service").map(raw => Api.deserialize(raw, Application.meta))
+  def read(): Future[Application] = Api.get("/service").map(raw => Api.deserialize[Application](raw))
 
 }

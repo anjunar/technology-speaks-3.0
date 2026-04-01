@@ -23,16 +23,16 @@ class SecondComment extends AbstractEntity[SecondComment] with OwnerProvider {
   override def meta: Meta[SecondComment] = SecondComment.meta
 
   def save(issue: Issue): Future[Data[FirstComment]] =
-    Api.post(s"/service/document/documents/document/issues/issue/${issue.id.get}/comment", this).map(raw => Api.deserialize(raw, Data.meta[FirstComment]))
+    Api.post(s"/service/document/documents/document/issues/issue/${issue.id.get}/comment", this).map(raw => Api.deserialize[Data[FirstComment]](raw))
 
   def save(post: Post): Future[Data[FirstComment]] =
-    Api.post(s"/service/timeline/posts/post/${post.id.get}/comment", this).map(raw => Api.deserialize(raw, Data.meta[FirstComment]))
+    Api.post(s"/service/timeline/posts/post/${post.id.get}/comment", this).map(raw => Api.deserialize[Data[FirstComment]](raw))
 
   def update(issue: Issue): Future[Data[FirstComment]] =
-    Api.put(s"/service/document/documents/document/issues/issue/${issue.id.get}/comment", this).map(raw => Api.deserialize(raw, Data.meta[FirstComment]))
+    Api.put(s"/service/document/documents/document/issues/issue/${issue.id.get}/comment", this).map(raw => Api.deserialize[Data[FirstComment]](raw))
 
   def update(post: Post): Future[Data[FirstComment]] =
-    Api.put(s"/service/timeline/posts/post/${post.id.get}/comment", this).map(raw => Api.deserialize(raw, Data.meta[FirstComment]))
+    Api.put(s"/service/timeline/posts/post/${post.id.get}/comment", this).map(raw => Api.deserialize[Data[FirstComment]](raw))
 }
 
 object SecondComment {
