@@ -11,21 +11,17 @@ class ModelSerializer extends Serializer[Model[?]] {
 
   override def serialize(input: Model[?], context: JavaContext): Dynamic = {
     val out = js.Dictionary[js.Any]()
-    
+
     val jsonType = getJsonType(input)
     if (jsonType.isDefined) {
       out.update("@type", jsonType.get)
     }
-    
+
     input.meta.properties.foreach { access =>
       if (!isIgnored(access)) {
         val value = access.asInstanceOf[PropertyAccess[Any, Any]].get(input)
-        if (value != null) {
-          val serialized = serializeValue(value)
-          if (serialized != null && !js.isUndefined(serialized)) {
-            out.update(getJsonFieldName(access), serialized)
-          }
-        }
+        val serialized = serializeValue(value)
+        out.update(getJsonFieldName(access), serialized)
       }
     }
     out.asInstanceOf[js.Dynamic]
@@ -59,6 +55,10 @@ class ModelSerializer extends Serializer[Model[?]] {
   private def serializeValue(value: Any): js.Any = {
     value match {
       case null => null
+      case p: Property[?] =>
+        val inner = p.get
+        if (inner == null) null
+        else serializeValue(inner)
       case p: ReadOnlyProperty[?] => serializeValue(p.get)
       case m: Model[?] => serialize(m, new JavaContext(null))
       case arr: js.Array[?] => arr.map(serializeValue)

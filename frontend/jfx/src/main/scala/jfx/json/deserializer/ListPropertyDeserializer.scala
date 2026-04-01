@@ -1,6 +1,5 @@
 package jfx.json.deserializer
 
-import com.anjunar.scala.enterprise.macros.TypeHelper
 import com.anjunar.scala.enterprise.macros.reflection.ParameterizedType
 import jfx.core.state.ListProperty
 
@@ -11,7 +10,7 @@ class ListPropertyDeserializer extends Deserializer[ListProperty[?]] {
 
   override def deserialize(json: Dynamic, context: JsonContext): Any = {
     val elemType = context.resolvedType match {
-      case pt: ParameterizedType => TypeHelper.simpleRawType(pt.typeArguments(0))
+      case pt: ParameterizedType => pt.typeArguments(0)
       case _ => throw new IllegalStateException("ListProperty must have a generic type")
     }
 
@@ -20,7 +19,7 @@ class ListPropertyDeserializer extends Deserializer[ListProperty[?]] {
 
     var i = 0
     while (i < arr.length) {
-      val deserializer = DeserializerFactory.build(TypeHelper.rawType(elemType).asInstanceOf[Class[Any]])
+      val deserializer = DeserializerFactory.buildFromType(elemType)
       val value = deserializer.deserialize(arr(i), new JsonContext(elemType))
       result.push(value)
       i += 1

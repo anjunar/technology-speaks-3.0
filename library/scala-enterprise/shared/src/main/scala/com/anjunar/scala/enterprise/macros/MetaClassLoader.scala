@@ -19,7 +19,7 @@ object MetaClassLoader {
         case Annotation(className, params) if className == "jfx.json.JsonType" =>
           params.getOrElse("value", clazz.typeName).asInstanceOf[String]
       }
-      .getOrElse(clazz.typeName)
+      .getOrElse(clazz.typeName.split('.').last)
     
     typeNames += typeName -> clazz
   }

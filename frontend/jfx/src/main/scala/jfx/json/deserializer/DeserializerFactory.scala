@@ -1,7 +1,7 @@
 package jfx.json.deserializer
 
-import com.anjunar.scala.enterprise.macros.TypeHelper
 import com.anjunar.scala.enterprise.macros.reflection.{ParameterizedType, SimpleClass, Type}
+import com.anjunar.scala.enterprise.macros.MetaClassLoader
 import jfx.core.state.{ListProperty, Property}
 import jfx.form.Model
 
@@ -28,10 +28,36 @@ object DeserializerFactory {
 
   def buildFromType(tpe: Type): Deserializer[?] = {
     tpe match {
-      case sc: SimpleClass[?] => build(TypeHelper.rawType(sc).asInstanceOf[Class[Any]])
+      case sc: SimpleClass[?] =>
+        sc.typeName match {
+          case "java.lang.String" | "String" => new StringDeserializer()
+          case "scala.Int" | "Int" => new NumberDeserializer()
+          case "scala.Double" | "Double" => new NumberDeserializer()
+          case "scala.Float" | "Float" => new NumberDeserializer()
+          case "scala.Long" | "Long" => new NumberDeserializer()
+          case "scala.Boolean" | "Boolean" => new BooleanDeserializer()
+          case "java.util.UUID" | "UUID" => new UUIDDeserializer()
+          case "jfx.core.state.Property" | "Property" => new PropertyDeserializer()
+          case "jfx.core.state.ListProperty" | "ListProperty" => new ListPropertyDeserializer()
+          case _ =>
+            MetaClassLoader.factories.get(sc) match {
+              case Some(factory) => new ModelDeserializer()
+              case None =>
+                MetaClassLoader.getByTypeName(sc.typeName)
+                  .flatMap(MetaClassLoader.factories.get) match {
+                    case Some(factory) => new ModelDeserializer()
+                    case None => throw new IllegalArgumentException(s"No deserializer found for type '${sc.typeName}'")
+                  }
+            }
+        }
       case pt: ParameterizedType =>
         pt.rawType match {
-          case sc: SimpleClass[?] => build(TypeHelper.rawType(sc).asInstanceOf[Class[Any]])
+          case sc: SimpleClass[?] =>
+            sc.typeName match {
+              case "jfx.core.state.Property" | "Property" => new PropertyDeserializer()
+              case "jfx.core.state.ListProperty" | "ListProperty" => new ListPropertyDeserializer()
+              case _ => buildFromType(sc)
+            }
           case _ => throw new IllegalArgumentException(s"No deserializer found for class $tpe")
         }
       case _ => throw new IllegalArgumentException(s"No deserializer found for class $tpe")

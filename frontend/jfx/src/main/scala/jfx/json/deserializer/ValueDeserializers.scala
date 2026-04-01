@@ -4,11 +4,23 @@ import scala.scalajs.js
 import scala.scalajs.js.Dynamic
 
 class StringDeserializer extends Deserializer[String] {
-  override def deserialize(json: Dynamic, context: JsonContext): Any = json.toString
+  override def deserialize(json: Dynamic, context: JsonContext): Any = {
+    if (json == null || js.isUndefined(json)) null
+    else json.toString
+  }
 }
 
 class NumberDeserializer extends Deserializer[Number] {
-  override def deserialize(json: Dynamic, context: JsonContext): Any = json.asInstanceOf[Double]
+  override def deserialize(json: Dynamic, context: JsonContext): Any = {
+    val typeName = context.resolvedType.getTypeName
+    val doubleValue = json.asInstanceOf[Double]
+    typeName match {
+      case "scala.Long" | "Long" => doubleValue.toLong
+      case "scala.Float" | "Float" => doubleValue.toFloat
+      case "scala.Int" | "Int" => doubleValue.toInt
+      case _ => doubleValue
+    }
+  }
 }
 
 class BooleanDeserializer extends Deserializer[Boolean] {

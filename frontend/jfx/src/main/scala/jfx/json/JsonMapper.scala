@@ -17,9 +17,9 @@ class JsonMapper {
     deserializer.deserialize(json, new JsonContext(meta)).asInstanceOf[M]
   }
 
-  def deserializeArray[M <: Model[M]](json: Dynamic, meta: Type): Seq[M] = {
-    if (json == null || js.isUndefined(json) || !json.isInstanceOf[js.Array[?]]) return Seq.empty
-    json.asInstanceOf[js.Array[Dynamic]].toSeq.map(j => deserialize(j, meta))
+  def deserializeArray[M <: Model[M]](json: js.Array[js.Dynamic], meta: Type): Seq[M] = {
+    if (json == null || js.isUndefined(json)) return Seq.empty
+    json.toSeq.map(j => deserialize(j, meta))
   }
 
   def serialize(model: Model[?]): Dynamic = {

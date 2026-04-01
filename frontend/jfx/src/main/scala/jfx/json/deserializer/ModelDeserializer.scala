@@ -41,11 +41,20 @@ class ModelDeserializer extends Deserializer[Model[?]] {
         MetaClassLoader.getByTypeName(typeName)
           .flatMap(MetaClassLoader.factories.get)
           .getOrElse {
-            // Wenn @type nicht gefunden wurde, Fallback auf expectedType
-            MetaClassLoader.factories.getOrElse(expectedType, throw IllegalArgumentException(s"No factory registered for type '${expectedType.typeName}'. Make sure to call Meta(() => new ${expectedType.typeName}()) before deserialization."))
+            val typeNames = MetaClassLoader.typeNames
+            val test = typeNames.getOrElse(typeName, throw IllegalArgumentException(s"No factory registered for type '$typeName'. Make sure to call Meta(() => new $typeName()) before deserialization. available types: ${MetaClassLoader.factories.keys.mkString(",")}"))
+            MetaClassLoader.factories(test)
           }
       case None =>
-        MetaClassLoader.factories.getOrElse(expectedType, throw IllegalArgumentException(s"No factory registered for type '${expectedType.typeName}'. Make sure to call Meta(() => new ${expectedType.typeName}()) before deserialization."))
+        MetaClassLoader.factories.get(expectedType) match {
+          case Some(factory) => factory
+          case None =>
+            MetaClassLoader.getByTypeName(expectedType.typeName)
+              .flatMap(MetaClassLoader.factories.get)
+              .getOrElse {
+                throw IllegalArgumentException(s"No factory registered for type '${expectedType.typeName}'. Make sure to call Meta(() => new ${expectedType.typeName}()) before deserialization.")
+              }
+        }
     }
   }
 
@@ -55,11 +64,15 @@ class ModelDeserializer extends Deserializer[Model[?]] {
         val fieldName = getJsonFieldName(property)
         val rawValue = json.selectDynamic(fieldName).asInstanceOf[js.Any]
 
-        if (rawValue != null && !js.isUndefined(rawValue)) {
-          val deserializer = DeserializerFactory.buildFromType(property.genericType)
-          val elemContext = new JsonContext(property.genericType)
-          val decoded = deserializer.deserialize(rawValue.asInstanceOf[Dynamic], elemContext)
-          assignValue(model, property.asInstanceOf[PropertyAccess[Any, Any]], decoded)
+        if (!js.isUndefined(rawValue)) {
+          if (rawValue == null) {
+            assignValue(model, property.asInstanceOf[PropertyAccess[Any, Any]], null)
+          } else {
+            val deserializer = DeserializerFactory.buildFromType(property.genericType)
+            val elemContext = new JsonContext(property.genericType)
+            val decoded = deserializer.deserialize(rawValue.asInstanceOf[Dynamic], elemContext)
+            assignValue(model, property.asInstanceOf[PropertyAccess[Any, Any]], decoded)
+          }
         }
       }
     }
