@@ -19,7 +19,7 @@ object DeserializerFactory {
       case clazz: Class[E] if classOf[UUID].isAssignableFrom(clazz) => new UUIDDeserializer()
       case clazz: Class[E] if classOf[Number].isAssignableFrom(clazz) => new NumberDeserializer()
       case clazz: Class[E] if classOf[Boolean].isAssignableFrom(clazz) => new BooleanDeserializer()
-      case clazz: Class[E] if classOf[js.Array[?]].isAssignableFrom(clazz) => new ListPropertyDeserializer()
+      case clazz: Class[E] if classOf[js.Array[?]].isAssignableFrom(clazz) => new JsArrayDeserializer()
       case _ => throw new IllegalArgumentException(s"No deserializer found for class $clazz")
     }
 
@@ -36,6 +36,7 @@ object DeserializerFactory {
           case "scala.Float" | "Float" => new NumberDeserializer()
           case "scala.Long" | "Long" => new NumberDeserializer()
           case "scala.Boolean" | "Boolean" => new BooleanDeserializer()
+          case "scala.scalajs.js.Array" => new JsArrayDeserializer()
           case "java.util.UUID" | "UUID" => new UUIDDeserializer()
           case "jfx.core.state.Property" | "Property" => new PropertyDeserializer()
           case "jfx.core.state.ListProperty" | "ListProperty" => new ListPropertyDeserializer()
@@ -56,7 +57,8 @@ object DeserializerFactory {
                               case (key, factory) if key.typeName == sc.typeName => new ModelDeserializer()
                             }.getOrElse {
                               findFactoryByJsonType(sc.typeName).getOrElse {
-                                throw new IllegalArgumentException(s"No deserializer found for type '${sc.typeName}'")
+                                if (sc.subTypes.nonEmpty) new ModelDeserializer()
+                                else throw new IllegalArgumentException(s"No deserializer found for type '${sc.typeName}'")
                               }
                             }
                         }

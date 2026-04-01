@@ -57,12 +57,19 @@ class ModelDeserializer extends Deserializer[Model[?]] {
         MetaClassLoader.factories.get(expectedType) match {
           case Some(factory) => factory
           case None =>
-            MetaClassLoader.factories.collectFirst {
-              case (key, factory) if key.typeName == expectedType.typeName => factory
-            }.getOrElse {
+            val subTypeFactory = findSubTypeFactory(expectedType)
+            subTypeFactory.getOrElse {
               throw IllegalArgumentException(s"No factory registered for type '${expectedType.typeName}'. Available types: ${MetaClassLoader.factories.keys.map(_.typeName).mkString(", ")}")
             }
         }
+    }
+  }
+
+  private def findSubTypeFactory(expectedType: SimpleClass[?]): Option[() => Any] = {
+    val subTypes = expectedType.subTypes
+    subTypes.collectFirst {
+      case subType if MetaClassLoader.factories.contains(subType) =>
+        MetaClassLoader.factories(subType)
     }
   }
 
@@ -121,7 +128,7 @@ class ModelDeserializer extends Deserializer[Model[?]] {
           case single =>
             list.addOne(single)
         }
-      case _ =>
+      case _ => property.set(model, decoded)
     }
   }
 

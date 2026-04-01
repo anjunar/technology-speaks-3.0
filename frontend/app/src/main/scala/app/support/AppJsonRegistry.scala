@@ -29,7 +29,7 @@ class AppJsonRegistry {
   Meta[Link](() => new Link())
   Meta[ManagedProperty](() => new ManagedProperty())
   Meta[Address](() => new Address())
-  Meta[Email](() => new Email())
+  Meta[EMail](() => new EMail())
   Meta[ErrorResponse](() => new ErrorResponse())
   Meta[Account](() => new Account())
   Meta[Media](() => new Media())

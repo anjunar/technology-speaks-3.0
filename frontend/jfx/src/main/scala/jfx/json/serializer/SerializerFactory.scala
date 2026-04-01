@@ -19,7 +19,7 @@ object SerializerFactory {
       case clazz: Class[E] if classOf[UUID].isAssignableFrom(clazz) => new UUIDSerializer()
       case clazz: Class[E] if classOf[Number].isAssignableFrom(clazz) => new NumberSerializer()
       case clazz: Class[E] if classOf[Boolean].isAssignableFrom(clazz) => new BooleanSerializer()
-      case clazz: Class[E] if classOf[js.Array[?]].isAssignableFrom(clazz) => new ListPropertySerializer()
+      case clazz: Class[E] if classOf[js.Array[?]].isAssignableFrom(clazz) => new JsArraySerializer()
       case _ => throw new IllegalArgumentException(s"No serializer found for class $clazz")
     }
 

@@ -3,9 +3,11 @@ package app.domain.documents
 import app.domain.core.AbstractLink
 import app.support.JsonModel
 import jfx.core.meta.Meta
+import jfx.json.JsonType
 
 import scala.scalajs.js
 
+@JsonType("document-root")
 class DocumentsLink(
   var rel: String = "",
   var url: String = "",

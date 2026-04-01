@@ -33,17 +33,28 @@ object ClassAnnotationMacros {
     val fullNameExpr = Expr(classSymbol.fullName)
     val simpleNameExpr = Expr(classSymbol.name)
     val annotationsExpr = extractAnnotations(classSymbol)
-    
+
     // Properties aus der Klasse und allen Basisklassen auslesen
     val propertiesExpr = PropertyMacros.describePropertiesImpl[E]
+    
+    // Basisklassen/Traits zur Compilezeit auslesen
+    val baseTypesExpr = extractBaseTypes[E]
 
     '{
       SimpleClass[E](
         typeName = $fullNameExpr,
         annotations = $annotationsExpr,
-        properties = $propertiesExpr.toArray
+        properties = $propertiesExpr.toArray,
+        baseTypes = $baseTypesExpr
       )
     }
+  }
+  
+  private def extractBaseTypes[E: Type](using Quotes): Expr[Array[String]] = {
+    import quotes.reflect.*
+    
+    val baseTypes = TypeRepr.of[E].baseClasses.map(_.fullName).filter(_.nonEmpty)
+    '{ Array(${ Varargs(baseTypes.map(Expr(_))) }*) }
   }
 
   private def describeClassAnnotationsImpl[E: Type](using Quotes): Expr[Array[Annotation]] = {

@@ -4,6 +4,7 @@ import app.domain.core.{AbstractLink, User, UsersLink}
 import app.domain.documents.DocumentsLink
 import app.domain.followers.RelationShipLink
 import app.domain.security.*
+import app.domain.timeline.PostsLink
 import app.support.{Api, JsonModel}
 import app.support.Api.given
 import com.anjunar.scala.enterprise.macros.validation.JsonName
@@ -31,6 +32,7 @@ object Application {
     ConfirmLink.meta,
     DocumentsLink.meta,
     LogoutLink.meta,
+    PostsLink.meta,
     PasswordLoginLink.meta,
     PasswordRegisterLink.meta,
     WebAuthnLoginLink.meta,

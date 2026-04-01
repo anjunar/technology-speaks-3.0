@@ -12,7 +12,8 @@ Diese Datei beschreibt nicht nur Arbeitsregeln, sondern die tragenden Architektu
 - Test-Login:
   - User: `p_bittner@gmx.de`
   - Passwort: `test`
-- Fuer sbt das bereits laufende `sbtn-x86_64-pc-win32.exe` bzw. den vorhandenen sbt-Server nutzen.
+- Fuer sbt das bereits laufende `sbtn-x86_64-pc-win32.exe` bzw. den vorhandenen sbt-Server nutzen. `sbtn-x86_64-pc-win32.exe` ist im PATH
+- SBT ZU NUTZEN IST EIN SCHWERWIEGENDER FEHLER!! UND WIRD BESTRAFT!
 - Keine Kommentare im Code!
 
 ## Architekturueberblick

@@ -2,9 +2,11 @@ package app.domain.core
 
 import app.support.JsonModel
 import jfx.core.meta.Meta
+import jfx.json.JsonType
 
 import scala.scalajs.js
 
+@JsonType("users-list")
 class UsersLink(
   var rel: String = "",
   var url: String = "",

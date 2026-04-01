@@ -2,17 +2,16 @@ package jfx.json.deserializer
 
 import com.anjunar.scala.enterprise.macros.MetaClassLoader
 import com.anjunar.scala.enterprise.macros.reflection.{ParameterizedType, SimpleClass}
-import jfx.core.state.ListProperty
 
 import scala.scalajs.js
 import scala.scalajs.js.Dynamic
 
-class ListPropertyDeserializer extends Deserializer[ListProperty[?]] {
+class JsArrayDeserializer extends Deserializer[js.Array[?]] {
 
   override def deserialize(json: Dynamic, context: JsonContext): Any = {
     val elemType = context.resolvedType match {
       case pt: ParameterizedType => pt.typeArguments(0)
-      case _ => throw new IllegalStateException("ListProperty must have a generic type")
+      case _ => throw new IllegalStateException("js.Array must have a generic type")
     }
 
     val arr = json.asInstanceOf[js.Array[Dynamic]]
@@ -28,7 +27,7 @@ class ListPropertyDeserializer extends Deserializer[ListProperty[?]] {
       i += 1
     }
 
-    new ListProperty(result)
+    result
   }
 
   private def resolveElementType(json: Dynamic, declaredType: com.anjunar.scala.enterprise.macros.reflection.Type): JsonContext = {

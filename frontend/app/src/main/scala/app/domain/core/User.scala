@@ -21,7 +21,7 @@ class User extends AbstractEntity[User] {
   val image: Property[Media | Null] = Property(null)
   val info: Property[UserInfo | Null] = Property(null)
   val address: Property[Address | Null] = Property(null)
-  val emails: ListProperty[Email] = ListProperty()
+  val emails: ListProperty[EMail] = ListProperty()
 
   override def meta: Meta[User] = User.meta
 

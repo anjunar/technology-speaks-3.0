@@ -3,9 +3,11 @@ package app.domain.followers
 import app.domain.core.AbstractLink
 import app.support.JsonModel
 import jfx.core.meta.Meta
+import jfx.json.JsonType
 
 import scala.scalajs.js
 
+@JsonType("followers-list")
 class RelationShipLink(
   var rel: String = "",
   var url: String = "",
