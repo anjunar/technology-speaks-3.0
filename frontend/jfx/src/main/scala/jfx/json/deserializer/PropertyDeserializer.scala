@@ -14,7 +14,7 @@ class PropertyDeserializer extends Deserializer[Property[?]] {
       case _ => throw new IllegalStateException("Property must have a generic type")
     }
 
-    val deserializer = DeserializerFactory.build(propertyType.runtimeClass.asInstanceOf[Class[Any]])
+    val deserializer = DeserializerFactory.build(TypeHelper.rawType(propertyType).asInstanceOf[Class[Any]])
     deserializer.deserialize(json, new JsonContext(propertyType))
   }
 

@@ -11,10 +11,6 @@ import scala.scalajs.js
 object SerializerFactory {
 
   def build[E](clazz: Class[E]): Serializer[E] = {
-    if (clazz == null) {
-      return new GenericSerializer().asInstanceOf[Serializer[E]]
-    }
-
     val result = clazz match {
       case clazz: Class[E] if classOf[Property[?]].isAssignableFrom(clazz) => new PropertySerializer()
       case clazz: Class[E] if classOf[ListProperty[?]].isAssignableFrom(clazz) => new ListPropertySerializer()
@@ -24,27 +20,10 @@ object SerializerFactory {
       case clazz: Class[E] if classOf[Number].isAssignableFrom(clazz) => new NumberSerializer()
       case clazz: Class[E] if classOf[Boolean].isAssignableFrom(clazz) => new BooleanSerializer()
       case clazz: Class[E] if classOf[js.Array[?]].isAssignableFrom(clazz) => new ListPropertySerializer()
-      case _ => new GenericSerializer()
+      case _ => throw new IllegalArgumentException(s"No serializer found for class $clazz")
     }
 
     result.asInstanceOf[Serializer[E]]
   }
 
-  def buildFromType(tpe: Type): Serializer[?] = {
-    tpe match {
-      case sc: SimpleClass[?] => build(sc.runtimeClass.asInstanceOf[Class[Any]])
-      case pt: ParameterizedType =>
-        pt.rawType match {
-          case sc: SimpleClass[?] => build(sc.runtimeClass.asInstanceOf[Class[Any]])
-          case _ => new GenericSerializer()
-        }
-      case _ => new GenericSerializer()
-    }
-  }
-
 }
-
-class GenericSerializer extends Serializer[Any] {
-  override def serialize(input: Any, context: JavaContext): js.Dynamic = input.asInstanceOf[js.Dynamic]
-}
-

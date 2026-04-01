@@ -20,7 +20,7 @@ class PropertySerializer extends Serializer[Property[?]]{
       return null.asInstanceOf[js.Dynamic]
     }
 
-    SerializerFactory.build(propertyType.runtimeClass.asInstanceOf[Class[Any]])
+    SerializerFactory.build(TypeHelper.rawType(propertyType).asInstanceOf[Class[Any]])
       .serialize(value, new JavaContext(propertyType))
   }
 }

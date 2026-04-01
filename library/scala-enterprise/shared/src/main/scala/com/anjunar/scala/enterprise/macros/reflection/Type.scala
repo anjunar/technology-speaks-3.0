@@ -9,10 +9,11 @@ trait Type {
 case class SimpleClass[T](
   typeName: String,
   annotations: Array[Annotation] = Array.empty,
-  properties: Array[PropertyAccess[T, ?]] = Array.empty
+  properties: Array[PropertyAccess[T, ?]] = Array.empty,
 ) extends Type {
-  def runtimeClass: Class[T] = null.asInstanceOf[Class[T]]
   override def getTypeName: String = typeName
+
+  override def toString: String = s"SimpleClass($typeName)"
 }
 
 trait ParameterizedType extends Type {

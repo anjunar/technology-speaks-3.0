@@ -16,7 +16,7 @@ class ListPropertySerializer extends Serializer[ListProperty[?]] {
     }
 
     val arr = input.underlying.map { elem =>
-      SerializerFactory.build(elemType.runtimeClass.asInstanceOf[Class[Any]])
+      SerializerFactory.build(TypeHelper.rawType(elemType).asInstanceOf[Class[Any]])
         .serialize(elem, new JavaContext(elemType))
     }
 

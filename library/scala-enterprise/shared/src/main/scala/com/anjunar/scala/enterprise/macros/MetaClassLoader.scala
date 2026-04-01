@@ -10,9 +10,9 @@ object MetaClassLoader {
   val classes : mutable.Map[Class[?], SimpleClass[?]] = mutable.Map.empty
   val typeNames : mutable.Map[String, SimpleClass[?]] = mutable.Map.empty
 
-  def register(clazz: SimpleClass[?], instance: () => Any): Unit = {
+  def register(clazz: SimpleClass[?], javaType : Class[?], instance: () => Any): Unit = {
     factories += clazz -> instance
-    classes += clazz.runtimeClass -> clazz
+    classes += javaType -> clazz
     
     val typeName = clazz.annotations
       .collectFirst {

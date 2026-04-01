@@ -20,7 +20,7 @@ class ListPropertyDeserializer extends Deserializer[ListProperty[?]] {
 
     var i = 0
     while (i < arr.length) {
-      val deserializer = DeserializerFactory.build(elemType.runtimeClass.asInstanceOf[Class[Any]])
+      val deserializer = DeserializerFactory.build(TypeHelper.rawType(elemType).asInstanceOf[Class[Any]])
       val value = deserializer.deserialize(arr(i), new JsonContext(elemType))
       result.push(value)
       i += 1

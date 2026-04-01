@@ -1,5 +1,6 @@
 package jfx.json.deserializer
 
+import com.anjunar.scala.enterprise.macros.TypeHelper
 import com.anjunar.scala.enterprise.macros.reflection.{ParameterizedType, SimpleClass, Type}
 import jfx.core.state.{ListProperty, Property}
 import jfx.form.Model
@@ -27,10 +28,10 @@ object DeserializerFactory {
 
   def buildFromType(tpe: Type): Deserializer[?] = {
     tpe match {
-      case sc: SimpleClass[?] => build(sc.runtimeClass.asInstanceOf[Class[Any]])
+      case sc: SimpleClass[?] => build(TypeHelper.rawType(sc).asInstanceOf[Class[Any]])
       case pt: ParameterizedType =>
         pt.rawType match {
-          case sc: SimpleClass[?] => build(sc.runtimeClass.asInstanceOf[Class[Any]])
+          case sc: SimpleClass[?] => build(TypeHelper.rawType(sc).asInstanceOf[Class[Any]])
           case _ => throw new IllegalArgumentException(s"No deserializer found for class $tpe")
         }
       case _ => throw new IllegalArgumentException(s"No deserializer found for class $tpe")
