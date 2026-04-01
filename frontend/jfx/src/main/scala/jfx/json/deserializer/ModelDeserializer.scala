@@ -21,12 +21,32 @@ class ModelDeserializer extends Deserializer[Model[?]] {
       case _ => throw new IllegalArgumentException(s"Expected SimpleClass or ParameterizedType, got ${context.resolvedType}")
     }
 
-    val factories = MetaClassLoader.factories
-    val factory = factories.getOrElse(modelType, throw IllegalStateException(s"No factory registered for type '${modelType.typeName}'"))
+    val jsonType = readJsonType(json)
+    val factory = findFactory(jsonType, modelType)
 
     val model = factory().asInstanceOf[Model[?]]
     populateModel(model, json, context)
     model
+  }
+
+  private def readJsonType(json: Dynamic): Option[String] = {
+    val rawType = json.selectDynamic("@type").asInstanceOf[js.Any]
+    if (rawType == null || js.isUndefined(rawType)) None
+    else Some(rawType.toString)
+  }
+
+  private def findFactory(jsonType: Option[String], expectedType: SimpleClass[?]): () => Any = {
+    jsonType match {
+      case Some(typeName) =>
+        MetaClassLoader.getByTypeName(typeName)
+          .flatMap(MetaClassLoader.factories.get)
+          .getOrElse {
+            // Wenn @type nicht gefunden wurde, Fallback auf expectedType
+            MetaClassLoader.factories.getOrElse(expectedType, throw IllegalArgumentException(s"No factory registered for type '${expectedType.typeName}'. Make sure to call Meta(() => new ${expectedType.typeName}()) before deserialization."))
+          }
+      case None =>
+        MetaClassLoader.factories.getOrElse(expectedType, throw IllegalArgumentException(s"No factory registered for type '${expectedType.typeName}'. Make sure to call Meta(() => new ${expectedType.typeName}()) before deserialization."))
+    }
   }
 
   private def populateModel(model: Model[?], json: Dynamic, parentContext: JsonContext): Unit = {

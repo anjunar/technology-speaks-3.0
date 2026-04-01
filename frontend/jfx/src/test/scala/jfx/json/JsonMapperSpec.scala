@@ -3,25 +3,52 @@ package jfx.json
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
+import scala.scalajs.js
+import scala.scalajs.js.Dynamic.literal as jsObj
 import jfx.core.state.{ListProperty, Property}
 import jfx.core.meta.Meta
+import com.anjunar.scala.enterprise.macros.validation.JsonName
+import jfx.json.JsonIgnore
 
 import java.util.UUID
 
 class JsonMapperSpec extends AnyFlatSpec with Matchers {
 
-  "JsonMapper" should "deserialize simple object with String properties" in {
+  "JsonMapper" should "serialize and deserialize simple model with String properties" in {
     TestPerson.meta
     val jsonMapper = new JsonMapper()
     val person = new TestPerson()
     person.name.set("Test User")
     person.email.set("test@example.com")
+    
     val json = jsonMapper.serialize(person)
-
     val result = jsonMapper.deserialize[TestPerson](json, TestPerson.meta)
 
     result.name.get shouldBe "Test User"
     result.email.get shouldBe "test@example.com"
+  }
+
+  it should "include @type field when @JsonType annotation is present" in {
+    TestPersonWithJsonType.meta
+    val jsonMapper = new JsonMapper()
+    val person = new TestPersonWithJsonType()
+    person.name.set("Typed Person")
+    
+    val json = jsonMapper.serialize(person)
+    
+    json.asInstanceOf[js.Dynamic].selectDynamic("@type").toString shouldBe "TestPersonWithJsonType"
+  }
+
+  it should "deserialize using @type field when present" in {
+    TestPersonWithJsonType.meta
+    val jsonMapper = new JsonMapper()
+    val person = new TestPersonWithJsonType()
+    person.name.set("Typed Person")
+    
+    val json = jsonMapper.serialize(person)
+    val result = jsonMapper.deserialize[TestPersonWithJsonType](json, TestPersonWithJsonType.meta)
+
+    result.name.get shouldBe "Typed Person"
   }
 
   it should "deserialize numeric values" in {
@@ -30,8 +57,8 @@ class JsonMapperSpec extends AnyFlatSpec with Matchers {
     val numbers = new TestNumbers()
     numbers.age.set(30)
     numbers.salary.set(50000.50)
+    
     val json = jsonMapper.serialize(numbers)
-
     val result = jsonMapper.deserialize[TestNumbers](json, TestNumbers.meta)
 
     result.age.get shouldBe 30
@@ -44,8 +71,8 @@ class JsonMapperSpec extends AnyFlatSpec with Matchers {
     val flags = new TestFlags()
     flags.active.set(true)
     flags.verified.set(false)
+    
     val json = jsonMapper.serialize(flags)
-
     val result = jsonMapper.deserialize[TestFlags](json, TestFlags.meta)
 
     result.active.get shouldBe true
@@ -58,36 +85,45 @@ class JsonMapperSpec extends AnyFlatSpec with Matchers {
     val uuid = UUID.randomUUID()
     val withUuid = new TestWithUuid()
     withUuid.id.set(uuid)
+    
     val json = jsonMapper.serialize(withUuid)
-
     val result = jsonMapper.deserialize[TestWithUuid](json, TestWithUuid.meta)
 
     result.id.get shouldBe uuid
   }
 
-  it should "deserialize Property[String]" in {
-    TestWithProperty.meta
+  it should "respect @JsonName annotation for field renaming" in {
+    TestWithJsonName.meta
     val jsonMapper = new JsonMapper()
-    val withProperty = new TestWithProperty()
-    withProperty.name.set("PropertyValue")
-    val json = jsonMapper.serialize(withProperty)
-
-    val result = jsonMapper.deserialize[TestWithProperty](json, TestWithProperty.meta)
-
-    result.name.get shouldBe "PropertyValue"
+    val model = new TestWithJsonName()
+    model.customField.set("Custom Value")
+    
+    val json = jsonMapper.serialize(model)
+    
+    val jsonObj = json.asInstanceOf[js.Dynamic]
+    js.isUndefined(jsonObj.selectDynamic("customField")) shouldBe true
+    js.isUndefined(jsonObj.selectDynamic("renamedField")) shouldBe false
+    jsonObj.selectDynamic("renamedField").toString shouldBe "Custom Value"
+    
+    val result = jsonMapper.deserialize[TestWithJsonName](json, TestWithJsonName.meta)
+    result.customField.get shouldBe "Custom Value"
   }
 
-  it should "deserialize Property[UUID]" in {
-    TestWithPropertyUuid.meta
+  it should "ignore fields with @JsonIgnore annotation" in {
+    TestWithJsonIgnore.meta
     val jsonMapper = new JsonMapper()
-    val uuid = UUID.randomUUID()
-    val withPropertyUuid = new TestWithPropertyUuid()
-    withPropertyUuid.id.set(uuid)
-    val json = jsonMapper.serialize(withPropertyUuid)
-
-    val result = jsonMapper.deserialize[TestWithPropertyUuid](json, TestWithPropertyUuid.meta)
-
-    result.id.get shouldBe uuid
+    val model = new TestWithJsonIgnore()
+    model.visible.set("Visible")
+    model.hidden.set("Hidden")
+    
+    val json = jsonMapper.serialize(model)
+    
+    val jsonObj = json.asInstanceOf[js.Dynamic]
+    js.isUndefined(jsonObj.selectDynamic("visible")) shouldBe false
+    js.isUndefined(jsonObj.selectDynamic("hidden")) shouldBe true
+    
+    val result = jsonMapper.deserialize[TestWithJsonIgnore](json, TestWithJsonIgnore.meta)
+    result.visible.get shouldBe "Visible"
   }
 
   it should "deserialize ListProperty" in {
@@ -95,8 +131,8 @@ class JsonMapperSpec extends AnyFlatSpec with Matchers {
     val jsonMapper = new JsonMapper()
     val withList = new TestWithListProperty()
     withList.items.setAll(Seq("item1", "item2", "item3"))
+    
     val json = jsonMapper.serialize(withList)
-
     val result = jsonMapper.deserialize[TestWithListProperty](json, TestWithListProperty.meta)
 
     result.items.length shouldBe 3
@@ -105,31 +141,76 @@ class JsonMapperSpec extends AnyFlatSpec with Matchers {
     result.items.get(2) shouldBe "item3"
   }
 
-  it should "deserialize Model with links" in {
-    TestModelWithLinks.meta
-    TestLinkFromSpec.meta
+  it should "deserialize nested models" in {
+    TestNestedParent.meta
+    TestNestedChild.meta
     val jsonMapper = new JsonMapper()
-    val entity = new TestModelWithLinks()
-    entity.name.set("Entity")
-    val link1 = new TestLinkFromSpec()
-    link1.rel.set("self")
-    link1.url.set("/api/1")
-    link1.method.set("GET")
-    val link2 = new TestLinkFromSpec()
-    link2.rel.set("edit")
-    link2.url.set("/api/2")
-    link2.method.set("PUT")
-    entity.links.setAll(Seq(link1, link2))
-    val json = jsonMapper.serialize(entity)
+    
+    val parent = new TestNestedParent()
+    parent.name.set("Parent")
+    val child = new TestNestedChild()
+    child.value.set("Child Value")
+    parent.child.set(child)
+    
+    val json = jsonMapper.serialize(parent)
+    val result = jsonMapper.deserialize[TestNestedParent](json, TestNestedParent.meta)
 
-    val result = jsonMapper.deserialize[TestModelWithLinks](json, TestModelWithLinks.meta)
+    result.name.get shouldBe "Parent"
+    result.child.get.value.get shouldBe "Child Value"
+  }
 
-    result.name.get shouldBe "Entity"
-    result.links.length shouldBe 2
-    result.links.get(0).rel.get shouldBe "self"
-    result.links.get(0).url.get shouldBe "/api/1"
-    result.links.get(1).rel.get shouldBe "edit"
-    result.links.get(1).url.get shouldBe "/api/2"
+  it should "handle null values gracefully" in {
+    TestPerson.meta
+    val jsonMapper = new JsonMapper()
+    val person = new TestPerson()
+    person.name.set(null)
+    person.email.set("notnull@example.com")
+    
+    val json = jsonMapper.serialize(person)
+    val result = jsonMapper.deserialize[TestPerson](json, TestPerson.meta)
+
+    result.name.get shouldBe null
+    result.email.get shouldBe "notnull@example.com"
+  }
+
+  it should "handle missing optional fields" in {
+    TestPerson.meta
+    val jsonMapper = new JsonMapper()
+    val person = new TestPerson()
+    person.name.set("OnlyName")
+    
+    val json = jsonMapper.serialize(person)
+    val result = jsonMapper.deserialize[TestPerson](json, TestPerson.meta)
+
+    result.name.get shouldBe "OnlyName"
+  }
+
+  it should "throw exception for unknown @type" in {
+    val jsonMapper = new JsonMapper()
+    
+    val json = jsObj(
+      "@type" -> "UnknownType",
+      "name" -> "Test"
+    )
+    
+    val ex = intercept[IllegalArgumentException] {
+      jsonMapper.deserialize[TestPerson](json, TestPerson.meta)
+    }
+    
+    ex.getMessage should include("UnknownType")
+    ex.getMessage should include("Available types")
+  }
+
+  it should "throw exception when factory not registered" in {
+    val jsonMapper = new JsonMapper()
+    val model = new TestUnregistered()
+    
+    val ex = intercept[IllegalArgumentException] {
+      jsonMapper.serialize(model)
+    }
+    
+    ex.getMessage should include("TestUnregistered")
+    ex.getMessage should include("Meta")
   }
 
   it should "serialize and deserialize round-trip" in {
@@ -146,57 +227,22 @@ class JsonMapperSpec extends AnyFlatSpec with Matchers {
     deserialized.email.get shouldBe "roundtrip@test.com"
   }
 
-  it should "serialize and deserialize Model with ListProperty[TestLinkFromSpec] round-trip" in {
-    TestModelWithLinks.meta
-    TestLinkFromSpec.meta
+  it should "serialize and deserialize model with nested models round-trip" in {
+    TestNestedParent.meta
+    TestNestedChild.meta
     val jsonMapper = new JsonMapper()
-    val entity = new TestModelWithLinks()
-    entity.name.set("Linked Entity")
-    val link1 = new TestLinkFromSpec()
-    link1.rel.set("self")
-    link1.url.set("/api/self")
-    link1.method.set("GET")
-    val link2 = new TestLinkFromSpec()
-    link2.rel.set("delete")
-    link2.url.set("/api/delete")
-    link2.method.set("DELETE")
-    entity.links.setAll(Seq(link1, link2))
+    
+    val parent = new TestNestedParent()
+    parent.name.set("Parent")
+    val child = new TestNestedChild()
+    child.value.set("Child Value")
+    parent.child.set(child)
+    
+    val json = jsonMapper.serialize(parent)
+    val deserialized = jsonMapper.deserialize[TestNestedParent](json, TestNestedParent.meta)
 
-    val json = jsonMapper.serialize(entity)
-    val deserialized = jsonMapper.deserialize[TestModelWithLinks](json, TestModelWithLinks.meta)
-
-    deserialized.name.get shouldBe "Linked Entity"
-    deserialized.links.length shouldBe 2
-    deserialized.links.get(0).rel.get shouldBe "self"
-    deserialized.links.get(0).url.get shouldBe "/api/self"
-    deserialized.links.get(1).rel.get shouldBe "delete"
-    deserialized.links.get(1).url.get shouldBe "/api/delete"
-  }
-
-  it should "handle null values gracefully" in {
-    TestPerson.meta
-    val jsonMapper = new JsonMapper()
-    val person = new TestPerson()
-    person.name.set(null)
-    person.email.set("notnull@example.com")
-    val json = jsonMapper.serialize(person)
-
-    val result = jsonMapper.deserialize[TestPerson](json, TestPerson.meta)
-
-    result.name.get shouldBe null
-    result.email.get shouldBe "notnull@example.com"
-  }
-
-  it should "handle missing optional fields" in {
-    TestPerson.meta
-    val jsonMapper = new JsonMapper()
-    val person = new TestPerson()
-    person.name.set("OnlyName")
-    val json = jsonMapper.serialize(person)
-
-    val result = jsonMapper.deserialize[TestPerson](json, TestPerson.meta)
-
-    result.name.get shouldBe "OnlyName"
+    deserialized.name.get shouldBe "Parent"
+    deserialized.child.get.value.get shouldBe "Child Value"
   }
 }
 
@@ -209,6 +255,17 @@ class TestPerson extends jfx.form.Model[TestPerson] {
 
 object TestPerson {
   val meta: Meta[TestPerson] = Meta(() => new TestPerson())
+}
+
+@JsonType("TestPersonWithJsonType")
+class TestPersonWithJsonType extends jfx.form.Model[TestPersonWithJsonType] {
+  val name: Property[String] = Property("")
+
+  override def meta: Meta[TestPersonWithJsonType] = TestPersonWithJsonType.meta
+}
+
+object TestPersonWithJsonType {
+  val meta: Meta[TestPersonWithJsonType] = Meta(() => new TestPersonWithJsonType())
 }
 
 class TestNumbers extends jfx.form.Model[TestNumbers] {
@@ -243,24 +300,28 @@ object TestWithUuid {
   val meta: Meta[TestWithUuid] = Meta(() => new TestWithUuid())
 }
 
-class TestWithProperty extends jfx.form.Model[TestWithProperty] {
-  val name: Property[String] = Property("")
+class TestWithJsonName extends jfx.form.Model[TestWithJsonName] {
+  @JsonName("renamedField")
+  val customField: Property[String] = Property("")
 
-  override def meta: Meta[TestWithProperty] = TestWithProperty.meta
+  override def meta: Meta[TestWithJsonName] = TestWithJsonName.meta
 }
 
-object TestWithProperty {
-  val meta: Meta[TestWithProperty] = Meta(() => new TestWithProperty())
+object TestWithJsonName {
+  val meta: Meta[TestWithJsonName] = Meta(() => new TestWithJsonName())
 }
 
-class TestWithPropertyUuid extends jfx.form.Model[TestWithPropertyUuid] {
-  val id: Property[UUID] = Property(null.asInstanceOf[UUID])
+class TestWithJsonIgnore extends jfx.form.Model[TestWithJsonIgnore] {
+  val visible: Property[String] = Property("")
+  
+  @JsonIgnore
+  val hidden: Property[String] = Property("")
 
-  override def meta: Meta[TestWithPropertyUuid] = TestWithPropertyUuid.meta
+  override def meta: Meta[TestWithJsonIgnore] = TestWithJsonIgnore.meta
 }
 
-object TestWithPropertyUuid {
-  val meta: Meta[TestWithPropertyUuid] = Meta(() => new TestWithPropertyUuid())
+object TestWithJsonIgnore {
+  val meta: Meta[TestWithJsonIgnore] = Meta(() => new TestWithJsonIgnore())
 }
 
 class TestWithListProperty extends jfx.form.Model[TestWithListProperty] {
@@ -273,25 +334,33 @@ object TestWithListProperty {
   val meta: Meta[TestWithListProperty] = Meta(() => new TestWithListProperty())
 }
 
-class TestModelWithLinks extends jfx.form.Model[TestModelWithLinks] {
+class TestNestedChild extends jfx.form.Model[TestNestedChild] {
+  val value: Property[String] = Property("")
+
+  override def meta: Meta[TestNestedChild] = TestNestedChild.meta
+}
+
+object TestNestedChild {
+  val meta: Meta[TestNestedChild] = Meta(() => new TestNestedChild())
+}
+
+class TestNestedParent extends jfx.form.Model[TestNestedParent] {
   val name: Property[String] = Property("")
-  val links: ListProperty[TestLinkFromSpec] = ListProperty()
+  val child: Property[TestNestedChild | Null] = Property(null)
 
-  override def meta: Meta[TestModelWithLinks] = TestModelWithLinks.meta
+  override def meta: Meta[TestNestedParent] = TestNestedParent.meta
 }
 
-object TestModelWithLinks {
-  val meta: Meta[TestModelWithLinks] = Meta(() => new TestModelWithLinks())
+object TestNestedParent {
+  val meta: Meta[TestNestedParent] = Meta(() => new TestNestedParent())
 }
 
-class TestLinkFromSpec extends jfx.form.Model[TestLinkFromSpec] {
-  val rel: Property[String] = Property("")
-  val url: Property[String] = Property("")
-  val method: Property[String] = Property("")
+class TestUnregistered extends jfx.form.Model[TestUnregistered] {
+  val value: Property[String] = Property("")
 
-  override def meta: Meta[TestLinkFromSpec] = TestLinkFromSpec.meta
+  override def meta: Meta[TestUnregistered] = TestUnregistered.meta
 }
 
-object TestLinkFromSpec {
-  val meta: Meta[TestLinkFromSpec] = Meta(() => new TestLinkFromSpec())
+object TestUnregistered {
+  val meta: Meta[TestUnregistered] = Meta(() => new TestUnregistered())
 }

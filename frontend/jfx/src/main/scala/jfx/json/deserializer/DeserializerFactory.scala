@@ -10,10 +10,6 @@ import scala.scalajs.js
 object DeserializerFactory {
 
   def build[E](clazz: Class[E]): Deserializer[E] = {
-    if (clazz == null) {
-      return new GenericDeserializer().asInstanceOf[Deserializer[E]]
-    }
-
     val result = clazz match {
       case clazz: Class[E] if classOf[Property[?]].isAssignableFrom(clazz) => new PropertyDeserializer()
       case clazz: Class[E] if classOf[ListProperty[?]].isAssignableFrom(clazz) => new ListPropertyDeserializer()
@@ -23,7 +19,7 @@ object DeserializerFactory {
       case clazz: Class[E] if classOf[Number].isAssignableFrom(clazz) => new NumberDeserializer()
       case clazz: Class[E] if classOf[Boolean].isAssignableFrom(clazz) => new BooleanDeserializer()
       case clazz: Class[E] if classOf[js.Array[?]].isAssignableFrom(clazz) => new ListPropertyDeserializer()
-      case _ => new GenericDeserializer()
+      case _ => throw new IllegalArgumentException(s"No deserializer found for class $clazz")
     }
 
     result.asInstanceOf[Deserializer[E]]
@@ -35,15 +31,10 @@ object DeserializerFactory {
       case pt: ParameterizedType =>
         pt.rawType match {
           case sc: SimpleClass[?] => build(sc.runtimeClass.asInstanceOf[Class[Any]])
-          case _ => new GenericDeserializer()
+          case _ => throw new IllegalArgumentException(s"No deserializer found for class $tpe")
         }
-      case _ => new GenericDeserializer()
+      case _ => throw new IllegalArgumentException(s"No deserializer found for class $tpe")
     }
   }
 
 }
-
-class GenericDeserializer extends Deserializer[Any] {
-  override def deserialize(json: scala.scalajs.js.Dynamic, context: JsonContext): Any = json
-}
-

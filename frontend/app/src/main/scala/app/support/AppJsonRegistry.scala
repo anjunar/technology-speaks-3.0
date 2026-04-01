@@ -76,18 +76,11 @@ class AppJsonRegistry {
       }
     }
 
-    new Schema(entries)
+    entries.asInstanceOf[Any]
   }
 
   private def serializeSchema(value: Any): js.Any = {
     val schema = value.asInstanceOf[Schema]
-    val out = js.Dictionary[js.Any]()
-
-    schema.entries.foreach { (key, property) =>
-      out.update(key, mapper.serialize(property))
-    }
-
-    out.update("@type", "Schema")
-    out.asInstanceOf[js.Any]
+    mapper.serialize(schema)
   }
 }

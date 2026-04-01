@@ -6,6 +6,7 @@ import jfx.json.{JsonIgnore, JsonType}
 
 import scala.scalajs.js
 
+@JsonType("Schema")
 class Schema(
   var entries: js.Dictionary[SchemaProperty] = js.Dictionary()
 ) extends JsonModel[Schema] {

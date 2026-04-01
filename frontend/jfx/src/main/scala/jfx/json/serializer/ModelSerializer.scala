@@ -1,6 +1,6 @@
 package jfx.json.serializer
 
-import com.anjunar.scala.enterprise.macros.{Annotation, PropertyAccess}
+import com.anjunar.scala.enterprise.macros.{Annotation, MetaClassLoader, PropertyAccess}
 import jfx.core.state.{ListProperty, Property, ReadOnlyProperty}
 import jfx.form.Model
 
@@ -11,6 +11,12 @@ class ModelSerializer extends Serializer[Model[?]] {
 
   override def serialize(input: Model[?], context: JavaContext): Dynamic = {
     val out = js.Dictionary[js.Any]()
+    
+    val jsonType = getJsonType(input)
+    if (jsonType.isDefined) {
+      out.update("@type", jsonType.get)
+    }
+    
     input.meta.properties.foreach { access =>
       if (!isIgnored(access)) {
         val value = access.asInstanceOf[PropertyAccess[Any, Any]].get(input)
@@ -23,6 +29,14 @@ class ModelSerializer extends Serializer[Model[?]] {
       }
     }
     out.asInstanceOf[js.Dynamic]
+  }
+
+  private def getJsonType(model: Model[?]): Option[String] = {
+    model.meta.annotations
+      .collectFirst {
+        case Annotation(className, params) if className == "jfx.json.JsonType" =>
+          params.getOrElse("value", model.getClass.getSimpleName).asInstanceOf[String]
+      }
   }
 
   private def getJsonFieldName(access: PropertyAccess[?, ?]): String = {

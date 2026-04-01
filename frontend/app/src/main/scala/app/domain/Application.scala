@@ -4,15 +4,17 @@ import app.domain.core.AbstractLink
 import app.domain.core.User
 import app.support.{Api, JsonModel}
 import app.support.Api.given
-import jfx.core.meta.Meta
+import com.anjunar.scala.enterprise.macros.validation.JsonName
 import jfx.core.meta.Meta
 import jfx.core.state.ListProperty
 
+import scala.annotation.meta.field
 import scala.concurrent.Future
 import scala.scalajs.js
 
 class Application(
   var user: User = new User(),
+  @(JsonName @field)("$links")
   val links: ListProperty[AbstractLink] = ListProperty()
 ) extends JsonModel[Application] {
 

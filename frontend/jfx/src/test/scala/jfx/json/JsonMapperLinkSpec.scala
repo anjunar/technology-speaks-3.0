@@ -13,7 +13,27 @@ import java.util.UUID
 
 class JsonMapperLinkSpec extends AnyFlatSpec with Matchers {
 
-  "JsonMapper" should "deserialize Link objects" in {
+  "JsonMapper" should "deserialize Link objects with @type" in {
+    TestLink.meta
+    val jsonMapper = new JsonMapper()
+
+    val linksJson = jsObj(
+      "@type" -> "TestLink",
+      "rel" -> "self",
+      "url" -> "/api/test",
+      "method" -> "GET",
+      "id" -> "123"
+    )
+
+    val result = jsonMapper.deserialize[TestLink](linksJson, TestLink.meta)
+
+    result.rel.get shouldBe "self"
+    result.url.get shouldBe "/api/test"
+    result.method.get shouldBe "GET"
+    result.id.get shouldBe "123"
+  }
+
+  it should "deserialize without @type when meta is provided" in {
     TestLink.meta
     val jsonMapper = new JsonMapper()
 
@@ -89,22 +109,26 @@ class JsonMapperLinkSpec extends AnyFlatSpec with Matchers {
     deserialized.id.get shouldBe uuid
   }
 
-  it should "deserialize an array of ErrorResponse" in {
-    TestEntityWithUuid.meta
+  it should "throw exception for mismatched @type" in {
+    TestLink.meta
     val jsonMapper = new JsonMapper()
 
-    val errorsJson = js.Array(
-      jsObj("message" -> "Error 1", "path" -> js.Array("field1")),
-      jsObj("message" -> "Error 2", "path" -> js.Array("field2", 0))
+    val json = jsObj(
+      "@type" -> "WrongType",
+      "rel" -> "self",
+      "url" -> "/api/test"
     )
 
-    val errors = jsonMapper.deserializeArray[TestEntityWithUuid](errorsJson.asInstanceOf[scala.scalajs.js.Dynamic], TestEntityWithUuid.meta)
+    val ex = intercept[IllegalArgumentException] {
+      jsonMapper.deserialize[TestLink](json, TestLink.meta)
+    }
 
-    errors.length shouldBe 0
+    ex.getMessage should include("WrongType")
   }
 
 }
 
+@JsonType("TestLink")
 class TestLink extends jfx.form.Model[TestLink] {
   val rel: Property[String] = Property("")
   val url: Property[String] = Property("")
@@ -118,6 +142,7 @@ object TestLink {
   val meta: Meta[TestLink] = Meta(() => new TestLink())
 }
 
+@JsonType("TestEntityWithLinks")
 class TestEntityWithLinks extends jfx.form.Model[TestEntityWithLinks] {
   val name: Property[String] = Property("")
   val links: ListProperty[TestLink] = ListProperty()
@@ -129,6 +154,7 @@ object TestEntityWithLinks {
   val meta: Meta[TestEntityWithLinks] = Meta(() => new TestEntityWithLinks())
 }
 
+@JsonType("TestEntityWithUuid")
 class TestEntityWithUuid extends jfx.form.Model[TestEntityWithUuid] {
   val id: Property[UUID] = Property(null.asInstanceOf[UUID])
 
