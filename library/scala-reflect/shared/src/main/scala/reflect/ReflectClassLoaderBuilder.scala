@@ -19,8 +19,21 @@ class ReflectClassLoaderBuilder {
     this
   }
 
-  def registerAll[T](descriptors: Seq[ClassDescriptor])(using Manifest[T]): this.type = {
-    descriptors.foreach(d => register(d, None))
+  def register[T](descriptor: ClassDescriptor, factory: () => T): this.type = {
+    val typeName = descriptor.typeName
+    descriptors += typeName -> descriptor
+    factories += typeName -> (factory.asInstanceOf[() => Any])
+    this
+  }
+
+  def registerByTypeName(typeName: String, descriptor: ClassDescriptor, factory: Option[() => Any] = None): this.type = {
+    descriptors += typeName -> descriptor
+    factory.foreach(f => factories += typeName -> f)
+    this
+  }
+
+  def registerAll(descriptors: Seq[ClassDescriptor]): this.type = {
+    descriptors.foreach(d => registerByTypeName(d.typeName, d, None))
     this
   }
 

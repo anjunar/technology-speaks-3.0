@@ -14,6 +14,17 @@ class ReflectClassLoader(
     factory.foreach(f => localFactories += typeName -> (f.asInstanceOf[() => Any]))
   }
 
+  def register[T](descriptor: ClassDescriptor, factory: () => T): Unit = {
+    val typeName = descriptor.typeName
+    localRegistry += typeName -> descriptor
+    localFactories += typeName -> (factory.asInstanceOf[() => Any])
+  }
+
+  def registerByTypeName(typeName: String, descriptor: ClassDescriptor, factory: Option[() => Any] = None): Unit = {
+    localRegistry += typeName -> descriptor
+    factory.foreach(f => localFactories += typeName -> f)
+  }
+
   def loadClass(typeName: String): Option[ClassDescriptor] = {
     localRegistry.get(typeName)
       .orElse(parent.flatMap(_.loadClass(typeName)))

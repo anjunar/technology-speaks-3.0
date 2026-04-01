@@ -40,7 +40,7 @@ lazy val scalaReflectJS = scalaReflect.js
 lazy val scalaReflectJVM = scalaReflect.jvm
 
 lazy val jfx = (project in file("frontend/jfx"))
-  .dependsOn(scalaEnterpriseJS)
+  .dependsOn(scalaEnterpriseJS, scalaReflectJS)
   .enablePlugins(ScalaJSPlugin)
   .settings(
     libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "2.8.1",

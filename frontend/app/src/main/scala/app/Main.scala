@@ -1,5 +1,6 @@
 package app
 
+import app.domain.DomainRegistry
 import app.services.ApplicationService
 import app.support.Api
 import jfx.dsl.{DslRuntime, Scope}
@@ -14,6 +15,7 @@ object Main {
   private given ExecutionContext = ExecutionContext.global
 
   def main(args: Array[String]): Unit = {
+    DomainRegistry.init()
 
     val fontLoader = Dynamic.global.eval("""document.fonts.load("24px 'Material Icons'")""").asInstanceOf[Promise[js.Object]]
 
