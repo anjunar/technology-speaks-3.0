@@ -26,6 +26,19 @@ lazy val scalaEnterprise = crossProject(JSPlatform, JVMPlatform)
 lazy val scalaEnterpriseJS = scalaEnterprise.js
 lazy val scalaEnterpriseJVM = scalaEnterprise.jvm
 
+lazy val scalaReflect = crossProject(JSPlatform, JVMPlatform)
+  .crossType(CrossType.Full)
+  .in(file("library/scala-reflect"))
+  .jsSettings(commonJsSettings)
+  .jvmSettings(
+    libraryDependencies ++= Seq(
+      "org.scalatest" %% "scalatest" % "3.2.19" % Test
+    )
+  )
+
+lazy val scalaReflectJS = scalaReflect.js
+lazy val scalaReflectJVM = scalaReflect.jvm
+
 lazy val jfx = (project in file("frontend/jfx"))
   .dependsOn(scalaEnterpriseJS)
   .enablePlugins(ScalaJSPlugin)
@@ -46,7 +59,7 @@ lazy val app = (project in file("frontend/app"))
   .settings(commonJsSettings)
 
 lazy val root = (project in file("."))
-  .aggregate(jfx, app, scalaEnterpriseJVM)
+  .aggregate(jfx, app, scalaEnterpriseJVM, scalaReflectJVM)
   .settings(
     publish / skip := true
   )
