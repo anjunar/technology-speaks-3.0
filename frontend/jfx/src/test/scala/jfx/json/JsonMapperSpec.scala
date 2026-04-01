@@ -231,18 +231,98 @@ class JsonMapperSpec extends AnyFlatSpec with Matchers {
     TestNestedParent.meta
     TestNestedChild.meta
     val jsonMapper = new JsonMapper()
-    
+
     val parent = new TestNestedParent()
     parent.name.set("Parent")
     val child = new TestNestedChild()
     child.value.set("Child Value")
     parent.child.set(child)
-    
+
     val json = jsonMapper.serialize(parent)
     val deserialized = jsonMapper.deserialize[TestNestedParent](json, TestNestedParent.meta)
 
     deserialized.name.get shouldBe "Parent"
     deserialized.child.get.value.get shouldBe "Child Value"
+  }
+
+  it should "serialize and deserialize Map property" in {
+    TestWithMap.meta
+    val jsonMapper = new JsonMapper()
+
+    val withMap = new TestWithMap()
+    val mapData = Map(
+      "key1" -> "value1",
+      "key2" -> "value2",
+      "key3" -> "value3"
+    )
+    withMap.entries.set(mapData)
+
+    val json = jsonMapper.serialize(withMap)
+    val deserialized = jsonMapper.deserialize[TestWithMap](json, TestWithMap.meta)
+
+    deserialized.entries.get shouldBe a[Map[?, ?]]
+    deserialized.entries.get.asInstanceOf[Map[String, String]]("key1") shouldBe "value1"
+    deserialized.entries.get.asInstanceOf[Map[String, String]]("key2") shouldBe "value2"
+    deserialized.entries.get.asInstanceOf[Map[String, String]]("key3") shouldBe "value3"
+  }
+
+  it should "serialize Map as JSON object with keys" in {
+    TestWithMap.meta
+    val jsonMapper = new JsonMapper()
+
+    val withMap = new TestWithMap()
+    withMap.entries.set(Map("a" -> "alpha", "b" -> "beta"))
+
+    val json = jsonMapper.serialize(withMap)
+
+    val jsonObj = json.asInstanceOf[js.Dynamic]
+    js.isUndefined(jsonObj.selectDynamic("entries")) shouldBe false
+    jsonObj.selectDynamic("entries").selectDynamic("a").toString shouldBe "alpha"
+    jsonObj.selectDynamic("entries").selectDynamic("b").toString shouldBe "beta"
+  }
+
+  it should "deserialize Map from JSON object" in {
+    TestWithMap.meta
+    val jsonMapper = new JsonMapper()
+
+    val json = jsObj(
+      "entries" -> jsObj(
+        "first" -> "one",
+        "second" -> "two"
+      )
+    )
+
+    val result = jsonMapper.deserialize[TestWithMap](json, TestWithMap.meta)
+
+    result.entries.get shouldBe a[Map[?, ?]]
+    val map = result.entries.get.asInstanceOf[Map[String, String]]
+    map("first") shouldBe "one"
+    map("second") shouldBe "two"
+  }
+
+  it should "serialize and deserialize Map with nested models" in {
+    TestWithNestedMap.meta
+    TestMapItem.meta
+    val jsonMapper = new JsonMapper()
+
+    val withMap = new TestWithNestedMap()
+    val item1 = new TestMapItem()
+    item1.name.set("Item 1")
+    val item2 = new TestMapItem()
+    item2.name.set("Item 2")
+    val mapData = Map(
+      "item1" -> item1,
+      "item2" -> item2
+    )
+    withMap.items.set(mapData)
+
+    val json = jsonMapper.serialize(withMap)
+    val deserialized = jsonMapper.deserialize[TestWithNestedMap](json, TestWithNestedMap.meta)
+
+    deserialized.items.get shouldBe a[Map[?, ?]]
+    val map = deserialized.items.get.asInstanceOf[Map[String, TestMapItem]]
+    map("item1").name.get shouldBe "Item 1"
+    map("item2").name.get shouldBe "Item 2"
   }
 }
 
@@ -353,6 +433,36 @@ class TestNestedParent extends jfx.form.Model[TestNestedParent] {
 
 object TestNestedParent {
   val meta: Meta[TestNestedParent] = Meta(() => new TestNestedParent())
+}
+
+class TestWithMap extends jfx.form.Model[TestWithMap] {
+  val entries: Property[Map[String, String]] = Property(Map.empty)
+
+  override def meta: Meta[TestWithMap] = TestWithMap.meta
+}
+
+object TestWithMap {
+  val meta: Meta[TestWithMap] = Meta(() => new TestWithMap())
+}
+
+class TestMapItem extends jfx.form.Model[TestMapItem] {
+  val name: Property[String] = Property("")
+
+  override def meta: Meta[TestMapItem] = TestMapItem.meta
+}
+
+object TestMapItem {
+  val meta: Meta[TestMapItem] = Meta(() => new TestMapItem())
+}
+
+class TestWithNestedMap extends jfx.form.Model[TestWithNestedMap] {
+  val items: Property[Map[String, TestMapItem]] = Property(Map.empty)
+
+  override def meta: Meta[TestWithNestedMap] = TestWithNestedMap.meta
+}
+
+object TestWithNestedMap {
+  val meta: Meta[TestWithNestedMap] = Meta(() => new TestWithNestedMap())
 }
 
 class TestUnregistered extends jfx.form.Model[TestUnregistered] {

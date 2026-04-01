@@ -15,6 +15,7 @@ object DeserializerFactory {
       case clazz: Class[E] if classOf[Property[?]].isAssignableFrom(clazz) => new PropertyDeserializer()
       case clazz: Class[E] if classOf[ListProperty[?]].isAssignableFrom(clazz) => new ListPropertyDeserializer()
       case clazz: Class[E] if classOf[Model[?]].isAssignableFrom(clazz) => new ModelDeserializer()
+      case clazz: Class[E] if classOf[Map[?, ?]].isAssignableFrom(clazz) => new MapDeserializer()
       case clazz: Class[E] if classOf[String].isAssignableFrom(clazz) => new StringDeserializer()
       case clazz: Class[E] if classOf[UUID].isAssignableFrom(clazz) => new UUIDDeserializer()
       case clazz: Class[E] if classOf[Number].isAssignableFrom(clazz) => new NumberDeserializer()
@@ -40,6 +41,7 @@ object DeserializerFactory {
           case "java.util.UUID" | "UUID" => new UUIDDeserializer()
           case "jfx.core.state.Property" | "Property" => new PropertyDeserializer()
           case "jfx.core.state.ListProperty" | "ListProperty" => new ListPropertyDeserializer()
+          case "scala.collection.immutable.Map" | "Map" => new MapDeserializer()
           case _ =>
             MetaClassLoader.factories.get(sc) match {
               case Some(factory) => new ModelDeserializer()
@@ -71,6 +73,7 @@ object DeserializerFactory {
             sc.typeName match {
               case "jfx.core.state.Property" | "Property" => new PropertyDeserializer()
               case "jfx.core.state.ListProperty" | "ListProperty" => new ListPropertyDeserializer()
+              case "scala.collection.immutable.Map" | "Map" => new MapDeserializer()
               case _ => buildFromType(sc)
             }
           case _ => throw new IllegalArgumentException(s"No deserializer found for class $tpe")

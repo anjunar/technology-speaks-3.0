@@ -1,14 +1,16 @@
 package app.domain.core
 
 import app.support.JsonModel
+import com.anjunar.scala.enterprise.macros.validation.JsonName
 import jfx.core.meta.Meta
 import jfx.json.{JsonIgnore, JsonType}
 
+import scala.annotation.meta.field
 import scala.scalajs.js
 
 @JsonType("Schema")
 class Schema(
-  var entries: js.Dictionary[SchemaProperty] = js.Dictionary()
+  var entries: Map[String, SchemaProperty] = Map.empty
 ) extends JsonModel[Schema] {
 
   override def meta: Meta[Schema] = Schema.meta
@@ -26,7 +28,7 @@ class SchemaProperty(
   var name: String = "",
   var `type`: String = "",
   var schema: Schema | Null = null,
-  @JsonIgnore
+  @(JsonName @field)("$links")
   var links: js.Array[Link] = js.Array()
 ) extends JsonModel[SchemaProperty] {
 

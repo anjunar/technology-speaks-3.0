@@ -117,22 +117,71 @@ class ModelDeserializer extends Deserializer[Model[?]] {
   private def populateModel(model: Model[?], json: Dynamic, parentContext: JsonContext, typeResolver: Type => Type): Unit = {
     model.meta.properties.foreach { property =>
       if (!isIgnored(property)) {
+        val resolvedGenericType = typeResolver(property.genericType)
         val fieldName = getJsonFieldName(property)
-        val rawValue = json.selectDynamic(fieldName).asInstanceOf[js.Any]
-
-        if (!js.isUndefined(rawValue)) {
-          if (rawValue == null) {
-            assignValue(model, property.asInstanceOf[PropertyAccess[Any, Any]], null)
-          } else {
-            val resolvedGenericType = typeResolver(property.genericType)
-            val deserializer = DeserializerFactory.buildFromType(resolvedGenericType)
-            val elemContext = new JsonContext(resolvedGenericType)
-            val decoded = deserializer.deserialize(rawValue.asInstanceOf[Dynamic], elemContext)
+        
+        resolvedGenericType match {
+          case pt: ParameterizedType if isMapType(pt) =>
+            val rawValue = json.asInstanceOf[js.Dynamic]
+            val decoded = deserializeMap(rawValue.asInstanceOf[Dynamic], pt)
             assignValue(model, property.asInstanceOf[PropertyAccess[Any, Any]], decoded)
-          }
+          case sc: SimpleClass[?] if isMapType(sc) =>
+            val rawValue = json.asInstanceOf[js.Dynamic]
+            val decoded = deserializeMap(rawValue.asInstanceOf[Dynamic], sc)
+            assignValue(model, property.asInstanceOf[PropertyAccess[Any, Any]], decoded)
+          case _ =>
+            val rawValue = json.selectDynamic(fieldName).asInstanceOf[js.Any]
+            if (!js.isUndefined(rawValue)) {
+              if (rawValue == null) {
+                assignValue(model, property.asInstanceOf[PropertyAccess[Any, Any]], null)
+              } else {
+                val deserializer = DeserializerFactory.buildFromType(resolvedGenericType)
+                val elemContext = new JsonContext(resolvedGenericType)
+                val decoded = deserializer.deserialize(rawValue.asInstanceOf[Dynamic], elemContext)
+                assignValue(model, property.asInstanceOf[PropertyAccess[Any, Any]], decoded)
+              }
+            }
         }
       }
     }
+  }
+
+  private def isMapType(tpe: Type): Boolean = {
+    tpe match {
+      case pt: ParameterizedType =>
+        pt.rawType match {
+          case sc: SimpleClass[?] => sc.typeName == "scala.collection.immutable.Map" || sc.typeName == "Map"
+          case _ => false
+        }
+      case sc: SimpleClass[?] => sc.typeName == "scala.collection.immutable.Map" || sc.typeName == "Map"
+      case _ => false
+    }
+  }
+
+  private def deserializeMap(json: Dynamic, mapType: Type): Map[String, Any] = {
+    val elemType = mapType match {
+      case pt: ParameterizedType if pt.typeArguments.length >= 2 => pt.typeArguments(1)
+      case _ => throw new IllegalStateException("Map must have two type arguments")
+    }
+
+    val jsonObj = json.asInstanceOf[js.Dynamic]
+    val keys = js.Dynamic.global.Object.keys(jsonObj).asInstanceOf[js.Array[String]]
+
+    val builder = Map.newBuilder[String, Any]
+    var i = 0
+    while (i < keys.length) {
+      val key = keys(i)
+      // Ignore meta fields like @type
+      if (key != "@type" && !key.startsWith("$")) {
+        val elemJson = jsonObj.selectDynamic(key).asInstanceOf[Dynamic]
+        val elemContext = new JsonContext(elemType)
+        val deserializer = DeserializerFactory.buildFromType(elemType)
+        val value = deserializer.deserialize(elemJson, elemContext)
+        builder += ((key, value))
+      }
+      i += 1
+    }
+    builder.result()
   }
 
   private def getJsonFieldName(access: PropertyAccess[?, ?]): String = {

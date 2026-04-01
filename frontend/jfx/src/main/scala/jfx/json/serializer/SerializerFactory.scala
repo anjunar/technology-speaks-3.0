@@ -15,6 +15,7 @@ object SerializerFactory {
       case clazz: Class[E] if classOf[Property[?]].isAssignableFrom(clazz) => new PropertySerializer()
       case clazz: Class[E] if classOf[ListProperty[?]].isAssignableFrom(clazz) => new ListPropertySerializer()
       case clazz: Class[E] if classOf[Model[?]].isAssignableFrom(clazz) => new ModelSerializer()
+      case clazz: Class[E] if classOf[Map[?, ?]].isAssignableFrom(clazz) => new MapSerializer()
       case clazz: Class[E] if classOf[String].isAssignableFrom(clazz) => new StringSerializer()
       case clazz: Class[E] if classOf[UUID].isAssignableFrom(clazz) => new UUIDSerializer()
       case clazz: Class[E] if classOf[Number].isAssignableFrom(clazz) => new NumberSerializer()

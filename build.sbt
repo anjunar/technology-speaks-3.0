@@ -40,7 +40,8 @@ lazy val app = (project in file("frontend/app"))
   .enablePlugins(ScalaJSPlugin)
   .dependsOn(jfx)
   .settings(
-    scalaJSUseMainModuleInitializer := true
+    scalaJSUseMainModuleInitializer := true,
+    libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.19" % Test
   )
   .settings(commonJsSettings)
 

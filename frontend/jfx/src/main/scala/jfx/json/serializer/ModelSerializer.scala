@@ -20,11 +20,39 @@ class ModelSerializer extends Serializer[Model[?]] {
     input.meta.properties.foreach { access =>
       if (!isIgnored(access)) {
         val value = access.asInstanceOf[PropertyAccess[Any, Any]].get(input)
-        val serialized = serializeValue(value)
-        out.update(getJsonFieldName(access), serialized)
+        
+        access.genericType match {
+          case pt: com.anjunar.scala.enterprise.macros.reflection.ParameterizedType 
+            if isMapType(pt) =>
+            value match {
+              case map: Map[?, ?] =>
+                map.foreach { case (key, mapValue) =>
+                  val serialized = serializeValue(mapValue, null)
+                  out.update(key.toString, serialized)
+                }
+              case _ =>
+            }
+          case _ =>
+            val serialized = serializeValue(value, access)
+            out.update(getJsonFieldName(access), serialized)
+        }
       }
     }
     out.asInstanceOf[js.Dynamic]
+  }
+
+  private def isMapType(tpe: com.anjunar.scala.enterprise.macros.reflection.Type): Boolean = {
+    tpe match {
+      case pt: com.anjunar.scala.enterprise.macros.reflection.ParameterizedType =>
+        pt.rawType match {
+          case sc: com.anjunar.scala.enterprise.macros.reflection.SimpleClass[?] => 
+            sc.typeName == "scala.collection.immutable.Map" || sc.typeName == "Map"
+          case _ => false
+        }
+      case sc: com.anjunar.scala.enterprise.macros.reflection.SimpleClass[?] => 
+        sc.typeName == "scala.collection.immutable.Map" || sc.typeName == "Map"
+      case _ => false
+    }
   }
 
   private def getJsonType(model: Model[?]): Option[String] = {
@@ -52,18 +80,28 @@ class ModelSerializer extends Serializer[Model[?]] {
     }
   }
 
-  private def serializeValue(value: Any): js.Any = {
+  private def serializeValue(value: Any, access: PropertyAccess[?, ?]): js.Any = {
     value match {
       case null => null
       case p: Property[?] =>
         val inner = p.get
         if (inner == null) null
-        else serializeValue(inner)
-      case p: ReadOnlyProperty[?] => serializeValue(p.get)
+        else serializeValue(inner, access)
+      case p: ReadOnlyProperty[?] => serializeValue(p.get, access)
       case m: Model[?] => serialize(m, new JavaContext(null))
-      case arr: js.Array[?] => arr.map(serializeValue)
+      case arr: js.Array[?] => arr.map(serializeValue(_, access))
+      case map: Map[?, ?] => serializeMap(map)
       case v => value.asInstanceOf[js.Any]
     }
+  }
+
+  private def serializeMap(map: Map[?, ?]): js.Dynamic = {
+    val out = js.Dictionary[js.Any]()
+    map.foreach { case (key, value) =>
+      val serialized = serializeValue(value, null)
+      out.update(key.toString, serialized)
+    }
+    out.asInstanceOf[js.Dynamic]
   }
 
 }

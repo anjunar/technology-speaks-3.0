@@ -36,6 +36,10 @@ import scala.util.{Failure, Success}
 
 class UserPage(val payload: Data[User]) extends PageComposite("User", pageResizable = false) {
 
+  println(s"UserPage constructor - payload: $payload")
+  println (s"UserPage constructor - payload.schema: ${payload.schema.entries}")
+  println (s"UserPage constructor - payload.data: ${payload.data}")
+
   val model: User = payload.data
 
   override def pageWidth: Int = 1240
