@@ -36,7 +36,7 @@ object Account {
     ).toFuture.flatMap { response =>
       if (response.ok) {
         response.text().toFuture.map { text =>
-          AppJson.mapper.deserialize(js.JSON.parse(text).asInstanceOf[js.Dynamic]).asInstanceOf[Data[Account]]
+          AppJson.mapper.deserialize(js.JSON.parse(text).asInstanceOf[js.Dynamic], Data.meta[Account]).asInstanceOf[Data[Account]]
         }
       } else {
         Future.successful(legacy())

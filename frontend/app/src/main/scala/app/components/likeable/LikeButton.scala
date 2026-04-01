@@ -107,7 +107,7 @@ class LikeButton(val likes: ListProperty[Like], val links: ListProperty[Link], v
         .iterator
         .collect {
           case value if value != null && !js.isUndefined(value) =>
-            AppJson.mapper.deserialize(value.asInstanceOf[js.Dynamic]).asInstanceOf[Like]
+            AppJson.mapper.deserialize(value.asInstanceOf[js.Dynamic], Like.meta).asInstanceOf[Like]
         }
         .toSeq
     } else {

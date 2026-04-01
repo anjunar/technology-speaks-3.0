@@ -3,6 +3,7 @@ package app.domain
 import app.domain.core.AbstractLink
 import app.domain.core.User
 import app.support.{Api, JsonModel}
+import app.support.Api.given
 import jfx.core.meta.Meta
 import jfx.core.meta.Meta
 import jfx.core.state.ListProperty
@@ -23,6 +24,6 @@ object Application {
 
   val meta = Meta[Application]()
 
-  def read(): Future[Application] = Api.get("/service")
+  def read(): Future[Application] = Api.get("/service").map(raw => Api.deserialize(raw, Application.meta))
 
 }

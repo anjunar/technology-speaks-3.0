@@ -6,5 +6,5 @@ object AppJson {
 
   val registry: AppJsonRegistry = new AppJsonRegistry
 
-  val mapper: JsonMapper = new JsonMapper(registry)
+  val mapper: JsonMapper = registry.mapper
 }

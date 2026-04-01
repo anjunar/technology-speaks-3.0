@@ -1,6 +1,7 @@
 package app.domain.security
 
 import app.support.{Api, JsonModel, JsonResponse}
+import app.support.Api.given
 import jfx.core.meta.Meta
 import com.anjunar.scala.enterprise.macros.validation.{EmailConstraint, NotBlank}
 import jfx.core.state.Property
@@ -19,8 +20,9 @@ class PasswordLogin(
   override def meta: Meta[PasswordLogin] = PasswordLogin.meta
 
   def save(): Future[JsonResponse] =
-    Api.post("/service/security/login", this)
+    Api.post("/service/security/login", this).map(raw => Api.deserialize(raw, JsonResponse.meta))
 }
 
 object PasswordLogin {
-  val meta : Meta[PasswordLogin] = Meta()}
+  val meta : Meta[PasswordLogin] = Meta(() => new PasswordLogin())
+}

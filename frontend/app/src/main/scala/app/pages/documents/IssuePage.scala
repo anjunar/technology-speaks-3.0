@@ -58,7 +58,7 @@ class IssuePage(val model: Issue) extends PageComposite("Aufgabe", pageResizable
   private def persistIssue(service: ApplicationService): Unit = {
     try {
       model.links.find(link => link.rel == "update" || link.rel == "save").foreach { link =>
-        Api.invokeLink[Data[Issue]](link, model).foreach { saved =>
+        Api.invokeLink(link, model).map(raw => Api.deserialize(raw, Data.meta[Issue])).foreach { saved =>
           if (link.rel == "update") {
             service.messageBus.publish(new IssueUpdated(saved))
           } else {

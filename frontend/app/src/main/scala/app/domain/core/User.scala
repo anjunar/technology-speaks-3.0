@@ -26,10 +26,10 @@ class User extends AbstractEntity[User] {
   override def meta: Meta[User] = User.meta
 
   def save(): Future[Data[User]] =
-    Api.post("/service/core/users/user", this)
+    Api.post("/service/core/users/user", this).map(raw => Api.deserialize(raw, Data.meta[User]))
 
   def update(): Future[Data[User]] =
-    Api.put("/service/core/users/user", this)
+    Api.put("/service/core/users/user", this).map(raw => Api.deserialize(raw, Data.meta[User]))
 
   def delete(): Future[Unit] =
     Api.delete("/service/core/users/user", this)
@@ -51,7 +51,7 @@ class User extends AbstractEntity[User] {
       case Some(link) if id.get != null =>
         Api
           .requestJson(link.method, Navigation.prefixedServiceUrl(link.url))
-          .flatMap(_ => User.read(id.get.toString))
+          .flatMap(raw => User.read(id.get.toString))
           .map { response =>
             links.setAll(response.data.links)
             this
@@ -66,7 +66,7 @@ object User {
   val meta: Meta[User] = Meta(() => new User())
 
   def read(id: String): Future[Data[User]] =
-    Api.get(s"/service/core/users/user/$id")
+    Api.get(s"/service/core/users/user/$id").map(raw => Api.deserialize(raw, Data.meta[User]))
 
   def list(index: Int, limit: Int, query: String = "", sorting: Seq[String] = Seq("created:desc")): Future[Table[Data[User]]] = {
     val normalizedQuery = Option(query).map(_.trim).getOrElse("")
@@ -75,7 +75,7 @@ object User {
       else s"&name=${encodeURIComponent(normalizedQuery)}"
     val sortParameter = renderSortParameters(sorting)
 
-    Api.get(s"/service/core/users?index=$index&limit=$limit$sortParameter$queryParameter")
+    Api.get(s"/service/core/users?index=$index&limit=$limit$sortParameter$queryParameter").map(raw => Api.deserialize(raw, Table.meta[Data[User]]))
   }
 
   private def renderSortParameters(sorting: Seq[String]): String = {

@@ -2,6 +2,7 @@ package app.domain.security
 
 import app.domain.core.UserInfo
 import app.support.{Api, JsonModel, JsonResponse}
+import app.support.Api.given
 import jfx.core.meta.Meta
 import com.anjunar.scala.enterprise.macros.validation.{EmailConstraint, NotBlank, Size}
 import jfx.core.state.Property
@@ -25,7 +26,7 @@ class PasswordRegister(
   override def meta: Meta[PasswordRegister] = PasswordRegister.meta
 
   def save(): Future[JsonResponse] =
-    Api.post("/service/security/register", this)
+    Api.post("/service/security/register", this).map(raw => Api.deserialize(raw, JsonResponse.meta))
 }
 
 object PasswordRegister {

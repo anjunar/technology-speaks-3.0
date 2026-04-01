@@ -3,6 +3,7 @@ package app.domain.documents
 import app.domain.core.{AbstractEntity, Data, Link, Table, User}
 import app.domain.shared.OwnerProvider
 import app.support.Api
+import app.support.Api.given
 import jfx.core.meta.Meta
 import com.anjunar.scala.enterprise.macros.validation.{NotBlank, NotNull}
 import jfx.core.state.{ListProperty, Property}
@@ -27,10 +28,10 @@ class Document extends AbstractEntity[Document] with OwnerProvider {
   override def meta: Meta[Document] = Document.meta
 
   def save(): Future[Data[Document]] =
-    Api.post("/service/document/documents/document", this)
+    Api.post("/service/document/documents/document", this).map(raw => Api.deserialize(raw, Data.meta[Document]))
 
   def update(): Future[Data[Document]] =
-    Api.put("/service/document/documents/document", this)
+    Api.put("/service/document/documents/document", this).map(raw => Api.deserialize(raw, Data.meta[Document]))
 
   def delete(): Future[Unit] =
     Api.delete("/service/document/documents/document", this)
@@ -39,10 +40,10 @@ class Document extends AbstractEntity[Document] with OwnerProvider {
 object Document {
   val meta: Meta[Document] = Meta(() => new Document())
   def root(): Future[Data[Document]] =
-    Api.post("/service/document/documents/document/root")
+    Api.post("/service/document/documents/document/root").map(raw => Api.deserialize(raw, Data.meta[Document]))
 
   def read(id: String): Future[Data[Document]] =
-    Api.get(s"/service/document/documents/document/$id")
+    Api.get(s"/service/document/documents/document/$id").map(raw => Api.deserialize(raw, Data.meta[Document]))
 
   def list(index: Int, limit: Int, query: String = "", sorting: Seq[String] = Seq("created:desc")): Future[Table[Data[Document]]] = {
     val normalizedQuery = Option(query).map(_.trim).getOrElse("")
@@ -51,7 +52,7 @@ object Document {
       else s"&name=${encodeURIComponent(normalizedQuery)}"
     val sortParameter = renderSortParameters(sorting)
 
-    Api.get(s"/service/document/documents?index=$index&limit=$limit$sortParameter$queryParameter")
+    Api.get(s"/service/document/documents?index=$index&limit=$limit$sortParameter$queryParameter").map(raw => Api.deserialize(raw, Table.meta[Data[Document]]))
   }
 
   private def renderSortParameters(sorting: Seq[String]): String = {

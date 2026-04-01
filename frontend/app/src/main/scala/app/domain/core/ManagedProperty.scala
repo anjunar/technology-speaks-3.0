@@ -2,9 +2,9 @@ package app.domain.core
 
 import app.domain.followers.Group
 import app.support.Api
+import app.support.Api.given
 import jfx.core.meta.Meta
 import jfx.core.state.{ListProperty, Property}
-import jfx.core.meta.Meta
 
 import java.util.UUID
 import scala.concurrent.Future
@@ -21,7 +21,7 @@ class ManagedProperty extends AbstractEntity[ManagedProperty] {
 
   def updateFromLink(): Future[ManagedProperty] =
     links.find(_.rel == "update") match {
-      case Some(link) => Api.invokeLink[ManagedProperty](link, this)
+      case Some(link) => Api.invokeLink(link, this).map(raw => Api.deserialize(raw, ManagedProperty.meta))
       case None       => Future.successful(this)
     }
 }

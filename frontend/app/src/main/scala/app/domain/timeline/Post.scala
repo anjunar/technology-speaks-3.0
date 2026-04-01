@@ -3,6 +3,7 @@ package app.domain.timeline
 import app.domain.core.{AbstractEntity, Data, Link, Table, User}
 import app.domain.shared.{Like, OwnerProvider}
 import app.support.Api
+import app.support.Api.given
 import jfx.core.meta.Meta
 import com.anjunar.scala.enterprise.macros.validation.NotNull
 import jfx.core.state.{ListProperty, Property}
@@ -22,10 +23,10 @@ class Post extends AbstractEntity[Post] with OwnerProvider {
   override def meta: Meta[Post] = Post.meta
 
   def save(): Future[Data[Post]] =
-    Api.post("/service/timeline/posts/post", this)
+    Api.post("/service/timeline/posts/post", this).map(raw => Api.deserialize(raw, Data.meta[Post]))
 
   def update(): Future[Data[Post]] =
-    Api.put("/service/timeline/posts/post", this)
+    Api.put("/service/timeline/posts/post", this).map(raw => Api.deserialize(raw, Data.meta[Post]))
 
   def delete(): Future[Unit] =
     Api.delete("/service/timeline/posts/post", this)
@@ -34,8 +35,8 @@ class Post extends AbstractEntity[Post] with OwnerProvider {
 object Post {
   val meta: Meta[Post] = Meta(() => new Post())
   def read(id: String): Future[Data[Post]] =
-    Api.get(s"/service/timeline/posts/post/$id")
+    Api.get(s"/service/timeline/posts/post/$id").map(raw => Api.deserialize(raw, Data.meta[Post]))
 
   def list(index: Int, limit: Int): Future[Table[Data[Post]]] =
-    Api.get(s"/service/timeline/posts?index=$index&limit=$limit&sort=created:desc")
+    Api.get(s"/service/timeline/posts?index=$index&limit=$limit&sort=created:desc").map(raw => Api.deserialize(raw, Table.meta[Data[Post]]))
 }

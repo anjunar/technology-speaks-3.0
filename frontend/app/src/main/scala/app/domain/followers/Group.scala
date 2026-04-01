@@ -2,6 +2,7 @@ package app.domain.followers
 
 import app.domain.core.{AbstractEntity, Data, Link, Table, User}
 import app.support.Api
+import app.support.Api.given
 import jfx.core.meta.Meta
 import com.anjunar.scala.enterprise.macros.validation.{NotBlank, Size}
 import jfx.core.state.{ListProperty, Property}
@@ -23,22 +24,22 @@ class Group extends AbstractEntity[Group] {
   override def meta: Meta[Group] = Group.meta
 
   def save(): Future[Data[Group]] =
-    Api.post("/service/followers/groups/groups", this)
+    Api.post("/service/followers/groups/groups", this).map(raw => Api.deserialize(raw, Data.meta[Group]))
 
   def update(): Future[Data[Group]] =
-    Api.put("/service/followers/groups/groups", this)
+    Api.put("/service/followers/groups/groups", this).map(raw => Api.deserialize(raw, Data.meta[Group]))
 
   def delete(): Future[Unit] =
     Api.delete("/service/followers/groups/groups", this)
 }
 
 object Group {
-  val meta : Meta[Group] = Meta()
+  val meta : Meta[Group] = Meta(() => new Group())
   def read(id: String): Future[Data[Group]] =
-    Api.get(s"/service/followers/groups/groups/$id")
+    Api.get(s"/service/followers/groups/groups/$id").map(raw => Api.deserialize(raw, Data.meta[Group]))
 
   def list(index: Int, limit: Int, sorting: Seq[String] = Seq("created:desc")): Future[Table[Data[Group]]] =
-    Api.get(s"/service/followers/groups?index=$index&limit=$limit${renderSortParameters(sorting)}")
+    Api.get(s"/service/followers/groups?index=$index&limit=$limit${renderSortParameters(sorting)}").map(raw => Api.deserialize(raw, Table.meta[Data[Group]]))
 
   private def renderSortParameters(sorting: Seq[String]): String = {
     val normalizedSorting = sorting.iterator.map(_.trim).filter(_.nonEmpty).toVector

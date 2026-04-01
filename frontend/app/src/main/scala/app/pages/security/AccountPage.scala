@@ -178,7 +178,7 @@ class AccountPage(val payload: Data[Account]) extends PageComposite("Account", p
             } else if (newPassword != confirmPassword) {
               Viewport.notify("Die neuen Passwoerter stimmen nicht ueberein.", Viewport.NotificationKind.Error)
             } else {
-              Api.invokeLink[JsonResponse](changePasswordLink.get, passwordChangeForm)
+              Api.invokeLink(changePasswordLink.get, passwordChangeForm).map(raw => Api.deserialize(raw, JsonResponse.meta))
                 .foreach { response =>
                   if (response != null && response.status == "success") {
                     Viewport.notify("Passwort aktualisiert.", Viewport.NotificationKind.Success)
@@ -212,7 +212,7 @@ class AccountPage(val payload: Data[Account]) extends PageComposite("Account", p
             } else if (newPassword != confirmPassword) {
               Viewport.notify("Die neuen Passwoerter stimmen nicht ueberein.", Viewport.NotificationKind.Error)
             } else {
-              Api.invokeLink[JsonResponse](createPasswordLink.get, createPasswordForm)
+              Api.invokeLink(createPasswordLink.get, createPasswordForm).map(raw => Api.deserialize(raw, JsonResponse.meta))
                 .foreach { response =>
                   if (response != null && response.status == "success") {
                     Viewport.notify("Passwort hinzugefuegt.", Viewport.NotificationKind.Success)

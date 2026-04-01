@@ -10,20 +10,15 @@ import app.domain.timeline.*
 import jfx.domain.{Media, Thumbnail}
 import jfx.form.ErrorResponse
 import jfx.json.JsonMapper
-import jfx.json.JsonRegistry
 import jfx.core.meta.Meta
 
 import scala.scalajs.js
 import scala.scalajs.js.Dynamic
 import scala.scalajs.js.JSConverters.*
 
-class AppJsonRegistry extends JsonRegistry {
+class AppJsonRegistry {
 
-  private val mapper = new JsonMapper(this)
-
-  valueFactories += classOf[Schema].getName -> (() => new Schema())
-  valueDeserializers += classOf[Schema].getName -> deserializeSchema
-  valueSerializers += classOf[Schema] -> serializeSchema
+  val mapper = new JsonMapper()
 
   // Registriere alle Model-Klassen im ClassLoader via Meta
   Meta[Application](() => new Application())
@@ -69,29 +64,13 @@ class AppJsonRegistry extends JsonRegistry {
   Meta[PostsLink](() => new PostsLink())
   Meta[JsonResponse](() => new JsonResponse())
 
-  // Nur spezielle Keys die keine echten Klassen sind (HATEOAS-Link-Rel-Namen)
-  override val classes: js.Map[String, () => Any] = js.Map(
-    "users-list" -> (() => new UsersLink()),
-    "document-root" -> (() => new DocumentsLink()),
-    "followers-list" -> (() => new RelationShipLink()),
-    "password-login-login" -> (() => new PasswordLoginLink()),
-    "account-read" -> (() => new AccountLink()),
-    "password-change-change" -> (() => new AccountLink()),
-    "password-register-register" -> (() => new PasswordRegisterLink()),
-    "web-authn-login-options" -> (() => new WebAuthnLoginLink()),
-    "web-authn-register-options" -> (() => new WebAuthnRegisterLink()),
-    "confirm-confirm" -> (() => new ConfirmLink()),
-    "logout-logout" -> (() => new LogoutLink()),
-    "posts-list" -> (() => new PostsLink())
-  )
-
   private def deserializeSchema(raw: js.Any): Any = {
     val dynamic = raw.asInstanceOf[Dynamic]
     val entries = js.Dictionary[SchemaProperty]()
 
     js.Object.keys(dynamic.asInstanceOf[js.Object]).foreach { key =>
       if (key != "@type") {
-        val property = mapper.deserialize(dynamic.selectDynamic(key)).asInstanceOf[SchemaProperty]
+        val property = mapper.deserialize(dynamic.selectDynamic(key), SchemaProperty.meta).asInstanceOf[SchemaProperty]
         property.name = key
         entries.update(key, property)
       }

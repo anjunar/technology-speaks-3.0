@@ -97,7 +97,7 @@ class LogoutPage extends PageComposite("Abmelden", pageResizable = false) {
                 classes = "security-page__button-primary"
                 onClick { _ =>
                   Api
-                    .post[app.support.JsonResponse]("/service/security/logout")
+                    .post("/service/security/logout")
                     .flatMap(_ => {
                       service.invoke()
                     })

@@ -21,10 +21,10 @@ class RelationShip extends AbstractEntity[RelationShip] {
   override def meta: Meta[RelationShip] = RelationShip.meta
 
   def save(): Future[Data[RelationShip]] =
-    Api.post("/service/followers/relationships/relationship", this)
+    Api.post("/service/followers/relationships/relationship", this).map(raw => Api.deserialize(raw, Data.meta[RelationShip]))
 
   def update(): Future[Data[RelationShip]] =
-    Api.put("/service/followers/relationships/relationship", this)
+    Api.put("/service/followers/relationships/relationship", this).map(raw => Api.deserialize(raw, Data.meta[RelationShip]))
 
   def delete(): Future[Unit] =
     Api.delete("/service/followers/relationships/relationship", this)
@@ -52,7 +52,7 @@ class RelationShip extends AbstractEntity[RelationShip] {
 object RelationShip {
   val meta: Meta[RelationShip] = Meta(() => new RelationShip())
   def read(id: String): Future[Data[RelationShip]] =
-    Api.get(s"/service/followers/relationships/relationship/$id")
+    Api.get(s"/service/followers/relationships/relationship/$id").map(raw => Api.deserialize(raw, Data.meta[RelationShip]))
 
   def list(
     index: Int,
@@ -77,7 +77,7 @@ object RelationShip {
       if (groupParameters.isEmpty) ""
       else s"&$groupParameters"
 
-    Api.get(s"/service/followers/relationships?index=$index&limit=$limit$sortParameter$queryParameter$groupsSuffix")
+    Api.get(s"/service/followers/relationships?index=$index&limit=$limit$sortParameter$queryParameter$groupsSuffix").map(raw => Api.deserialize(raw, Table.meta[Data[RelationShip]]))
   }
 
   private def renderSortParameters(sorting: Seq[String]): String = {
@@ -95,7 +95,7 @@ object RelationShip {
         .iterator
         .collect {
           case value if value != null && !js.isUndefined(value) =>
-            AppJson.mapper.deserialize(value.asInstanceOf[js.Dynamic]).asInstanceOf[Data[Group]].data
+            AppJson.mapper.deserialize(value.asInstanceOf[js.Dynamic], Data.meta[Group]).asInstanceOf[Data[Group]].data
         }
         .toSeq
     }

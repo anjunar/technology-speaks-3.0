@@ -4,6 +4,7 @@ import app.domain.core.{AbstractEntity, Data, Link, Table, User}
 import app.domain.documents.Issue
 import app.domain.timeline.Post
 import app.support.Api
+import app.support.Api.given
 import jfx.core.state.{ListProperty, Property}
 import jfx.core.meta.Meta
 
@@ -25,9 +26,9 @@ class FirstComment extends AbstractEntity[FirstComment] with OwnerProvider {
   def save(entity: AbstractEntity[?]): Future[Data[FirstComment]] =
     entity match {
       case issue: Issue =>
-        Api.post(s"/service/document/documents/document/issues/issue/${issue.id.get}/comment", this)
+        Api.post(s"/service/document/documents/document/issues/issue/${issue.id.get}/comment", this).map(raw => Api.deserialize(raw, Data.meta[FirstComment]))
       case post: Post =>
-        Api.post(s"/service/timeline/posts/post/${post.id.get}/comment", this)
+        Api.post(s"/service/timeline/posts/post/${post.id.get}/comment", this).map(raw => Api.deserialize(raw, Data.meta[FirstComment]))
       case _ =>
         Future.failed(RuntimeException("Unknown document type"))
     }
@@ -35,9 +36,9 @@ class FirstComment extends AbstractEntity[FirstComment] with OwnerProvider {
   def update(entity: AbstractEntity[?]): Future[Data[FirstComment]] =
     entity match {
       case issue: Issue =>
-        Api.put(s"/service/document/documents/document/issues/issue/${issue.id.get}/comment", this)
+        Api.put(s"/service/document/documents/document/issues/issue/${issue.id.get}/comment", this).map(raw => Api.deserialize(raw, Data.meta[FirstComment]))
       case post: Post =>
-        Api.put(s"/service/timeline/posts/post/${post.id.get}/comment", this)
+        Api.put(s"/service/timeline/posts/post/${post.id.get}/comment", this).map(raw => Api.deserialize(raw, Data.meta[FirstComment]))
       case _ =>
         Future.failed(RuntimeException("Unknown document type"))
     }
@@ -57,8 +58,8 @@ object FirstComment {
   val meta: Meta[FirstComment] = Meta(() => new FirstComment())
 
   def list(index: Int, limit: Int, post: Post): Future[Table[Data[FirstComment]]] =
-    Api.get(s"/service/timeline/posts/post/${post.id.get}/comments?index=$index&limit=$limit&sort=created:desc")
+    Api.get(s"/service/timeline/posts/post/${post.id.get}/comments?index=$index&limit=$limit&sort=created:desc").map(raw => Api.deserialize(raw, Table.meta[Data[FirstComment]]))
 
   def list(index: Int, limit: Int, issue: Issue): Future[Table[Data[FirstComment]]] =
-    Api.get(s"/service/document/documents/document/issues/issue/${issue.id.get}/comments?index=$index&limit=$limit&sort=created:desc")
+    Api.get(s"/service/document/documents/document/issues/issue/${issue.id.get}/comments?index=$index&limit=$limit&sort=created:desc").map(raw => Api.deserialize(raw, Table.meta[Data[FirstComment]]))
 }

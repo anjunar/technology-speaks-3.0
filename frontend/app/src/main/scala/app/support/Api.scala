@@ -1,6 +1,7 @@
 package app.support
 
 import app.domain.core.Link
+import jfx.core.meta.Meta
 import jfx.form.{ErrorResponse, ErrorResponseException, Model}
 import jfx.json.JsonMapper
 import org.scalajs.dom.{RequestInit, fetch, window}
@@ -14,20 +15,20 @@ object Api {
 
   given ExecutionContext = ExecutionContext.global
 
-  def get[M <: Model[M]](url: String): Future[M] =
-    requestJson("GET", url).map(deserialize[M])
+  def get(url: String): Future[js.Any] =
+    requestJson("GET", url)
 
-  def post[M <: Model[M]](url: String, body: Any = null): Future[M] =
-    requestJson("POST", url, body).map(deserialize[M])
+  def post(url: String, body: Any = null): Future[js.Any] =
+    requestJson("POST", url, body)
 
-  def put[M <: Model[M]](url: String, body: Any = null): Future[M] =
-    requestJson("PUT", url, body).map(deserialize[M])
+  def put(url: String, body: Any = null): Future[js.Any] =
+    requestJson("PUT", url, body)
 
   def delete(url: String, body: Any = null): Future[Unit] =
     requestJson("DELETE", url, body).map(_ => ())
 
-  def invokeLink[M <: Model[M]](link: Link, body: Any = null): Future[M] =
-    requestJson(link.method, Navigation.prefixedServiceUrl(link.url), body).map(deserialize[M])
+  def invokeLink(link: Link, body: Any = null): Future[js.Any] =
+    requestJson(link.method, Navigation.prefixedServiceUrl(link.url), body)
 
   def postText(url: String, body: String): Future[String] =
     requestText("POST", url, if (body == null) js.undefined else body.asInstanceOf[js.Any])
@@ -38,11 +39,11 @@ object Api {
       else js.JSON.parse(text)
     }
 
-  private def deserialize[M <: Model[M]](raw: js.Any): M =
+  def deserialize[M <: Model[M]](raw: js.Any, meta: Meta[M]): M =
     if (raw == null || js.isUndefined(raw)) {
       null.asInstanceOf[M]
     } else {
-      AppJson.mapper.deserialize(raw.asInstanceOf[js.Dynamic]).asInstanceOf[M]
+      AppJson.mapper.deserialize(raw.asInstanceOf[js.Dynamic], meta).asInstanceOf[M]
     }
 
   private def serializeBody(body: Any): js.UndefOr[js.Any] =
@@ -56,6 +57,9 @@ object Api {
       case other =>
         other.asInstanceOf[js.Any]
     }
+
+  private def serializeModel(model: Model[?]): js.Dynamic =
+    AppJson.mapper.serialize(model)
 
   private def requestText(
     method: String,
@@ -93,7 +97,7 @@ object Api {
           Navigation.redirectToLogin()
           Future.failed(RuntimeException("Request was rejected with 403"))
         } else if (response.status == 400) {
-          Future.failed(new ErrorResponseException(AppJson.mapper.deserializeArray(JSON.parse(text), classOf[ErrorResponse])))
+          Future.failed(new ErrorResponseException(AppJson.mapper.deserializeArray(JSON.parse(text), ErrorResponse.meta)))
         } else {
           Future.failed(RuntimeException(s"HTTP ${response.status}: $text"))
         }
