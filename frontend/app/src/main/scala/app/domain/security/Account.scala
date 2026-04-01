@@ -21,7 +21,7 @@ class Account(
 object Account {
   private given ExecutionContext = ExecutionContext.global
 
-  val meta : Meta[Account] = Meta()
+  val meta : Meta[Account] = Meta(() => new Account())
 
   def read(): Future[Data[Account]] =
     fetch(

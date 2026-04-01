@@ -19,13 +19,33 @@ class ListPropertyDeserializer extends Deserializer[ListProperty[?]] {
 
     var i = 0
     while (i < arr.length) {
-      val deserializer = DeserializerFactory.buildFromType(elemType)
-      val value = deserializer.deserialize(arr(i), new JsonContext(elemType))
+      val elemJson = arr(i)
+      val elemContext = resolveElementType(elemJson, elemType)
+      val deserializer = DeserializerFactory.buildFromType(elemContext.resolvedType)
+      val value = deserializer.deserialize(elemJson, elemContext)
       result.push(value)
       i += 1
     }
 
     new ListProperty(result)
+  }
+
+  private def resolveElementType(json: Dynamic, declaredType: com.anjunar.scala.enterprise.macros.reflection.Type): JsonContext = {
+    val jsonType = readJsonType(json)
+    jsonType match {
+      case Some(typeName) =>
+        com.anjunar.scala.enterprise.macros.MetaClassLoader.getByTypeName(typeName) match {
+          case Some(clazz) => new JsonContext(clazz)
+          case None => new JsonContext(declaredType)
+        }
+      case None => new JsonContext(declaredType)
+    }
+  }
+
+  private def readJsonType(json: Dynamic): Option[String] = {
+    val rawType = json.selectDynamic("@type").asInstanceOf[js.Any]
+    if (rawType == null || js.isUndefined(rawType)) None
+    else Some(rawType.toString)
   }
 
 }

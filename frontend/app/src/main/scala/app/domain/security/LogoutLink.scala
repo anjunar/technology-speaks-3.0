@@ -20,4 +20,4 @@ class LogoutLink(
 }
 
 object LogoutLink {
-  val meta : Meta[LogoutLink] = Meta()}
+  val meta : Meta[LogoutLink] = Meta(() => new LogoutLink())}

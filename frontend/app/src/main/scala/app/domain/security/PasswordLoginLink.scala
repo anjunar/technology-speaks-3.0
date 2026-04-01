@@ -20,4 +20,4 @@ class PasswordLoginLink(
 }
 
 object PasswordLoginLink {
-  val meta : Meta[PasswordLoginLink] = Meta()}
+  val meta : Meta[PasswordLoginLink] = Meta(() => new PasswordLoginLink())}

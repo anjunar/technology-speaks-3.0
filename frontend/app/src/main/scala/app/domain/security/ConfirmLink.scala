@@ -20,4 +20,4 @@ class ConfirmLink(
 }
 
 object ConfirmLink {
-  val meta : Meta[ConfirmLink] = Meta()}
+  val meta : Meta[ConfirmLink] = Meta(() => new ConfirmLink())}

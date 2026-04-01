@@ -20,4 +20,4 @@ class PostsLink(
 }
 
 object PostsLink {
-  val meta : Meta[PostsLink] = Meta()}
+  val meta : Meta[PostsLink] = Meta(() => new PostsLink())}

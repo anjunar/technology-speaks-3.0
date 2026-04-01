@@ -19,4 +19,4 @@ class UsersLink(
 }
 
 object UsersLink {
-  val meta : Meta[UsersLink] = Meta()}
+  val meta : Meta[UsersLink] = Meta(() => new UsersLink())}

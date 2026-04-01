@@ -1,7 +1,9 @@
 package app.domain
 
-import app.domain.core.AbstractLink
-import app.domain.core.User
+import app.domain.core.{AbstractLink, User, UsersLink}
+import app.domain.documents.DocumentsLink
+import app.domain.followers.RelationShipLink
+import app.domain.security.*
 import app.support.{Api, JsonModel}
 import app.support.Api.given
 import com.anjunar.scala.enterprise.macros.validation.JsonName
@@ -10,7 +12,6 @@ import jfx.core.state.ListProperty
 
 import scala.annotation.meta.field
 import scala.concurrent.Future
-import scala.scalajs.js
 
 class Application(
   var user: User = new User(),
@@ -23,6 +24,21 @@ class Application(
 }
 
 object Application {
+
+  val subClasses: Seq[Meta[?]] = Seq(
+    AccountLink.meta,
+    UsersLink.meta,
+    ConfirmLink.meta,
+    DocumentsLink.meta,
+    LogoutLink.meta,
+    PasswordLoginLink.meta,
+    PasswordRegisterLink.meta,
+    WebAuthnLoginLink.meta,
+    WebAuthnRegisterLink.meta,
+    RelationShipLink.meta,
+  )
+
+  subClasses.foreach(println)
 
   val meta: Meta[Application] = Meta[Application](() => new Application())
 

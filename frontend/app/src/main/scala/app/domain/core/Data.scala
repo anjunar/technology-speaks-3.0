@@ -19,5 +19,5 @@ class Data[E: ClassTag](
 }
 
 object Data {
-  def meta[E : ClassTag]: Meta[Data[E]] = Meta()
+  def meta[E : ClassTag]: Meta[Data[E]] = Meta(() => new Data())
 }

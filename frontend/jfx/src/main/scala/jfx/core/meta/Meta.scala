@@ -9,23 +9,11 @@ type Meta[E] = SimpleClass[E]
 
 object Meta {
 
-  inline def apply[E]()(using ClassTag[E]): Meta[E] = {
-    ClassAnnotationMacros.describeClass[E]
-  }
-
   inline def apply[E](factory: () => E)(using classTag : ClassTag[E]): Meta[E] = {
     val simpleClass = ClassAnnotationMacros.describeClass[E]
     ClassLoader.register(factory, simpleClass)
     MetaClassLoader.register(simpleClass, classTag.runtimeClass, factory)
     simpleClass
-  }
-
-  inline def apply[E](factory: () => E, typeName: String)(using classTag : ClassTag[E]): Meta[E] = {
-    val simpleClass = ClassAnnotationMacros.describeClass[E]
-    val registered = simpleClass.copy(typeName = typeName)
-    ClassLoader.register(factory, registered)
-    MetaClassLoader.register(simpleClass, classTag.runtimeClass, factory)
-    registered
   }
 
 }

@@ -14,4 +14,4 @@ class ConfirmCode(
 }
 
 object ConfirmCode {
-  val meta : Meta[ConfirmCode] = Meta()}
+  val meta : Meta[ConfirmCode] = Meta(() => new ConfirmCode())}

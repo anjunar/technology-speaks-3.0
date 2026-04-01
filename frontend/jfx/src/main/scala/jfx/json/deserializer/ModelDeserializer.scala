@@ -39,21 +39,29 @@ class ModelDeserializer extends Deserializer[Model[?]] {
     jsonType match {
       case Some(typeName) =>
         MetaClassLoader.getByTypeName(typeName)
-          .flatMap(MetaClassLoader.factories.get)
-          .getOrElse {
-            val typeNames = MetaClassLoader.typeNames
-            val test = typeNames.getOrElse(typeName, throw IllegalArgumentException(s"No factory registered for type '$typeName'. Make sure to call Meta(() => new $typeName()) before deserialization. available types: ${MetaClassLoader.factories.keys.mkString(",")}"))
-            MetaClassLoader.factories(test)
-          }
+          .flatMap(MetaClassLoader.factories.get) match {
+          case Some(factory) => factory
+          case None =>
+            MetaClassLoader.factories.collectFirst {
+              case (key, factory) if key.typeName == typeName => factory
+            }.getOrElse {
+              val simpleTypeName = typeName.split('.').last
+              MetaClassLoader.factories.collectFirst {
+                case (key, factory) if key.typeName.split('.').last == simpleTypeName => factory
+              }.getOrElse {
+                throw IllegalArgumentException(s"No factory registered for type '$typeName'. Available types: ${MetaClassLoader.factories.keys.map(_.typeName).mkString(", ")}")
+              }
+            }
+        }
       case None =>
         MetaClassLoader.factories.get(expectedType) match {
           case Some(factory) => factory
           case None =>
-            MetaClassLoader.getByTypeName(expectedType.typeName)
-              .flatMap(MetaClassLoader.factories.get)
-              .getOrElse {
-                throw IllegalArgumentException(s"No factory registered for type '${expectedType.typeName}'. Make sure to call Meta(() => new ${expectedType.typeName}()) before deserialization.")
-              }
+            MetaClassLoader.factories.collectFirst {
+              case (key, factory) if key.typeName == expectedType.typeName => factory
+            }.getOrElse {
+              throw IllegalArgumentException(s"No factory registered for type '${expectedType.typeName}'. Available types: ${MetaClassLoader.factories.keys.map(_.typeName).mkString(", ")}")
+            }
         }
     }
   }

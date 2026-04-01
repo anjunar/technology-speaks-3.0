@@ -23,4 +23,4 @@ class PasswordChange(
 }
 
 object PasswordChange {
-  val meta : Meta[PasswordChange] = Meta()}
+  val meta : Meta[PasswordChange] = Meta(() => new PasswordChange())}

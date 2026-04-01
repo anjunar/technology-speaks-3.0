@@ -1,7 +1,7 @@
 package jfx.json.deserializer
 
 import com.anjunar.scala.enterprise.macros.reflection.{ParameterizedType, SimpleClass, Type}
-import com.anjunar.scala.enterprise.macros.MetaClassLoader
+import com.anjunar.scala.enterprise.macros.{Annotation, MetaClassLoader}
 import jfx.core.state.{ListProperty, Property}
 import jfx.form.Model
 
@@ -46,7 +46,20 @@ object DeserializerFactory {
                 MetaClassLoader.getByTypeName(sc.typeName)
                   .flatMap(MetaClassLoader.factories.get) match {
                     case Some(factory) => new ModelDeserializer()
-                    case None => throw new IllegalArgumentException(s"No deserializer found for type '${sc.typeName}'")
+                    case None =>
+                      val simpleName = sc.typeName.split('.').last
+                      MetaClassLoader.getByTypeName(simpleName)
+                        .flatMap(MetaClassLoader.factories.get) match {
+                          case Some(factory) => new ModelDeserializer()
+                          case None =>
+                            MetaClassLoader.factories.collectFirst {
+                              case (key, factory) if key.typeName == sc.typeName => new ModelDeserializer()
+                            }.getOrElse {
+                              findFactoryByJsonType(sc.typeName).getOrElse {
+                                throw new IllegalArgumentException(s"No deserializer found for type '${sc.typeName}'")
+                              }
+                            }
+                        }
                   }
             }
         }
@@ -62,6 +75,21 @@ object DeserializerFactory {
         }
       case _ => throw new IllegalArgumentException(s"No deserializer found for class $tpe")
     }
+  }
+
+  private def findFactoryByJsonType(typeName: String): Option[Deserializer[?]] = {
+    MetaClassLoader.factories.collectFirst {
+      case (key, factory) =>
+        val clazz = MetaClassLoader.getByTypeName(key.typeName)
+        clazz.flatMap { c =>
+          c.annotations.collectFirst {
+            case Annotation(className, params) if className == "jfx.json.JsonType" =>
+              params.get("value") match {
+                case Some(jsonTypeValue: String) if jsonTypeValue == typeName => new ModelDeserializer()
+              }
+          }
+        }
+    }.flatten
   }
 
 }

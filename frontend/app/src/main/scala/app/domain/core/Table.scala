@@ -11,7 +11,6 @@ import scala.reflect.ClassTag
 class Table[E: ClassTag](
   var rows: js.Array[E] = new js.Array[E](),
   var size: Int = 0,
-  @JsonIgnore
   var schema: Schema | Null = null
 ) extends JsonModel[Table[E]] {
 
@@ -19,5 +18,5 @@ class Table[E: ClassTag](
 }
 
 object Table {
-  def meta[E : ClassTag]: Meta[Table[E]] = Meta()
+  def meta[E : ClassTag]: Meta[Table[E]] = Meta(() => new Table())
 }

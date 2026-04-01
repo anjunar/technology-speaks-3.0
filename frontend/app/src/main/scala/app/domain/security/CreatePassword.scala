@@ -15,4 +15,4 @@ class CreatePassword(
 }
 
 object CreatePassword {
-  val meta : Meta[CreatePassword] = Meta()}
+  val meta : Meta[CreatePassword] = Meta(() => new CreatePassword())}

@@ -20,4 +20,4 @@ class RelationShipLink(
 }
 
 object RelationShipLink {
-  val meta : Meta[RelationShipLink] = Meta()}
+  val meta : Meta[RelationShipLink] = Meta(() => new RelationShipLink())}

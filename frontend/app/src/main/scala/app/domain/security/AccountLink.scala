@@ -20,4 +20,4 @@ class AccountLink(
 }
 
 object AccountLink {
-  val meta : Meta[AccountLink] = Meta()}
+  val meta : Meta[AccountLink] = Meta(() => new AccountLink())}

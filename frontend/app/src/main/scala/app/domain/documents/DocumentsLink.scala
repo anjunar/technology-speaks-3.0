@@ -20,4 +20,4 @@ class DocumentsLink(
 }
 
 object DocumentsLink {
-  val meta : Meta[DocumentsLink] = Meta()}
+  val meta : Meta[DocumentsLink] = Meta(() => new DocumentsLink())}

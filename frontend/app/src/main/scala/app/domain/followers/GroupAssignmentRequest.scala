@@ -13,4 +13,4 @@ class GroupAssignmentRequest(
 }
 
 object GroupAssignmentRequest {
-  val meta : Meta[GroupAssignmentRequest] = Meta()}
+  val meta : Meta[GroupAssignmentRequest] = Meta(() => new GroupAssignmentRequest())}
