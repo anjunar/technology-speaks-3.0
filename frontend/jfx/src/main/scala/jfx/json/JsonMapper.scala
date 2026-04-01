@@ -29,7 +29,7 @@ class JsonMapper {
   private def getJsonFieldName(access: PropertyAccess[?, ?]): String = {
     access.annotations
       .collectFirst {
-        case Annotation(className, params) if className == "jfx.json.JsonType" =>
+        case Annotation(className, params) if className == "com.anjunar.scala.enterprise.macros.validation.JsonName" =>
           params.getOrElse("value", access.name).asInstanceOf[String]
       }
       .getOrElse(access.name)

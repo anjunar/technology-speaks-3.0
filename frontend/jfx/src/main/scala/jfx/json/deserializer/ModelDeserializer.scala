@@ -21,7 +21,8 @@ class ModelDeserializer extends Deserializer[Model[?]] {
       case _ => throw new IllegalArgumentException(s"Expected SimpleClass or ParameterizedType, got ${context.resolvedType}")
     }
 
-    val factory = MetaClassLoader.factories.getOrElse(modelType, throw IllegalStateException(s"No factory registered for type '${modelType.typeName}'"))
+    val factories = MetaClassLoader.factories
+    val factory = factories.getOrElse(modelType, throw IllegalStateException(s"No factory registered for type '${modelType.typeName}'"))
 
     val model = factory().asInstanceOf[Model[?]]
     populateModel(model, json, context)
@@ -47,7 +48,7 @@ class ModelDeserializer extends Deserializer[Model[?]] {
   private def getJsonFieldName(access: PropertyAccess[?, ?]): String = {
     access.annotations
       .collectFirst {
-        case Annotation(className, params) if className == "jfx.json.JsonType" =>
+        case Annotation(className, params) if className == "com.anjunar.scala.enterprise.macros.validation.JsonName" =>
           params.getOrElse("value", access.name).asInstanceOf[String]
       }
       .getOrElse(access.name)

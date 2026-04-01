@@ -1,8 +1,8 @@
 package jfx.json
 
+import com.anjunar.scala.enterprise.macros.PropertyMacros
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import jfx.core.meta.Meta
 import com.anjunar.scala.enterprise.macros.validation.{NotBlank, Size}
 
 class AnnotationExtractionSpec extends AnyFlatSpec with Matchers {
