@@ -1,55 +1,31 @@
 package jfx.json
 
-import com.anjunar.scala.enterprise.macros.{Annotation, PropertyAccess}
-import com.anjunar.scala.enterprise.macros.reflection.{ParameterizedType, SimpleClass, Type}
-import jfx.core.state.{ListProperty, ReadOnlyProperty}
-import jfx.json.deserializer.{DeserializerFactory, JsonContext, ModelDeserializer}
-import jfx.json.serializer.{JavaContext, ModelSerializer, SerializerFactory}
+import jfx.json.deserializer.{Deserializer, DeserializerFactory, JsonContext, ModelDeserializer}
+import jfx.json.serializer.{JavaContext, ModelSerializer}
 import jfx.form.Model
 
 import scala.scalajs.js
 import scala.scalajs.js.Dynamic
 
-class JsonMapper {
+object JsonMapper {
+  def deserialize[M <: Model[M]](json: Dynamic, meta: com.anjunar.scala.enterprise.macros.reflection.Type): M =
+    new ModelDeserializer().deserialize(json, new JsonContext(meta)).asInstanceOf[M]
 
-  def deserialize[M <: Model[M]](json: Dynamic, meta: Type): M = {
-    val deserializer = new ModelDeserializer()
-    deserializer.deserialize(json, new JsonContext(meta)).asInstanceOf[M]
-  }
+  def deserializeArray[M <: Model[M]](json: js.Array[js.Dynamic], meta: com.anjunar.scala.enterprise.macros.reflection.Type): Seq[M] =
+    if (json == null || js.isUndefined(json)) Seq.empty
+    else json.toSeq.map(j => deserialize(j, meta))
 
-  def deserializeArray[M <: Model[M]](json: js.Array[js.Dynamic], meta: Type): Seq[M] = {
-    if (json == null || js.isUndefined(json)) return Seq.empty
-    json.toSeq.map(j => deserialize(j, meta))
-  }
-
-  def serialize(model: Model[?]): Dynamic = {
+  def serialize(model: Model[?]): Dynamic =
     new ModelSerializer().serialize(model, new JavaContext(model.meta))
-  }
+}
 
-  private def getJsonFieldName(access: PropertyAccess[?, ?]): String = {
-    access.annotations
-      .collectFirst {
-        case Annotation(className, params) if className == "com.anjunar.scala.enterprise.macros.validation.JsonName" =>
-          params.getOrElse("value", access.name).asInstanceOf[String]
-      }
-      .getOrElse(access.name)
-  }
+class JsonMapper {
+  def deserialize[M <: Model[M]](json: Dynamic, meta: com.anjunar.scala.enterprise.macros.reflection.Type): M =
+    JsonMapper.deserialize(json, meta)
 
-  def isIgnored(access: PropertyAccess[?, ?]): Boolean = {
-    val name = access.name
-    name == "meta" || name == "##" || name.startsWith("$") || access.annotations.exists {
-      case Annotation(className, _) => className == "jfx.json.JsonIgnore"
-      case null => false
-    }
-  }
+  def deserializeArray[M <: Model[M]](json: js.Array[js.Dynamic], meta: com.anjunar.scala.enterprise.macros.reflection.Type): Seq[M] =
+    JsonMapper.deserializeArray(json, meta)
 
-  private def readField(dynamic: Dynamic, access: PropertyAccess[?, ?]): js.Any = {
-    val jsonName = getJsonFieldName(access)
-    if (jsonName != access.name) {
-      val annotated = dynamic.selectDynamic(jsonName).asInstanceOf[js.Any]
-      if (annotated != null && !js.isUndefined(annotated)) return annotated
-    }
-    dynamic.selectDynamic(access.name).asInstanceOf[js.Any]
-  }
-
+  def serialize(model: Model[?]): Dynamic =
+    JsonMapper.serialize(model)
 }

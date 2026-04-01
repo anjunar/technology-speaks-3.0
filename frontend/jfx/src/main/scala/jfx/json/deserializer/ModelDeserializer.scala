@@ -4,6 +4,7 @@ import com.anjunar.scala.enterprise.macros.{Annotation, MetaClassLoader, Propert
 import com.anjunar.scala.enterprise.macros.reflection.{ParameterizedType, SimpleClass, Type}
 import jfx.core.state.{ListProperty, Property}
 import jfx.form.Model
+import jfx.json.JsonHelpers
 
 import scala.scalajs.js
 import scala.scalajs.js.Dynamic
@@ -13,149 +14,94 @@ class ModelDeserializer extends Deserializer[Model[?]] {
   override def deserialize(json: Dynamic, context: JsonContext): Any = {
     val modelType = context.resolvedType match {
       case sc: SimpleClass[?] => sc
-      case pt: ParameterizedType =>
-        pt.rawType match {
-          case sc: SimpleClass[?] => sc
-          case _ => throw new IllegalArgumentException(s"Expected SimpleClass, got ${context.resolvedType}")
-        }
+      case pt: ParameterizedType => pt.rawType match {
+        case sc: SimpleClass[?] => sc
+        case _ => throw new IllegalArgumentException(s"Expected SimpleClass, got ${context.resolvedType}")
+      }
       case _ => throw new IllegalArgumentException(s"Expected SimpleClass or ParameterizedType, got ${context.resolvedType}")
     }
 
-    val jsonType = readJsonType(json)
-    val factory = findFactory(jsonType, modelType)
+    modelType.typeName match {
+      case "scala.scalajs.js.Array" =>
+        val deserializer = new JsArrayDeserializer()
+        return deserializer.deserialize(json, context)
+      case "scala.collection.immutable.Map" | "Map" =>
+        context.resolvedType match {
+          case pt: ParameterizedType => return deserializeMap(json, pt)
+          case _ => throw new IllegalArgumentException("Map must be parameterized")
+        }
+      case _ =>
+    }
 
+    val factory = JsonHelpers.findFactory(readJsonType(json), modelType)
     val model = factory().asInstanceOf[Model[?]]
     val typeResolver = context.resolvedType match {
       case pt: ParameterizedType => createTypeResolver(pt)
-      case _ => identity[Type] _
+      case _ => identity[Type]
     }
-    populateModel(model, json, context, typeResolver)
+    populateModel(model, json, typeResolver)
     model
   }
 
-  private def createTypeResolver(parameterizedType: ParameterizedType): Type => Type = {
-    val typeArgs = parameterizedType.typeArguments
-    val typeParamNames: Array[String] = parameterizedType.rawType match {
-      case sc: SimpleClass[?] => sc.typeParameters
-      case _ => Array.empty
+  private def createTypeResolver(pt: ParameterizedType): Type => Type = {
+    val typeArgs = pt.typeArguments
+    val typeParamIndex = pt.rawType match {
+      case sc: SimpleClass[?] => sc.typeParameters.zipWithIndex.toMap
+      case _ => Map.empty[String, Int]
     }
-    val typeParamIndex: Map[String, Int] = typeParamNames.zipWithIndex.toMap
-    
-    (tpe: Type) => {
-      tpe match {
-        case pt: ParameterizedType =>
-          val resolvedArgs = pt.typeArguments.map { arg =>
-            resolveTypeArgument(arg, typeArgs, typeParamIndex)
-          }
-          com.anjunar.scala.enterprise.macros.ReflectionSupport.parameterized(
-            pt.rawType.asInstanceOf[SimpleClass[?]],
-            resolvedArgs
-          )
-        case _ =>
-          resolveTypeArgument(tpe, typeArgs, typeParamIndex)
-      }
+    (tpe: Type) => tpe match {
+      case pt2: ParameterizedType =>
+        com.anjunar.scala.enterprise.macros.ReflectionSupport.parameterized(
+          pt2.rawType.asInstanceOf[SimpleClass[?]],
+          pt2.typeArguments.map(resolveTypeArgument(_, typeArgs, typeParamIndex))
+        )
+      case _ => resolveTypeArgument(tpe, typeArgs, typeParamIndex)
     }
   }
 
-  private def resolveTypeArgument(
-    tpe: Type,
-    typeArgs: Array[Type],
-    typeParamIndex: Map[String, Int]
-  ): Type = {
-    tpe.getTypeName match {
-      case name if typeParamIndex.contains(name) =>
-        val index = typeParamIndex(name)
-        if (index < typeArgs.length) typeArgs(index) else tpe
+  private def resolveTypeArgument(tpe: Type, typeArgs: Array[Type], typeParamIndex: Map[String, Int]): Type =
+    typeParamIndex.get(tpe.getTypeName) match {
+      case Some(i) if i < typeArgs.length => typeArgs(i)
       case _ => tpe
     }
-  }
 
-  private def readJsonType(json: Dynamic): Option[String] = {
-    val rawType = json.selectDynamic("@type").asInstanceOf[js.Any]
-    if (rawType == null || js.isUndefined(rawType)) None
-    else Some(rawType.toString)
-  }
+  private def readJsonType(json: Dynamic): Option[String] =
+    Option(json.selectDynamic("@type").asInstanceOf[js.Any])
+      .filter(v => v != null && !js.isUndefined(v))
+      .map(_.toString)
 
-  private def findFactory(jsonType: Option[String], expectedType: SimpleClass[?]): () => Any = {
-    jsonType match {
-      case Some(typeName) =>
-        MetaClassLoader.getByTypeName(typeName)
-          .flatMap(MetaClassLoader.factories.get) match {
-          case Some(factory) => factory
-          case None =>
-            MetaClassLoader.factories.collectFirst {
-              case (key, factory) if key.typeName == typeName => factory
-            }.getOrElse {
-              val simpleTypeName = typeName.split('.').last
-              MetaClassLoader.factories.collectFirst {
-                case (key, factory) if key.typeName.split('.').last == simpleTypeName => factory
-              }.getOrElse {
-                throw IllegalArgumentException(s"No factory registered for type '$typeName'. Available types: ${MetaClassLoader.factories.keys.map(_.typeName).mkString(", ")}")
-              }
-            }
-        }
-      case None =>
-        MetaClassLoader.factories.get(expectedType) match {
-          case Some(factory) => factory
-          case None =>
-            val subTypeFactory = findSubTypeFactory(expectedType)
-            subTypeFactory.getOrElse {
-              throw IllegalArgumentException(s"No factory registered for type '${expectedType.typeName}'. Available types: ${MetaClassLoader.factories.keys.map(_.typeName).mkString(", ")}")
-            }
-        }
-    }
-  }
-
-  private def findSubTypeFactory(expectedType: SimpleClass[?]): Option[() => Any] = {
-    val subTypes = expectedType.subTypes
-    subTypes.collectFirst {
-      case subType if MetaClassLoader.factories.contains(subType) =>
-        MetaClassLoader.factories(subType)
-    }
-  }
-
-  private def populateModel(model: Model[?], json: Dynamic, parentContext: JsonContext, typeResolver: Type => Type): Unit = {
+  private def populateModel(model: Model[?], json: Dynamic, typeResolver: Type => Type): Unit = {
     model.meta.properties.foreach { property =>
-      if (!isIgnored(property)) {
-        val resolvedGenericType = typeResolver(property.genericType)
-        val fieldName = getJsonFieldName(property)
-        
-        resolvedGenericType match {
-          case pt: ParameterizedType if isMapType(pt) =>
-            val rawValue = json.asInstanceOf[js.Dynamic]
-            val decoded = deserializeMap(rawValue.asInstanceOf[Dynamic], pt)
-            assignValue(model, property.asInstanceOf[PropertyAccess[Any, Any]], decoded)
-          case sc: SimpleClass[?] if isMapType(sc) =>
-            val rawValue = json.asInstanceOf[js.Dynamic]
-            val decoded = deserializeMap(rawValue.asInstanceOf[Dynamic], sc)
-            assignValue(model, property.asInstanceOf[PropertyAccess[Any, Any]], decoded)
+      if (!JsonHelpers.isIgnored(property)) {
+        val resolvedType = typeResolver(property.genericType)
+        val fieldName = JsonHelpers.getJsonFieldName(property)
+        val decoded = resolvedType match {
+          case pt: ParameterizedType if isMapType(pt) => deserializeMap(json, pt)
+          case sc: SimpleClass[?] if isMapType(sc) => deserializeMap(json, sc)
           case _ =>
             val rawValue = json.selectDynamic(fieldName).asInstanceOf[js.Any]
-            if (!js.isUndefined(rawValue)) {
-              if (rawValue == null) {
-                assignValue(model, property.asInstanceOf[PropertyAccess[Any, Any]], null)
-              } else {
-                val deserializer = DeserializerFactory.buildFromType(resolvedGenericType)
-                val elemContext = new JsonContext(resolvedGenericType)
-                val decoded = deserializer.deserialize(rawValue.asInstanceOf[Dynamic], elemContext)
-                assignValue(model, property.asInstanceOf[PropertyAccess[Any, Any]], decoded)
-              }
+            if (js.isUndefined(rawValue) || rawValue == null) null
+            else {
+              val deserializer = DeserializerFactory.buildFromType(resolvedType)
+              deserializer.deserialize(rawValue.asInstanceOf[Dynamic], new JsonContext(resolvedType))
             }
+        }
+        try {
+          assignValue(model, property.asInstanceOf[PropertyAccess[Any, Any]], decoded)
+        } catch {
+          case _: UnsupportedOperationException => // Skip read-only properties
         }
       }
     }
   }
 
-  private def isMapType(tpe: Type): Boolean = {
-    tpe match {
-      case pt: ParameterizedType =>
-        pt.rawType match {
-          case sc: SimpleClass[?] => sc.typeName == "scala.collection.immutable.Map" || sc.typeName == "Map"
-          case _ => false
-        }
+  private def isMapType(tpe: Type): Boolean = tpe match {
+    case pt: ParameterizedType => pt.rawType match {
       case sc: SimpleClass[?] => sc.typeName == "scala.collection.immutable.Map" || sc.typeName == "Map"
       case _ => false
     }
+    case sc: SimpleClass[?] => sc.typeName == "scala.collection.immutable.Map" || sc.typeName == "Map"
+    case _ => false
   }
 
   private def deserializeMap(json: Dynamic, mapType: Type): Map[String, Any] = {
@@ -163,20 +109,16 @@ class ModelDeserializer extends Deserializer[Model[?]] {
       case pt: ParameterizedType if pt.typeArguments.length >= 2 => pt.typeArguments(1)
       case _ => throw new IllegalStateException("Map must have two type arguments")
     }
-
     val jsonObj = json.asInstanceOf[js.Dynamic]
     val keys = js.Dynamic.global.Object.keys(jsonObj).asInstanceOf[js.Array[String]]
-
     val builder = Map.newBuilder[String, Any]
     var i = 0
     while (i < keys.length) {
       val key = keys(i)
-      // Ignore meta fields like @type
       if (key != "@type" && !key.startsWith("$")) {
         val elemJson = jsonObj.selectDynamic(key).asInstanceOf[Dynamic]
-        val elemContext = new JsonContext(elemType)
         val deserializer = DeserializerFactory.buildFromType(elemType)
-        val value = deserializer.deserialize(elemJson, elemContext)
+        val value = deserializer.deserialize(elemJson, new JsonContext(elemType))
         builder += ((key, value))
       }
       i += 1
@@ -184,43 +126,19 @@ class ModelDeserializer extends Deserializer[Model[?]] {
     builder.result()
   }
 
-  private def getJsonFieldName(access: PropertyAccess[?, ?]): String = {
-    access.annotations
-      .collectFirst {
-        case Annotation(className, params) if className == "com.anjunar.scala.enterprise.macros.validation.JsonName" =>
-          params.getOrElse("value", access.name).asInstanceOf[String]
-      }
-      .getOrElse(access.name)
-  }
-
-  private def isIgnored(access: PropertyAccess[?, ?]): Boolean = {
-    val name = access.name
-    name == "meta" || name == "##" || name.startsWith("$") || access.annotations.exists {
-      case Annotation(className, _) => className == "jfx.json.JsonIgnore"
-      case null => false
-    }
-  }
-
   private def assignValue(model: Model[?], property: PropertyAccess[Any, Any], decoded: Any): Unit = {
     property.get(model) match {
-      case p: Property[Any @unchecked] =>
-        p.set(decoded)
+      case p: Property[Any @unchecked] => p.set(decoded)
       case list: ListProperty[Any @unchecked] =>
-        list.clear()
-        decoded match {
-          case values: js.Array[?] =>
-            var i = 0
-            while (i < values.length) {
-              list.addOne(values(i))
-              i += 1
-            }
-          case values: Iterable[?] =>
-            values.foreach(v => list.addOne(v))
-          case single =>
-            list.addOne(single)
+        if (decoded != null) {
+          list.clear()
+          decoded match {
+            case values: js.Array[?] => values.foreach(list.addOne)
+            case values: Iterable[?] => values.foreach(list.addOne)
+            case single => list.addOne(single)
+          }
         }
-      case _ => property.set(model, decoded)
+      case _ => if (decoded != null) property.set(model, decoded)
     }
   }
-
 }

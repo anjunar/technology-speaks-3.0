@@ -1,7 +1,6 @@
 package jfx.json.deserializer
 
 import com.anjunar.scala.enterprise.macros.reflection.{ParameterizedType, SimpleClass, Type}
-import com.anjunar.scala.enterprise.macros.{Annotation, MetaClassLoader}
 import jfx.core.state.{ListProperty, Property}
 import jfx.form.Model
 
@@ -10,91 +9,37 @@ import scala.scalajs.js
 
 object DeserializerFactory {
 
-  def build[E](clazz: Class[E]): Deserializer[E] = {
-    val result = clazz match {
-      case clazz: Class[E] if classOf[Property[?]].isAssignableFrom(clazz) => new PropertyDeserializer()
-      case clazz: Class[E] if classOf[ListProperty[?]].isAssignableFrom(clazz) => new ListPropertyDeserializer()
-      case clazz: Class[E] if classOf[Model[?]].isAssignableFrom(clazz) => new ModelDeserializer()
-      case clazz: Class[E] if classOf[Map[?, ?]].isAssignableFrom(clazz) => new MapDeserializer()
-      case clazz: Class[E] if classOf[String].isAssignableFrom(clazz) => new StringDeserializer()
-      case clazz: Class[E] if classOf[UUID].isAssignableFrom(clazz) => new UUIDDeserializer()
-      case clazz: Class[E] if classOf[Number].isAssignableFrom(clazz) => new NumberDeserializer()
-      case clazz: Class[E] if classOf[Boolean].isAssignableFrom(clazz) => new BooleanDeserializer()
-      case clazz: Class[E] if classOf[js.Array[?]].isAssignableFrom(clazz) => new JsArrayDeserializer()
-      case _ => throw new IllegalArgumentException(s"No deserializer found for class $clazz")
+  def build[E](clazz: Class[E]): Deserializer[E] = (clazz match {
+    case c if classOf[Property[?]].isAssignableFrom(c) => new PropertyDeserializer()
+    case c if classOf[ListProperty[?]].isAssignableFrom(c) => new ListPropertyDeserializer()
+    case c if classOf[Model[?]].isAssignableFrom(c) => new ModelDeserializer()
+    case c if classOf[String].isAssignableFrom(c) => new StringDeserializer()
+    case c if classOf[UUID].isAssignableFrom(c) => new UUIDDeserializer()
+    case c if classOf[Number].isAssignableFrom(c) => new NumberDeserializer()
+    case c if classOf[Boolean].isAssignableFrom(c) => new BooleanDeserializer()
+    case c if classOf[js.Array[?]].isAssignableFrom(c) => new JsArrayDeserializer()
+    case _ => throw new IllegalArgumentException(s"No deserializer for $clazz")
+  }).asInstanceOf[Deserializer[E]]
+
+  def buildFromType(tpe: Type): Deserializer[?] = tpe match {
+    case sc: SimpleClass[?] => sc.typeName match {
+      case "java.lang.String" | "String" => new StringDeserializer()
+      case "scala.Int" | "Int" | "scala.Double" | "Double" | "scala.Float" | "Float" | "scala.Long" | "Long" => new NumberDeserializer()
+      case "scala.Boolean" | "Boolean" => new BooleanDeserializer()
+      case "java.util.UUID" | "UUID" => new UUIDDeserializer()
+      case "scala.scalajs.js.Array" => new JsArrayDeserializer()
+      case "jfx.core.state.Property" | "Property" => new PropertyDeserializer()
+      case "jfx.core.state.ListProperty" | "ListProperty" => new ListPropertyDeserializer()
+      case _ => new ModelDeserializer()
     }
-
-    result.asInstanceOf[Deserializer[E]]
-  }
-
-  def buildFromType(tpe: Type): Deserializer[?] = {
-    tpe match {
-      case sc: SimpleClass[?] =>
-        sc.typeName match {
-          case "java.lang.String" | "String" => new StringDeserializer()
-          case "scala.Int" | "Int" => new NumberDeserializer()
-          case "scala.Double" | "Double" => new NumberDeserializer()
-          case "scala.Float" | "Float" => new NumberDeserializer()
-          case "scala.Long" | "Long" => new NumberDeserializer()
-          case "scala.Boolean" | "Boolean" => new BooleanDeserializer()
-          case "scala.scalajs.js.Array" => new JsArrayDeserializer()
-          case "java.util.UUID" | "UUID" => new UUIDDeserializer()
-          case "jfx.core.state.Property" | "Property" => new PropertyDeserializer()
-          case "jfx.core.state.ListProperty" | "ListProperty" => new ListPropertyDeserializer()
-          case "scala.collection.immutable.Map" | "Map" => new MapDeserializer()
-          case _ =>
-            MetaClassLoader.factories.get(sc) match {
-              case Some(factory) => new ModelDeserializer()
-              case None =>
-                MetaClassLoader.getByTypeName(sc.typeName)
-                  .flatMap(MetaClassLoader.factories.get) match {
-                    case Some(factory) => new ModelDeserializer()
-                    case None =>
-                      val simpleName = sc.typeName.split('.').last
-                      MetaClassLoader.getByTypeName(simpleName)
-                        .flatMap(MetaClassLoader.factories.get) match {
-                          case Some(factory) => new ModelDeserializer()
-                          case None =>
-                            MetaClassLoader.factories.collectFirst {
-                              case (key, factory) if key.typeName == sc.typeName => new ModelDeserializer()
-                            }.getOrElse {
-                              findFactoryByJsonType(sc.typeName).getOrElse {
-                                if (sc.subTypes.nonEmpty) new ModelDeserializer()
-                                else throw new IllegalArgumentException(s"No deserializer found for type '${sc.typeName}'")
-                              }
-                            }
-                        }
-                  }
-            }
-        }
-      case pt: ParameterizedType =>
-        pt.rawType match {
-          case sc: SimpleClass[?] =>
-            sc.typeName match {
-              case "jfx.core.state.Property" | "Property" => new PropertyDeserializer()
-              case "jfx.core.state.ListProperty" | "ListProperty" => new ListPropertyDeserializer()
-              case "scala.collection.immutable.Map" | "Map" => new MapDeserializer()
-              case _ => buildFromType(sc)
-            }
-          case _ => throw new IllegalArgumentException(s"No deserializer found for class $tpe")
-        }
-      case _ => throw new IllegalArgumentException(s"No deserializer found for class $tpe")
+    case pt: ParameterizedType => pt.rawType match {
+      case sc: SimpleClass[?] => sc.typeName match {
+        case "jfx.core.state.Property" | "Property" => new PropertyDeserializer()
+        case "jfx.core.state.ListProperty" | "ListProperty" => new ListPropertyDeserializer()
+        case _ => new ModelDeserializer()
+      }
+      case _ => new ModelDeserializer()
     }
+    case _ => new ModelDeserializer()
   }
-
-  private def findFactoryByJsonType(typeName: String): Option[Deserializer[?]] = {
-    MetaClassLoader.factories.collectFirst {
-      case (key, factory) =>
-        val clazz = MetaClassLoader.getByTypeName(key.typeName)
-        clazz.flatMap { c =>
-          c.annotations.collectFirst {
-            case Annotation(className, params) if className == "jfx.json.JsonType" =>
-              params.get("value") match {
-                case Some(jsonTypeValue: String) if jsonTypeValue == typeName => new ModelDeserializer()
-              }
-          }
-        }
-    }.flatten
-  }
-
 }
