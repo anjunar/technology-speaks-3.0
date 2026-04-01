@@ -23,6 +23,11 @@ object ReflectionSupport {
     new SimpleClass(underlying.getName)
   }
 
+  def resolveClassWithParams(name: String, typeParams: Array[String]): SimpleClass[?] = {
+    val cls = resolveClass(name)
+    new SimpleClass(cls.typeName, cls.annotations, cls.properties, cls.baseTypes, typeParams)
+  }
+
   def resolveClassWithAnnotations(name: String, annotations: Array[Annotation]): SimpleClass[?] = {
     val cls = resolveClass(name)
     new SimpleClass(cls.typeName, annotations)

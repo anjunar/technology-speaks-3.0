@@ -35,7 +35,15 @@ class JsArrayDeserializer extends Deserializer[js.Array[?]] {
     jsonType match {
       case Some(typeName) =>
         com.anjunar.scala.enterprise.macros.MetaClassLoader.getByTypeName(typeName) match {
-          case Some(clazz) => new JsonContext(clazz)
+          case Some(clazz) =>
+            declaredType match {
+              case pt: ParameterizedType if pt.rawType.getTypeName == clazz.typeName =>
+                new JsonContext(declaredType)
+              case sc: SimpleClass[?] if sc.typeName == typeName =>
+                new JsonContext(declaredType)
+              case _ =>
+                new JsonContext(clazz)
+            }
           case None => new JsonContext(declaredType)
         }
       case None =>

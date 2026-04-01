@@ -8,6 +8,10 @@ object ReflectionSupport {
     new SimpleClass(name)
   }
 
+  def resolveClassWithParams(name: String, typeParams: Array[String]): SimpleClass[?] = {
+    new SimpleClass(name, typeParameters = typeParams)
+  }
+
   def resolveClassWithAnnotations(name: String, annotations: Array[Annotation]): SimpleClass[?] = {
     new SimpleClass(name, annotations)
   }

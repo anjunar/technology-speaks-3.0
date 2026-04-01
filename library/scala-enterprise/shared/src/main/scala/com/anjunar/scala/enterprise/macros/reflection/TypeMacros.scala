@@ -90,7 +90,11 @@ object TypeMacros {
             s"No runtime class symbol available for type ${normalized.show(using Printer.TypeReprStructure)}"
           )
 
-        '{ ReflectionSupport.resolveClass(${ Expr(sym.fullName) }) }
+        val typeParams: Array[String] = sym.typeMembers.collect {
+          case s if s.flags.is(Flags.Param) => s.name
+        }.toArray
+        
+        '{ ReflectionSupport.resolveClassWithParams(${ Expr(sym.fullName) }, ${ Expr(typeParams) }) }
     }
   }
 

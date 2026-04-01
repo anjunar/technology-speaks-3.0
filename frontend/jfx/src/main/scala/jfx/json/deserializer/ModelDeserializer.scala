@@ -1,7 +1,7 @@
 package jfx.json.deserializer
 
 import com.anjunar.scala.enterprise.macros.{Annotation, MetaClassLoader, PropertyAccess}
-import com.anjunar.scala.enterprise.macros.reflection.{ParameterizedType, SimpleClass}
+import com.anjunar.scala.enterprise.macros.reflection.{ParameterizedType, SimpleClass, Type}
 import jfx.core.state.{ListProperty, Property}
 import jfx.form.Model
 
@@ -25,8 +25,49 @@ class ModelDeserializer extends Deserializer[Model[?]] {
     val factory = findFactory(jsonType, modelType)
 
     val model = factory().asInstanceOf[Model[?]]
-    populateModel(model, json, context)
+    val typeResolver = context.resolvedType match {
+      case pt: ParameterizedType => createTypeResolver(pt)
+      case _ => identity[Type] _
+    }
+    populateModel(model, json, context, typeResolver)
     model
+  }
+
+  private def createTypeResolver(parameterizedType: ParameterizedType): Type => Type = {
+    val typeArgs = parameterizedType.typeArguments
+    val typeParamNames: Array[String] = parameterizedType.rawType match {
+      case sc: SimpleClass[?] => sc.typeParameters
+      case _ => Array.empty
+    }
+    val typeParamIndex: Map[String, Int] = typeParamNames.zipWithIndex.toMap
+    
+    (tpe: Type) => {
+      tpe match {
+        case pt: ParameterizedType =>
+          val resolvedArgs = pt.typeArguments.map { arg =>
+            resolveTypeArgument(arg, typeArgs, typeParamIndex)
+          }
+          com.anjunar.scala.enterprise.macros.ReflectionSupport.parameterized(
+            pt.rawType.asInstanceOf[SimpleClass[?]],
+            resolvedArgs
+          )
+        case _ =>
+          resolveTypeArgument(tpe, typeArgs, typeParamIndex)
+      }
+    }
+  }
+
+  private def resolveTypeArgument(
+    tpe: Type,
+    typeArgs: Array[Type],
+    typeParamIndex: Map[String, Int]
+  ): Type = {
+    tpe.getTypeName match {
+      case name if typeParamIndex.contains(name) =>
+        val index = typeParamIndex(name)
+        if (index < typeArgs.length) typeArgs(index) else tpe
+      case _ => tpe
+    }
   }
 
   private def readJsonType(json: Dynamic): Option[String] = {
@@ -73,7 +114,7 @@ class ModelDeserializer extends Deserializer[Model[?]] {
     }
   }
 
-  private def populateModel(model: Model[?], json: Dynamic, parentContext: JsonContext): Unit = {
+  private def populateModel(model: Model[?], json: Dynamic, parentContext: JsonContext, typeResolver: Type => Type): Unit = {
     model.meta.properties.foreach { property =>
       if (!isIgnored(property)) {
         val fieldName = getJsonFieldName(property)
@@ -83,8 +124,9 @@ class ModelDeserializer extends Deserializer[Model[?]] {
           if (rawValue == null) {
             assignValue(model, property.asInstanceOf[PropertyAccess[Any, Any]], null)
           } else {
-            val deserializer = DeserializerFactory.buildFromType(property.genericType)
-            val elemContext = new JsonContext(property.genericType)
+            val resolvedGenericType = typeResolver(property.genericType)
+            val deserializer = DeserializerFactory.buildFromType(resolvedGenericType)
+            val elemContext = new JsonContext(resolvedGenericType)
             val decoded = deserializer.deserialize(rawValue.asInstanceOf[Dynamic], elemContext)
             assignValue(model, property.asInstanceOf[PropertyAccess[Any, Any]], decoded)
           }

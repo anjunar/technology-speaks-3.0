@@ -10,7 +10,8 @@ case class SimpleClass[T](
   typeName: String,
   annotations: Array[Annotation] = Array.empty,
   properties: Array[PropertyAccess[T, ?]] = Array.empty,
-  baseTypes: Array[String] = Array.empty
+  baseTypes: Array[String] = Array.empty,
+  typeParameters: Array[String] = Array.empty
 ) extends Type {
   override def getTypeName: String = typeName
 
