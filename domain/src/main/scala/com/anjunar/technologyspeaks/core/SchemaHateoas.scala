@@ -3,7 +3,6 @@ package com.anjunar.technologyspeaks.core
 import com.anjunar.json.mapper.provider.OwnerProvider
 import com.anjunar.json.mapper.schema.property.Property
 import com.anjunar.json.mapper.schema.{EntitySchema, Link, VisibilityRule}
-import com.anjunar.scala.enterprise.macros.PropertyAccess
 import com.anjunar.technologyspeaks.SpringContext
 import com.anjunar.technologyspeaks.security.IdentityHolder
 
@@ -64,7 +63,8 @@ object SchemaHateoas {
     currentUser: User
   ): Property[Any, ?] = {
     val copy = new Property[Any, Any](
-      source.propertyAccess.asInstanceOf[PropertyAccess[Any, Any]],
+      source.propertyAccessor.asInstanceOf[_root_.reflect.PropertyAccessor[Any, Any]],
+      source.propertyDescriptor,
       source.rule.asInstanceOf[VisibilityRule[Any]]
     )
 

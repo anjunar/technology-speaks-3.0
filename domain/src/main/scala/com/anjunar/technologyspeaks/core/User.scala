@@ -58,7 +58,7 @@ class User(@(JsonbProperty @field) @(NotBlank @field) @(Size @field)(min = 2, ma
 }
 
 object User extends RepositoryContext[User] with SchemaProvider[Schema] {
-  
+
   class Schema extends AbstractEntitySchema[User](SpringContext.entityManager()) {
     @JsonbProperty val nickName: Property[User, String] = property(_.nickName, new OwnerRule[User]())
     @JsonbProperty val image: Property[User, Media] = property(_.image, new OwnerRule[User]())
@@ -66,7 +66,7 @@ object User extends RepositoryContext[User] with SchemaProvider[Schema] {
     @JsonbProperty val address: Property[User, Address] = property(_.address, new OwnerRule[User]())
     @JsonbProperty val emails: Property[User, java.util.Set[EMail]] = property(_.emails, new OwnerRule[User]())
   }
-  
+
   @Entity(name = "UserView")
   class View extends EntityView
 

@@ -2,10 +2,12 @@ package com.anjunar.json.mapper.schema.property
 
 import com.anjunar.json.mapper.schema.VisibilityRule
 import com.anjunar.json.mapper.schema.jpa.JPAListAttribute
-import com.anjunar.scala.enterprise.macros.PropertyAccess
+import _root_.reflect.{PropertyAccessor, PropertyDescriptor}
 import jakarta.persistence.metamodel.ListAttribute
 
-import java.lang.reflect.Type
-
-class ListProperty[T,V](propertyAccess: PropertyAccess[T,V], rule: VisibilityRule[T], collectionAttribute: ListAttribute[T,V])
-  extends Property[T,V](propertyAccess, rule), JPAListAttribute[T,V](collectionAttribute)
+class ListProperty[T,V](
+  propertyAccessor: PropertyAccessor[T,V],
+  propertyDescriptor: PropertyDescriptor,
+  rule: VisibilityRule[T],
+  collectionAttribute: ListAttribute[T,V]
+) extends Property[T,V](propertyAccessor, propertyDescriptor, rule), JPAListAttribute[T,V](collectionAttribute)

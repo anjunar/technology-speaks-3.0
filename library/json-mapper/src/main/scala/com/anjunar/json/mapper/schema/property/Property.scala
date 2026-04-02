@@ -1,42 +1,40 @@
 package com.anjunar.json.mapper.schema.property
 
 import com.anjunar.json.mapper.schema.{EntitySchema, Helper, Link, SchemaProvider, VisibilityRule}
-import com.anjunar.scala.enterprise.macros.{Annotation, PropertyAccess, TypeHelper}
-import com.anjunar.scala.enterprise.macros.reflection.Type
+import _root_.reflect.{ClassDescriptor, PropertyAccessor, PropertyDescriptor}
 import com.anjunar.scala.universe.TypeResolver
 import jakarta.json.bind.annotation.JsonbProperty
 
 import java.util
 
-class Property[T, V](val propertyAccess : PropertyAccess[T, V], val rule: VisibilityRule[T]) {
-  
-  val name : String = propertyAccess.name
-  
-  val isWriteable : Boolean = propertyAccess.isWriteable
+class Property[T, V](
+  val propertyAccessor: PropertyAccessor[T, V],
+  val propertyDescriptor: PropertyDescriptor,
+  val rule: VisibilityRule[T]
+) {
 
-  val genericType : Type = propertyAccess.genericType
-  
-  def get(instance: T): V = propertyAccess.get(instance)
+  val name: String = propertyDescriptor.name
 
-  def set(instance: T, value: V): Unit = propertyAccess.set(instance, value)
-  
-  def findAnnotation[A <: Annotation](clazz: Class[A]): A = {
-    val option = propertyAccess.annotations.find(_.annotationClassName == clazz.getName)
-    if (option.isEmpty) {
-      null.asInstanceOf[A]
-    } else {
-      option.get.asInstanceOf[A]
-    }
-  }
+  val isWriteable: Boolean = propertyDescriptor.isWriteable
+
+  def get(instance: T): V = propertyAccessor.get(instance)
+
+  def set(instance: T, value: V): Unit = propertyAccessor.set(instance, value)
+
+  def hasAnnotation(annotationClass: String): Boolean =
+    propertyDescriptor.hasAnnotation(annotationClass)
+
+  def getAnnotation(annotationClass: String): Option[_root_.reflect.Annotation] =
+    propertyDescriptor.getAnnotation(annotationClass)
 
   @JsonbProperty("type")
-  val typeName: String = TypeHelper.rawType(propertyAccess.genericType).getSimpleName
+  val typeName: String = propertyDescriptor.propertyType.simpleName
 
   @JsonbProperty
   var schema: EntitySchema[?] =
     val value =
       try {
-        TypeHelper.rawType(propertyAccess.genericType)
+        Class.forName(propertyDescriptor.propertyType.typeName)
       } catch {
         case _: Throwable => null
       }

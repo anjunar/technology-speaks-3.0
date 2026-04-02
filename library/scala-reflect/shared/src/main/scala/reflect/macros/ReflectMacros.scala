@@ -4,21 +4,21 @@ import scala.quoted.*
 import reflect.*
 
 object ReflectMacros {
-  
+
   inline def reflect[T]: ClassDescriptor = ${ reflectImpl[T] }
-  
+
   inline def reflectType[T]: TypeDescriptor = ${ reflectTypeImpl[T] }
-  
+
   inline def extractProperties[T]: Array[PropertyDescriptor] = ${ extractPropertiesImpl[T] }
-  
+
   inline def extractConstructors[T]: Array[ConstructorDescriptor] = ${ extractConstructorsImpl[T] }
-  
+
   inline def makeAccessor[E, V](inline selector: E => V): PropertyAccessor[E, V] =
     ${ makeAccessorImpl[E, V]('selector) }
-  
+
   inline def createInstance[T](inline args: Any*): T = ${ createInstanceImpl[T]('args) }
-  
-  private def reflectImpl[T: Type](using Quotes): Expr[ClassDescriptor] = {
+
+  private[macros] def reflectImpl[T: Type](using Quotes): Expr[ClassDescriptor] = {
     import quotes.reflect.*
 
     val tpe = TypeRepr.of[T]
@@ -98,7 +98,7 @@ object ReflectMacros {
     }
   }
   
-  private def extractPropertiesImpl[T: Type](using Quotes): Expr[Array[PropertyDescriptor]] = {
+  private[macros] def extractPropertiesImpl[T: Type](using Quotes): Expr[Array[PropertyDescriptor]] = {
     import quotes.reflect.*
 
     val tpe = TypeRepr.of[T]
@@ -136,7 +136,7 @@ object ReflectMacros {
     '{ Array(${ Varargs(propertyDescriptors) }*) }
   }
 
-  private def buildTypeDescriptorSimple(using Quotes)(tpe: quotes.reflect.TypeRepr): Expr[TypeDescriptor] = {
+  private[macros] def buildTypeDescriptorSimple(using Quotes)(tpe: quotes.reflect.TypeRepr): Expr[TypeDescriptor] = {
     import quotes.reflect.*
 
     val normalized = tpe.widenTermRefByName.dealias
@@ -280,7 +280,7 @@ object ReflectMacros {
     }
   }
   
-  private def makeAccessorImpl[E: Type, V: Type](using Quotes)(selectorExpr: Expr[E => V]): Expr[PropertyAccessor[E, V]] = {
+  private[macros] def makeAccessorImpl[E: Type, V: Type](using Quotes)(selectorExpr: Expr[E => V]): Expr[PropertyAccessor[E, V]] = {
     import quotes.reflect.*
 
     val getterLambda = '{ (e: E) => $selectorExpr(e) }
@@ -341,35 +341,38 @@ object ReflectMacros {
       report.errorAndAbort(s"Instantiation for non-case class ${symbol.name} requires explicit constructor invocation")
   }
   
-  private def collectPropertySymbols(using Quotes)(tpe: quotes.reflect.TypeRepr): List[quotes.reflect.Symbol] = {
+  private[macros] def collectPropertySymbols(using Quotes)(tpe: quotes.reflect.TypeRepr): List[quotes.reflect.Symbol] = {
     import quotes.reflect.*
 
-    val directMembers = tpe.typeSymbol.declarations.collect {
-      case s: Symbol if s.isTerm => s
-    }.filter { s =>
-      !s.flags.is(Flags.Private) && !s.flags.is(Flags.Protected) &&
-      !s.name.contains("$") &&
-      !s.name.endsWith("_=") &&
-      s.name != "hashCode" && s.name != "toString" && s.name != "getClass" &&
-      !s.isClassConstructor &&
-      !s.flags.is(Flags.Macro) && !s.flags.is(Flags.Artifact)
-    }.filter { s =>
-      val isField = !s.isDefDef
-      val isMethod = s.isDefDef
+    // Collect property symbols from the class and all base classes
+    val allSymbols = tpe.baseClasses.flatMap { baseClass =>
+      baseClass.declarations.collect {
+        case s: Symbol if s.isTerm => s
+      }.filter { s =>
+        !s.flags.is(Flags.Private) && !s.flags.is(Flags.Protected) &&
+        !s.name.contains("$") &&
+        !s.name.endsWith("_=") &&
+        s.name != "hashCode" && s.name != "toString" && s.name != "getClass" && s.name != "clone" && s.name != "notify" && s.name != "notifyAll" && s.name != "wait" && s.name != "finalize" &&
+        !s.isClassConstructor &&
+        !s.flags.is(Flags.Macro) &&
+        !s.flags.is(Flags.Artifact)
+      }.filter { s =>
+        val isField = !s.isDefDef
+        val isMethod = s.isDefDef
 
-      if isField then true
-      else if isMethod then
-        val methodType = normalizeType(tpe.memberType(s))
-        val isParameterless = s.paramSymss.isEmpty
-        val returnsUnit = methodType =:= TypeRepr.of[Unit]
-        isParameterless && !returnsUnit
-      else false
+        if isField then true
+        else if isMethod then
+          val methodType = normalizeType(tpe.memberType(s))
+          val isParameterless = s.paramSymss.isEmpty
+          val returnsUnit = methodType =:= TypeRepr.of[Unit]
+          isParameterless && !returnsUnit
+        else false
+      }
     }
-
-    directMembers.distinctBy(_.name)
+    allSymbols.distinctBy(_.name)
   }
   
-  private def extractAnnotations(using Quotes)(symbol: quotes.reflect.Symbol): Expr[Array[Annotation]] = {
+  private[macros] def extractAnnotations(using Quotes)(symbol: quotes.reflect.Symbol): Expr[Array[Annotation]] = {
     import quotes.reflect.*
     
     val annotationExprs = symbol.annotations.flatMap { ann =>
@@ -386,7 +389,7 @@ object ReflectMacros {
     '{ Array(${ Varargs(annotationExprs) }*) }
   }
   
-  private def extractAnnotationParams(using Quotes)(ann: quotes.reflect.Term): List[(String, Expr[Any])] = {
+  private[macros] def extractAnnotationParams(using Quotes)(ann: quotes.reflect.Term): List[(String, Expr[Any])] = {
     import quotes.reflect.*
     
     ann match {
@@ -408,7 +411,7 @@ object ReflectMacros {
     }
   }
   
-  private def extractBaseTypes(using Quotes)(tpe: quotes.reflect.TypeRepr): Expr[Array[String]] = {
+  private[macros] def extractBaseTypes(using Quotes)(tpe: quotes.reflect.TypeRepr): Expr[Array[String]] = {
     import quotes.reflect.*
     
     val baseTypes = tpe.baseClasses
@@ -419,7 +422,7 @@ object ReflectMacros {
     '{ Array(${ Varargs(baseTypes.map(Expr(_))) }*) }
   }
   
-  private def extractTypeParameters(using Quotes)(symbol: quotes.reflect.Symbol): Expr[Array[String]] = {
+  private[macros] def extractTypeParameters(using Quotes)(symbol: quotes.reflect.Symbol): Expr[Array[String]] = {
     import quotes.reflect.*
     
     val typeParams = symbol.typeMembers.collect {
@@ -443,7 +446,7 @@ object ReflectMacros {
     '{ ${ Expr(bounds) } }
   }
   
-  private def extractPropertySelector(using Quotes)(expr: Expr[Any]): String = {
+  private[macros] def extractPropertySelector(using Quotes)(expr: Expr[Any]): String = {
     import quotes.reflect.*
 
     def loop(term: Term): String = term match {
@@ -457,14 +460,15 @@ object ReflectMacros {
         }
       case Ident(name) => name
       case Lambda(params, body) => loop(body)
-      case Closure(Ident(name), _) => name
+      case Closure(inner, _) => loop(inner)
+      case Apply(TypeApply(Select(_, "apply"), _), List(inner)) => loop(inner)
       case _ => report.errorAndAbort(s"Expected a simple property selector: ${term.show}")
     }
 
     loop(expr.asTerm)
   }
   
-  private def normalizeType(using Quotes)(tpe: quotes.reflect.TypeRepr): quotes.reflect.TypeRepr = {
+  private[macros] def normalizeType(using Quotes)(tpe: quotes.reflect.TypeRepr): quotes.reflect.TypeRepr = {
     import quotes.reflect.*
     
     @scala.annotation.tailrec

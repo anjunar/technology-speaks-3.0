@@ -78,7 +78,7 @@ lazy val scalaUniverse2 = (project in file("library/scala-universe"))
   )
 
 lazy val jsonMapper2 = (project in file("library/json-mapper"))
-  .dependsOn(scalaUniverse2)
+  .dependsOn(scalaUniverse2, scalaReflectJVM)
   .settings(
     libraryDependencies ++= Seq(
       "com.google.guava" % "guava" % "33.5.0-jre",
