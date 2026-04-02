@@ -1,6 +1,6 @@
 package jfx.json.deserializer
 
-import reflect.{ParameterizedTypeDescriptor, TypeDescriptor}
+import reflect.{ClassDescriptor, ParameterizedTypeDescriptor, TypeDescriptor}
 import jfx.core.state.Property
 
 import scala.scalajs.js
@@ -16,15 +16,14 @@ class PropertyDeserializer extends Deserializer[Property[?]] {
       case _ => throw new IllegalStateException("Property must have a generic type")
     }
 
-    // Check if this is an Option type (Property[Option[T]])
+    // Check if this is Property[Option[T]]
     if (isOptionType(propertyType)) {
       if (json == null || js.isUndefined(json)) {
         None
       } else {
-        // Get element type from Option[T]
         val elementType = propertyType match {
           case pt: ParameterizedTypeDescriptor if pt.typeArguments.nonEmpty => pt.typeArguments(0)
-          case _ => propertyType
+          case _ => throw new IllegalStateException("Option must have a type argument")
         }
         val deserializer = DeserializerFactory.buildFromType(elementType)
         val value = deserializer.deserialize(json, new JsonContext(elementType))
@@ -37,7 +36,11 @@ class PropertyDeserializer extends Deserializer[Property[?]] {
   }
 
   private def isOptionType(tpe: TypeDescriptor): Boolean = {
-    tpe.typeName == "scala.Option" || tpe.typeName == "Option"
+    tpe match {
+      case pt: ParameterizedTypeDescriptor => pt.rawType.typeName == "scala.Option" || pt.rawType.typeName == "Option"
+      case cd: ClassDescriptor => cd.typeName == "scala.Option" || cd.typeName == "Option"
+      case _ => false
+    }
   }
 
 }

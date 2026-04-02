@@ -66,25 +66,14 @@ class ModelDeserializer extends Deserializer[Model[?]] {
 
   private def deserializeValue(rawValue: js.Any, propType: TypeDescriptor): Any = {
     propType match {
-      case pt: reflect.ParameterizedTypeDescriptor if isOptionType(pt) && pt.typeArguments.nonEmpty =>
-        // Handle Option[T] directly - don't try to create Option instance
-        if (rawValue == null || js.isUndefined(rawValue)) {
-          None
-        } else {
-          val elementType = pt.typeArguments(0)
-          val deserializer = DeserializerFactory.buildFromType(elementType)
-          val value = deserializer.deserialize(rawValue.asInstanceOf[Dynamic], new JsonContext(elementType))
-          Some(value)
-        }
+      case pt: reflect.ParameterizedTypeDescriptor if isPropertyType(pt) && pt.typeArguments.nonEmpty =>
+        // Handle Property[T] - use PropertyDeserializer which handles Option internally
+        val deserializer = DeserializerFactory.buildFromType(pt)
+        deserializer.deserialize(rawValue.asInstanceOf[Dynamic], new JsonContext(pt))
       case pt: reflect.ParameterizedTypeDescriptor if isListPropertyType(pt) && pt.typeArguments.nonEmpty =>
         // Handle ListProperty[T] - use ListPropertyDeserializer
         val deserializer = DeserializerFactory.buildFromType(pt)
         deserializer.deserialize(rawValue.asInstanceOf[Dynamic], new JsonContext(pt))
-      case pt: reflect.ParameterizedTypeDescriptor if isPropertyType(pt) && pt.typeArguments.nonEmpty =>
-        // Handle Property[T] - unwrap and deserialize element type
-        val elementType = pt.typeArguments(0)
-        val deserializer = DeserializerFactory.buildFromType(elementType)
-        deserializer.deserialize(rawValue.asInstanceOf[Dynamic], new JsonContext(elementType))
       case pt: reflect.ParameterizedTypeDescriptor if isMapType(pt) =>
         deserializeMap(rawValue.asInstanceOf[Dynamic], pt)
       case cd: reflect.ClassDescriptor if isMapType(cd) =>
@@ -140,7 +129,7 @@ class ModelDeserializer extends Deserializer[Model[?]] {
       case Some(accessor) =>
         accessor.get(model) match {
           case p: Property[Any @unchecked] =>
-            // Handle Option values - if decoded is None and property is Option, set directly
+            // Set the value directly - decoded is already the correct type (including Option)
             p.set(decoded)
           case list: ListProperty[Any @unchecked] =>
             // decoded is either a ListProperty or js.Array from ListPropertyDeserializer
