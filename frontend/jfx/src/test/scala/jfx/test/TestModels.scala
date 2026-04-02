@@ -1,54 +1,64 @@
 package jfx.test
 
 import jfx.core.state.{ListProperty, Property}
-import jfx.form.Model
 import reflect.ReflectRegistry
 
-class SimpleModel extends Model[SimpleModel] {
+class SimpleModel {
   val name: Property[String] = Property("")
   val value: Property[Int] = Property(0)
 }
 
-class NestedModel extends Model[NestedModel] {
+class NestedModel {
   val title: Property[String] = Property("")
   val count: Property[Int] = Property(0)
 }
 
-class ParentModel extends Model[ParentModel] {
+class ParentModel {
   val name: Property[String] = Property("")
   val nested: Property[NestedModel] = Property(new NestedModel)
 }
 
-class ListModel extends Model[ListModel] {
+class ListModel {
   val name: Property[String] = Property("")
   val items: ListProperty[String] = new ListProperty[String]()
 }
 
-class BooleanModel extends Model[BooleanModel] {
+class BooleanModel {
   val name: Property[String] = Property("")
   val active: Property[Boolean] = Property(false)
 }
 
-class DoubleModel extends Model[DoubleModel] {
+class DoubleModel {
   val name: Property[String] = Property("")
   val amount: Property[Double] = Property(0.0)
 }
 
-class OptionModel extends Model[OptionModel] {
+class OptionModel {
   val name: Property[String] = Property("")
   val description: Property[Option[String]] = Property(None)
 }
 
-class MapModel extends Model[MapModel] {
+class MapModel {
   val name: Property[String] = Property("")
   val metadata: Property[Map[String, String]] = Property(Map.empty[String, String])
+}
+
+class Item {
+  val itemName: Property[String] = Property("")
+  val price: Property[Double] = Property(0.0)
+}
+
+class GenericContainer[E] {
+  val containerName: Property[String] = Property("")
+  val data: Property[E] = Property(null.asInstanceOf[E])
+  val score: Property[Double] = Property(1.0)
 }
 
 object TestModelRegistry {
   println("=== Registering Test Models ===")
   val simpleDesc = ReflectRegistry.register(() => new SimpleModel())
   println(s"Registered SimpleModel with typeName: ${simpleDesc.typeName}")
-  
+
   ReflectRegistry.register(() => new NestedModel())
   ReflectRegistry.register(() => new ParentModel())
   ReflectRegistry.register(() => new ListModel())
@@ -56,5 +66,10 @@ object TestModelRegistry {
   ReflectRegistry.register(() => new DoubleModel())
   ReflectRegistry.register(() => new OptionModel())
   ReflectRegistry.register(() => new MapModel())
+  ReflectRegistry.register(() => new Item())
+  // Register GenericContainer - the macro will capture type parameters
+  val genericContainerDesc = ReflectRegistry.register(() => new GenericContainer[Item]())
+  println(s"Registered GenericContainer with typeName: ${genericContainerDesc.typeName}")
+  println(s"GenericContainer typeParameters: ${genericContainerDesc.typeParameters.mkString(", ")}")
   println("=== Done Registering ===")
 }

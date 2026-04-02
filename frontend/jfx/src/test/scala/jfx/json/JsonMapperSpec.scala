@@ -1,13 +1,17 @@
 package jfx.json
 
-import jfx.test.{SimpleModel, NestedModel, ParentModel, ListModel, BooleanModel, DoubleModel, OptionModel, MapModel}
+import jfx.test.{SimpleModel, NestedModel, ParentModel, ListModel, BooleanModel, DoubleModel, OptionModel, MapModel, Item, GenericContainer, TestModelRegistry}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import reflect.macros.ReflectMacros
+import reflect.ReflectRegistry
 import scala.scalajs.js
 import scala.scalajs.js.Dynamic
 
 class JsonMapperSpec extends AnyFlatSpec with Matchers {
+
+  // Ensure test models are registered
+  TestModelRegistry
 
   "JsonMapper" should "ein einfaches Modell serialisieren" in {
     reflect.ReflectRegistry.register(() => new SimpleModel())
@@ -290,5 +294,47 @@ class JsonMapperSpec extends AnyFlatSpec with Matchers {
     models(0).value.get shouldBe 11
     models(1).name.get shouldBe "Static 2"
     models(1).value.get shouldBe 22
+  }
+
+  it should "generische Typ-Informationen bei der Serialisierung erhalten" in {
+    val item = new Item
+    item.itemName.set("Test Item")
+    item.price.set(19.99)
+
+    val container = new GenericContainer[Item]
+    container.containerName.set("Item Container")
+    container.data.set(item)
+    container.score.set(0.95)
+
+    val mapper = new JsonMapper
+    val meta = ReflectMacros.reflectType[GenericContainer[Item]]
+    val json = mapper.serialize(container, meta)
+
+    json.containerName.toString shouldBe "Item Container"
+    json.score.toString shouldBe "0.95"
+    json.data.itemName.toString shouldBe "Test Item"
+    json.data.price.toString shouldBe "19.99"
+  }
+
+  it should "generische Typ-Informationen bei der Deserialisierung erhalten" in {
+    val itemJson = Dynamic.literal(
+      itemName = "Deserialized Item",
+      price = 29.99
+    )
+    val containerJson = Dynamic.literal(
+      containerName = "Deserialized Container",
+      data = itemJson,
+      score = 0.87
+    )
+
+    val mapper = new JsonMapper
+    // Use the parameterized type descriptor to preserve generic type information
+    val meta = ReflectMacros.reflectType[GenericContainer[Item]]
+    val container = mapper.deserialize[GenericContainer[Item]](containerJson, meta)
+
+    container.containerName.get shouldBe "Deserialized Container"
+    container.score.get shouldBe 0.87
+    container.data.get.itemName.get shouldBe "Deserialized Item"
+    container.data.get.price.get shouldBe 29.99
   }
 }

@@ -1,7 +1,7 @@
 package jfx.json.serializer
 
 import reflect.macros.PropertySupport
-import reflect.{ClassDescriptor, PropertyAccessor, PropertyDescriptor, TypeDescriptor}
+import reflect.{ClassDescriptor, ParameterizedTypeDescriptor, PropertyAccessor, PropertyDescriptor, TypeDescriptor}
 import reflect.ReflectRegistry
 import jfx.core.state.{ListProperty, Property, ReadOnlyProperty}
 import jfx.json.{JsonHelpers, JsonMapper}
@@ -15,11 +15,17 @@ class ModelSerializer extends Serializer[AnyRef] {
     val out = js.Dictionary[js.Any]()
     getJsonType(input).foreach(t => out.update("@type", t))
 
-    val properties = context.resolvedType.properties
+    val (rawType, typeArgs) = context.resolvedType match {
+      case pt: ParameterizedTypeDescriptor => (pt.rawType, pt.typeArguments)
+      case cd: ClassDescriptor => (cd, Array.empty[TypeDescriptor])
+    }
+
+    val properties = rawType.properties
     properties.foreach { prop =>
       if (!JsonHelpers.isIgnored(prop)) {
-        val value = readPropertyValue(input, context.resolvedType.typeName, prop)
-        prop.propertyType match {
+        val value = readPropertyValue(input, rawType.typeName, prop)
+        val resolvedPropertyType = resolvePropertyType(prop.propertyType, rawType, typeArgs)
+        resolvedPropertyType match {
           case pt: reflect.ParameterizedTypeDescriptor if isMapType(pt) =>
             value.asInstanceOf[Map[?, ?]].foreach { case (k, v) =>
               out.update(k.toString, serializeValue(v))
@@ -30,6 +36,25 @@ class ModelSerializer extends Serializer[AnyRef] {
       }
     }
     out.asInstanceOf[js.Dynamic]
+  }
+
+  private def resolvePropertyType(propType: TypeDescriptor, rawType: ClassDescriptor, typeArgs: Array[TypeDescriptor]): TypeDescriptor = {
+    propType match {
+      case cd: ClassDescriptor if rawType.typeParameters.contains(cd.typeName) && typeArgs.nonEmpty =>
+        val typeParamIndex = rawType.typeParameters.indexOf(cd.typeName)
+        if (typeParamIndex >= 0 && typeParamIndex < typeArgs.length) typeArgs(typeParamIndex)
+        else propType
+      case pt: ParameterizedTypeDescriptor =>
+        val resolvedArgs = pt.typeArguments.map(arg => resolvePropertyType(arg, rawType, typeArgs))
+        pt.copy(typeArguments = resolvedArgs)
+      case tv: reflect.TypeVariableDescriptor =>
+        if rawType.typeParameters.contains(tv.name) && typeArgs.nonEmpty then
+          val typeParamIndex = rawType.typeParameters.indexOf(tv.name)
+          if (typeParamIndex >= 0 && typeParamIndex < typeArgs.length) typeArgs(typeParamIndex)
+          else propType
+        else propType
+      case _ => propType
+    }
   }
 
   private def isMapType(tpe: TypeDescriptor): Boolean = tpe match {
@@ -67,6 +92,12 @@ class ModelSerializer extends Serializer[AnyRef] {
       val out = js.Dictionary[js.Any]()
       map.foreach { case (k, v) => out.update(k.toString, serializeValue(v)) }
       out.asInstanceOf[js.Dynamic]
+    case v: String => v
+    case v: Int => v
+    case v: Double => v
+    case v: Float => v
+    case v: Long => v
+    case v: Boolean => v
     case v => JsonMapper.serialize(v)
   }
 }

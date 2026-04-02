@@ -23,10 +23,22 @@ object JsonMapper {
     }
 
   def serialize(model: Any): Dynamic = {
-    val typeName = model.getClass.getName
-    val typeDescriptor = reflect.ReflectRegistry.loadClass(typeName).getOrElse(
-      throw new IllegalArgumentException(s"Cannot find type descriptor for $typeName")
-    )
+    serialize(model, null)
+  }
+
+  def serialize[M](model: M, meta: reflect.TypeDescriptor): Dynamic = {
+    val typeDescriptor = if (meta != null) {
+      meta
+    } else {
+      val typeName = model.getClass.getName
+      reflect.ReflectRegistry.loadClass(typeName).orElse(
+        reflect.ReflectRegistry.loadClassBySimpleName(model.getClass.getSimpleName)
+      ).orElse(
+        reflect.ReflectRegistry.getAllRegistered.find(_.simpleName == model.getClass.getSimpleName)
+      ).getOrElse(
+        throw new IllegalArgumentException(s"Cannot find type descriptor for $typeName")
+      )
+    }
     val value = SerializerFactory.buildFromType(typeDescriptor).asInstanceOf[Serializer[Any]]
     value.serialize(model, new JavaContext(typeDescriptor))
   }
@@ -41,4 +53,7 @@ class JsonMapper {
 
   def serialize(model: Any): Dynamic =
     JsonMapper.serialize(model)
+
+  def serialize[M](model: M, meta: reflect.TypeDescriptor): Dynamic =
+    JsonMapper.serialize(model, meta)
 }

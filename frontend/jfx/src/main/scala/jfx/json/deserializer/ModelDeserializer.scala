@@ -1,7 +1,7 @@
 package jfx.json.deserializer
 
 import reflect.macros.PropertySupport
-import reflect.{PropertyAccessor, TypeDescriptor}
+import reflect.{ClassDescriptor, ParameterizedTypeDescriptor, PropertyAccessor, TypeDescriptor}
 import jfx.core.state.{ListProperty, Property}
 import jfx.json.JsonHelpers
 
@@ -11,9 +11,9 @@ import scala.scalajs.js.Dynamic
 class ModelDeserializer extends Deserializer[AnyRef] {
 
   override def deserialize(json: Dynamic, context: JsonContext): Any = {
-    val modelType = context.resolvedType match {
-      case cd: reflect.ClassDescriptor => cd
-      case pt: reflect.ParameterizedTypeDescriptor => pt.rawType
+    val (modelType, rawType, typeArgs) = context.resolvedType match {
+      case pt: ParameterizedTypeDescriptor => (pt.rawType, pt.rawType, pt.typeArguments)
+      case cd: ClassDescriptor => (cd, cd, Array.empty[TypeDescriptor])
       case _ => throw new IllegalArgumentException(s"Expected ClassDescriptor, got ${context.resolvedType}")
     }
 
@@ -23,7 +23,7 @@ class ModelDeserializer extends Deserializer[AnyRef] {
         return deserializer.deserialize(json, context)
       case "scala.collection.immutable.Map" | "Map" =>
         context.resolvedType match {
-          case pt: reflect.ParameterizedTypeDescriptor => return deserializeMap(json, pt)
+          case pt: ParameterizedTypeDescriptor => return deserializeMap(json, pt)
           case _ => throw new IllegalArgumentException("Map must be parameterized")
         }
       case _ =>
@@ -31,16 +31,13 @@ class ModelDeserializer extends Deserializer[AnyRef] {
 
     // Resolve polymorphic type using @type field in JSON
     val actualTypeName = modelType match {
-      case cd: reflect.ClassDescriptor => resolvePolymorphicType(json, cd)
+      case cd: ClassDescriptor => resolvePolymorphicType(json, cd)
       case _ => modelType.typeName
     }
 
     // Create instance directly from registry using type name
-    val model = reflect.ReflectRegistry.createInstance(actualTypeName) match {
-      case Some(m) => m.asInstanceOf[AnyRef]
-      case None => throw new IllegalArgumentException(s"Cannot create instance for $actualTypeName")
-    }
-    populateModel(model, json, actualTypeName)
+    val model = createModelInstance(actualTypeName)
+    populateModel(model, json, actualTypeName, rawType, typeArgs)
     model
   }
 
@@ -49,7 +46,7 @@ class ModelDeserializer extends Deserializer[AnyRef] {
       .filter(v => v != null && !js.isUndefined(v))
       .map(_.toString)
 
-  private def resolvePolymorphicType(json: Dynamic, modelType: reflect.ClassDescriptor): String = {
+  private def resolvePolymorphicType(json: Dynamic, modelType: ClassDescriptor): String = {
     readJsonType(json) match {
       case Some(jsonTypeName) =>
         jfx.json.JsonTypeRegistry.resolveType(jsonTypeName) match {
@@ -62,7 +59,32 @@ class ModelDeserializer extends Deserializer[AnyRef] {
     }
   }
 
-  private def populateModel(model: AnyRef, json: Dynamic, typeName: String): Unit = {
+  private def createModelInstance(actualTypeName: String): AnyRef = {
+    // Try to create instance using full type name first
+    reflect.ReflectRegistry.createInstance(actualTypeName) match {
+      case Some(m) => m.asInstanceOf[AnyRef]
+      case None =>
+        // Try to find by base name without type parameters (e.g., "jfx.test.GenericContainer" from "jfx.test.GenericContainer[Item]")
+        val baseTypeName = actualTypeName.split('[').head
+        reflect.ReflectRegistry.createInstance(baseTypeName) match {
+          case Some(m) => m.asInstanceOf[AnyRef]
+          case None =>
+            // Extract simple name from full type name (e.g., "jfx.test.GenericContainer[Item]" -> "GenericContainer")
+            val simpleName = actualTypeName.split('.').last.split('[').head
+            // Find by simple name and create instance
+            reflect.ReflectRegistry.getAllRegistered.find(_.simpleName == simpleName) match {
+              case Some(descriptor) =>
+                reflect.ReflectRegistry.createInstance(descriptor.typeName) match {
+                  case Some(m) => m.asInstanceOf[AnyRef]
+                  case None => throw new IllegalArgumentException(s"Cannot create instance for $actualTypeName (no factory for ${descriptor.typeName})")
+                }
+              case None => throw new IllegalArgumentException(s"Cannot create instance for $actualTypeName (no descriptor found for simple name $simpleName)")
+            }
+        }
+    }
+  }
+
+  private def populateModel(model: AnyRef, json: Dynamic, typeName: String, rawType: ClassDescriptor, typeArgs: Array[TypeDescriptor]): Unit = {
     // Get properties from registry instead of typeDescriptor to avoid recursion issues
     val classDescriptor = reflect.ReflectRegistry.loadClass(typeName).getOrElse(
       throw new IllegalArgumentException(s"Cannot find class descriptor for $typeName")
@@ -78,10 +100,30 @@ class ModelDeserializer extends Deserializer[AnyRef] {
         }
         val rawValue = json.selectDynamic(fieldName).asInstanceOf[js.Any]
         if (!js.isUndefined(rawValue) && rawValue != null) {
-          val decoded = deserializeValue(rawValue, prop.propertyType)
+          val resolvedPropertyType = resolvePropertyType(prop.propertyType, rawType, typeArgs)
+          val decoded = deserializeValue(rawValue, resolvedPropertyType)
           assignValue(model, typeName, prop, decoded)
         }
       }
+    }
+  }
+
+  private def resolvePropertyType(propType: TypeDescriptor, rawType: ClassDescriptor, typeArgs: Array[TypeDescriptor]): TypeDescriptor = {
+    propType match {
+      case cd: ClassDescriptor if rawType.typeParameters.contains(cd.typeName) && typeArgs.nonEmpty =>
+        val typeParamIndex = rawType.typeParameters.indexOf(cd.typeName)
+        if (typeParamIndex >= 0 && typeParamIndex < typeArgs.length) typeArgs(typeParamIndex)
+        else propType
+      case pt: ParameterizedTypeDescriptor =>
+        val resolvedArgs = pt.typeArguments.map(arg => resolvePropertyType(arg, rawType, typeArgs))
+        pt.copy(typeArguments = resolvedArgs)
+      case tv: reflect.TypeVariableDescriptor =>
+        if rawType.typeParameters.contains(tv.name) && typeArgs.nonEmpty then
+          val typeParamIndex = rawType.typeParameters.indexOf(tv.name)
+          if (typeParamIndex >= 0 && typeParamIndex < typeArgs.length) typeArgs(typeParamIndex)
+          else propType
+        else propType
+      case _ => propType
     }
   }
 
