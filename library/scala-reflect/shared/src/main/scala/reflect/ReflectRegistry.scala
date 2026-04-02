@@ -8,7 +8,7 @@ object ReflectRegistry {
   private val descriptorsBySimpleName: mutable.Map[String, ClassDescriptor] = mutable.Map.empty
   private val factories: mutable.Map[String, () => Any] = mutable.Map.empty
 
-  def register[T](descriptor: ClassDescriptor, factory: Option[() => T] = None)(using Manifest[T]): Unit = {
+  def register[T](descriptor: ClassDescriptor, factory: Option[() => T] = None): Unit = {
     val typeName = descriptor.typeName
     descriptorsByName += typeName -> descriptor
 
@@ -64,14 +64,8 @@ object ReflectRegistry {
     }
   }
 
-  def isAssignableFrom[T](subType: String)(using Manifest[T]): Boolean =
-    isAssignableFrom(subType, manifest[T].runtimeClass.getName)
-
   def getSubTypes(superType: String): List[ClassDescriptor] =
     descriptorsByName.values.filter(_.baseTypes.contains(superType)).toList
-
-  def getSubTypes[T](using Manifest[T]): List[ClassDescriptor] =
-    getSubTypes(manifest[T].runtimeClass.getName)
 
   def getAllRegistered: Iterable[ClassDescriptor] = descriptorsByName.values
 
@@ -82,4 +76,7 @@ object ReflectRegistry {
     descriptorsBySimpleName.clear()
     factories.clear()
   }
+
+  // Force recompilation
+  private val _recompileMarker: Long = System.currentTimeMillis()
 }

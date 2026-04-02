@@ -33,7 +33,7 @@ class JsArrayDeserializer extends Deserializer[js.Array[?]] {
     val jsonType = readJsonType(json)
     jsonType match {
       case Some(typeName) =>
-        reflect.ReflectRegistry.factoriesByTypeName.get(typeName) match {
+        reflect.ReflectRegistry.loadClassBySimpleName(typeName) match {
           case Some(clazz) =>
             declaredType match {
               case pt: ParameterizedTypeDescriptor if pt.rawType.typeName == clazz.typeName =>
@@ -59,7 +59,7 @@ class JsArrayDeserializer extends Deserializer[js.Array[?]] {
 
   private def findConcreteSubType(declaredType: ClassDescriptor, json: Dynamic): Option[ClassDescriptor] = {
     val jsonType = readJsonType(json)
-    jsonType.flatMap(typeName => reflect.ReflectRegistry.factoriesByTypeName.get(typeName))
+    jsonType.flatMap(typeName => reflect.ReflectRegistry.loadClassBySimpleName(typeName))
   }
 
   private def readJsonType(json: Dynamic): Option[String] = {

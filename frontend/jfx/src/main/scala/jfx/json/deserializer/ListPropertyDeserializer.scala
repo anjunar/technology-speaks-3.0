@@ -34,7 +34,7 @@ class ListPropertyDeserializer extends Deserializer[ListProperty[?]] {
     val jsonType = readJsonType(json)
     jsonType match {
       case Some(typeName) =>
-        reflect.ReflectRegistry.factoriesByTypeName.get(typeName) match {
+        reflect.ReflectRegistry.loadClassBySimpleName(typeName) match {
           case Some(clazz) => new JsonContext(clazz)
           case None => new JsonContext(declaredType)
         }
@@ -52,7 +52,7 @@ class ListPropertyDeserializer extends Deserializer[ListProperty[?]] {
 
   private def findConcreteSubType(declaredType: ClassDescriptor, json: Dynamic): Option[ClassDescriptor] = {
     val jsonType = readJsonType(json)
-    jsonType.flatMap(typeName => reflect.ReflectRegistry.factoriesByTypeName.get(typeName))
+    jsonType.flatMap(typeName => reflect.ReflectRegistry.loadClassBySimpleName(typeName))
   }
 
   private def readJsonType(json: Dynamic): Option[String] = {

@@ -6,7 +6,7 @@ import org.scalatest.matchers.should.Matchers
 import scala.scalajs.js
 import scala.scalajs.js.Dynamic.literal as jsObj
 import jfx.core.state.{ListProperty, Property}
-import jfx.core.meta.Meta
+import reflect.macros.ReflectMacros.reflectType
 import jfx.form.ErrorResponse
 
 import java.util.UUID
@@ -14,7 +14,7 @@ import java.util.UUID
 class JsonMapperLinkSpec extends AnyFlatSpec with Matchers {
 
   "JsonMapper" should "deserialize Link objects with @type" in {
-    TestLink.meta
+    reflect.ReflectRegistry.register(reflect.macros.ReflectMacros.reflect[TestLink], () => new TestLink())
     val jsonMapper = new JsonMapper()
 
     val linksJson = jsObj(
@@ -25,7 +25,7 @@ class JsonMapperLinkSpec extends AnyFlatSpec with Matchers {
       "id" -> "123"
     )
 
-    val result = jsonMapper.deserialize[TestLink](linksJson, TestLink.meta)
+    val result = jsonMapper.deserialize[TestLink](linksJson, reflect.ReflectRegistry.register(reflect.macros.ReflectMacros.reflect[TestLink], () => new TestLink()))
 
     result.rel.get shouldBe "self"
     result.url.get shouldBe "/api/test"
@@ -34,7 +34,7 @@ class JsonMapperLinkSpec extends AnyFlatSpec with Matchers {
   }
 
   it should "deserialize without @type when meta is provided" in {
-    TestLink.meta
+    reflect.ReflectRegistry.register(reflect.macros.ReflectMacros.reflect[TestLink], () => new TestLink())
     val jsonMapper = new JsonMapper()
 
     val linksJson = jsObj(
@@ -44,7 +44,7 @@ class JsonMapperLinkSpec extends AnyFlatSpec with Matchers {
       "id" -> "123"
     )
 
-    val result = jsonMapper.deserialize[TestLink](linksJson, TestLink.meta)
+    val result = jsonMapper.deserialize[TestLink](linksJson, reflect.ReflectRegistry.register(reflect.macros.ReflectMacros.reflect[TestLink], () => new TestLink()))
 
     result.rel.get shouldBe "self"
     result.url.get shouldBe "/api/test"
@@ -53,8 +53,8 @@ class JsonMapperLinkSpec extends AnyFlatSpec with Matchers {
   }
 
   it should "deserialize and serialize TestEntity with links" in {
-    TestEntityWithLinks.meta
-    TestLink.meta
+    reflect.ReflectRegistry.register(reflect.macros.ReflectMacros.reflect[TestEntityWithLinks], () => new TestEntityWithLinks())
+    reflect.ReflectRegistry.register(reflect.macros.ReflectMacros.reflect[TestLink], () => new TestLink())
     val jsonMapper = new JsonMapper()
 
     val entity = new TestEntityWithLinks()
@@ -71,7 +71,7 @@ class JsonMapperLinkSpec extends AnyFlatSpec with Matchers {
     entity.links.setAll(Seq(link1, link2))
 
     val json = jsonMapper.serialize(entity)
-    val deserialized = jsonMapper.deserialize[TestEntityWithLinks](json, TestEntityWithLinks.meta)
+    val deserialized = jsonMapper.deserialize[TestEntityWithLinks](json, reflect.ReflectRegistry.register(reflect.macros.ReflectMacros.reflect[TestEntityWithLinks], () => new TestEntityWithLinks()))
 
     deserialized.name.get shouldBe ""
     deserialized.links.length shouldBe 2
@@ -82,7 +82,7 @@ class JsonMapperLinkSpec extends AnyFlatSpec with Matchers {
   }
 
   it should "deserialize Property[UUID] from JSON" in {
-    TestEntityWithUuid.meta
+    reflect.ReflectRegistry.register(reflect.macros.ReflectMacros.reflect[TestEntityWithUuid], () => new TestEntityWithUuid())
     val jsonMapper = new JsonMapper()
 
     val uuid = UUID.randomUUID()
@@ -90,13 +90,13 @@ class JsonMapperLinkSpec extends AnyFlatSpec with Matchers {
       "id" -> uuid.toString
     )
 
-    val deserialized = jsonMapper.deserialize[TestEntityWithUuid](json, TestEntityWithUuid.meta)
+    val deserialized = jsonMapper.deserialize[TestEntityWithUuid](json, reflect.ReflectRegistry.register(reflect.macros.ReflectMacros.reflect[TestEntityWithUuid], () => new TestEntityWithUuid()))
 
     deserialized.id.get shouldBe uuid
   }
 
   it should "serialize and deserialize Property[UUID]" in {
-    TestEntityWithUuid.meta
+    reflect.ReflectRegistry.register(reflect.macros.ReflectMacros.reflect[TestEntityWithUuid], () => new TestEntityWithUuid())
     val jsonMapper = new JsonMapper()
 
     val entity = new TestEntityWithUuid()
@@ -104,13 +104,13 @@ class JsonMapperLinkSpec extends AnyFlatSpec with Matchers {
     entity.id.set(uuid)
 
     val json = jsonMapper.serialize(entity)
-    val deserialized = jsonMapper.deserialize[TestEntityWithUuid](json, TestEntityWithUuid.meta)
+    val deserialized = jsonMapper.deserialize[TestEntityWithUuid](json, reflect.ReflectRegistry.register(reflect.macros.ReflectMacros.reflect[TestEntityWithUuid], () => new TestEntityWithUuid()))
 
     deserialized.id.get shouldBe uuid
   }
 
   it should "throw exception for mismatched @type" in {
-    TestLink.meta
+    reflect.ReflectRegistry.register(reflect.macros.ReflectMacros.reflect[TestLink], () => new TestLink())
     val jsonMapper = new JsonMapper()
 
     val json = jsObj(
@@ -120,7 +120,7 @@ class JsonMapperLinkSpec extends AnyFlatSpec with Matchers {
     )
 
     val ex = intercept[IllegalArgumentException] {
-      jsonMapper.deserialize[TestLink](json, TestLink.meta)
+      jsonMapper.deserialize[TestLink](json, reflect.ReflectRegistry.register(reflect.macros.ReflectMacros.reflect[TestLink], () => new TestLink()))
     }
 
     ex.getMessage should include("WrongType")
@@ -139,7 +139,7 @@ class TestLink extends jfx.form.Model[TestLink] {
 }
 
 object TestLink {
-
+  reflect.ReflectRegistry.register(reflect.macros.ReflectMacros.reflect[TestLink], () => new TestLink())
 }
 
 @JsonType("TestEntityWithLinks")
@@ -151,7 +151,7 @@ class TestEntityWithLinks extends jfx.form.Model[TestEntityWithLinks] {
 }
 
 object TestEntityWithLinks {
-
+  reflect.ReflectRegistry.register(reflect.macros.ReflectMacros.reflect[TestEntityWithLinks], () => new TestEntityWithLinks())
 }
 
 @JsonType("TestEntityWithUuid")
@@ -162,5 +162,5 @@ class TestEntityWithUuid extends jfx.form.Model[TestEntityWithUuid] {
 }
 
 object TestEntityWithUuid {
-
+  reflect.ReflectRegistry.register(reflect.macros.ReflectMacros.reflect[TestEntityWithUuid], () => new TestEntityWithUuid())
 }

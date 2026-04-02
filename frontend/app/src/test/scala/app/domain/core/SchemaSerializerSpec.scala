@@ -10,8 +10,8 @@ import jfx.json.JsonMapper
 class SchemaSerializerSpec extends AnyFlatSpec with Matchers {
 
   "Schema" should "serialize with properties directly in object, not in entries field" in {
-    Schema.meta
-    SchemaProperty.meta
+    reflectType[Schema]
+    reflectType[SchemaProperty]
     
     val jsonMapper = new JsonMapper()
     val schema = new Schema()
@@ -44,8 +44,8 @@ class SchemaSerializerSpec extends AnyFlatSpec with Matchers {
   }
 
   it should "deserialize from properties directly in object" in {
-    Schema.meta
-    SchemaProperty.meta
+    reflectType[Schema]
+    reflectType[SchemaProperty]
     
     val jsonMapper = new JsonMapper()
     
@@ -63,7 +63,7 @@ class SchemaSerializerSpec extends AnyFlatSpec with Matchers {
       )
     )
     
-    val schema = jsonMapper.deserialize[Schema](json, Schema.meta)
+    val schema = jsonMapper.deserialize[Schema](json, reflectType[Schema])
     
     schema.entries should not be null
     schema.entries.size shouldBe 2
@@ -78,8 +78,8 @@ class SchemaSerializerSpec extends AnyFlatSpec with Matchers {
   }
 
   it should "serialize and deserialize nested schema" in {
-    Schema.meta
-    SchemaProperty.meta
+    reflectType[Schema]
+    reflectType[SchemaProperty]
     
     val jsonMapper = new JsonMapper()
     
@@ -99,7 +99,7 @@ class SchemaSerializerSpec extends AnyFlatSpec with Matchers {
     
     val json = jsonMapper.serialize(schema)
     
-    val deserialized = jsonMapper.deserialize[Schema](json, Schema.meta)
+    val deserialized = jsonMapper.deserialize[Schema](json, reflectType[Schema])
     
     val imageEntry = deserialized.entries.get("image").get
     imageEntry.name shouldBe "image"
@@ -110,8 +110,8 @@ class SchemaSerializerSpec extends AnyFlatSpec with Matchers {
   }
 
   it should "deserialize schema from backend JSON" in {
-    Schema.meta
-    SchemaProperty.meta
+    reflectType[Schema]
+    reflectType[SchemaProperty]
     
     val jsonMapper = new JsonMapper()
     
@@ -204,7 +204,7 @@ class SchemaSerializerSpec extends AnyFlatSpec with Matchers {
       )
     )
     
-    val schema = jsonMapper.deserialize[Schema](json, Schema.meta)
+    val schema = jsonMapper.deserialize[Schema](json, reflectType[Schema])
     
     schema.entries should not be null
     schema.entries.size shouldBe 5  // emails (Set) wird nicht als Map behandelt

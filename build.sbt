@@ -13,19 +13,6 @@ lazy val commonJsSettings = Seq(
     )
 )
 
-lazy val scalaEnterprise = crossProject(JSPlatform, JVMPlatform)
-  .crossType(CrossType.Full)
-  .in(file("library/scala-enterprise"))
-  .jsSettings(commonJsSettings)
-  .jvmSettings(
-    libraryDependencies ++= Seq(
-      "org.scalatest" %% "scalatest" % "3.2.19" % Test
-    )
-  )
-
-lazy val scalaEnterpriseJS = scalaEnterprise.js
-lazy val scalaEnterpriseJVM = scalaEnterprise.jvm
-
 lazy val scalaReflect = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .in(file("library/scala-reflect"))

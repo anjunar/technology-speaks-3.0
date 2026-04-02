@@ -1,7 +1,7 @@
 package jfx.json.serializer
 
 import reflect.macros.PropertySupport
-import reflect.{PropertyAccessor, PropertyDescriptor, TypeDescriptor}
+import reflect.{ClassDescriptor, PropertyAccessor, PropertyDescriptor, TypeDescriptor}
 import jfx.core.state.{ListProperty, Property, ReadOnlyProperty}
 import jfx.form.Model
 import jfx.json.{JsonHelpers, JsonMapper}
@@ -39,14 +39,7 @@ class ModelSerializer extends Serializer[Model[?]] {
   }
 
   private def getJsonType(model: Model[?]): Option[String] = {
-    val clazz = model.getClass
-    val annotations = clazz.getAnnotations()
-    annotations.find(_.annotationType().getName == "jfx.json.JsonType") match {
-      case Some(jsonTypeAnn) =>
-        val method = jsonTypeAnn.annotationType().getMethod("value")
-        Some(method.invoke(jsonTypeAnn).asInstanceOf[String])
-      case None => Some(clazz.getSimpleName)
-    }
+    Some(model.getClass.getSimpleName.stripSuffix("$"))
   }
 
   private def serializeValue(value: Any): js.Any = value match {

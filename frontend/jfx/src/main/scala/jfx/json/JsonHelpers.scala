@@ -21,25 +21,28 @@ object JsonHelpers {
   }
 
   def isIgnored(accessor: PropertyAccessor[?, ?]): Boolean = {
-    // Cannot check annotations on PropertyAccessor, need to use PropertyDescriptor
     false
   }
 
   def findFactory(jsonType: Option[String], expectedType: ClassDescriptor): () => Any = {
+    import reflect.ReflectRegistry
+    
     if (expectedType.typeName == "scala.scalajs.js.Array") return () => null
 
     jsonType match {
       case Some(typeName) =>
-        reflect.ReflectRegistry.factoriesByTypeName.get(typeName).flatMap(reflect.ReflectRegistry.factories.get)
-          .orElse(reflect.ReflectRegistry.factories.collectFirst { case (k, f) if k.typeName == typeName => f })
-          .orElse {
-            val simpleName = typeName.split('.').last
-            reflect.ReflectRegistry.factories.collectFirst { case (k, f) if k.typeName.split('.').last == simpleName => f }
-          }
+        ReflectRegistry.loadClass(typeName)
+          .flatMap(desc => ReflectRegistry.createInstance(desc.typeName))
+          .orElse(ReflectRegistry.loadClassBySimpleName(typeName.split('.').last)
+            .flatMap(desc => ReflectRegistry.createInstance(desc.typeName)))
+          .map(instance => () => instance)
           .getOrElse(throw IllegalArgumentException(s"No factory for '$typeName'"))
       case None =>
-        reflect.ReflectRegistry.factories.get(expectedType)
-          .orElse(expectedType.baseTypes.map(reflect.ReflectionSupport.resolveClass).collectFirst { case st if reflect.ReflectRegistry.factories.contains(st) => reflect.ReflectRegistry.factories(st) })
+        expectedType.baseTypes
+          .map(reflect.ReflectionSupport.resolveClass)
+          .find(desc => ReflectRegistry.contains(desc.typeName))
+          .map(desc => ReflectRegistry.createInstance(desc.typeName).get)
+          .map(instance => () => instance)
           .getOrElse(throw IllegalArgumentException(s"No factory for '${expectedType.typeName}'"))
     }
   }
