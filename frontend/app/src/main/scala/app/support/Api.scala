@@ -20,23 +20,23 @@ object Api {
   def get(url: String): Future[js.Any] =
     requestJson("GET", url, null)
 
-  def post(url: String, body: Any): Future[js.Any] =
-    requestJson("POST", url, body)
+  inline def post[B](url: String, body: B): Future[js.Any] =
+    requestJson[B]("POST", url, body)
 
   def post(url: String): Future[js.Any] =
     requestJson("POST", url, null)
 
-  def put(url: String, body: Any): Future[js.Any] =
-    requestJson("PUT", url, body)
+  inline def put[B](url: String, body: B): Future[js.Any] =
+    requestJson[B]("PUT", url, body)
 
-  def delete(url: String, body: Any): Future[Unit] =
-    requestJson("DELETE", url, body).map(_ => ())
+  inline def delete[B](url: String, body: B): Future[Unit] =
+    requestJson[B]("DELETE", url, body).map(_ => ())
 
   def postText(url: String, body: String): Future[String] =
     requestText("POST", url, body)
 
-  def invokeLink(link: Link, body: Any): Future[js.Any] =
-    requestJson(link.method, "/service" + link.url, body)
+  inline def invokeLink[B](link: Link, body: B): Future[js.Any] =
+    requestJson[B](link.method, "/service" + link.url, body)
 
   def invokeLink(link: Link): Future[js.Any] =
     requestJson(link.method, "/service" + link.url, null)
@@ -51,7 +51,6 @@ object Api {
       case b: Float => b.asInstanceOf[js.Any]
       case b: Long => b.asInstanceOf[js.Any]
       case b if js.Array.isArray(b.asInstanceOf[js.Any]) => b.asInstanceOf[js.Any]
-      case b if !js.isUndefined(b.asInstanceOf[js.Dynamic].constructor) && b.asInstanceOf[js.Dynamic].constructor.name.asInstanceOf[String] == "Object" => b.asInstanceOf[js.Any]
       case b => JsonMapper.serialize(b, reflectType[E])
     }
     requestText(method, url, bodyArg).map { text =>

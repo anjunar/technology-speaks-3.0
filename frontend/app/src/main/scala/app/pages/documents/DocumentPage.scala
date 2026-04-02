@@ -43,7 +43,7 @@ class DocumentPage(val model: Document) extends PageComposite("Dokument") {
   private val documentsPageSize = 50
   private val issuesPageSize = 50
 
-  private val currentDocumentProperty: Property[Document] = Property(model)
+  private val currentDocumentProperty: Property[Document] = Property(if (model != null) model else new Document())
   private val searchQueryProperty: Property[String] = Property("")
   private val leftSidebarExpandedProperty: Property[Boolean] = Property(true)
   private val rightSidebarExpandedProperty: Property[Boolean] = Property(true)
@@ -168,6 +168,9 @@ class DocumentPage(val model: Document) extends PageComposite("Dokument") {
   }
 
   private def openDocument(document: Document): Unit = {
+    if (document == null) {
+      return
+    }
     val selectedId = document.id.get
     val currentId = currentDocumentProperty.get.id.get
 
@@ -200,15 +203,17 @@ class DocumentPage(val model: Document) extends PageComposite("Dokument") {
 
   private def handleDocumentSaved(saved: Data[Document]): Unit = {
     RemoteTableList.reloadFirstPage(documentsProperty, pageSize = documentsPageSize)
-    saved.data.editable.set(false)
-    currentDocumentProperty.set(saved.data)
+    if (saved != null && saved.data != null) {
+      saved.data.editable.set(false)
+      currentDocumentProperty.set(saved.data)
+    }
   }
 
   private def handleDocumentsImported(): Unit =
     RemoteTableList.reloadFirstPage(documentsProperty, pageSize = documentsPageSize)
 
   private def reloadIssues(): Unit =
-    if (currentDocumentProperty.get.id.get != null) {
+    if (currentDocumentProperty.get != null && currentDocumentProperty.get.id != null && currentDocumentProperty.get.id.get != null) {
       RemoteTableList.reloadFirstPage(issuesProperty, pageSize = issuesPageSize)
     } else {
       issuesProperty.clear()
