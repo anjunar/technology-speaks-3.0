@@ -1,6 +1,5 @@
 package app.domain.core
 
-import app.support.JsonModel
 import jfx.core.meta.Meta
 import jfx.json.JsonIgnore
 

@@ -12,7 +12,7 @@ import java.util.UUID
 import scala.concurrent.Future
 import scala.scalajs.js
 
-class FirstComment extends AbstractEntity[FirstComment] with OwnerProvider {
+class FirstComment extends AbstractEntity with OwnerProvider {
 
   val user: Property[User | Null] = Property(null)
   val editor: Property[js.Any | Null] = Property(null)
@@ -23,7 +23,7 @@ class FirstComment extends AbstractEntity[FirstComment] with OwnerProvider {
 
 
 
-  def save(entity: AbstractEntity[?]): Future[Data[FirstComment]] =
+  def save(entity: AbstractEntity): Future[Data[FirstComment]] =
     entity match {
       case issue: Issue =>
         Api.post(s"/service/document/documents/document/issues/issue/${issue.id.get}/comment", this).map(raw => Api.deserialize[Data[FirstComment]](raw))
@@ -33,7 +33,7 @@ class FirstComment extends AbstractEntity[FirstComment] with OwnerProvider {
         Future.failed(RuntimeException("Unknown document type"))
     }
 
-  def update(entity: AbstractEntity[?]): Future[Data[FirstComment]] =
+  def update(entity: AbstractEntity): Future[Data[FirstComment]] =
     entity match {
       case issue: Issue =>
         Api.put(s"/service/document/documents/document/issues/issue/${issue.id.get}/comment", this).map(raw => Api.deserialize[Data[FirstComment]](raw))
@@ -43,7 +43,7 @@ class FirstComment extends AbstractEntity[FirstComment] with OwnerProvider {
         Future.failed(RuntimeException("Unknown document type"))
     }
 
-  def delete(entity: AbstractEntity[?]): Future[Unit] =
+  def delete(entity: AbstractEntity): Future[Unit] =
     entity match {
       case issue: Issue =>
         Api.delete(s"/service/document/documents/document/issues/issue/${issue.id.get}/comment", this)

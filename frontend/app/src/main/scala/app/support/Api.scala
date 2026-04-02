@@ -41,11 +41,24 @@ object Api {
   def invokeLink(link: Link): Future[js.Any] =
     requestJson(link.method, link.url, null)
 
-  def requestJson(method: String, url: String, body: Any): Future[js.Any] =
-    requestText(method, url, body).map { text =>
+  def requestJson(method: String, url: String, body: Any): Future[js.Any] = {
+    val bodyArg: js.Any = body match {
+      case null => null
+      case b: String => b.asInstanceOf[js.Any]
+      case b: Boolean => b.asInstanceOf[js.Any]
+      case b: Double => b.asInstanceOf[js.Any]
+      case b: Int => b.asInstanceOf[js.Any]
+      case b: Float => b.asInstanceOf[js.Any]
+      case b: Long => b.asInstanceOf[js.Any]
+      case b if js.Array.isArray(b.asInstanceOf[js.Any]) => b.asInstanceOf[js.Any]
+      case b if !js.isUndefined(b.asInstanceOf[js.Dynamic].constructor) && b.asInstanceOf[js.Dynamic].constructor.name.asInstanceOf[String] == "Object" => b.asInstanceOf[js.Any]
+      case b => AppJson.mapper.serialize(b)
+    }
+    requestText(method, url, bodyArg).map { text =>
       if (text.isEmpty) null
       else js.JSON.parse(text)
     }
+  }
 
   def requestJson(method: String, url: String): Future[js.Any] =
     requestText(method, url, null).map { text =>
@@ -60,28 +73,31 @@ object Api {
       AppJson.mapper.deserialize(raw.asInstanceOf[js.Dynamic], reflectType[M]).asInstanceOf[M]
     }
 
-  private def serializeBody(body: Any): js.UndefOr[dom.BodyInit] =
-    body match {
-      case null =>
-        js.undefined
-      case text: String =>
-        text.asInstanceOf[dom.BodyInit]
-      case other =>
-        other.asInstanceOf[dom.BodyInit]
-    }
-
   private def requestText(
     methodArg: String,
     urlArg: String,
-    bodyArg: Any = null
+    bodyArg: js.Any = null
   ): Future[String] = {
-    val init = new RequestInit {
-      method = methodArg.asInstanceOf[dom.HttpMethod]
-      body = serializeBody(bodyArg)
-      headers = js.Dictionary("Accept" -> "application/json")
+    val headers = js.Dictionary(
+      "Content-Type" -> "application/json",
+      "Accept" -> "application/json"
+    )
+
+    val body = if (bodyArg == null || js.isUndefined(bodyArg)) {
+      null
+    } else if (js.typeOf(bodyArg) == "string") {
+      bodyArg
+    } else {
+      js.JSON.stringify(bodyArg)
     }
 
-    fetch(urlArg, init).toFuture.flatMap { response =>
+    val init = js.Dynamic.literal(
+      method = methodArg.asInstanceOf[dom.HttpMethod],
+      body = body.asInstanceOf[js.Any],
+      headers = headers,
+    )
+    
+    fetch(urlArg, init.asInstanceOf[RequestInit]).toFuture.flatMap { response =>
       response.text().toFuture.flatMap { text =>
         if (response.ok) {
           Future.successful(text)

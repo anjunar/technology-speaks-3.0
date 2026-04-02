@@ -3,13 +3,12 @@ package jfx.json.deserializer
 import reflect.macros.PropertySupport
 import reflect.{PropertyAccessor, TypeDescriptor}
 import jfx.core.state.{ListProperty, Property}
-import jfx.form.Model
 import jfx.json.JsonHelpers
 
 import scala.scalajs.js
 import scala.scalajs.js.Dynamic
 
-class ModelDeserializer extends Deserializer[Model[?]] {
+class ModelDeserializer extends Deserializer[AnyRef] {
 
   override def deserialize(json: Dynamic, context: JsonContext): Any = {
     val modelType = context.resolvedType match {
@@ -38,7 +37,7 @@ class ModelDeserializer extends Deserializer[Model[?]] {
 
     // Create instance directly from registry using type name
     val model = reflect.ReflectRegistry.createInstance(actualTypeName) match {
-      case Some(m) => m.asInstanceOf[Model[?]]
+      case Some(m) => m.asInstanceOf[AnyRef]
       case None => throw new IllegalArgumentException(s"Cannot create instance for $actualTypeName")
     }
     populateModel(model, json, actualTypeName)
@@ -63,7 +62,7 @@ class ModelDeserializer extends Deserializer[Model[?]] {
     }
   }
 
-  private def populateModel(model: Model[?], json: Dynamic, typeName: String): Unit = {
+  private def populateModel(model: AnyRef, json: Dynamic, typeName: String): Unit = {
     // Get properties from registry instead of typeDescriptor to avoid recursion issues
     val classDescriptor = reflect.ReflectRegistry.loadClass(typeName).getOrElse(
       throw new IllegalArgumentException(s"Cannot find class descriptor for $typeName")
@@ -146,7 +145,7 @@ class ModelDeserializer extends Deserializer[Model[?]] {
     builder.result()
   }
 
-  private def assignValue(model: Model[?], typeName: String, prop: reflect.PropertyDescriptor, decoded: Any): Unit = {
+  private def assignValue(model: AnyRef, typeName: String, prop: reflect.PropertyDescriptor, decoded: Any): Unit = {
     reflect.ReflectRegistry.getPropertyAccessor(typeName, prop.name) match {
       case Some(accessor) =>
         accessor.get(model) match {

@@ -7,7 +7,7 @@ import scala.scalajs.js
 class ErrorResponse(
   var message: String = "",
   var path: js.Array[Any] = new js.Array[Any]()
-) extends Model[ErrorResponse]
+)
 
 object ErrorResponse {
 

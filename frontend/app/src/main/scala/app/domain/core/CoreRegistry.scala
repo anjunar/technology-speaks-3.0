@@ -14,5 +14,8 @@ object CoreRegistry {
     loader.register(() => new EMail())
     loader.register(() => new Media())
     loader.register(() => new ManagedProperty())
+
+    loader.register(() => new Table[Any]())
+    loader.register(() => new Data[Any]())
   }
 }

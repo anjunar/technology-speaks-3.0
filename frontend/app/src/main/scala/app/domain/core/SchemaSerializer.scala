@@ -1,7 +1,6 @@
 package app.domain.core
 
-import jfx.json.serializer.{JavaContext, ModelSerializer, Serializer}
-import jfx.form.Model
+import jfx.json.serializer.{JavaContext, Serializer}
 
 import scala.scalajs.js
 import scala.scalajs.js.Dynamic

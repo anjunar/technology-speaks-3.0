@@ -2,7 +2,7 @@ package app.domain.security
 
 import app.domain.core.Data
 import app.domain.core.Link
-import app.support.{AppJson, JsonModel}
+import app.support.{AppJson}
 import jfx.core.meta.Meta
 import jfx.core.state.ListProperty
 import org.scalajs.dom.{RequestInit, fetch}
@@ -14,10 +14,7 @@ import scala.scalajs.js.JSConverters.*
 
 class Account(
   val links: ListProperty[Link] = ListProperty()
-) extends JsonModel[Account] {
-
-
-}
+)
 
 object Account {
   private given ExecutionContext = ExecutionContext.global

@@ -13,7 +13,7 @@ import scala.concurrent.Future
 import scala.scalajs.js
 import scala.scalajs.js.URIUtils.encodeURIComponent
 
-class Document extends AbstractEntity[Document] with OwnerProvider {
+class Document extends AbstractEntity with OwnerProvider {
 
   @NotBlank(message = "Titel ist erforderlich")
   val title: Property[String] = Property("")

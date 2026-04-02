@@ -12,7 +12,7 @@ import scala.scalajs.js
 import jfx.form.validators.*
 import scala.scalajs.js.URIUtils.encodeURIComponent
 
-class User extends AbstractEntity[User] {
+class User extends AbstractEntity {
 
   @NotBlank(message = "NickName ist erforderlich")
   @Size(min = 2, max = 80, message = "NickName muss zwischen 2 und 80 Zeichen haben")

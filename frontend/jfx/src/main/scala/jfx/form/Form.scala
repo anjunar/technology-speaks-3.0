@@ -5,7 +5,7 @@ import jfx.core.state.Property
 import jfx.dsl.{ComponentContext, DslRuntime, Scope}
 import org.scalajs.dom.HTMLFormElement
 
-class Form[M <: Model[M]](model: M) extends NativeComponent[HTMLFormElement], Formular[M, HTMLFormElement], Editable {
+class Form[M](model: M) extends NativeComponent[HTMLFormElement], Formular[M, HTMLFormElement], Editable {
 
   override val name: String = "default"
 
@@ -31,7 +31,7 @@ class Form[M <: Model[M]](model: M) extends NativeComponent[HTMLFormElement], Fo
 
 object Form {
 
-  def form[M <: Model[M]](model: M)(init: Form[M] ?=> Unit): Form[M] =
+  def form[M](model: M)(init: Form[M] ?=> Unit): Form[M] =
     DslRuntime.currentScope { currentScope =>
       val currentContext = DslRuntime.currentComponentContext()
       val component = new Form(model)
@@ -46,10 +46,10 @@ object Form {
       component
     }
 
-  def onSubmit[M <: Model[M]](using form: Form[M]): Form[M] => Unit =
+  def onSubmit[M](using form: Form[M]): Form[M] => Unit =
     form.onSubmit
 
-  def onSubmit_=[M <: Model[M]](listener: Form[M] => Unit)(using form: Form[M]): Unit =
+  def onSubmit_=[M](listener: Form[M] => Unit)(using form: Form[M]): Unit =
     form.onSubmit = listener
 
 }

@@ -1,7 +1,7 @@
 package app.domain.security
 
 import app.domain.core.UserInfo
-import app.support.{Api, JsonModel, JsonResponse}
+import app.support.{Api, JsonResponse}
 import app.support.Api.given
 import jfx.core.meta.Meta
 import jfx.form.validators.{EmailConstraint, NotBlank, Size}
@@ -21,9 +21,7 @@ class PasswordRegister(
   @NotBlank(message = "Passwort ist erforderlich")
   @Size(min = 8, max = 128, message = "Passwort muss zwischen 8 und 128 Zeichen haben")
   val password: Property[String] = Property("")
-) extends JsonModel[PasswordRegister] {
-
-
+) {
 
   def save(): Future[JsonResponse] =
     Api.post("/service/security/register", this).map(raw => Api.deserialize[JsonResponse](raw))

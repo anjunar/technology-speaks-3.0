@@ -1,6 +1,5 @@
 package app.domain.security
 
-import app.support.JsonModel
 import jfx.core.meta.Meta
 import jfx.form.validators.{NotBlank, Size}
 import jfx.core.state.Property
@@ -17,8 +16,5 @@ class PasswordChange(
 
   @NotBlank(message = "Passwortbestätigung ist erforderlich")
   val confirmPassword: Property[String] = Property("")
-) extends JsonModel[PasswordChange] {
-
-
-}
+)
 

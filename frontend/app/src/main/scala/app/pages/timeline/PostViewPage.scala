@@ -33,7 +33,7 @@ class PostViewPage(val model: Post) extends PageComposite("Post") {
   private given ExecutionContext = ExecutionContext.global
   private val pageSize = 40
 
-  private val itemsProperty: ListProperty[Data[? <: AbstractEntity[?]]] = ListProperty()
+  private val itemsProperty: ListProperty[Data[? <: AbstractEntity]] = ListProperty()
   private val commentsProperty: RemoteListProperty[FirstComment, RemotePageQuery] =
     RemoteTableList.createMapped[Data[FirstComment], FirstComment](pageSize = pageSize) { query =>
       if (model.id.get != null) {
@@ -151,8 +151,8 @@ class PostViewPage(val model: Post) extends PageComposite("Post") {
 
   private def syncItems(): Unit =
     itemsProperty.setAll(
-      Seq(new Data(model).asInstanceOf[Data[? <: AbstractEntity[?]]]) ++
-        commentsProperty.iterator.map(comment => new Data(comment).asInstanceOf[Data[? <: AbstractEntity[?]]])
+      Seq(new Data(model).asInstanceOf[Data[? <: AbstractEntity]]) ++
+        commentsProperty.iterator.map(comment => new Data(comment).asInstanceOf[Data[? <: AbstractEntity]])
     )
 }
 

@@ -12,7 +12,7 @@ import java.util.UUID
 import scala.concurrent.Future
 import scala.scalajs.js
 
-class SecondComment extends AbstractEntity[SecondComment] with OwnerProvider {
+class SecondComment extends AbstractEntity with OwnerProvider {
 
   val user: Property[User | Null] = Property(null)
   val editor: Property[js.Any | Null] = Property(null)

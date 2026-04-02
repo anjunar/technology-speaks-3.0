@@ -10,7 +10,7 @@ import java.util.UUID
 import scala.concurrent.Future
 import scala.scalajs.js
 
-class ManagedProperty extends AbstractEntity[ManagedProperty] {
+class ManagedProperty extends AbstractEntity {
 
   val name: Property[String] = Property("")
   val visibleForAll: Property[Boolean] = Property(false)

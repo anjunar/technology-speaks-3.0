@@ -12,7 +12,7 @@ import java.util.UUID
 import scala.concurrent.Future
 import scala.scalajs.js
 
-class Issue extends AbstractEntity[Issue] with OwnerProvider {
+class Issue extends AbstractEntity with OwnerProvider {
 
   @NotBlank(message = "Titel ist erforderlich")
   val title: Property[String] = Property("")

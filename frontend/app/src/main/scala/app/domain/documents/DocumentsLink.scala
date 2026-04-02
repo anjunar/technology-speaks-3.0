@@ -1,7 +1,6 @@
 package app.domain.documents
 
 import app.domain.core.AbstractLink
-import app.support.JsonModel
 import jfx.core.meta.Meta
 import jfx.json.JsonType
 
@@ -13,7 +12,7 @@ class DocumentsLink(
   var url: String = "",
   var method: String = "GET"
 ) extends AbstractLink {
-  
+
   override def name: String = "Dokument"
 
   override def icon: String = "edit_document"

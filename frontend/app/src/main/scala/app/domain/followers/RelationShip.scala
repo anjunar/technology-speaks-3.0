@@ -12,7 +12,7 @@ import scala.scalajs.js
 import scala.scalajs.js.JSConverters.*
 import scala.scalajs.js.URIUtils.encodeURIComponent
 
-class RelationShip extends AbstractEntity[RelationShip] {
+class RelationShip extends AbstractEntity {
 
   val follower: Property[User | Null] = Property(null)
   val users: ListProperty[User] = ListProperty()

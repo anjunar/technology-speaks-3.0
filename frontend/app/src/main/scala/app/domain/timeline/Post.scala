@@ -12,7 +12,7 @@ import java.util.UUID
 import scala.concurrent.Future
 import scala.scalajs.js
 
-class Post extends AbstractEntity[Post] with OwnerProvider {
+class Post extends AbstractEntity with OwnerProvider {
 
   val user: Property[User | Null] = Property(null)
 

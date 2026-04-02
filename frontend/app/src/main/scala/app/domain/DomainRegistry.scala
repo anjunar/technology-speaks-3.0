@@ -4,9 +4,10 @@ import app.domain.core.{CoreRegistry, Link, UsersLink}
 import app.domain.timeline.{PostsLink, TimelineRegistry}
 import app.domain.documents.{DocumentsLink, DocumentsRegistry}
 import app.domain.followers.{FollowersRegistry, RelationShipLink}
-import app.domain.security._
+import app.domain.security.*
 import app.domain.shared.SharedRegistry
 import jfx.core.meta.PackageClassLoader
+import jfx.domain.{Media, Thumbnail}
 
 object DomainRegistry {
 
@@ -15,7 +16,6 @@ object DomainRegistry {
 
     loader.register(() => new Application())
     
-    // Register all Link types for polymorphic deserialization
     loader.register(() => new Link())
     loader.register(() => new UsersLink())
     loader.register(() => new PostsLink())
@@ -28,6 +28,9 @@ object DomainRegistry {
     loader.register(() => new LogoutLink())
     loader.register(() => new AccountLink())
     loader.register(() => new ConfirmLink())
+
+    loader.register(() => new Thumbnail())
+    loader.register(() => new Media())
 
     CoreRegistry.init()
     TimelineRegistry.init()

@@ -4,7 +4,7 @@ import jfx.core.meta.Meta
 import jfx.core.state.Property
 import jfx.form.validators.*
 
-class UserInfo extends AbstractEntity[UserInfo] {
+class UserInfo extends AbstractEntity {
 
   @NotBlank(message = "Vorname ist erforderlich")
   @Size(min = 2, max = 80, message = "Vorname muss zwischen 2 und 80 Zeichen haben")
@@ -16,5 +16,5 @@ class UserInfo extends AbstractEntity[UserInfo] {
 
   @NotNull(message = "Geburtsdatum ist erforderlich")
   val birthDate: Property[String] = Property("")
-  
+
 }

@@ -1,6 +1,6 @@
 package app.domain.security
 
-import app.support.{Api, JsonModel, JsonResponse}
+import app.support.{Api, JsonResponse}
 import app.support.Api.given
 import jfx.core.meta.Meta
 import jfx.form.validators.{EmailConstraint, NotBlank}
@@ -15,9 +15,7 @@ class PasswordLogin(
 
   @NotBlank(message = "Passwort ist erforderlich")
   val password: Property[String] = Property("")
-) extends JsonModel[PasswordLogin] {
-
-
+) {
 
   def save(): Future[JsonResponse] =
     Api.post("/service/security/login", this).map(raw => Api.deserialize[JsonResponse](raw))

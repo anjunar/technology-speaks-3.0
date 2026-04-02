@@ -38,7 +38,7 @@ class IssuePage(val model: Issue) extends PageComposite("Aufgabe", pageResizable
 
   private given ExecutionContext = ExecutionContext.global
   private val pageSize = 50
-  private val itemsProperty: ListProperty[Data[? <: AbstractEntity[?]]] = ListProperty()
+  private val itemsProperty: ListProperty[Data[? <: AbstractEntity]] = ListProperty()
 
   private val commentsProperty: RemoteListProperty[FirstComment, RemotePageQuery] =
     RemoteTableList.createMapped[Data[FirstComment], FirstComment](pageSize = pageSize) { query =>
@@ -184,8 +184,8 @@ class IssuePage(val model: Issue) extends PageComposite("Aufgabe", pageResizable
 
   private def syncItems(): Unit =
     itemsProperty.setAll(
-      Seq(new Data(model).asInstanceOf[Data[? <: AbstractEntity[?]]]) ++
-        commentsProperty.iterator.map(comment => new Data(comment).asInstanceOf[Data[? <: AbstractEntity[?]]])
+      Seq(new Data(model).asInstanceOf[Data[? <: AbstractEntity]]) ++
+        commentsProperty.iterator.map(comment => new Data(comment).asInstanceOf[Data[? <: AbstractEntity]])
     )
 }
 

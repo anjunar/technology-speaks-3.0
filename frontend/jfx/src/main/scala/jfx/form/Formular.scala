@@ -8,7 +8,7 @@ import org.scalajs.dom.{HTMLElement, Node, console}
 
 import scala.collection.mutable
 
-trait Formular[M <: Model[M], N <: Node] extends NodeComponent[N], Editable {
+trait Formular[M, N <: Node] extends NodeComponent[N], Editable {
 
   val name : String
 

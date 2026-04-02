@@ -4,15 +4,14 @@ import reflect.macros.PropertySupport
 import reflect.{ClassDescriptor, PropertyAccessor, PropertyDescriptor, TypeDescriptor}
 import reflect.ReflectRegistry
 import jfx.core.state.{ListProperty, Property, ReadOnlyProperty}
-import jfx.form.Model
 import jfx.json.{JsonHelpers, JsonMapper}
 
 import scala.scalajs.js
 import scala.scalajs.js.Dynamic
 
-class ModelSerializer extends Serializer[Model[?]] {
+class ModelSerializer extends Serializer[AnyRef] {
 
-  override def serialize(input: Model[?], context: JavaContext): Dynamic = {
+  override def serialize(input: AnyRef, context: JavaContext): Dynamic = {
     val out = js.Dictionary[js.Any]()
     getJsonType(input).foreach(t => out.update("@type", t))
 
@@ -39,7 +38,7 @@ class ModelSerializer extends Serializer[Model[?]] {
     case _ => false
   }
 
-  private def readPropertyValue(model: Model[?], typeName: String, prop: PropertyDescriptor): Any = {
+  private def readPropertyValue(model: AnyRef, typeName: String, prop: PropertyDescriptor): Any = {
     ReflectRegistry.getPropertyAccessor(typeName, prop.name) match {
       case Some(accessor) =>
         val value = accessor.get(model)
@@ -53,7 +52,7 @@ class ModelSerializer extends Serializer[Model[?]] {
     }
   }
 
-  private def getJsonType(model: Model[?]): Option[String] = {
+  private def getJsonType(model: Any): Option[String] = {
     Some(model.getClass.getSimpleName.stripSuffix("$"))
   }
 
@@ -63,12 +62,11 @@ class ModelSerializer extends Serializer[Model[?]] {
     case p: ReadOnlyProperty[?] => serializeValue(p.get)
     case Some(v) => serializeValue(v)
     case None => null
-    case m: Model[?] => JsonMapper.serialize(m)
     case arr: js.Array[?] => arr.map(serializeValue)
     case map: Map[?, ?] =>
       val out = js.Dictionary[js.Any]()
       map.foreach { case (k, v) => out.update(k.toString, serializeValue(v)) }
       out.asInstanceOf[js.Dynamic]
-    case v => v.asInstanceOf[js.Any]
+    case v => JsonMapper.serialize(v)
   }
 }

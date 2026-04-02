@@ -5,7 +5,7 @@ import app.domain.documents.DocumentsLink
 import app.domain.followers.RelationShipLink
 import app.domain.security.*
 import app.domain.timeline.PostsLink
-import app.support.{Api, JsonModel}
+import app.support.{Api}
 import app.support.Api.given
 import jfx.core.meta.Meta
 import jfx.core.state.ListProperty
@@ -18,11 +18,7 @@ class Application(
   var user: User = new User(),
   @(JsonName @field)("$links")
   val links: ListProperty[AbstractLink] = ListProperty()
-) extends JsonModel[Application] {
-
-
-
-}
+)
 
 object Application {
 

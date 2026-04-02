@@ -12,7 +12,7 @@ import scala.concurrent.Future
 import scala.scalajs.js
 import scala.scalajs.js.URIUtils.encodeURIComponent
 
-class Group extends AbstractEntity[Group] {
+class Group extends AbstractEntity {
 
   @NotBlank(message = "Name ist erforderlich")
   @Size(min = 3, max = 80, message = "Name muss zwischen 3 und 80 Zeichen haben")

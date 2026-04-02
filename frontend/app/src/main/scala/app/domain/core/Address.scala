@@ -4,7 +4,7 @@ import jfx.core.meta.Meta
 import jfx.core.state.Property
 import jfx.form.validators.*
 
-class Address extends AbstractEntity[Address] {
+class Address extends AbstractEntity {
 
   @NotBlank(message = "Straße ist erforderlich")
   @Size(min = 2, max = 80, message = "Straße muss zwischen 2 und 80 Zeichen haben")

@@ -22,7 +22,7 @@ import scala.concurrent.ExecutionContext
 
 class FirstCommentCard(
   comment: FirstComment,
-  owner: AbstractEntity[?],
+  owner: AbstractEntity,
   onPersist: FirstComment => Unit,
   onDeleteCompleted: FirstComment => Unit
 ) extends DivComposite {
@@ -94,7 +94,7 @@ class FirstCommentCard(
 object FirstCommentCard {
   def firstCommentCard(
     comment: FirstComment,
-    owner: AbstractEntity[?],
+    owner: AbstractEntity,
     onPersist: FirstComment => Unit = _ => (),
     onDeleteCompleted: FirstComment => Unit = _ => ()
   )(using Scope): FirstCommentCard =

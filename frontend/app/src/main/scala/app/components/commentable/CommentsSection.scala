@@ -24,7 +24,7 @@ import jfx.statement.ForEach.forEach
 
 import scala.concurrent.ExecutionContext
 
-class CommentsSection(val firstComment: FirstComment, val owner: AbstractEntity[?]) extends DivComposite {
+class CommentsSection(val firstComment: FirstComment, val owner: AbstractEntity) extends DivComposite {
 
   private given ExecutionContext = ExecutionContext.global
 
@@ -76,12 +76,12 @@ class CommentsSection(val firstComment: FirstComment, val owner: AbstractEntity[
 }
 
 object CommentsSection {
-  def commentsSection(firstComment: FirstComment, owner: AbstractEntity[?])(init: CommentsSection ?=> Unit = {})(using Scope): CommentsSection =
+  def commentsSection(firstComment: FirstComment, owner: AbstractEntity)(init: CommentsSection ?=> Unit = {})(using Scope): CommentsSection =
     CompositeSupport.buildComposite(new CommentsSection(firstComment, owner))(init)
 
   final class CommentReplyCard(firstComment: FirstComment,
                                comment: SecondComment,
-                               owner: AbstractEntity[?]
+                               owner: AbstractEntity
                               ) extends DivComposite {
 
     private given ExecutionContext = ExecutionContext.global
@@ -140,7 +140,7 @@ object CommentsSection {
   object CommentReplyCard {
     def card(firstComment: FirstComment,
              comment: SecondComment,
-             owner: AbstractEntity[?])(using Scope): CommentReplyCard =
+             owner: AbstractEntity)(using Scope): CommentReplyCard =
       CompositeSupport.buildComposite(new CommentReplyCard(firstComment, comment, owner))
   }
 

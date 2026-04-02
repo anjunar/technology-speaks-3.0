@@ -1,6 +1,5 @@
 package app.domain.core
 
-import app.support.JsonModel
 import jfx.core.meta.Meta
 import jfx.json.JsonType
 
@@ -11,9 +10,7 @@ class UsersLink(
   var rel: String = "",
   var url: String = "",
   var method: String = "GET"
-) extends JsonModel[UsersLink] with AbstractLink {
-
-
+) extends AbstractLink {
 
   override def name: String = "Benutzer"
 
