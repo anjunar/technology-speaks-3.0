@@ -13,10 +13,23 @@ object JsonMapper {
 
   def deserializeArray[M <: Model[M]](json: js.Array[js.Dynamic], meta: reflect.TypeDescriptor): Seq[M] =
     if (json == null || js.isUndefined(json)) Seq.empty
-    else json.toSeq.map(j => deserialize(j, meta))
+    else {
+      val builder = Seq.newBuilder[M]
+      var i = 0
+      while (i < json.length) {
+        builder += deserialize(json(i), meta)
+        i += 1
+      }
+      builder.result()
+    }
 
-  def serialize(model: Model[?]): Dynamic =
-    new ModelSerializer().serialize(model, new JavaContext(null))
+  def serialize(model: Model[?]): Dynamic = {
+    val typeName = model.getClass.getName
+    val typeDescriptor = reflect.ReflectRegistry.loadClass(typeName).getOrElse(
+      throw new IllegalArgumentException(s"Cannot find type descriptor for $typeName")
+    )
+    new ModelSerializer().serialize(model, new JavaContext(typeDescriptor))
+  }
 }
 
 class JsonMapper {

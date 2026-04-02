@@ -156,6 +156,7 @@ object ReflectMacros {
         val isAbstractExpr = Expr(raw.typeSymbol.flags.is(Flags.Abstract))
         val isFinalExpr = Expr(raw.typeSymbol.flags.is(Flags.Final))
         val isCaseClassExpr = Expr(raw.typeSymbol.flags.is(Flags.Case))
+        val typeArgumentsExprs = args.map(arg => buildTypeDescriptorSimple(arg))
 
         '{
           ParameterizedTypeDescriptor(
@@ -171,7 +172,7 @@ object ReflectMacros {
               isFinal = $isFinalExpr,
               isCaseClass = $isCaseClassExpr
             ),
-            typeArguments = Array.empty[TypeDescriptor]
+            typeArguments = ${ Expr.ofList(typeArgumentsExprs.toList) }.toArray
           )
         }
 
@@ -232,6 +233,43 @@ object ReflectMacros {
         isCaseClass = $isCaseClassExpr
       )
     }
+  }
+
+  private def extractPropertiesImplUsingType(using Quotes)(tpe: quotes.reflect.TypeRepr): Expr[Array[PropertyDescriptor]] = {
+    import quotes.reflect.*
+
+    val propertySymbols = collectPropertySymbols(tpe)
+
+    val propertyDescriptors = propertySymbols.map { s =>
+      val nameExpr = Expr(s.name)
+      val propertyType = normalizeType(tpe.memberType(s))
+      val propertyTypeExpr = buildTypeDescriptorSimple(propertyType)
+      val annotationsExpr = extractAnnotations(s)
+
+      val isWriteable = tpe.typeSymbol.methodMember(s"${s.name}_=").nonEmpty ||
+        tpe.baseClasses.exists(_.methodMember(s"${s.name}_=").nonEmpty)
+      val isWriteableExpr = Expr(isWriteable)
+
+      val isPublicExpr = Expr(!s.flags.is(Flags.Private) && !s.flags.is(Flags.Protected))
+      val isPrivateExpr = Expr(s.flags.is(Flags.Private))
+      val isProtectedExpr = Expr(s.flags.is(Flags.Protected))
+      val isReadableExpr = Expr(!s.flags.is(Flags.Private))
+
+      '{
+        PropertyDescriptor(
+          name = $nameExpr,
+          propertyType = $propertyTypeExpr,
+          annotations = $annotationsExpr,
+          isWriteable = $isWriteableExpr,
+          isReadable = $isReadableExpr,
+          isPublic = $isPublicExpr,
+          isPrivate = $isPrivateExpr,
+          isProtected = $isProtectedExpr
+        )
+      }
+    }
+
+    '{ Array(${ Varargs(propertyDescriptors) }*) }
   }
   
   private def extractConstructorsImpl[T: Type](using Quotes): Expr[Array[ConstructorDescriptor]] = {

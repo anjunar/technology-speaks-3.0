@@ -32,7 +32,9 @@ lazy val jfx = (project in file("frontend/jfx"))
   .settings(
     libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "2.8.1",
     libraryDependencies += ("org.scala-js" %%% "scalajs-java-securerandom" % "1.0.0").cross(CrossVersion.for3Use2_13),
-    libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.19" % Test
+    libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.19" % Test,
+    Test / logBuffered := false,
+    Test / outputStrategy := Some(StdoutOutput)
   )
   .settings(commonJsSettings)
 

@@ -30,9 +30,12 @@ class ModelDeserializer extends Deserializer[Model[?]] {
       case _ =>
     }
 
-    val factory = JsonHelpers.findFactory(readJsonType(json), modelType)
-    val model = factory().asInstanceOf[Model[?]]
-    populateModel(model, json)
+    // Create instance directly from registry using type name
+    val model = reflect.ReflectRegistry.createInstance(modelType.typeName) match {
+      case Some(m) => m.asInstanceOf[Model[?]]
+      case None => throw new IllegalArgumentException(s"Cannot create instance for ${modelType.typeName}")
+    }
+    populateModel(model, json, context.resolvedType)
     model
   }
 
@@ -41,19 +44,21 @@ class ModelDeserializer extends Deserializer[Model[?]] {
       .filter(v => v != null && !js.isUndefined(v))
       .map(_.toString)
 
-  private def populateModel(model: Model[?], json: Dynamic): Unit = {
-    val properties = PropertySupport.extractPropertiesWithAccessors[Model[?]]
-    properties.foreach { propWithAccessor =>
-      if (!JsonHelpers.isIgnored(propWithAccessor.descriptor)) {
-        val fieldName = propWithAccessor.descriptor.name
+  private def populateModel(model: Model[?], json: Dynamic, typeDescriptor: reflect.TypeDescriptor): Unit = {
+    // Get properties from registry instead of typeDescriptor to avoid recursion issues
+    val typeName = typeDescriptor.typeName
+    val classDescriptor = reflect.ReflectRegistry.loadClass(typeName).getOrElse(
+      throw new IllegalArgumentException(s"Cannot find class descriptor for $typeName")
+    )
+    val properties = classDescriptor.properties
+    
+    properties.foreach { prop =>
+      if (!JsonHelpers.isIgnored(prop)) {
+        val fieldName = prop.name
         val rawValue = json.selectDynamic(fieldName).asInstanceOf[js.Any]
         if (!js.isUndefined(rawValue) && rawValue != null) {
-          val decoded = deserializeValue(rawValue, propWithAccessor.descriptor.propertyType)
-          try {
-            assignValue(model, propWithAccessor.accessor.asInstanceOf[PropertyAccessor[Any, Any]], decoded)
-          } catch {
-            case _: UnsupportedOperationException => // Skip read-only properties
-          }
+          val decoded = deserializeValue(rawValue, prop.propertyType)
+          assignValue(model, typeName, prop, decoded)
         }
       }
     }
@@ -61,6 +66,25 @@ class ModelDeserializer extends Deserializer[Model[?]] {
 
   private def deserializeValue(rawValue: js.Any, propType: TypeDescriptor): Any = {
     propType match {
+      case pt: reflect.ParameterizedTypeDescriptor if isOptionType(pt) && pt.typeArguments.nonEmpty =>
+        // Handle Option[T] directly - don't try to create Option instance
+        if (rawValue == null || js.isUndefined(rawValue)) {
+          None
+        } else {
+          val elementType = pt.typeArguments(0)
+          val deserializer = DeserializerFactory.buildFromType(elementType)
+          val value = deserializer.deserialize(rawValue.asInstanceOf[Dynamic], new JsonContext(elementType))
+          Some(value)
+        }
+      case pt: reflect.ParameterizedTypeDescriptor if isListPropertyType(pt) && pt.typeArguments.nonEmpty =>
+        // Handle ListProperty[T] - use ListPropertyDeserializer
+        val deserializer = DeserializerFactory.buildFromType(pt)
+        deserializer.deserialize(rawValue.asInstanceOf[Dynamic], new JsonContext(pt))
+      case pt: reflect.ParameterizedTypeDescriptor if isPropertyType(pt) && pt.typeArguments.nonEmpty =>
+        // Handle Property[T] - unwrap and deserialize element type
+        val elementType = pt.typeArguments(0)
+        val deserializer = DeserializerFactory.buildFromType(elementType)
+        deserializer.deserialize(rawValue.asInstanceOf[Dynamic], new JsonContext(elementType))
       case pt: reflect.ParameterizedTypeDescriptor if isMapType(pt) =>
         deserializeMap(rawValue.asInstanceOf[Dynamic], pt)
       case cd: reflect.ClassDescriptor if isMapType(cd) =>
@@ -69,6 +93,18 @@ class ModelDeserializer extends Deserializer[Model[?]] {
         val deserializer = DeserializerFactory.buildFromType(propType)
         deserializer.deserialize(rawValue.asInstanceOf[Dynamic], new JsonContext(propType))
     }
+  }
+
+  private def isPropertyType(tpe: TypeDescriptor): Boolean = {
+    tpe.typeName == "jfx.core.state.Property" || tpe.typeName == "Property"
+  }
+  
+  private def isListPropertyType(tpe: TypeDescriptor): Boolean = {
+    tpe.typeName == "jfx.core.state.ListProperty" || tpe.typeName == "ListProperty"
+  }
+  
+  private def isOptionType(tpe: TypeDescriptor): Boolean = {
+    tpe.typeName == "scala.Option" || tpe.typeName == "Option"
   }
 
   private def isMapType(tpe: TypeDescriptor): Boolean = tpe match {
@@ -99,19 +135,34 @@ class ModelDeserializer extends Deserializer[Model[?]] {
     builder.result()
   }
 
-  private def assignValue(model: Model[?], property: PropertyAccessor[Any, Any], decoded: Any): Unit = {
-    property.get(model) match {
-      case p: Property[Any @unchecked] => p.set(decoded)
-      case list: ListProperty[Any @unchecked] =>
-        if (decoded != null) {
-          list.clear()
-          decoded match {
-            case values: js.Array[?] => values.foreach(list.addOne)
-            case values: Iterable[?] => values.foreach(list.addOne)
-            case single => list.addOne(single)
-          }
+  private def assignValue(model: Model[?], typeName: String, prop: reflect.PropertyDescriptor, decoded: Any): Unit = {
+    reflect.ReflectRegistry.getPropertyAccessor(typeName, prop.name) match {
+      case Some(accessor) =>
+        accessor.get(model) match {
+          case p: Property[Any @unchecked] =>
+            // Handle Option values - if decoded is None and property is Option, set directly
+            p.set(decoded)
+          case list: ListProperty[Any @unchecked] =>
+            // decoded is either a ListProperty or js.Array from ListPropertyDeserializer
+            decoded match {
+              case newList: ListProperty[Any @unchecked] =>
+                // Replace all elements
+                list.clear()
+                newList.underlying.foreach(list.addOne)
+              case arr: js.Array[?] =>
+                list.clear()
+                arr.foreach(list.addOne)
+              case values: Iterable[?] =>
+                list.clear()
+                values.foreach(list.addOne)
+              case single =>
+                list.clear()
+                list.addOne(single)
+            }
+          case _ => if (decoded != null) accessor.set(model, decoded)
         }
-      case _ => if (decoded != null) property.set(model, decoded)
+      case None =>
+        js.Dynamic.global.console.error(s"No accessor found for $typeName.${prop.name}")
     }
   }
 }
