@@ -5,6 +5,7 @@ import jfx.core.state.{CompositeDisposable, Disposable, ListProperty, Property, 
 import jfx.core.state.ListProperty.{Clear, Patch, RemoveAt, RemoveRange, UpdateAt}
 import jfx.form.validators.{Validator, ValidatorFactory}
 import org.scalajs.dom.{HTMLElement, Node, console}
+import reflect.{ClassDescriptor, PropertyAccessor, PropertyDescriptor, ReflectRegistry}
 
 import scala.collection.mutable
 
@@ -129,37 +130,33 @@ trait Formular[M, N <: Node] extends NodeComponent[N], Editable {
   private def bindNow(control: AnyControl): jfx.core.state.Disposable = {
     val controlName = control.name
 
-/*
     val (modelPropertyOption, accessValidators) = control match {
       case subForm: SubForm[?] =>
         if (subForm.index > -1) {
           val parent = control.findParentForm().name
           (
-            valueProperty.get
-              .findPropertyOption[ListProperty[?]](parent)
+            findPropertyOption[ListProperty[?]](valueProperty.get, parent)
               .flatMap(list => Option(list.get(subForm.index)))
               .map(Property(_)),
             Vector.empty
           )
         } else {
-          val accessOption = valueProperty.get.findPropertyAccessOption(controlName)
-          val descriptorOption = valueProperty.get.findPropertyDescriptorOption(controlName)
+          val accessOption = findPropertyAccessOption(valueProperty.get, controlName)
+          val descriptorOption = findPropertyDescriptorOption(valueProperty.get, controlName)
           (
             accessOption.map(_.get(valueProperty.get)),
             descriptorOption.map(d => ValidatorFactory.createValidators(d.annotations)).getOrElse(Vector.empty)
           )
         }
       case _ =>
-        val accessOption = valueProperty.get.findPropertyAccessOption(controlName)
-        val descriptorOption = valueProperty.get.findPropertyDescriptorOption(controlName)
+        val accessOption = findPropertyAccessOption(valueProperty.get, controlName)
+        val descriptorOption = findPropertyDescriptorOption(valueProperty.get, controlName)
         (
           accessOption.map(_.get(valueProperty.get)),
           descriptorOption.map(d => ValidatorFactory.createValidators(d.annotations)).getOrElse(Vector.empty)
         )
     }
-*/
 
-/*
     if (modelPropertyOption.isEmpty) {
       console.warn(s"Skipping form binding for control '$controlName' because no matching model property was found.")
       return () => ()
@@ -176,8 +173,6 @@ trait Formular[M, N <: Node] extends NodeComponent[N], Editable {
     } else {
       Property.subscribeBidirectional(modelProperty.asInstanceOf[Property[Any]], controlProperty.asInstanceOf[Property[Any]])
     }
-*/
-    null.asInstanceOf[jfx.core.state.Disposable]
   }
 
   private def syncControlValidators(control: AnyControl, validators: Vector[Validator[Any]]): Unit = {
@@ -202,6 +197,23 @@ trait Formular[M, N <: Node] extends NodeComponent[N], Editable {
 
   private def rawValidators(control: AnyControl): ListProperty[Validator[Any]] =
     control.validators.asInstanceOf[ListProperty[Validator[Any]]]
+
+  private def findPropertyOption[T](model: Any, propertyName: String): Option[T] =
+    findPropertyAccessOption(model, propertyName).map(_.get(model).asInstanceOf[T])
+
+  private def findPropertyAccessOption(model: Any, propertyName: String): Option[PropertyAccessor[Any, Any]] =
+    findPropertyDescriptorOption(model, propertyName).flatMap(_.accessor).map(_.asInstanceOf[PropertyAccessor[Any, Any]])
+
+  private def findPropertyDescriptorOption(model: Any, propertyName: String): Option[PropertyDescriptor] =
+    modelDescriptor(model).flatMap(_.getProperty(propertyName))
+
+  private def modelDescriptor(model: Any): Option[ClassDescriptor] =
+    if (model == null) {
+      None
+    } else {
+      ReflectRegistry.loadClass(model.getClass.getName)
+        .orElse(ReflectRegistry.loadClass(model.getClass.getSimpleName))
+    }
 
   private def onFieldsChange(change: ListProperty.Change[Control[?, ? <: HTMLElement]]): Unit =
     change match {

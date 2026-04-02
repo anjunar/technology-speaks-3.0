@@ -6,6 +6,7 @@ import org.scalatest.matchers.should.Matchers
 import scala.scalajs.js
 import scala.scalajs.js.Dynamic.literal as jsObj
 import jfx.json.JsonMapper
+import reflect.macros.ReflectMacros.reflectType
 
 class SchemaSerializerSpec extends AnyFlatSpec with Matchers {
 

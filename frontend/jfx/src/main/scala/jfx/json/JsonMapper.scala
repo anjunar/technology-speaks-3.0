@@ -34,8 +34,6 @@ object JsonMapper {
   private val JsonNameAnnotation = "jfx.json.JsonName"
   private val JsonIgnoreAnnotation = "jfx.json.JsonIgnore"
   private val TypeField = "@type"
-  private val DefaultMapper = new JsonMapper
-
   inline def serialize[M](model: M): Dynamic =
     serialize(model, reflectType[M])
 
@@ -90,7 +88,7 @@ object JsonMapper {
         case descriptor: ClassDescriptor =>
           serializeObject(value, descriptor, context)
         case _ =>
-          serializeUntyped(value)
+          throw new IllegalArgumentException(s"Unsupported type descriptor for serialization: ${expectedType.typeName}")
       }
     }
   }
@@ -128,7 +126,7 @@ object JsonMapper {
         case descriptor: TypeVariableDescriptor =>
           deserializeValue(value, context.copy(expectedType = resolveTypeVariable(context.bindings, descriptor)))
         case _ =>
-          value
+          throw new IllegalArgumentException(s"Unsupported type descriptor for deserialization: ${expectedType.typeName}")
       }
     }
   }
@@ -215,8 +213,13 @@ object JsonMapper {
 
   private def serializeMapEntries(value: Any, context: JsonContext): Seq[(String, js.Any)] = {
     val valueType = secondTypeArgument(context.expectedType)
-    value.asInstanceOf[scala.collection.Map[Any, Any]].toSeq.map { case (key, entryValue) =>
-      key.toString -> serializeValue(entryValue, childContext(context, valueType))
+    value match {
+      case entries: scala.collection.Map[?, ?] =>
+        entries.toSeq.map { case (key, entryValue) =>
+          key.toString -> serializeValue(entryValue, childContext(context, valueType))
+        }
+      case other =>
+        throw new IllegalArgumentException(s"Expected map for ${context.expectedType.typeName}, got ${other.getClass.getName}")
     }
   }
 
@@ -227,7 +230,8 @@ object JsonMapper {
         case array: js.Array[?] => array.toSeq
         case array: Array[?] => array.toSeq
         case iterable: Iterable[?] => iterable.toSeq
-        case other => Seq(other)
+        case other =>
+          throw new IllegalArgumentException(s"Expected collection for ${context.expectedType.typeName}, got ${other.getClass.getName}")
       }
     js.Array(values.map(item => serializeValue(item, childContext(context, elementType)))*)
   }
@@ -240,29 +244,6 @@ object JsonMapper {
         value.toString
       case _ =>
         value.asInstanceOf[js.Any]
-    }
-
-  private def serializeUntyped(value: Any): js.Any =
-    value match {
-      case null => null
-      case primitive: String => primitive
-      case primitive: Boolean => primitive
-      case primitive: Int => primitive
-      case primitive: Double => primitive
-      case primitive: Float => primitive.toDouble
-      case primitive: Long => primitive.toDouble
-      case primitive: Short => primitive.toInt
-      case primitive: Byte => primitive.toInt
-      case primitive: UUID => primitive.toString
-      case property: Property[?] => serializeUntyped(property.get)
-      case property: ListProperty[?] => js.Array(property.get.toSeq.map(serializeUntyped)*)
-      case values: js.Array[?] => js.Array(values.toSeq.map(serializeUntyped)*)
-      case values: Array[?] => js.Array(values.toSeq.map(serializeUntyped)*)
-      case values: Iterable[?] => js.Array(values.toSeq.map(serializeUntyped)*)
-      case values: scala.collection.Map[?, ?] =>
-        js.Dictionary(values.toSeq.map { case (key, entryValue) => key.toString -> serializeUntyped(entryValue) }*).asInstanceOf[js.Any]
-      case other =>
-        other.asInstanceOf[js.Any]
     }
 
   private def deserializePropertyValue(value: js.Any, context: JsonContext): Any = {
@@ -314,7 +295,7 @@ object JsonMapper {
     } else if (rawTypeName == "scala.collection.immutable.Set" || rawTypeName == "scala.collection.Set") {
       items.toSet
     } else {
-      items
+      throw new IllegalArgumentException(s"Unsupported collection type for deserialization: $rawTypeName")
     }
   }
 
@@ -339,7 +320,7 @@ object JsonMapper {
       case "java.util.UUID" =>
         UUID.fromString(value.toString)
       case _ =>
-        value.asInstanceOf[Any]
+        value
     }
 
   private def assignProperty(instance: Any, owner: ClassDescriptor, property: PropertyDescriptor, value: Any): Unit = {
@@ -356,7 +337,8 @@ object JsonMapper {
             case seq: Seq[?] => seq
             case iterable: Iterable[?] => iterable.toSeq
             case null => Seq.empty
-            case other => Seq(other)
+            case other =>
+              throw new IllegalArgumentException(s"Expected sequence value for list property ${owner.typeName}.${property.name}, got ${other.getClass.getName}")
           }
         propertyValue.setAll(values.asInstanceOf[Seq[Any]])
       case _ =>
@@ -371,26 +353,48 @@ object JsonMapper {
     jsonType match {
       case Some(typeName) =>
         val candidates = subtypeCandidates(declaredDescriptor)
-        candidates.find(matchesJsonType(_, typeName)).orElse {
-          ReflectRegistry.loadClass(typeName)
-            .filter(descriptor => descriptor.typeName == declaredDescriptor.typeName || descriptor.baseTypes.contains(declaredDescriptor.typeName))
-        }
+        candidates.find(matchesJsonType(_, typeName))
+          .orElse {
+            ReflectRegistry.loadClass(typeName)
+              .filter(descriptor => descriptor.typeName == declaredDescriptor.typeName || isAssignableTo(descriptor, declaredDescriptor.typeName))
+          }
+          .orElse {
+            throw new IllegalArgumentException(s"Unknown @type '$typeName' for ${declaredDescriptor.typeName}")
+          }
       case None if declaredDescriptor.isAbstract =>
-        None
+        throw new IllegalArgumentException(s"Missing @type for abstract type ${declaredDescriptor.typeName}")
       case None =>
         Some(fullDescriptor(declaredDescriptor))
     }
   }
 
   private def runtimeDescriptorForValue(value: Any, fallback: ClassDescriptor): ClassDescriptor = {
-    val runtimeName = value.getClass.getName
-    ReflectRegistry.loadClass(runtimeName)
+    val runtimeNames = candidateRuntimeNames(value)
+    val registryMatch =
+      runtimeNames.iterator
+        .flatMap(name => ReflectRegistry.loadClass(name))
+        .toSeq
+        .headOption
+
+    registryMatch
+      .orElse {
+        if (fallback.isAbstract) {
+          subtypeCandidates(fallback).find { candidate =>
+            runtimeNames.contains(candidate.typeName) || runtimeNames.contains(candidate.simpleName)
+          }
+        } else {
+          None
+        }
+      }
       .orElse(ReflectRegistry.loadClass(fallback.typeName))
-      .getOrElse(fallback)
+      .orElse(Option.when(fallback.properties.nonEmpty)(fallback))
+      .getOrElse(throw new IllegalArgumentException(s"Cannot resolve runtime descriptor for value of ${runtimeNames.headOption.getOrElse(value.getClass.getName)} as ${fallback.typeName}"))
   }
 
   private def subtypeCandidates(descriptor: ClassDescriptor): List[ClassDescriptor] =
-    (fullDescriptor(descriptor) :: ReflectRegistry.getSubTypes(descriptor.typeName)).distinctBy(_.typeName)
+    (Option.when(ReflectRegistry.contains(descriptor.typeName))(fullDescriptor(descriptor)).toList ++
+      ReflectRegistry.getAllRegistered.filter(candidate => isAssignableTo(candidate, descriptor.typeName)).toList)
+      .distinctBy(_.typeName)
 
   private def matchesJsonType(descriptor: ClassDescriptor, jsonType: String): Boolean = {
     val names = Set(
@@ -402,6 +406,23 @@ object JsonMapper {
 
   private def jsonTypeValue(descriptor: ClassDescriptor): Option[String] =
     annotationValue(descriptor.annotations, JsonTypeAnnotation)
+
+  private def isAssignableTo(descriptor: ClassDescriptor, superTypeName: String): Boolean =
+    descriptor.typeName == superTypeName || descriptor.baseTypes.contains(superTypeName)
+
+  private def candidateRuntimeNames(value: Any): Vector[String] = {
+    val javaClass = value.getClass
+    val dynamic = value.asInstanceOf[js.Dynamic]
+    val constructorName =
+      if (js.isUndefined(dynamic.selectDynamic("constructor")) || js.isUndefined(dynamic.selectDynamic("constructor").selectDynamic("name"))) None
+      else Option(dynamic.selectDynamic("constructor").selectDynamic("name").toString)
+
+    Vector(
+      Option(javaClass.getName),
+      Option(javaClass.getSimpleName),
+      constructorName
+    ).flatten.distinct
+  }
 
   private def serializableProperties(descriptor: ClassDescriptor): Array[PropertyDescriptor] =
     fullDescriptor(descriptor).properties.filterNot(_.hasAnnotation(JsonIgnoreAnnotation))
@@ -426,12 +447,19 @@ object JsonMapper {
   private def fullDescriptor(descriptor: ClassDescriptor): ClassDescriptor =
     ReflectRegistry.loadClass(descriptor.typeName)
       .orElse(ReflectRegistry.loadClass(descriptor.simpleName))
-      .getOrElse(descriptor)
+      .orElse(Option.when(descriptor.properties.nonEmpty)(descriptor))
+      .orElse(Option.when(descriptor.typeParameters.nonEmpty)(descriptor))
+      .getOrElse(throw new IllegalArgumentException(s"Missing class descriptor for ${descriptor.typeName}"))
 
   private def childContext(parent: JsonContext, childType: TypeDescriptor): JsonContext = {
     val resolved = parent.resolve(childType)
-    val bindings = typeBindings(resolved, rawClassDescriptor(resolved))
-    JsonContext(resolved, parent.bindings ++ bindings)
+    resolved match {
+      case parameterized: ParameterizedTypeDescriptor =>
+        val bindings = typeBindings(parameterized, parameterized.rawType)
+        JsonContext(resolved, parent.bindings ++ bindings)
+      case _ =>
+        JsonContext(resolved, parent.bindings)
+    }
   }
 
   private def typeBindings(descriptor: TypeDescriptor): Map[String, TypeDescriptor] =
@@ -466,7 +494,7 @@ object JsonMapper {
   private def rawClassDescriptor(descriptor: TypeDescriptor): ClassDescriptor =
     descriptor match {
       case parameterized: ParameterizedTypeDescriptor =>
-        fullDescriptor(parameterized.rawType)
+        parameterized.rawType
       case classDescriptor: ClassDescriptor =>
         fullDescriptor(classDescriptor)
       case variable: TypeVariableDescriptor =>
@@ -510,8 +538,10 @@ object JsonMapper {
     val rawTypeName = rawTypeNameOf(descriptor)
     if (rawTypeName == "scala.collection.immutable.ListMap") {
       ListMap(entries*)
-    } else {
+    } else if (rawTypeName == "scala.collection.immutable.Map" || rawTypeName == "scala.collection.Map") {
       ImmutableMap(entries*)
+    } else {
+      throw new IllegalArgumentException(s"Unsupported map type for deserialization: $rawTypeName")
     }
   }
 
@@ -570,9 +600,13 @@ object JsonMapper {
     typeName == "java.util.UUID"
 
   private def asDictionary(value: js.Any): js.Dictionary[js.Any] =
-    value.asInstanceOf[js.Dictionary[js.Any]]
+    if (value != null && !js.isUndefined(value) && !js.Array.isArray(value) && js.typeOf(value) == "object") {
+      value.asInstanceOf[js.Dictionary[js.Any]]
+    } else {
+      throw new IllegalArgumentException(s"Expected JSON object, got ${js.typeOf(value)}")
+    }
 
   private def asJsArray(value: js.Any): js.Array[js.Any] =
     if (js.Array.isArray(value)) value.asInstanceOf[js.Array[js.Any]]
-    else js.Array()
+    else throw new IllegalArgumentException(s"Expected JSON array, got ${js.typeOf(value)}")
 }

@@ -212,7 +212,7 @@ object ReflectMacros {
       case '[t] => reflectImpl[t]
     }
   }
-  
+
   private[macros] def extractPropertiesImpl[T: Type](using Quotes): Expr[Array[PropertyDescriptor]] = {
     import quotes.reflect.*
 
