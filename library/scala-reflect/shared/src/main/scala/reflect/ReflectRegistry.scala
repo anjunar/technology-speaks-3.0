@@ -63,11 +63,15 @@ object ReflectRegistry {
   def isAssignableFrom(subType: String, superType: String): Boolean = {
     if subType == superType then return true
 
-    loadClass(subType) match {
-      case Some(descriptor) =>
-        if descriptor.baseTypes.contains(superType) then true
-        else descriptor.baseTypes.exists(bt => isAssignableFrom(bt, superType))
-      case None => false
+    (loadClass(subType), loadClass(superType)) match {
+      case (Some(subDescriptor), Some(superDescriptor)) =>
+        (subDescriptor.runtimeClass, superDescriptor.runtimeClass) match {
+          case (Some(subRuntimeClass), Some(superRuntimeClass)) =>
+            superRuntimeClass.isAssignableFrom(subRuntimeClass)
+          case _ =>
+            subDescriptor.baseTypes.contains(superType) || subDescriptor.baseTypes.exists(bt => isAssignableFrom(bt, superType))
+        }
+      case _ => false
     }
   }
 

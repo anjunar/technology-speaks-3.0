@@ -5,7 +5,7 @@ import jfx.core.state.{CompositeDisposable, Disposable, ListProperty, Property, 
 import jfx.core.state.ListProperty.{Clear, Patch, RemoveAt, RemoveRange, UpdateAt}
 import jfx.form.validators.{Validator, ValidatorFactory}
 import org.scalajs.dom.{HTMLElement, Node, console}
-import reflect.{ClassDescriptor, PropertyAccessor, PropertyDescriptor, ReflectRegistry}
+import reflect.{ClassDescriptor, PropertyAccessor, PropertyDescriptor}
 
 import scala.collection.mutable
 
@@ -211,8 +211,8 @@ trait Formular[M, N <: Node] extends NodeComponent[N], Editable {
     if (model == null) {
       None
     } else {
-      ReflectRegistry.loadClass(model.getClass.getName)
-        .orElse(ReflectRegistry.loadClass(model.getClass.getSimpleName))
+      ClassDescriptor.maybeForName(model.getClass.getName)
+        .orElse(ClassDescriptor.maybeForName(model.getClass.getSimpleName))
     }
 
   private def onFieldsChange(change: ListProperty.Change[Control[?, ? <: HTMLElement]]): Unit =

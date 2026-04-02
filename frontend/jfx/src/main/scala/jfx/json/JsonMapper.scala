@@ -365,7 +365,7 @@ object JsonMapper {
         val candidates = subtypeCandidates(declaredDescriptor)
         candidates.find(matchesJsonType(_, typeName))
           .orElse {
-            ReflectRegistry.loadClass(typeName)
+            ClassDescriptor.maybeForName(typeName)
               .filter(descriptor => descriptor.typeName == declaredDescriptor.typeName || isAssignableTo(descriptor, declaredDescriptor.typeName))
           }
           .orElse {
@@ -391,7 +391,7 @@ object JsonMapper {
     val runtimeNames = candidateRuntimeNames(value)
     val registryMatch =
       runtimeNames.iterator
-        .flatMap(name => ReflectRegistry.loadClass(name))
+        .flatMap(name => ClassDescriptor.maybeForName(name))
         .toSeq
         .headOption
 
@@ -470,8 +470,8 @@ object JsonMapper {
 
   private def fullDescriptor(descriptor: ClassDescriptor): ClassDescriptor =
     Option.when(descriptor.properties.nonEmpty || descriptor.typeParameters.nonEmpty)(descriptor)
-      .orElse(ReflectRegistry.loadClass(descriptor.typeName))
-      .orElse(ReflectRegistry.loadClass(descriptor.simpleName))
+      .orElse(ClassDescriptor.maybeForName(descriptor.typeName))
+      .orElse(ClassDescriptor.maybeForName(descriptor.simpleName))
       .getOrElse(throw new IllegalArgumentException(s"Missing class descriptor for ${descriptor.typeName}"))
 
   private def childContext(parent: JsonContext, childType: TypeDescriptor): JsonContext = {
@@ -523,7 +523,7 @@ object JsonMapper {
       case classDescriptor: ClassDescriptor =>
         fullDescriptor(classDescriptor)
       case variable: TypeVariableDescriptor =>
-        variable.bounds.iterator.flatMap(ReflectRegistry.loadClass).toSeq.headOption.getOrElse(
+        variable.bounds.iterator.flatMap(ClassDescriptor.maybeForName).toSeq.headOption.getOrElse(
           throw new IllegalArgumentException(s"Cannot resolve type variable ${variable.name}")
         )
       case other =>

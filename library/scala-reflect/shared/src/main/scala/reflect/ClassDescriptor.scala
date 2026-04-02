@@ -53,3 +53,14 @@ final case class ClassDescriptor(
   def isSubTypeOf(otherTypeName: String): Boolean =
     baseTypes.contains(otherTypeName)
 }
+
+object ClassDescriptor {
+
+  def forName(typeName: String): ClassDescriptor =
+    ReflectRegistry.loadClass(typeName).getOrElse(
+      throw new IllegalArgumentException(s"Cannot load class descriptor: $typeName")
+    )
+
+  def maybeForName(typeName: String): Option[ClassDescriptor] =
+    ReflectRegistry.loadClass(typeName)
+}

@@ -3,7 +3,7 @@ package jfx.control.cell
 import reflect.macros.PropertySupport
 import jfx.control.TableColumn
 import jfx.core.state.{Property, ReadOnlyProperty}
-import reflect.ReflectRegistry
+import reflect.ClassDescriptor
 
 class PropertyValueFactory[S, T](val property: String)
   extends (TableColumn.CellDataFeatures[S, T] => ReadOnlyProperty[T] | Null) {
@@ -16,11 +16,11 @@ class PropertyValueFactory[S, T](val property: String)
 
   private def resolveValue(rowValue: S): ReadOnlyProperty[T] | Null = {
     val typeName = rowValue.getClass.getName
-    ReflectRegistry.loadClass(typeName) match {
+    ClassDescriptor.maybeForName(typeName) match {
       case Some(descriptor) =>
         descriptor.properties.find(_.name == property) match {
           case Some(prop) =>
-            ReflectRegistry.getPropertyAccessor(typeName, property) match {
+            descriptor.getProperty(property).flatMap(_.accessor) match {
               case Some(accessor) => wrapValue(accessor.get(rowValue.asInstanceOf[Any]))
               case None => null
             }
