@@ -151,7 +151,26 @@ object ReflectMacros {
     import quotes.reflect.*
     
     val tpe = TypeRepr.of[T]
-    buildTypeDescriptor(tpe)
+    val descriptorExpr = buildTypeDescriptor(tpe)
+    val fullDescriptorExpr = reflectWithAccessorsImpl[T]
+    buildDefaultFactoryExpr[T] match {
+      case Some(factoryExpr) =>
+        '{
+          val descriptor = $fullDescriptorExpr
+          _root_.reflect.ReflectRegistry.registerByTypeName(
+            descriptor.typeName,
+            descriptor,
+            Some($factoryExpr.asInstanceOf[() => Any])
+          )
+          $descriptorExpr
+        }
+      case None =>
+        '{
+          val descriptor = $fullDescriptorExpr
+          _root_.reflect.ReflectRegistry.registerWithAccessors(descriptor)
+          $descriptorExpr
+        }
+    }
   }
   
   private def buildTypeDescriptor(using Quotes)(tpe: quotes.reflect.TypeRepr): Expr[TypeDescriptor] = {
@@ -475,6 +494,49 @@ object ReflectMacros {
       }
     else
       report.errorAndAbort(s"Instantiation for non-case class ${symbol.name} requires explicit constructor invocation")
+  }
+
+  private def buildDefaultFactoryExpr[T: Type](using Quotes): Option[Expr[() => Any]] = {
+    import quotes.reflect.*
+
+    val symbol = TypeRepr.of[T].typeSymbol
+    val constructor = symbol.primaryConstructor
+
+    if symbol.flags.is(Flags.Abstract) || constructor == Symbol.noSymbol then
+      None
+    else
+      val parameters = constructor.paramSymss.flatten
+      if parameters.nonEmpty && !parameters.forall(_.flags.is(Flags.HasDefault)) then
+        None
+      else
+        buildConstructorInvocation[T].map { invocation =>
+          '{ (() => ${ invocation.asExprOf[T] }.asInstanceOf[Any]).asInstanceOf[() => Any] }
+        }
+  }
+
+  private def buildConstructorInvocation[T: Type](using Quotes): Option[quotes.reflect.Term] = {
+    import quotes.reflect.*
+
+    val tpe = TypeRepr.of[T]
+    val symbol = tpe.typeSymbol
+    val constructor = symbol.primaryConstructor
+
+    if constructor == Symbol.noSymbol then
+      None
+    else
+      val parameters = constructor.paramSymss.flatten
+      val defaultArguments =
+        parameters.zipWithIndex.map { case (_, index) =>
+          val getterName = s"$$lessinit$$greater$$default$$${index + 1}"
+          symbol.companionModule.methodMember(getterName).headOption.map(getter => Select(Ref(symbol.companionModule), getter))
+        }
+
+      if parameters.nonEmpty && defaultArguments.exists(_.isEmpty) then
+        None
+      else
+        val newTerm = New(TypeTree.of[T])
+        val ctorTerm = Select(newTerm, constructor)
+        Some(Apply(ctorTerm, defaultArguments.flatten))
   }
   
   private[macros] def collectPropertySymbols(using Quotes)(tpe: quotes.reflect.TypeRepr): List[quotes.reflect.Symbol] = {

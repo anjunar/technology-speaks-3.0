@@ -41,7 +41,7 @@ object Api {
   def invokeLink(link: Link): Future[js.Any] =
     requestJson(link.method, link.url, null)
 
-  def requestJson(method: String, url: String, body: Any): Future[js.Any] = {
+  inline def requestJson[E](method: String, url: String, body: Any): Future[js.Any] = {
     val bodyArg: js.Any = body match {
       case null => null
       case b: String => b.asInstanceOf[js.Any]
@@ -52,7 +52,7 @@ object Api {
       case b: Long => b.asInstanceOf[js.Any]
       case b if js.Array.isArray(b.asInstanceOf[js.Any]) => b.asInstanceOf[js.Any]
       case b if !js.isUndefined(b.asInstanceOf[js.Dynamic].constructor) && b.asInstanceOf[js.Dynamic].constructor.name.asInstanceOf[String] == "Object" => b.asInstanceOf[js.Any]
-      case b => AppJson.mapper.serialize(b)
+      case b => JsonMapper.serialize(b, reflectType[E])
     }
     requestText(method, url, bodyArg).map { text =>
       if (text.isEmpty) null
@@ -70,7 +70,7 @@ object Api {
     if (raw == null || js.isUndefined(raw)) {
       null.asInstanceOf[M]
     } else {
-      AppJson.mapper.deserialize(raw.asInstanceOf[js.Dynamic], reflectType[M]).asInstanceOf[M]
+      JsonMapper.deserialize(raw.asInstanceOf[js.Dynamic], reflectType[M]).asInstanceOf[M]
     }
 
   private def requestText(
@@ -108,7 +108,7 @@ object Api {
           Navigation.redirectToLogin()
           Future.failed(RuntimeException("Request was rejected with 403"))
         } else if (response.status == 400) {
-          Future.failed(new ErrorResponseException(AppJson.mapper.deserializeArray(JSON.parse(text).asInstanceOf[js.Array[js.Dynamic]], reflectType[ErrorResponse])))
+          Future.failed(new ErrorResponseException(JsonMapper.deserialize(JSON.parse(text), reflectType[ErrorResponse])))
         } else {
           Future.failed(RuntimeException(s"HTTP ${response.status}: $text"))
         }

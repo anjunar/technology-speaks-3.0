@@ -3,7 +3,7 @@ package app.components.likeable
 import app.domain.core.Link
 import app.domain.shared.Like
 import app.services.ApplicationService
-import app.support.{Api, AppJson, Navigation}
+import app.support.{Api, Navigation}
 import app.ui.{CompositeSupport, DivComposite}
 import reflect.macros.ReflectMacros.reflectType
 import jfx.action.Button.button
@@ -11,12 +11,14 @@ import jfx.action.Button.{buttonType_=, onClick}
 import jfx.core.component.ElementComponent.*
 import jfx.core.state.{Disposable, ListProperty, Property}
 import jfx.dsl.*
+import jfx.json.JsonMapper
 import jfx.layout.Div.div
 import jfx.layout.HBox.hbox
 
 import scala.concurrent.ExecutionContext
 import scala.scalajs.js
 import scala.util.{Failure, Success}
+
 
 class LikeButton(val likes: ListProperty[Like], val links: ListProperty[Link], val rel: String = "like") extends DivComposite {
 
@@ -108,7 +110,7 @@ class LikeButton(val likes: ListProperty[Like], val links: ListProperty[Link], v
         .iterator
         .collect {
           case value if value != null && !js.isUndefined(value) =>
-            AppJson.mapper.deserialize(value.asInstanceOf[js.Dynamic], reflectType[Like]).asInstanceOf[Like]
+            JsonMapper.deserialize(value.asInstanceOf[js.Dynamic], reflectType[Like]).asInstanceOf[Like]
         }
         .toSeq
     } else {

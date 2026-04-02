@@ -17,5 +17,8 @@ object CoreRegistry {
 
     loader.register(() => new Table[Any]())
     loader.register(() => new Data[Any]())
+
+    loader.register(() => new Schema())
+    loader.register(() => new SchemaProperty())
   }
 }

@@ -1,59 +1,578 @@
 package jfx.json
 
-import jfx.json.deserializer.{Deserializer, DeserializerFactory, JsonContext, ModelDeserializer}
-import jfx.json.serializer.{JavaContext, ModelSerializer, Serializer, SerializerFactory}
+import jfx.core.state.{ListProperty, Property}
+import reflect.{Annotation, ClassDescriptor, ParameterizedTypeDescriptor, PropertyAccessor, PropertyDescriptor, ReflectRegistry, TypeDescriptor, TypeVariableDescriptor}
+import reflect.macros.ReflectMacros.reflectType
 
+import java.util.UUID
+import scala.collection.immutable.{ListMap, Map as ImmutableMap}
 import scala.scalajs.js
 import scala.scalajs.js.Dynamic
-
-object JsonMapper {
-  def deserialize[M](json: Dynamic, meta: reflect.TypeDescriptor): M =
-    new ModelDeserializer().deserialize(json, new JsonContext(meta)).asInstanceOf[M]
-
-  def deserializeArray[M](json: js.Array[js.Dynamic], meta: reflect.TypeDescriptor): Seq[M] =
-    if (json == null || js.isUndefined(json)) Seq.empty
-    else {
-      val builder = Seq.newBuilder[M]
-      var i = 0
-      while (i < json.length) {
-        builder += deserialize(json(i), meta)
-        i += 1
-      }
-      builder.result()
-    }
-
-  def serialize(model: Any): Dynamic = {
-    serialize(model, null)
-  }
-
-  def serialize[M](model: M, meta: reflect.TypeDescriptor): Dynamic = {
-    val typeDescriptor = if (meta != null) {
-      meta
-    } else {
-      val typeName = model.getClass.getName
-      reflect.ReflectRegistry.loadClass(typeName).orElse(
-        reflect.ReflectRegistry.loadClassBySimpleName(model.getClass.getSimpleName)
-      ).orElse(
-        reflect.ReflectRegistry.getAllRegistered.find(_.simpleName == model.getClass.getSimpleName)
-      ).getOrElse(
-        throw new IllegalArgumentException(s"Cannot find type descriptor for $typeName")
-      )
-    }
-    val value = SerializerFactory.buildFromType(typeDescriptor).asInstanceOf[Serializer[Any]]
-    value.serialize(model, new JavaContext(typeDescriptor))
-  }
-}
+import scala.scalajs.js.JSConverters.*
 
 class JsonMapper {
-  def deserialize[M](json: Dynamic, meta: reflect.TypeDescriptor): M =
+
+  inline def serialize[M](model: M): Dynamic =
+    JsonMapper.serialize(model, reflectType[M])
+
+  def serialize[M](model: M, meta: TypeDescriptor): Dynamic =
+    JsonMapper.serialize(model, meta)
+
+  inline def deserialize[M](json: Dynamic): M =
+    JsonMapper.deserialize(json, reflectType[M])
+
+  def deserialize[M](json: Dynamic, meta: TypeDescriptor): M =
     JsonMapper.deserialize(json, meta)
 
-  def deserializeArray[M](json: js.Array[js.Dynamic], meta: reflect.TypeDescriptor): Seq[M] =
+  def deserializeArray[M](json: js.Array[js.Dynamic], meta: TypeDescriptor): Seq[M] =
     JsonMapper.deserializeArray(json, meta)
+}
 
-  def serialize(model: Any): Dynamic =
-    JsonMapper.serialize(model)
+object JsonMapper {
 
-  def serialize[M](model: M, meta: reflect.TypeDescriptor): Dynamic =
-    JsonMapper.serialize(model, meta)
+  private val JsonTypeAnnotation = "jfx.json.JsonType"
+  private val JsonNameAnnotation = "jfx.json.JsonName"
+  private val JsonIgnoreAnnotation = "jfx.json.JsonIgnore"
+  private val TypeField = "@type"
+  private val DefaultMapper = new JsonMapper
+
+  inline def serialize[M](model: M): Dynamic =
+    serialize(model, reflectType[M])
+
+  def serialize[M](model: M, meta: TypeDescriptor): Dynamic =
+    serializeValue(model, JsonContext.root(meta)).asInstanceOf[Dynamic]
+
+  inline def deserialize[M](json: Dynamic): M =
+    deserialize(json, reflectType[M])
+
+  def deserialize[M](json: Dynamic, meta: TypeDescriptor): M =
+    deserializeValue(json, JsonContext.root(meta)).asInstanceOf[M]
+
+  def deserializeArray[M](json: js.Array[js.Dynamic], meta: TypeDescriptor): Seq[M] =
+    if (json == null || js.isUndefined(json)) {
+      Seq.empty
+    } else {
+      json.toSeq.map(value => deserializeValue(value, JsonContext.root(meta)).asInstanceOf[M])
+    }
+
+  private final case class JsonContext(expectedType: TypeDescriptor, bindings: Map[String, TypeDescriptor]) {
+    def resolve(tpe: TypeDescriptor): TypeDescriptor =
+      substitute(bindings, tpe)
+  }
+
+  private object JsonContext {
+    def root(meta: TypeDescriptor): JsonContext =
+      JsonContext(meta, typeBindings(meta))
+  }
+
+  private def serializeValue(value: Any, context: JsonContext): js.Any = {
+    if (value == null) {
+      null
+    } else {
+      val expectedType = context.resolve(context.expectedType)
+      expectedType match {
+        case descriptor if isPropertyType(descriptor) =>
+          serializePropertyValue(value, context)
+        case descriptor if isListPropertyType(descriptor) =>
+          serializeListPropertyValue(value, context)
+        case descriptor if isOptionType(descriptor) =>
+          serializeOptionValue(value, context)
+        case descriptor if isMapType(descriptor) =>
+          serializeMapValue(value, context)
+        case descriptor if isCollectionType(descriptor) =>
+          serializeCollectionValue(value, context)
+        case descriptor if isPrimitiveType(descriptor.typeName) =>
+          serializePrimitive(value, descriptor.typeName)
+        case descriptor: ParameterizedTypeDescriptor =>
+          serializeValue(value, context.copy(expectedType = descriptor.rawType))
+        case descriptor: ClassDescriptor if isPrimitiveType(descriptor.typeName) =>
+          serializePrimitive(value, descriptor.typeName)
+        case descriptor: ClassDescriptor =>
+          serializeObject(value, descriptor, context)
+        case _ =>
+          serializeUntyped(value)
+      }
+    }
+  }
+
+  private def deserializeValue(value: js.Any, context: JsonContext): Any = {
+    val expectedType = context.resolve(context.expectedType)
+    if (value == null || js.isUndefined(value)) {
+      if (isPropertyType(expectedType)) {
+        deserializePropertyValue(value, context)
+      } else if (isOptionType(expectedType)) {
+        None
+      } else {
+        null
+      }
+    } else {
+      expectedType match {
+        case descriptor if isPropertyType(descriptor) =>
+          deserializePropertyValue(value, context)
+        case descriptor if isListPropertyType(descriptor) =>
+          deserializeListPropertyValue(value, context)
+        case descriptor if isOptionType(descriptor) =>
+          deserializeOptionValue(value, context)
+        case descriptor if isMapType(descriptor) =>
+          deserializeMapValue(value, context)
+        case descriptor if isCollectionType(descriptor) =>
+          deserializeCollectionValue(value, context)
+        case descriptor if isPrimitiveType(descriptor.typeName) =>
+          deserializePrimitive(value, descriptor.typeName)
+        case descriptor: ParameterizedTypeDescriptor =>
+          deserializeObjectValue(value, descriptor.rawType, context)
+        case descriptor: ClassDescriptor if isPrimitiveType(descriptor.typeName) =>
+          deserializePrimitive(value, descriptor.typeName)
+        case descriptor: ClassDescriptor =>
+          deserializeObjectValue(value, descriptor, context)
+        case descriptor: TypeVariableDescriptor =>
+          deserializeValue(value, context.copy(expectedType = resolveTypeVariable(context.bindings, descriptor)))
+        case _ =>
+          value
+      }
+    }
+  }
+
+  private def serializeObject(model: Any, declaredDescriptor: ClassDescriptor, parentContext: JsonContext): js.Dynamic = {
+    val runtimeDescriptor = runtimeDescriptorForValue(model, declaredDescriptor)
+    val context = JsonContext(runtimeDescriptor, typeBindings(runtimeDescriptor))
+    val obj = js.Dictionary.empty[js.Any]
+
+    jsonTypeValue(runtimeDescriptor).foreach(typeName => obj(TypeField) = typeName)
+
+    val properties = serializableProperties(runtimeDescriptor)
+    if (isInlineMapShape(runtimeDescriptor, properties)) {
+      val property = properties.head
+      val accessor = propertyAccessor(runtimeDescriptor, property)
+      val propertyValue = accessor.get(model.asInstanceOf[Any])
+      val fieldContext = childContext(context, property.propertyType)
+      serializeMapEntries(propertyValue, fieldContext).foreach { case (key, mappedValue) =>
+        obj(key) = mappedValue
+      }
+    } else {
+      properties.foreach { property =>
+        val accessor = propertyAccessor(runtimeDescriptor, property)
+        val propertyValue = accessor.get(model.asInstanceOf[Any])
+        val fieldContext = childContext(context, property.propertyType)
+        obj(jsonFieldName(property)) = serializeValue(propertyValue, fieldContext)
+      }
+    }
+
+    obj.asInstanceOf[js.Dynamic]
+  }
+
+  private def deserializeObjectValue(value: js.Any, declaredDescriptor: ClassDescriptor, parentContext: JsonContext): Any = {
+    val resolvedDescriptor = resolvePolymorphicDescriptor(declaredDescriptor, value).getOrElse(fullDescriptor(declaredDescriptor))
+    val bindings = typeBindings(parentContext.resolve(parentContext.expectedType), resolvedDescriptor)
+    val context = JsonContext(resolvedDescriptor, bindings)
+    val instance = createInstance(resolvedDescriptor)
+    val properties = serializableProperties(resolvedDescriptor)
+    val jsonObject = asDictionary(value)
+
+    if (isInlineMapShape(resolvedDescriptor, properties)) {
+      val property = properties.head
+      val fieldContext = childContext(context, property.propertyType)
+      val mapValue = deserializeInlineMap(jsonObject, fieldContext)
+      assignProperty(instance, resolvedDescriptor, property, mapValue)
+    } else {
+      properties.foreach { property =>
+        val fieldName = jsonFieldName(property)
+        if (jsonObject.contains(fieldName)) {
+          val rawValue = jsonObject(fieldName)
+          val fieldContext = childContext(context, property.propertyType)
+          val mappedValue = deserializeValue(rawValue, fieldContext)
+          assignProperty(instance, resolvedDescriptor, property, mappedValue)
+        }
+      }
+    }
+
+    instance
+  }
+
+  private def serializePropertyValue(value: Any, context: JsonContext): js.Any = {
+    val property = value.asInstanceOf[Property[Any]]
+    val innerType = propertyElementType(context.expectedType)
+    serializeValue(property.get, childContext(context, innerType))
+  }
+
+  private def serializeListPropertyValue(value: Any, context: JsonContext): js.Any = {
+    val property = value.asInstanceOf[ListProperty[Any]]
+    val elementType = listElementType(context.expectedType)
+    js.Array(property.get.toSeq.map(item => serializeValue(item, childContext(context, elementType)))*)
+  }
+
+  private def serializeOptionValue(value: Any, context: JsonContext): js.Any =
+    value.asInstanceOf[Option[Any]] match {
+      case Some(inner) =>
+        val innerType = firstTypeArgument(context.expectedType)
+        serializeValue(inner, childContext(context, innerType))
+      case None =>
+        null
+    }
+
+  private def serializeMapValue(value: Any, context: JsonContext): js.Any =
+    js.Dictionary(serializeMapEntries(value, context)*).asInstanceOf[js.Any]
+
+  private def serializeMapEntries(value: Any, context: JsonContext): Seq[(String, js.Any)] = {
+    val valueType = secondTypeArgument(context.expectedType)
+    value.asInstanceOf[scala.collection.Map[Any, Any]].toSeq.map { case (key, entryValue) =>
+      key.toString -> serializeValue(entryValue, childContext(context, valueType))
+    }
+  }
+
+  private def serializeCollectionValue(value: Any, context: JsonContext): js.Any = {
+    val elementType = firstTypeArgument(context.expectedType)
+    val values =
+      value match {
+        case array: js.Array[?] => array.toSeq
+        case array: Array[?] => array.toSeq
+        case iterable: Iterable[?] => iterable.toSeq
+        case other => Seq(other)
+      }
+    js.Array(values.map(item => serializeValue(item, childContext(context, elementType)))*)
+  }
+
+  private def serializePrimitive(value: Any, typeName: String): js.Any =
+    typeName match {
+      case "java.util.UUID" =>
+        value.asInstanceOf[UUID].toString
+      case "scala.Char" | "char" =>
+        value.toString
+      case _ =>
+        value.asInstanceOf[js.Any]
+    }
+
+  private def serializeUntyped(value: Any): js.Any =
+    value match {
+      case null => null
+      case primitive: String => primitive
+      case primitive: Boolean => primitive
+      case primitive: Int => primitive
+      case primitive: Double => primitive
+      case primitive: Float => primitive.toDouble
+      case primitive: Long => primitive.toDouble
+      case primitive: Short => primitive.toInt
+      case primitive: Byte => primitive.toInt
+      case primitive: UUID => primitive.toString
+      case property: Property[?] => serializeUntyped(property.get)
+      case property: ListProperty[?] => js.Array(property.get.toSeq.map(serializeUntyped)*)
+      case values: js.Array[?] => js.Array(values.toSeq.map(serializeUntyped)*)
+      case values: Array[?] => js.Array(values.toSeq.map(serializeUntyped)*)
+      case values: Iterable[?] => js.Array(values.toSeq.map(serializeUntyped)*)
+      case values: scala.collection.Map[?, ?] =>
+        js.Dictionary(values.toSeq.map { case (key, entryValue) => key.toString -> serializeUntyped(entryValue) }*).asInstanceOf[js.Any]
+      case other =>
+        other.asInstanceOf[js.Any]
+    }
+
+  private def deserializePropertyValue(value: js.Any, context: JsonContext): Any = {
+    val innerType = propertyElementType(context.expectedType)
+    deserializeValue(value, childContext(context, innerType))
+  }
+
+  private def deserializeListPropertyValue(value: js.Any, context: JsonContext): Any =
+    deserializeCollectionValue(value, context)
+
+  private def deserializeOptionValue(value: js.Any, context: JsonContext): Any =
+    if (value == null || js.isUndefined(value)) {
+      None
+    } else {
+      val innerType = firstTypeArgument(context.expectedType)
+      Some(deserializeValue(value, childContext(context, innerType)))
+    }
+
+  private def deserializeMapValue(value: js.Any, context: JsonContext): Any = {
+    val elementType = secondTypeArgument(context.expectedType)
+    val entries = asDictionary(value).toSeq.map { case (key, entryValue) =>
+      key -> deserializeValue(entryValue, childContext(context, elementType))
+    }
+    collectionFactory(context.expectedType, entries)
+  }
+
+  private def deserializeInlineMap(json: js.Dictionary[js.Any], context: JsonContext): Any = {
+    val reserved = Set(TypeField)
+    val entries = json.toSeq.collect {
+      case (key, rawValue) if !reserved.contains(key) =>
+        key -> deserializeValue(rawValue, childContext(context, secondTypeArgument(context.expectedType)))
+    }
+    collectionFactory(context.expectedType, entries)
+  }
+
+  private def deserializeCollectionValue(value: js.Any, context: JsonContext): Any = {
+    val elementType = firstTypeArgument(context.expectedType)
+    val items = asJsArray(value).map(item => deserializeValue(item, childContext(context, elementType))).toSeq
+    val rawTypeName = rawTypeNameOf(context.expectedType)
+
+    if (isListPropertyType(context.expectedType)) {
+      items
+    } else if (isJsArrayType(context.expectedType)) {
+      js.Array(items*)
+    } else if (rawTypeName == "scala.Array") {
+      items.toArray
+    } else if (rawTypeName == "scala.collection.immutable.List") {
+      items.toList
+    } else if (rawTypeName == "scala.collection.immutable.Set" || rawTypeName == "scala.collection.Set") {
+      items.toSet
+    } else {
+      items
+    }
+  }
+
+  private def deserializePrimitive(value: js.Any, typeName: String): Any =
+    typeName match {
+      case "scala.Int" | "int" =>
+        value.asInstanceOf[Double].toInt
+      case "scala.Double" | "double" =>
+        value.asInstanceOf[Double]
+      case "scala.Float" | "float" =>
+        value.asInstanceOf[Double].toFloat
+      case "scala.Long" | "long" =>
+        value.asInstanceOf[Double].toLong
+      case "scala.Short" | "short" =>
+        value.asInstanceOf[Double].toShort
+      case "scala.Byte" | "byte" =>
+        value.asInstanceOf[Double].toByte
+      case "scala.Boolean" | "boolean" =>
+        value.asInstanceOf[Boolean]
+      case "scala.Char" | "char" =>
+        value.toString.headOption.getOrElse('\u0000')
+      case "java.util.UUID" =>
+        UUID.fromString(value.toString)
+      case _ =>
+        value.asInstanceOf[Any]
+    }
+
+  private def assignProperty(instance: Any, owner: ClassDescriptor, property: PropertyDescriptor, value: Any): Unit = {
+    val accessor = propertyAccessor(owner, property)
+    val currentValue = accessor.get(instance)
+
+    currentValue match {
+      case propertyValue: Property[Any] =>
+        propertyValue.set(value)
+      case propertyValue: ListProperty[Any] =>
+        val values =
+          value match {
+            case array: js.Array[?] => array.toSeq
+            case seq: Seq[?] => seq
+            case iterable: Iterable[?] => iterable.toSeq
+            case null => Seq.empty
+            case other => Seq(other)
+          }
+        propertyValue.setAll(values.asInstanceOf[Seq[Any]])
+      case _ =>
+        accessor.set(instance, value)
+    }
+  }
+
+  private def resolvePolymorphicDescriptor(declaredDescriptor: ClassDescriptor, value: js.Any): Option[ClassDescriptor] = {
+    val jsonObject = asDictionary(value)
+    val jsonType = jsonObject.get(TypeField).map(_.toString)
+
+    jsonType match {
+      case Some(typeName) =>
+        val candidates = subtypeCandidates(declaredDescriptor)
+        candidates.find(matchesJsonType(_, typeName)).orElse {
+          ReflectRegistry.loadClass(typeName)
+            .filter(descriptor => descriptor.typeName == declaredDescriptor.typeName || descriptor.baseTypes.contains(declaredDescriptor.typeName))
+        }
+      case None if declaredDescriptor.isAbstract =>
+        None
+      case None =>
+        Some(fullDescriptor(declaredDescriptor))
+    }
+  }
+
+  private def runtimeDescriptorForValue(value: Any, fallback: ClassDescriptor): ClassDescriptor = {
+    val runtimeName = value.getClass.getName
+    ReflectRegistry.loadClass(runtimeName)
+      .orElse(ReflectRegistry.loadClass(fallback.typeName))
+      .getOrElse(fallback)
+  }
+
+  private def subtypeCandidates(descriptor: ClassDescriptor): List[ClassDescriptor] =
+    (fullDescriptor(descriptor) :: ReflectRegistry.getSubTypes(descriptor.typeName)).distinctBy(_.typeName)
+
+  private def matchesJsonType(descriptor: ClassDescriptor, jsonType: String): Boolean = {
+    val names = Set(
+      descriptor.typeName,
+      descriptor.simpleName
+    ) ++ jsonTypeValue(descriptor).toSet
+    names.contains(jsonType)
+  }
+
+  private def jsonTypeValue(descriptor: ClassDescriptor): Option[String] =
+    annotationValue(descriptor.annotations, JsonTypeAnnotation)
+
+  private def serializableProperties(descriptor: ClassDescriptor): Array[PropertyDescriptor] =
+    fullDescriptor(descriptor).properties.filterNot(_.hasAnnotation(JsonIgnoreAnnotation))
+
+  private def jsonFieldName(property: PropertyDescriptor): String =
+    annotationValue(property.annotations, JsonNameAnnotation).getOrElse(property.name)
+
+  private def annotationValue(annotations: Array[Annotation], annotationClassName: String): Option[String] =
+    annotations.find(_.annotationClassName == annotationClassName).flatMap(_.parameters.get("value")).map(_.toString)
+
+  private def propertyAccessor(owner: ClassDescriptor, property: PropertyDescriptor): PropertyAccessor[Any, Any] =
+    property.accessor
+      .orElse(fullDescriptor(owner).getProperty(property.name).flatMap(_.accessor))
+      .getOrElse(throw new IllegalArgumentException(s"Missing accessor for ${owner.typeName}.${property.name}"))
+      .asInstanceOf[PropertyAccessor[Any, Any]]
+
+  private def createInstance(descriptor: ClassDescriptor): Any =
+    ReflectRegistry.createInstance(descriptor.typeName)
+      .orElse(ReflectRegistry.createInstance(descriptor.simpleName))
+      .getOrElse(throw new IllegalArgumentException(s"Cannot instantiate ${descriptor.typeName}"))
+
+  private def fullDescriptor(descriptor: ClassDescriptor): ClassDescriptor =
+    ReflectRegistry.loadClass(descriptor.typeName)
+      .orElse(ReflectRegistry.loadClass(descriptor.simpleName))
+      .getOrElse(descriptor)
+
+  private def childContext(parent: JsonContext, childType: TypeDescriptor): JsonContext = {
+    val resolved = parent.resolve(childType)
+    val bindings = typeBindings(resolved, rawClassDescriptor(resolved))
+    JsonContext(resolved, parent.bindings ++ bindings)
+  }
+
+  private def typeBindings(descriptor: TypeDescriptor): Map[String, TypeDescriptor] =
+    descriptor match {
+      case parameterized: ParameterizedTypeDescriptor =>
+        typeBindings(parameterized, rawClassDescriptor(parameterized))
+      case _ =>
+        Map.empty
+    }
+
+  private def typeBindings(descriptor: TypeDescriptor, rawDescriptor: ClassDescriptor): Map[String, TypeDescriptor] =
+    descriptor match {
+      case parameterized: ParameterizedTypeDescriptor =>
+        rawDescriptor.typeParameters.zip(parameterized.typeArguments).toMap
+      case _ =>
+        Map.empty
+    }
+
+  private def substitute(bindings: Map[String, TypeDescriptor], descriptor: TypeDescriptor): TypeDescriptor =
+    descriptor match {
+      case variable: TypeVariableDescriptor =>
+        resolveTypeVariable(bindings, variable)
+      case parameterized: ParameterizedTypeDescriptor =>
+        parameterized.copy(typeArguments = parameterized.typeArguments.map(arg => substitute(bindings, arg)))
+      case other =>
+        other
+    }
+
+  private def resolveTypeVariable(bindings: Map[String, TypeDescriptor], descriptor: TypeVariableDescriptor): TypeDescriptor =
+    bindings.getOrElse(descriptor.name, descriptor)
+
+  private def rawClassDescriptor(descriptor: TypeDescriptor): ClassDescriptor =
+    descriptor match {
+      case parameterized: ParameterizedTypeDescriptor =>
+        fullDescriptor(parameterized.rawType)
+      case classDescriptor: ClassDescriptor =>
+        fullDescriptor(classDescriptor)
+      case variable: TypeVariableDescriptor =>
+        variable.bounds.iterator.flatMap(ReflectRegistry.loadClass).toSeq.headOption.getOrElse(
+          throw new IllegalArgumentException(s"Cannot resolve type variable ${variable.name}")
+        )
+      case other =>
+        throw new IllegalArgumentException(s"Unsupported descriptor ${other.typeName}")
+    }
+
+  private def propertyElementType(descriptor: TypeDescriptor): TypeDescriptor =
+    firstTypeArgument(descriptor)
+
+  private def listElementType(descriptor: TypeDescriptor): TypeDescriptor =
+    firstTypeArgument(descriptor)
+
+  private def firstTypeArgument(descriptor: TypeDescriptor): TypeDescriptor =
+    descriptor match {
+      case parameterized: ParameterizedTypeDescriptor if parameterized.typeArguments.nonEmpty =>
+        parameterized.typeArguments.head
+      case _ =>
+        throw new IllegalArgumentException(s"Missing type argument for ${descriptor.typeName}")
+    }
+
+  private def secondTypeArgument(descriptor: TypeDescriptor): TypeDescriptor =
+    descriptor match {
+      case parameterized: ParameterizedTypeDescriptor if parameterized.typeArguments.length >= 2 =>
+        parameterized.typeArguments(1)
+      case _ =>
+        throw new IllegalArgumentException(s"Missing second type argument for ${descriptor.typeName}")
+    }
+
+  private def rawTypeNameOf(descriptor: TypeDescriptor): String =
+    descriptor match {
+      case parameterized: ParameterizedTypeDescriptor => parameterized.rawType.typeName
+      case classDescriptor: ClassDescriptor => classDescriptor.typeName
+      case _ => descriptor.typeName
+    }
+
+  private def collectionFactory(descriptor: TypeDescriptor, entries: Seq[(String, Any)]): scala.collection.Map[String, Any] = {
+    val rawTypeName = rawTypeNameOf(descriptor)
+    if (rawTypeName == "scala.collection.immutable.ListMap") {
+      ListMap(entries*)
+    } else {
+      ImmutableMap(entries*)
+    }
+  }
+
+  private def isInlineMapShape(descriptor: ClassDescriptor, properties: Array[PropertyDescriptor]): Boolean =
+    properties.length == 1 && isMapType(properties.head.propertyType)
+
+  private def isPropertyType(descriptor: TypeDescriptor): Boolean =
+    rawTypeNameOf(descriptor) == "jfx.core.state.Property"
+
+  private def isListPropertyType(descriptor: TypeDescriptor): Boolean =
+    rawTypeNameOf(descriptor) == "jfx.core.state.ListProperty"
+
+  private def isOptionType(descriptor: TypeDescriptor): Boolean =
+    rawTypeNameOf(descriptor) == "scala.Option"
+
+  private def isMapType(descriptor: TypeDescriptor): Boolean = {
+    val rawTypeName = rawTypeNameOf(descriptor)
+    rawTypeName == "scala.collection.immutable.Map" ||
+    rawTypeName == "scala.collection.Map" ||
+    rawTypeName == "scala.collection.immutable.ListMap"
+  }
+
+  private def isCollectionType(descriptor: TypeDescriptor): Boolean = {
+    val rawTypeName = rawTypeNameOf(descriptor)
+    isJsArrayType(descriptor) ||
+    rawTypeName == "scala.Array" ||
+    rawTypeName == "scala.collection.immutable.List" ||
+    rawTypeName == "scala.collection.immutable.Seq" ||
+    rawTypeName == "scala.collection.Seq" ||
+    rawTypeName == "scala.collection.immutable.Set" ||
+    rawTypeName == "scala.collection.Set"
+  }
+
+  private def isJsArrayType(descriptor: TypeDescriptor): Boolean =
+    rawTypeNameOf(descriptor) == "scala.scalajs.js.Array"
+
+  private def isPrimitiveType(typeName: String): Boolean =
+    typeName == "scala.Predef.String" ||
+    typeName == "java.lang.String" ||
+    typeName == "scala.Boolean" ||
+    typeName == "boolean" ||
+    typeName == "scala.Int" ||
+    typeName == "int" ||
+    typeName == "scala.Double" ||
+    typeName == "double" ||
+    typeName == "scala.Float" ||
+    typeName == "float" ||
+    typeName == "scala.Long" ||
+    typeName == "long" ||
+    typeName == "scala.Short" ||
+    typeName == "short" ||
+    typeName == "scala.Byte" ||
+    typeName == "byte" ||
+    typeName == "scala.Char" ||
+    typeName == "char" ||
+    typeName == "java.util.UUID"
+
+  private def asDictionary(value: js.Any): js.Dictionary[js.Any] =
+    value.asInstanceOf[js.Dictionary[js.Any]]
+
+  private def asJsArray(value: js.Any): js.Array[js.Any] =
+    if (js.Array.isArray(value)) value.asInstanceOf[js.Array[js.Any]]
+    else js.Array()
 }

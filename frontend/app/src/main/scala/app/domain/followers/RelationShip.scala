@@ -1,9 +1,10 @@
 package app.domain.followers
 
 import app.domain.core.{AbstractEntity, Data, Link, Table, User}
-import app.support.{Api, AppJson}
+import app.support.Api
 import app.support.Api.given
 import jfx.core.state.{ListProperty, Property}
+import jfx.json.JsonMapper
 import reflect.macros.ReflectMacros.reflectType
 
 import java.util.UUID
@@ -48,7 +49,7 @@ class RelationShip extends AbstractEntity {
 }
 
 object RelationShip {
- 
+
   def read(id: String): Future[Data[RelationShip]] =
     Api.get(s"/service/followers/relationships/relationship/$id").map(raw => Api.deserialize[Data[RelationShip]](raw))
 
@@ -93,7 +94,7 @@ object RelationShip {
         .iterator
         .collect {
           case value if value != null && !js.isUndefined(value) =>
-            AppJson.mapper.deserialize(value.asInstanceOf[js.Dynamic], reflectType[Group]).asInstanceOf[Group]
+            JsonMapper.deserialize(value.asInstanceOf[js.Dynamic], reflectType[Group]).asInstanceOf[Group]
         }
         .toSeq
     }

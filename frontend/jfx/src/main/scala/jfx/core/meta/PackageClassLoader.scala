@@ -11,10 +11,7 @@ class PackageClassLoader(val packageName: String, parent: ReflectClassLoader) {
   inline def register[T](inline factory: () => T): ClassDescriptor = {
     val descriptor = ReflectMacros.reflectWithAccessors[T]
     loader.register[T](descriptor, factory)
-    // Also register in ReflectRegistry for global access
     reflect.ReflectRegistry.registerByTypeName(descriptor.typeName, descriptor, Some(factory.asInstanceOf[() => Any]))
-    // Also register @JsonType annotation for polymorphic deserialization
-    jfx.json.JsonTypeRegistry.register(descriptor)
     descriptor
   }
 

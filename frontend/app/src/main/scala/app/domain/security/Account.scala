@@ -2,9 +2,9 @@ package app.domain.security
 
 import app.domain.core.Data
 import app.domain.core.Link
-import app.support.{AppJson}
 import jfx.core.meta.Meta
 import jfx.core.state.ListProperty
+import jfx.json.JsonMapper
 import org.scalajs.dom.{RequestInit, fetch}
 import reflect.macros.ReflectMacros.reflectType
 
@@ -34,7 +34,7 @@ object Account {
     ).toFuture.flatMap { response =>
       if (response.ok) {
         response.text().toFuture.map { text =>
-          AppJson.mapper.deserialize(js.JSON.parse(text), reflectType[Data[Account]]).asInstanceOf[Data[Account]]
+          JsonMapper.deserialize(js.JSON.parse(text), reflectType[Data[Account]]).asInstanceOf[Data[Account]]
         }
       } else {
         Future.successful(legacy())

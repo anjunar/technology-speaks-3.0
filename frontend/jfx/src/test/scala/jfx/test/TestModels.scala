@@ -54,6 +54,20 @@ class GenericContainer[E] {
   val score: Property[Double] = Property(1.0)
 }
 
+class User {
+  val nickName: Property[String] = Property("")
+}
+
+class Data[E] {
+  val data: Property[E] = Property(null.asInstanceOf[E])
+  val score: Property[Double] = Property(1.0)
+}
+
+class Table[E] {
+  val rows: ListProperty[E] = new ListProperty[E]()
+  val size: Property[Int] = Property(0)
+}
+
 object TestModelRegistry {
   println("=== Registering Test Models ===")
   val simpleDesc = ReflectRegistry.register(() => new SimpleModel())
@@ -68,8 +82,13 @@ object TestModelRegistry {
   ReflectRegistry.register(() => new MapModel())
   ReflectRegistry.register(() => new Item())
   // Register GenericContainer - the macro will capture type parameters
-  val genericContainerDesc = ReflectRegistry.register(() => new GenericContainer[Item]())
+  val genericContainerDesc = ReflectRegistry.register(() => new GenericContainer[Any]())
   println(s"Registered GenericContainer with typeName: ${genericContainerDesc.typeName}")
   println(s"GenericContainer typeParameters: ${genericContainerDesc.typeParameters.mkString(", ")}")
+
+  ReflectRegistry.register(() => new User())
+  ReflectRegistry.register(() => new Data[User]())
+  ReflectRegistry.register(() => new Table[Data[User]]())
+
   println("=== Done Registering ===")
 }
