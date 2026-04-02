@@ -1,5 +1,6 @@
 package jfx.core.meta
 
+import reflect.ReflectRegistry
 import scala.collection.mutable
 import scala.reflect.ClassTag
 
@@ -10,6 +11,7 @@ object ClassLoader {
   def register[E](factory: () => E)(using ClassTag[E]): Unit = {
     val clazz = summon[ClassTag[E]].runtimeClass
     classes.put(clazz.getName, (clazz, factory))
+    ReflectRegistry.registerRuntimeClass(clazz.getName, clazz)
   }
 
   def getFactory(typeName: String): Option[() => Any] = {

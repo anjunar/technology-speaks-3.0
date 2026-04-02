@@ -1,28 +1,32 @@
 package reflect
 
 import scala.collection.mutable
+import scala.reflect.ClassTag
 
 class ReflectClassLoader(
   parent: Option[ReflectClassLoader] = None,
-  private val localRegistry: mutable.Map[String, ClassDescriptor] = mutable.Map.empty,
-  private val localFactories: mutable.Map[String, () => Any] = mutable.Map.empty
+  private val localRegistry: mutable.Map[String, ClassDescriptor] = mutable.Map.empty
 ) extends ClassLoaderLike {
 
-  def register[T](descriptor: ClassDescriptor, factory: Option[() => T] = None)(using Manifest[T]): Unit = {
+  def register[T](descriptor: ClassDescriptor, factory: Option[() => T] = None)(using ClassTag[T]): Unit = {
     val typeName = descriptor.typeName
+    descriptor.bindRuntimeClass(summon[ClassTag[T]].runtimeClass)
+    factory.foreach(f => descriptor.bindFactory(f.asInstanceOf[() => Any]))
     localRegistry += typeName -> descriptor
-    factory.foreach(f => localFactories += typeName -> (f.asInstanceOf[() => Any]))
+    ReflectRegistry.registerByTypeName(typeName, descriptor)
   }
 
-  def register[T](descriptor: ClassDescriptor, factory: () => T): Unit = {
+  def register[T](descriptor: ClassDescriptor, factory: () => T)(using ClassTag[T]): Unit = {
     val typeName = descriptor.typeName
+    descriptor.bindRuntimeClass(summon[ClassTag[T]].runtimeClass)
+    descriptor.bindFactory(factory.asInstanceOf[() => Any])
     localRegistry += typeName -> descriptor
-    localFactories += typeName -> (factory.asInstanceOf[() => Any])
+    ReflectRegistry.registerByTypeName(typeName, descriptor)
   }
 
-  def registerByTypeName(typeName: String, descriptor: ClassDescriptor, factory: Option[() => Any] = None): Unit = {
+  def registerByTypeName(typeName: String, descriptor: ClassDescriptor): Unit = {
     localRegistry += typeName -> descriptor
-    factory.foreach(f => localFactories += typeName -> f)
+    ReflectRegistry.registerByTypeName(typeName, descriptor)
   }
 
   def loadClass(typeName: String): Option[ClassDescriptor] = {
@@ -41,9 +45,9 @@ class ReflectClassLoader(
   }
 
   def createInstance(typeName: String): Option[Any] = {
-    localFactories.get(typeName)
-      .orElse(parent.flatMap(_.localFactories.get(typeName)))
-      .map(_())
+    localRegistry.get(typeName).flatMap(_.createInstance())
+      .orElse(localRegistry.values.find(_.simpleName == typeName).flatMap(_.createInstance()))
+      .orElse(parent.flatMap(_.createInstance(typeName)))
       .orElse(ReflectRegistry.createInstance(typeName))
   }
 
@@ -87,11 +91,10 @@ class ReflectClassLoader(
 
   def clearLocal(): Unit = {
     localRegistry.clear()
-    localFactories.clear()
   }
 
   def withParent(newParent: ReflectClassLoader): ReflectClassLoader =
-    new ReflectClassLoader(Some(newParent), localRegistry.clone(), localFactories.clone())
+    new ReflectClassLoader(Some(newParent), localRegistry.clone())
 }
 
 object ReflectClassLoader {

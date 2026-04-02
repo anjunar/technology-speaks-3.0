@@ -7,7 +7,7 @@ trait TypeDescriptor {
   def properties: Array[PropertyDescriptor]
   def constructors: Array[ConstructorDescriptor]
   def baseTypes: Array[String]
-  def typeParameters: Array[String]
+  def typeParameters: Array[TypeDescriptor]
   def isAbstract: Boolean
   def isFinal: Boolean
   def isCaseClass: Boolean

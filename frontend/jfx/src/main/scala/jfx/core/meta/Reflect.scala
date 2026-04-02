@@ -2,6 +2,7 @@ package jfx.core.meta
 
 import reflect.*
 import reflect.macros.ReflectMacros
+import scala.reflect.ClassTag
 
 object Reflect {
   
@@ -14,13 +15,13 @@ object Reflect {
     loader
   }
   
-  inline def register[T](inline factory: () => T): ClassDescriptor = {
+  inline def register[T](inline factory: () => T)(using ClassTag[T]): ClassDescriptor = {
     val descriptor = ReflectMacros.reflect[T]
     defaultLoader.register[T](descriptor, factory)
     descriptor
   }
   
-  inline def registerAll[Ts](inline factories: (() => Ts)*): Seq[ClassDescriptor] = {
+  inline def registerAll[Ts](inline factories: (() => Ts)*)(using ClassTag[Ts]): Seq[ClassDescriptor] = {
     factories.map { factory =>
       val descriptor = ReflectMacros.reflect[Ts]
       defaultLoader.register[Ts](descriptor, factory)

@@ -10,7 +10,7 @@ final case class ArrayTypeDescriptor(
   override def properties: Array[PropertyDescriptor] = Array.empty
   override def constructors: Array[ConstructorDescriptor] = Array.empty
   override def baseTypes: Array[String] = Array("scala.Array")
-  override def typeParameters: Array[String] = Array.empty
+  override def typeParameters: Array[TypeDescriptor] = Array.empty
   override def isAbstract: Boolean = false
   override def isFinal: Boolean = true
   override def isCaseClass: Boolean = false

@@ -601,13 +601,16 @@ object ReflectMacros {
     '{ Array(${ Varargs(baseTypes.map(Expr(_))) }*) }
   }
   
-  private[macros] def extractTypeParameters(using Quotes)(symbol: quotes.reflect.Symbol): Expr[Array[String]] = {
+  private[macros] def extractTypeParameters(using Quotes)(symbol: quotes.reflect.Symbol): Expr[Array[TypeDescriptor]] = {
     import quotes.reflect.*
     
     val typeParams = symbol.typeMembers.collect {
-      case s if s.flags.is(Flags.Param) => s.name
+      case s if s.flags.is(Flags.Param) =>
+        val nameExpr = Expr(s.name)
+        val boundsExpr = extractBounds(s)
+        '{ TypeVariableDescriptor(name = $nameExpr, bounds = $boundsExpr).asInstanceOf[TypeDescriptor] }
     }
-    '{ Array(${ Varargs(typeParams.map(Expr(_))) }*) }
+    '{ Array(${ Varargs(typeParams) }*) }
   }
   
   private def extractBounds(using Quotes)(symbol: quotes.reflect.Symbol): Expr[Array[String]] = {

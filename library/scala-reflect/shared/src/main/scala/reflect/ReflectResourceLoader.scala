@@ -28,9 +28,8 @@ class ReflectResourceLoader extends ResourceLoader {
 class ReflectClassLoaderWithResources(
   parent: Option[ReflectClassLoader] = None,
   private val localRegistry: mutable.Map[String, ClassDescriptor] = mutable.Map.empty,
-  private val localFactories: mutable.Map[String, () => Any] = mutable.Map.empty,
   private val resourceLoader: ReflectResourceLoader = new ReflectResourceLoader
-) extends ReflectClassLoader(parent, localRegistry, localFactories) with ResourceLoader {
+) extends ReflectClassLoader(parent, localRegistry) with ResourceLoader {
 
   def getResource(name: String): Option[String] = resourceLoader.getResource(name)
 
@@ -42,7 +41,6 @@ class ReflectClassLoaderWithResources(
     new ReflectClassLoaderWithResources(
       Some(newParent),
       localRegistry.clone(),
-      localFactories.clone(),
       resourceLoader
     )
   }

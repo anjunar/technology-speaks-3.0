@@ -3,22 +3,21 @@ package jfx.core.meta
 import reflect.*
 import reflect.macros.ReflectMacros
 import scala.collection.mutable
+import scala.reflect.ClassTag
 
 class PackageClassLoader(val packageName: String, parent: ReflectClassLoader) {
 
   private val loader: ReflectClassLoader = ReflectClassLoader.createWithParent(parent)
 
-  inline def register[T](inline factory: () => T, clazz : Class[T]): ClassDescriptor = {
+  inline def register[T](inline factory: () => T, clazz : Class[T])(using ClassTag[T]): ClassDescriptor = {
     val descriptor = ReflectMacros.reflectWithAccessors[T]
-    descriptor.runtimeClass = clazz
+    descriptor.bindRuntimeClass(clazz)
     loader.register[T](descriptor, factory)
-    reflect.ReflectRegistry.registerByTypeName(descriptor.typeName, descriptor, Some(factory.asInstanceOf[() => Any]))
     descriptor
   }
 
-  def registerByDescriptor(descriptor: ClassDescriptor, factory: Option[() => Any] = None): Unit = {
-    loader.registerByTypeName(descriptor.typeName, descriptor, factory)
-  }
+  def registerByDescriptor(descriptor: ClassDescriptor): Unit =
+    loader.registerByTypeName(descriptor.typeName, descriptor)
 
   def loadClass(typeName: String): Option[ClassDescriptor] =
     loader.loadClass(typeName)

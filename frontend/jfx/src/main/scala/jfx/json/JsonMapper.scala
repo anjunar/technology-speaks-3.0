@@ -496,7 +496,9 @@ object JsonMapper {
   private def typeBindings(descriptor: TypeDescriptor, rawDescriptor: ClassDescriptor): Map[String, TypeDescriptor] =
     descriptor match {
       case parameterized: ParameterizedTypeDescriptor =>
-        rawDescriptor.typeParameters.zip(parameterized.typeArguments).toMap
+        rawDescriptor.typeParameters.collect { case variable: TypeVariableDescriptor => variable.name }
+          .zip(parameterized.typeArguments)
+          .toMap
       case _ =>
         Map.empty
     }
