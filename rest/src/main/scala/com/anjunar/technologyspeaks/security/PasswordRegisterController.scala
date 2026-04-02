@@ -2,7 +2,9 @@ package com.anjunar.technologyspeaks.security
 
 import com.anjunar.json.mapper.intermediate.model.{JsonArray, JsonNode, JsonObject, JsonString}
 import com.anjunar.technologyspeaks.core.{EMail, PasswordCredential, Role, User}
+import com.anjunar.technologyspeaks.rest.EntityManagerProvider
 import jakarta.annotation.security.RolesAllowed
+import jakarta.persistence.EntityManager
 import org.springframework.http.{HttpStatus, ResponseEntity}
 import org.springframework.web.bind.annotation.{PostMapping, RequestBody, RestController}
 
@@ -10,7 +12,7 @@ import java.security.SecureRandom
 import scala.jdk.CollectionConverters.*
 
 @RestController
-class PasswordRegisterController(val registerService: RegisterService, val sessionHolder: SessionHolder) {
+class PasswordRegisterController(val registerService: RegisterService, val sessionHolder: SessionHolder, val entityManager : EntityManager) extends EntityManagerProvider {
 
   @PostMapping(value = Array("/security/register"), produces = Array("application/json"), consumes = Array("application/json"))
   @RolesAllowed(Array("Anonymous"))

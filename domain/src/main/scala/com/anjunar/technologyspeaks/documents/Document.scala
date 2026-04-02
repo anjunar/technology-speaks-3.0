@@ -92,10 +92,10 @@ class Document(@(NotBlank @field)
 object Document extends RepositoryContext[Document] with SchemaProvider[Schema] {
 
   class Schema extends AbstractEntitySchema[Document](SpringContext.entityManager()) {
-    @JsonbProperty val title = property(_.title, new OwnerRule[Document]())
-    @JsonbProperty val bookname = property(_.bookname, new OwnerRule[Document]())
-    @JsonbProperty val user = property(_.user, new OwnerRule[Document]())
-    @JsonbProperty val editor = property(_.editor, new OwnerRule[Document]())
+    @JsonbProperty val title = property(_.title, classOf[OwnerRule[Document]])
+    @JsonbProperty val bookname = property(_.bookname, classOf[OwnerRule[Document]])
+    @JsonbProperty val user = property(_.user, classOf[OwnerRule[Document]])
+    @JsonbProperty val editor = property(_.editor, classOf[OwnerRule[Document]])
   }
 
 }

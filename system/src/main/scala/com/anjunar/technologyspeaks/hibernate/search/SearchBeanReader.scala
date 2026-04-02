@@ -8,6 +8,9 @@ import org.hibernate.Session
 import org.hibernate.query.criteria.{HibernateCriteriaBuilder, JpaCriteriaQuery, JpaRoot}
 import org.springframework.beans.factory.ObjectProvider
 
+import scala.util.boundary
+import scala.util.boundary.break
+
 object SearchBeanReader {
 
   def read[E](
@@ -71,34 +74,37 @@ object SearchBeanReader {
     instances: ObjectProvider[SortProvider[Any, E]]
   ): java.util.List[Order] = {
     val beanModel = AnnotationIntrospector.createWithType(searchBean.getClass, classOf[JsonbProperty])
+    boundary {
+      for (property <- beanModel.properties) {
+        val restSort = property.findAnnotation(classOf[RestSort])
 
-    for (property <- beanModel.properties) {
-      val restSort = property.findAnnotation(classOf[RestSort])
-
-      if (restSort != null) {
-        val value = property.get(searchBean)
-        if (value != null) {
-          val sortProvider = findProvider(instances, restSort.value())
-          if (sortProvider != null) {
-            return sortProvider.sort(
-              Context(
-                searchBean,
-                session,
-                builder,
-                predicates,
-                root,
-                query,
-                selection,
-                property.name,
-                new java.util.HashMap[String, Any]()
+        if (restSort != null) {
+          val value = property.get(searchBean)
+          if (value != null) {
+            val sortProvider = findProvider(instances, restSort.value())
+            if (sortProvider != null) {
+              break(
+                sortProvider.sort(
+                  Context(
+                    searchBean,
+                    session,
+                    builder,
+                    predicates,
+                    root,
+                    query,
+                    selection,
+                    property.name,
+                    new java.util.HashMap[String, Any]()
+                  )
+                )
               )
-            )
+            }
           }
         }
       }
-    }
 
-    new java.util.ArrayList[Order]()
+      new java.util.ArrayList[Order]()
+    }
   }
 
   private def findProvider[T](instances: ObjectProvider[T], clazz: Class[?]): T = {

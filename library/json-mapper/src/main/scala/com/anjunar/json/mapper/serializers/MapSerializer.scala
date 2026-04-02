@@ -21,6 +21,7 @@ class MapSerializer extends Serializer[java.util.Map[String, ?]] {
       val javaContext = new JavaContext(
         context.resolvedClass.typeArguments(1),
         context.graph,
+        context.inject,
         context,
         context.name
       )

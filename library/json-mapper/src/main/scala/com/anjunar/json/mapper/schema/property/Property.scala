@@ -10,7 +10,7 @@ import java.util
 class Property[T, V](
   val propertyAccessor: PropertyAccessor[T, V],
   val propertyDescriptor: PropertyDescriptor,
-  val rule: VisibilityRule[T]
+  val rule: Class[? <: VisibilityRule[T]]
 ) {
 
   val name: String = propertyDescriptor.name

@@ -7,6 +7,7 @@ import com.anjunar.json.mapper.{EntityLoader, JsonMapper}
 import com.anjunar.scala.universe.TypeResolver
 import jakarta.persistence.EntityManager
 import jakarta.validation.Validator
+import org.springframework.context.ApplicationContext
 import org.springframework.core.MethodParameter
 import org.springframework.http.HttpInputMessage
 import org.springframework.http.converter.HttpMessageConverter
@@ -17,7 +18,7 @@ import java.lang.reflect.Type
 import java.util.UUID
 
 @ControllerAdvice
-class MapperRequestBodyAdvice(val entityManager: EntityManager, val validator: Validator) extends RequestBodyAdvice {
+class MapperRequestBodyAdvice(val entityManager: EntityManager, val validator: Validator, val applicationContext: ApplicationContext) extends RequestBodyAdvice {
 
   override def supports(
                          methodParameter: MethodParameter,
@@ -65,7 +66,7 @@ class MapperRequestBodyAdvice(val entityManager: EntityManager, val validator: V
                 entityManager.find(clazz, id)
             }
 
-            JsonMapper.deserialize(jsonObject, instance.asInstanceOf[DTO], resolvedClass, entityGraph, loader, validator)
+            JsonMapper.deserialize(jsonObject, instance, resolvedClass, entityGraph, loader, [T] => (clazz: Class[T]) => applicationContext.getBean(clazz) , validator)
           case _ =>
             throw new IllegalArgumentException("body must be a json object")
         }

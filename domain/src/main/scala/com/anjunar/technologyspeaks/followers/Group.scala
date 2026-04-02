@@ -33,7 +33,7 @@ class Group(@(JsonbProperty @field) @(Size @field)(min = 3, max = 80)var name: S
 object Group extends RepositoryContext[Group] with SchemaProvider[Schema] {
 
   class Schema extends AbstractEntitySchema[Group](SpringContext.entityManager()) {
-    @JsonbProperty val name = property(_.name, new OwnerRule[Group]())
+    @JsonbProperty val name = property(_.name, classOf[OwnerRule[Group]])
   }
 
 }

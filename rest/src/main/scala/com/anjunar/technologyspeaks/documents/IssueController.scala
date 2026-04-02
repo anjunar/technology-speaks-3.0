@@ -1,15 +1,16 @@
 package com.anjunar.technologyspeaks.documents
 
 import com.anjunar.technologyspeaks.core.SchemaHateoas
-import com.anjunar.technologyspeaks.rest.EntityGraph
+import com.anjunar.technologyspeaks.rest.{EntityGraph, EntityManagerProvider}
 import com.anjunar.technologyspeaks.rest.types.Data
 import com.anjunar.technologyspeaks.security.{IdentityHolder, LinkBuilder}
 import jakarta.annotation.security.RolesAllowed
+import jakarta.persistence.EntityManager
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation._
+import org.springframework.web.bind.annotation.*
 
 @RestController
-class IssueController(val identityHolder: IdentityHolder) {
+class IssueController(val identityHolder: IdentityHolder, val entityManager : EntityManager) extends EntityManagerProvider {
 
   @GetMapping(value = Array("/document/documents/document/{id}/issues/issue"), produces = Array("application/json"))
   @RolesAllowed(Array("User", "Administrator"))

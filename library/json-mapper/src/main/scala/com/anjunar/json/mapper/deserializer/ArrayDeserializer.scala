@@ -53,6 +53,7 @@ class ArrayDeserializer extends Deserializer[java.util.Collection[?]] {
                 context.graph,
                 context.loader,
                 context.validator,
+                context.inject,
                 context,
                 context.name,
                 index

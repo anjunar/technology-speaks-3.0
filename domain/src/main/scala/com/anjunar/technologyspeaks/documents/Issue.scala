@@ -100,10 +100,10 @@ class Issue(@(NotBlank @field)
 object Issue extends RepositoryContext[Issue] with SchemaProvider[Schema] {
 
   class Schema extends AbstractEntitySchema[Issue](SpringContext.entityManager()) {
-    @JsonbProperty val title = property(_.title, new OwnerRule[Issue]())
-    @JsonbProperty val user = property(_.user, new OwnerRule[Issue]())
-    @JsonbProperty val editor = property(_.editor, new OwnerRule[Issue]())
-    @JsonbProperty val likes = property(_.likes, new OwnerRule[Issue]())
+    @JsonbProperty val title = property(_.title, classOf[OwnerRule[Issue]])
+    @JsonbProperty val user = property(_.user, classOf[OwnerRule[Issue]])
+    @JsonbProperty val editor = property(_.editor, classOf[OwnerRule[Issue]])
+    @JsonbProperty val likes = property(_.likes, classOf[OwnerRule[Issue]])
   }
 
 }

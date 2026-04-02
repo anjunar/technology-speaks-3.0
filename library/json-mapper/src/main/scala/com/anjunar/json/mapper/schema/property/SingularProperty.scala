@@ -10,6 +10,6 @@ import org.hibernate.query.sqm.SqmPathSource
 class SingularProperty[T,V](
   propertyAccessor: PropertyAccessor[T,V],
   propertyDescriptor: PropertyDescriptor,
-  rule: VisibilityRule[T],
+  rule: Class[? <: VisibilityRule[T]],
   collectionAttribute: SingularAttribute[T,V] & PersistentAttribute[T,V] & SqmPathSource[V]
 ) extends Property[T,V](propertyAccessor, propertyDescriptor, rule), JPASingularAttribute[T,V](collectionAttribute)

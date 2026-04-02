@@ -11,6 +11,7 @@ class JsonContext(
   val graph: EntityGraph[?],
   val loader: EntityLoader,
   val validator: Validator,
+  val inject: [T] => Class[T] => T,               
   val parent: JsonContext,
   val name: String,
   val index: Int = -1

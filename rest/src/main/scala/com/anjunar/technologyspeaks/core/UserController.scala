@@ -2,15 +2,17 @@ package com.anjunar.technologyspeaks.core
 
 import com.anjunar.technologyspeaks.followers.UserGroupsController.GroupAssignmentRequest
 import com.anjunar.technologyspeaks.followers.{FollowerController, RelationShip, UserGroupsController}
-import com.anjunar.technologyspeaks.rest.EntityGraph
+import com.anjunar.technologyspeaks.rest.{EntityGraph, EntityManagerProvider}
 import com.anjunar.technologyspeaks.rest.types.Data
 import com.anjunar.technologyspeaks.security.{IdentityHolder, LinkBuilder}
 import jakarta.annotation.security.RolesAllowed
+import jakarta.persistence.EntityManager
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.{DeleteMapping, GetMapping, PathVariable, PutMapping, RequestBody, RestController}
 
 @RestController
-class UserController(val identityHolder: IdentityHolder, val userService: UserService) {
+class UserController(val entityManager : EntityManager, val identityHolder: IdentityHolder, val userService: UserService) 
+  extends EntityManagerProvider {
 
   @GetMapping(value = Array("/core/users/user/{id}"), produces = Array("application/json"))
   @RolesAllowed(Array("User", "Administrator"))

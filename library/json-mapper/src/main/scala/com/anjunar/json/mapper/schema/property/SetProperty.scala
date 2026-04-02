@@ -8,6 +8,6 @@ import jakarta.persistence.metamodel.SetAttribute
 class SetProperty[T,V](
   propertyAccessor: PropertyAccessor[T,V],
   propertyDescriptor: PropertyDescriptor,
-  rule: VisibilityRule[T],
+  rule: Class[? <: VisibilityRule[T]],
   collectionAttribute: SetAttribute[T,V]
 ) extends Property[T,V](propertyAccessor, propertyDescriptor, rule), JPASetAttribute[T,V](collectionAttribute)

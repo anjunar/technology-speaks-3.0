@@ -1,10 +1,12 @@
 package com.anjunar.technologyspeaks.core
 
+import com.anjunar.technologyspeaks.rest.EntityManagerProvider
 import com.anjunar.technologyspeaks.security.LinkBuilder
+import jakarta.persistence.EntityManager
 import org.springframework.web.bind.annotation.{GetMapping, PathVariable, PutMapping, RequestBody, RestController}
 
 @RestController
-class ManagedPropertyController {
+class ManagedPropertyController(val entityManager : EntityManager) extends EntityManagerProvider {
 
   @GetMapping(value = Array("/core/properties/property/{id}"), produces = Array("application/json"))
   def read(@PathVariable("id") managedProperty: ManagedProperty): ManagedProperty =

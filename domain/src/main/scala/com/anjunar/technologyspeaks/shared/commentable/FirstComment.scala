@@ -31,8 +31,8 @@ object FirstComment extends RepositoryContext[FirstComment] with SchemaProvider[
 
   class Schema extends AbstractEntitySchema[FirstComment](SpringContext.entityManager()) {
     @JsonbProperty val user = property(_.user)
-    @JsonbProperty val editor = property(_.editor, new DefaultWritableRule[FirstComment]())
-    @JsonbProperty val comments = property(_.comments, new DefaultWritableRule[FirstComment]())
+    @JsonbProperty val editor = property(_.editor, classOf[DefaultWritableRule[FirstComment]])
+    @JsonbProperty val comments = property(_.comments, classOf[DefaultWritableRule[FirstComment]])
     @JsonbProperty val likes = property(_.likes)
   }
 

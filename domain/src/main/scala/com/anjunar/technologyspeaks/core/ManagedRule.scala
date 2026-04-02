@@ -5,14 +5,18 @@ import com.anjunar.json.mapper.schema.VisibilityRule
 import com.anjunar.scala.universe.introspector.AbstractProperty
 import com.anjunar.technologyspeaks.followers.RelationShip
 import com.anjunar.technologyspeaks.SpringContext
+import com.anjunar.technologyspeaks.rest.EntityManagerProvider
 import com.anjunar.technologyspeaks.security.IdentityHolder
+import jakarta.persistence.EntityManager
+import org.springframework.stereotype.Component
 
 import scala.jdk.CollectionConverters.*
 
-class ManagedRule[E <: OwnerProvider & EntityProvider] extends VisibilityRule[E] {
-
-  val holder = SpringContext.getBean(classOf[IdentityHolder])
-  val bootstrapService = SpringContext.getBean(classOf[ManagedPropertyBootstrapService])
+@Component
+class ManagedRule[E <: OwnerProvider & EntityProvider](val entityManager : EntityManager,
+                                                       val holder : IdentityHolder,
+                                                       val bootstrapService : ManagedPropertyBootstrapService) 
+  extends VisibilityRule[E], EntityManagerProvider {
 
   override def isVisible(instance: E, property: AbstractProperty): Boolean = {
     if (instance == null) {

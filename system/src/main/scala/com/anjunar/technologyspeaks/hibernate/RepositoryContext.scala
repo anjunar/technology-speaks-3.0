@@ -16,19 +16,15 @@ abstract class RepositoryContext[E] {
     superClass.asInstanceOf[ParameterizedType].getActualTypeArguments.apply(0).asInstanceOf[Class[E]]
   }
 
-  def entityManager(): EntityManager = SpringContext.entityManager()
+  def find(id: Any)(using entityManager : EntityManager): E =
+    entityManager.find(clazz, id)
 
-  def find(id: Any): E =
-    entityManager().find(clazz, id)
-
-  def find(graph: EntityGraph[E], id: Any): E = {
-    val entityManager = this.entityManager()
+  def find(graph: EntityGraph[E], id: Any)(using entityManager : EntityManager): E = {
     val hints = java.util.Map.of[String, Any]("jakarta.persistence.loadgraph", graph)
     entityManager.find(clazz, id, hints)
   }
 
-  def findAll(): java.util.List[E] = {
-    val entityManager = this.entityManager()
+  def findAll()(using entityManager : EntityManager): java.util.List[E] = {
     val criteriaBuilder = entityManager.getCriteriaBuilder
     val query = criteriaBuilder.createQuery(clazz)
     val root = query.from(clazz)
@@ -36,8 +32,7 @@ abstract class RepositoryContext[E] {
     entityManager.createQuery(query).getResultList
   }
 
-  def query(parameters: (String, Any)*): E = {
-    val entityManager = this.entityManager()
+  def query(parameters: (String, Any)*)(using entityManager : EntityManager): E = {
 
     val entityAnnotation = clazz.getAnnotation(classOf[Entity])
     var entityName =
@@ -62,8 +57,7 @@ abstract class RepositoryContext[E] {
     }
   }
 
-  def queryAll(parameters: (String, Any)*): java.util.List[E] = {
-    val entityManager = this.entityManager()
+  def queryAll(parameters: (String, Any)*)(using entityManager : EntityManager): java.util.List[E] = {
 
     val entityAnnotation = clazz.getAnnotation(classOf[Entity])
     var entityName =

@@ -9,9 +9,9 @@ import java.util.Objects
 
 object AnnotationIntrospector {
 
-  private val cache = new util.HashMap[(ResolvedClass, Class[_ <: Annotation]), AnnotationModel]
+  private val cache = new util.HashMap[(ResolvedClass, Class[? <: Annotation]), AnnotationModel]
 
-  def create(aClass: ResolvedClass, annotationClass: Class[_ <: Annotation]): AnnotationModel = {
+  def create(aClass: ResolvedClass, annotationClass: Class[? <: Annotation]): AnnotationModel = {
     val key = (aClass, annotationClass)
     var model = cache.get(key)
     if (Objects.isNull(model)) {
@@ -21,7 +21,7 @@ object AnnotationIntrospector {
     model
   }
 
-  def createWithType(aType: Type, annotationClass: Class[_ <: Annotation]): AnnotationModel = 
+  def createWithType(aType: Type, annotationClass: Class[? <: Annotation]): AnnotationModel =
     create(TypeResolver.resolve(aType), annotationClass)
 
 }

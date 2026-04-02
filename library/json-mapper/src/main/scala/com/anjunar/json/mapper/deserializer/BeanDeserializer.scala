@@ -22,10 +22,12 @@ class BeanDeserializer extends Deserializer[Any] {
         val beanModel = AnnotationIntrospector.create(context.resolvedClass, classOf[JsonbProperty])
 
         val companion = TypeResolver.companionInstance[AnyRef](context.resolvedClass.raw)
-        val schemaProvider = companion match {
-          case value: SchemaProvider[EntitySchema[Any]] => value
-          case _ => null
-        }
+        val schemaProvider =
+          if (companion != null && classOf[SchemaProvider[?]].isInstance(companion)) {
+            companion.asInstanceOf[SchemaProvider[EntitySchema[Any]]]
+          } else {
+            null
+          }
 
         val properties = beanModel.properties
         var index = 0
@@ -70,7 +72,7 @@ class BeanDeserializer extends Deserializer[Any] {
         return
       }
 
-      val visibilityRule = schemaProperty.rule
+      val visibilityRule = context.inject(schemaProperty.rule)
       if (!visibilityRule.isWriteable(context.instance, property)) {
         return
       }
@@ -439,7 +441,7 @@ class BeanDeserializer extends Deserializer[Any] {
     node: JsonNode
   ): Any = {
     val deserializer = DeserializerRegistry.findDeserializer(propertyType.raw.asInstanceOf[Class[Any]], node)
-    val jsonContext = new JsonContext(propertyType, existingInstance, context.graph, context.loader, context.validator, context, name)
+    val jsonContext = new JsonContext(propertyType, existingInstance, context.graph, context.loader, context.validator, context.inject,context, name)
     deserializer.deserialize(node, jsonContext)
   }
 

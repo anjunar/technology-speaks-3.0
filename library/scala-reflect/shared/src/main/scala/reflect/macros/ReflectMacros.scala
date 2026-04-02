@@ -625,7 +625,7 @@ object ReflectMacros {
         }
       case _ => Array.empty[String]
     }
-    '{ ${ Expr(bounds) } }
+    Expr(bounds)
   }
   
   private[macros] def extractPropertySelector(using Quotes)(expr: Expr[Any]): String = {

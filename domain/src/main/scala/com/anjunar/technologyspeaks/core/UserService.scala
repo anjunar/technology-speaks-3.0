@@ -2,6 +2,7 @@ package com.anjunar.technologyspeaks.core
 
 import com.anjunar.technologyspeaks.documents.{Document, Issue}
 import com.anjunar.technologyspeaks.followers.{Group, RelationShip}
+import com.anjunar.technologyspeaks.rest.EntityManagerProvider
 import com.anjunar.technologyspeaks.shared.commentable.{FirstComment, SecondComment}
 import com.anjunar.technologyspeaks.timeline.Post
 import jakarta.persistence.EntityManager
@@ -11,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional
 import scala.jdk.CollectionConverters.*
 
 @Service
-class UserService(private val entityManager: EntityManager) {
+class UserService(val entityManager: EntityManager) extends EntityManagerProvider {
 
   @Transactional(readOnly = false)
   def deleteUser(user: User): Unit = {

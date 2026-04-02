@@ -1,14 +1,15 @@
 package com.anjunar.technologyspeaks.timeline
 
 import com.anjunar.technologyspeaks.core.SchemaHateoas
-import com.anjunar.technologyspeaks.rest.EntityGraph
+import com.anjunar.technologyspeaks.rest.{EntityGraph, EntityManagerProvider}
 import com.anjunar.technologyspeaks.rest.types.Data
 import com.anjunar.technologyspeaks.security.{IdentityHolder, LinkBuilder}
 import jakarta.annotation.security.RolesAllowed
-import org.springframework.web.bind.annotation._
+import jakarta.persistence.EntityManager
+import org.springframework.web.bind.annotation.*
 
 @RestController
-class PostController(val identityHolder: IdentityHolder) {
+class PostController(val identityHolder: IdentityHolder, val entityManager : EntityManager) extends EntityManagerProvider {
 
   @GetMapping(value = Array("/timeline/posts/post/{id}"), produces = Array("application/json"))
   @RolesAllowed(Array("User", "Administrator"))

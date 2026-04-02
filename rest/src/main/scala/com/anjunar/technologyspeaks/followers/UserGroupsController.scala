@@ -2,10 +2,12 @@ package com.anjunar.technologyspeaks.followers
 
 import com.anjunar.technologyspeaks.core.SchemaHateoas
 import com.anjunar.technologyspeaks.core.User
+import com.anjunar.technologyspeaks.rest.EntityManagerProvider
 import com.anjunar.technologyspeaks.rest.types.Data
 import com.anjunar.technologyspeaks.security.IdentityHolder
 import jakarta.annotation.security.RolesAllowed
 import jakarta.json.bind.annotation.JsonbProperty
+import jakarta.persistence.EntityManager
 import org.springframework.http.HttpStatus
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.{GetMapping, PathVariable, PutMapping, RequestBody, RestController}
@@ -15,7 +17,7 @@ import java.util.UUID
 import scala.jdk.CollectionConverters.*
 
 @RestController
-class UserGroupsController(private val identityHolder: IdentityHolder) {
+class UserGroupsController(private val identityHolder: IdentityHolder, val entityManager : EntityManager) extends EntityManagerProvider {
 
   @GetMapping(value = Array("/core/users/user/{id}/groups"), produces = Array("application/json"))
   @RolesAllowed(Array("User", "Administrator"))

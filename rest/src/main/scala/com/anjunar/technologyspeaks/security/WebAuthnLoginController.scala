@@ -72,7 +72,11 @@ class WebAuthnLoginController(val store: CredentialStore, val entityManager: Ent
 
     val challenge = challengeStore.get(username)
 
-    val serverProperty = new ServerProperty(new Origin(ORIGIN), RP_ID, challenge)
+    val serverProperty = ServerProperty.builder()
+      .origin(new Origin(ORIGIN))
+      .rpId(RP_ID)
+      .challenge(challenge)
+      .build()
     val authenticationParameters = new AuthenticationParameters(
       serverProperty,
       credentialRecord,

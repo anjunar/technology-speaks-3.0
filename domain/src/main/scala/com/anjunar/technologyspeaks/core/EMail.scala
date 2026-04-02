@@ -33,7 +33,7 @@ class EMail(@(JsonbProperty @field) @(Email @field) @(NotBlank @field) @Column(u
 object EMail extends RepositoryContext[EMail] with SchemaProvider[Schema] {
 
   class Schema extends AbstractEntitySchema[EMail](SpringContext.entityManager()) {
-    @JsonbProperty val value = property(_.value, new OwnerRule[EMail]())
+    @JsonbProperty val value = property(_.value, classOf[OwnerRule[EMail]])
   }
 
 }

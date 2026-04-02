@@ -1,6 +1,8 @@
 package com.anjunar.technologyspeaks.documents
 
+import com.anjunar.technologyspeaks.rest.EntityManagerProvider
 import com.anjunar.technologyspeaks.security.IdentityHolder
+import jakarta.persistence.EntityManager
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
@@ -11,7 +13,7 @@ import scala.jdk.CollectionConverters.*
 import scala.util.Using
 
 @Service
-class DocumentImportService(val identityHolder: IdentityHolder) {
+class DocumentImportService(val identityHolder: IdentityHolder, val entityManager : EntityManager) extends EntityManagerProvider {
 
   def importDirectory(request: DocumentImportService.ImportRequest): DocumentImportService.ImportResult = {
     val directory = validateDirectory(request.path)

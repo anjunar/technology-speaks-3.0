@@ -41,9 +41,9 @@ class Thumbnail(@(NotBlank @field)
 object Thumbnail extends SchemaProvider[Schema] {
 
   class Schema extends AbstractEntitySchema[Thumbnail](SpringContext.entityManager()) {
-    val name = property(_.name, new DefaultWritableRule[Thumbnail]())
-    val contentType = property(_.contentType, new DefaultWritableRule[Thumbnail]())
-    val data = property(_.data, new DefaultWritableRule[Thumbnail]())
+    val name = property(_.name, classOf[DefaultWritableRule[Thumbnail]])
+    val contentType = property(_.contentType, classOf[DefaultWritableRule[Thumbnail]])
+    val data = property(_.data, classOf[DefaultWritableRule[Thumbnail]])
   }
 
 }

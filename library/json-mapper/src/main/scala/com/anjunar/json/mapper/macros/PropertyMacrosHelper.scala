@@ -15,8 +15,8 @@ object PropertyMacrosHelper {
     propertiesWithAccessors.foreach { propertyWithAccessor =>
       val property = new Property[E, Any](
         propertyWithAccessor.accessor, 
-        propertyWithAccessor.descriptor, 
-        new DefaultRule().asInstanceOf[VisibilityRule[E]]
+        propertyWithAccessor.descriptor,
+        classOf[DefaultRule[E]],
       )
       properties.put(propertyWithAccessor.descriptor.name, property)
     }

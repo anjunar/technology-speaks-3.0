@@ -6,6 +6,7 @@ import jakarta.persistence.EntityGraph
 class JavaContext(
   val resolvedClass: ResolvedClass,
   val graph: EntityGraph[?],
+  val inject : [T] => Class[T] => T,               
   val parent: JavaContext,
   val name: String
 ) {

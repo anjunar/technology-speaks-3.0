@@ -1,15 +1,17 @@
 package com.anjunar.technologyspeaks.followers
 
 import com.anjunar.technologyspeaks.core.SchemaHateoas
+import com.anjunar.technologyspeaks.rest.EntityManagerProvider
 import com.anjunar.technologyspeaks.rest.types.Data
 import com.anjunar.technologyspeaks.security.{IdentityHolder, LinkBuilder}
 import jakarta.annotation.security.RolesAllowed
+import jakarta.persistence.EntityManager
 import org.springframework.http.{HttpStatus, ResponseEntity}
 import org.springframework.web.bind.annotation.{DeleteMapping, GetMapping, PathVariable, PostMapping, PutMapping, RequestBody, RestController}
 import org.springframework.web.server.ResponseStatusException
 
 @RestController
-class GroupController(private val identityHolder: IdentityHolder) {
+class GroupController(private val identityHolder: IdentityHolder, val entityManager : EntityManager) extends EntityManagerProvider {
 
   @GetMapping(value = Array("/followers/groups/groups/{id}"), produces = Array("application/json"))
   @RolesAllowed(Array("User", "Administrator"))

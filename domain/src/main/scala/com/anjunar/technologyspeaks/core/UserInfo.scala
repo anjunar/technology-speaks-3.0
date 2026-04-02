@@ -41,10 +41,10 @@ class UserInfo(@(NotBlank @field)
 object UserInfo extends SchemaProvider[Schema] {
 
   class Schema extends EntitySchema[UserInfo](SpringContext.entityManager()) {
-    @JsonbProperty val id = property(_.id, new ManagedRule[UserInfo]())
-    @JsonbProperty val firstName = property(_.firstName, new ManagedRule[UserInfo]())
-    @JsonbProperty val lastName = property(_.lastName, new ManagedRule[UserInfo]())
-    @JsonbProperty val birthDate = property(_.birthDate, new ManagedRule[UserInfo]())
+    @JsonbProperty val id = property(_.id, classOf[ManagedRule[UserInfo]])
+    @JsonbProperty val firstName = property(_.firstName, classOf[ManagedRule[UserInfo]])
+    @JsonbProperty val lastName = property(_.lastName, classOf[ManagedRule[UserInfo]])
+    @JsonbProperty val birthDate = property(_.birthDate, classOf[ManagedRule[UserInfo]])
   }
 
 }

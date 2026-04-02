@@ -2,6 +2,7 @@ package com.anjunar.technologyspeaks.rest
 
 import com.anjunar.json.mapper.provider.EntityProvider
 import com.anjunar.technologyspeaks.SpringContext
+import jakarta.persistence.EntityManager
 import org.springframework.core.convert.TypeDescriptor
 import org.springframework.core.convert.converter.{ConditionalGenericConverter, GenericConverter}
 import org.springframework.stereotype.Component
@@ -9,7 +10,7 @@ import org.springframework.stereotype.Component
 import java.util.{Set, UUID}
 
 @Component
-class EntityConverter extends ConditionalGenericConverter {
+class EntityConverter(val entityManager: EntityManager) extends ConditionalGenericConverter, EntityManagerProvider {
 
   override def getConvertibleTypes(): java.util.Set[GenericConverter.ConvertiblePair] =
     Set.of(new GenericConverter.ConvertiblePair(classOf[String], classOf[EntityProvider]))
@@ -22,7 +23,6 @@ class EntityConverter extends ConditionalGenericConverter {
       return null
     }
 
-    val entityManager = SpringContext.entityManager()
     try {
       val id = UUID.fromString(source.asInstanceOf[String])
       entityManager.find(targetType.getType, id)

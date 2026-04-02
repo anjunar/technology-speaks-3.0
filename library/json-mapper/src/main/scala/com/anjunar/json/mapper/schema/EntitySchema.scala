@@ -18,7 +18,7 @@ abstract class EntitySchema[T](val entityManager: EntityManager = null) {
   def findProperty[V](name: String): Property[T, V] = properties(name).asInstanceOf[Property[T, V]]
 
   protected inline def property[V](inline selector: T => V,
-                                   rule: VisibilityRule[T] = new DefaultRule().asInstanceOf[VisibilityRule[T]]): Property[T, V] = {
+                                   rule: Class[? <: VisibilityRule[T]] = classOf[DefaultRule[T]]): Property[T, V] = {
     val propertyWithAccessor = PropertySupport.makeProperty(selector)
     val value = new Property[T, V](propertyWithAccessor.accessor, propertyWithAccessor.descriptor, rule)
     properties.put(propertyWithAccessor.descriptor.name, value.asInstanceOf[Property[T, Any]])
@@ -26,7 +26,7 @@ abstract class EntitySchema[T](val entityManager: EntityManager = null) {
   }
 
   protected inline def reference[V](inline selector: T => V,
-                                    rule: VisibilityRule[T] = new DefaultRule().asInstanceOf[VisibilityRule[T]]): SingularProperty[T, V] = {
+                                    rule: Class[? <: VisibilityRule[T]] = classOf[DefaultRule[T]]): SingularProperty[T, V] = {
     val propertyWithAccessor = PropertySupport.makeProperty(selector)
 
     val metamodel = entityManager.getMetamodel
@@ -39,7 +39,7 @@ abstract class EntitySchema[T](val entityManager: EntityManager = null) {
   }
 
   protected inline def set[V](inline selector: T => V,
-                              rule: VisibilityRule[T] = new DefaultRule().asInstanceOf[VisibilityRule[T]]): SetProperty[T, V] = {
+                              rule: Class[? <: VisibilityRule[T]] = classOf[DefaultRule[T]]): SetProperty[T, V] = {
     val propertyWithAccessor = PropertySupport.makeProperty(selector)
 
     val metamodel = entityManager.getMetamodel
@@ -52,7 +52,7 @@ abstract class EntitySchema[T](val entityManager: EntityManager = null) {
   }
 
   protected inline def list[V](inline selector: T => V,
-                               rule: VisibilityRule[T] = new DefaultRule().asInstanceOf[VisibilityRule[T]]): ListProperty[T, V] = {
+                               rule: Class[? <: VisibilityRule[T]] = classOf[DefaultRule[T]]): ListProperty[T, V] = {
     val propertyWithAccessor = PropertySupport.makeProperty(selector)
 
     val metamodel = entityManager.getMetamodel

@@ -1,15 +1,16 @@
 package com.anjunar.technologyspeaks.followers
 
 import com.anjunar.technologyspeaks.core.SchemaHateoas
-import com.anjunar.technologyspeaks.rest.EntityGraph
+import com.anjunar.technologyspeaks.rest.{EntityGraph, EntityManagerProvider}
 import com.anjunar.technologyspeaks.rest.types.Data
 import com.anjunar.technologyspeaks.security.LinkBuilder
 import jakarta.annotation.security.RolesAllowed
+import jakarta.persistence.EntityManager
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.{DeleteMapping, GetMapping, PathVariable, PostMapping, PutMapping, RequestBody, RestController}
 
 @RestController
-class RelationShipController {
+class RelationShipController(val entityManager : EntityManager) extends EntityManagerProvider {
 
   @GetMapping(value = Array("/followers/relationships/relationship/{id}"), produces = Array("application/json"))
   @RolesAllowed(Array("User", "Administrator"))

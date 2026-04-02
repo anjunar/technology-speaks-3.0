@@ -5,8 +5,12 @@ import com.anjunar.json.mapper.schema.property.Property
 import com.anjunar.json.mapper.schema.{EntitySchema, Link, VisibilityRule}
 import com.anjunar.technologyspeaks.SpringContext
 import com.anjunar.technologyspeaks.security.IdentityHolder
+import jakarta.persistence.EntityManager
 
 object SchemaHateoas {
+  
+  val entityManager: EntityManager = SpringContext.entityManager()
+  given EntityManager = entityManager
 
   private def bootstrapService: ManagedPropertyBootstrapService =
     SpringContext.getBean(classOf[ManagedPropertyBootstrapService])
@@ -65,7 +69,7 @@ object SchemaHateoas {
     val copy = new Property[Any, Any](
       source.propertyAccessor.asInstanceOf[_root_.reflect.PropertyAccessor[Any, Any]],
       source.propertyDescriptor,
-      source.rule.asInstanceOf[VisibilityRule[Any]]
+      source.rule.asInstanceOf[Class[VisibilityRule[Any]]]
     )
 
     copy.schema =

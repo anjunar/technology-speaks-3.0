@@ -26,7 +26,7 @@ object SecondComment extends RepositoryContext[SecondComment] with SchemaProvide
 
   class Schema extends AbstractEntitySchema[SecondComment](SpringContext.entityManager()) {
     @JsonbProperty val user = property(_.user)
-    @JsonbProperty val editor = property(_.editor, new DefaultWritableRule[SecondComment]())
+    @JsonbProperty val editor = property(_.editor, classOf[DefaultWritableRule[SecondComment]])
     @JsonbProperty val likes = property(_.likes)
   }
 

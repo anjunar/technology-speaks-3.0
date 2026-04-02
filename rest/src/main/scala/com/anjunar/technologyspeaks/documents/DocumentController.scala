@@ -1,17 +1,19 @@
 package com.anjunar.technologyspeaks.documents
 
 import com.anjunar.technologyspeaks.core.SchemaHateoas
-import com.anjunar.technologyspeaks.rest.EntityGraph
+import com.anjunar.technologyspeaks.rest.{EntityGraph, EntityManagerProvider}
 import com.anjunar.technologyspeaks.rest.types.Data
 import com.anjunar.technologyspeaks.security.{IdentityHolder, LinkBuilder}
 import com.anjunar.technologyspeaks.shared.editor.Node
 import jakarta.annotation.security.RolesAllowed
+import jakarta.persistence.EntityManager
 import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.bind.annotation.{GetMapping, PathVariable, PostMapping, PutMapping, RequestBody, RestController}
 
 @RestController
-class DocumentController(val identityHolder: IdentityHolder, val documentImportService: DocumentImportService) {
+class DocumentController(val identityHolder: IdentityHolder, val documentImportService: DocumentImportService, val entityManager : EntityManager)
+  extends EntityManagerProvider {
 
   @GetMapping(value = Array("/document/documents/document"), produces = Array("application/json"))
   @RolesAllowed(Array("User", "Administrator"))

@@ -10,6 +10,7 @@ import scala.beans.BeanProperty
 import scala.compiletime.uninitialized
 import com.anjunar.technologyspeaks.SpringContext
 import com.anjunar.technologyspeaks.core.Media.Schema
+
 @Entity
 @NamedEntityGraph(
   name = "Media.full",
@@ -46,10 +47,10 @@ class Media(@(NotBlank @field)
 object Media extends SchemaProvider[Schema] {
 
   class Schema extends AbstractEntitySchema[Media](SpringContext.entityManager()) {
-    @JsonbProperty val name = property(_.name, new DefaultWritableRule[Media]())
-    @JsonbProperty val contentType = property(_.contentType, new DefaultWritableRule[Media]())
-    @JsonbProperty val data = property(_.data, new DefaultWritableRule[Media]())
-    @JsonbProperty val thumbnail = property(_.thumbnail, new DefaultWritableRule[Media]())
+    @JsonbProperty val name = property(_.name, classOf[DefaultWritableRule[Media]])
+    @JsonbProperty val contentType = property(_.contentType, classOf[DefaultWritableRule[Media]])
+    @JsonbProperty val data = property(_.data, classOf[DefaultWritableRule[Media]])
+    @JsonbProperty val thumbnail = property(_.thumbnail, classOf[DefaultWritableRule[Media]])
   }
 
 }

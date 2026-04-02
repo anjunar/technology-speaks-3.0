@@ -2,13 +2,15 @@ package com.anjunar.technologyspeaks.security
 
 import com.anjunar.json.mapper.intermediate.model.JsonObject
 import com.anjunar.technologyspeaks.core.{EMail, PasswordCredential}
+import com.anjunar.technologyspeaks.rest.EntityManagerProvider
 import jakarta.annotation.security.RolesAllowed
+import jakarta.persistence.EntityManager
 import org.springframework.web.bind.annotation.{PostMapping, RequestBody, RestController}
 
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 
 @RestController
-class PasswordLoginController(val sessionHolder: SessionHolder) {
+class PasswordLoginController(val sessionHolder: SessionHolder, val entityManager : EntityManager) extends EntityManagerProvider {
 
   @PostMapping(value = Array("/security/login"), produces = Array("application/json"), consumes = Array("application/json"))
   @RolesAllowed(Array("Anonymous"))

@@ -1,11 +1,13 @@
 package com.anjunar.technologyspeaks.security
 
 import com.anjunar.technologyspeaks.core.{EMail, Role, User, WebAuthnCredential}
+import com.anjunar.technologyspeaks.rest.EntityManagerProvider
 import com.webauthn4j.credential.CredentialRecord
+import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Service
 
 @Service
-class CredentialStore {
+class CredentialStore(val entityManager : EntityManager) extends EntityManagerProvider {
 
   def credentialId(record: CredentialRecord): String =
     record.asInstanceOf[WebAuthnCredentialRecord].getCredentialID

@@ -12,13 +12,14 @@ import jakarta.validation.Validator
 object JsonMapper {
 
   def deserialize(jsonNode: JsonNode,
-                  instance: DTO,
+                  instance: AnyRef,
                   resolvedClass: ResolvedClass,
                   graph: EntityGraph[?],
                   loader: EntityLoader,
+                  inject: [T] => Class[T] => T,
                   validator: Validator): Any = {
     val deserializer = DeserializerRegistry.findDeserializer(resolvedClass.raw.asInstanceOf[Class[Any]], jsonNode)
-    val context = new JsonContext(resolvedClass, instance, graph, loader, validator, null, null)
+    val context = new JsonContext(resolvedClass, instance, graph, loader, validator, inject, null, null)
     val deserialized = deserializer.deserialize(jsonNode, context)
 
     val errorRequests = new java.util.ArrayList[ErrorRequest]()
@@ -42,9 +43,9 @@ object JsonMapper {
     }
   }
 
-  def serialize(instance: Any, resolvedClass: ResolvedClass, graph: EntityGraph[?]): String = {
-    val serializer = SerializerRegistry.find(resolvedClass.raw.asInstanceOf[Class[Any]], instance).asInstanceOf[Serializer[Any]]
-    val node = serializer.serialize(instance, new JavaContext(resolvedClass, graph, null, null))
+  def serialize(instance: Any, resolvedClass: ResolvedClass, graph: EntityGraph[?], inject : [T] => Class[T] => T): String = {
+    val serializer = SerializerRegistry.find(resolvedClass.raw.asInstanceOf[Class[Any]], instance)
+    val node = serializer.serialize(instance, new JavaContext(resolvedClass, graph, inject, null, null))
     JsonGenerator.generate(node)
   }
 

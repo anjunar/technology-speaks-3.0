@@ -83,8 +83,8 @@ class RelationShip extends AbstractEntity, OwnerProvider, EntityContext[Relation
 object RelationShip extends RepositoryContext[RelationShip] with SchemaProvider[Schema] {
 
   class Schema extends AbstractEntitySchema[RelationShip](SpringContext.entityManager()) {
-    @JsonbProperty val follower = property(_.follower, new OwnerRule[RelationShip]())
-    @JsonbProperty val groups = property(_.groups, new OwnerRule[RelationShip]())
+    @JsonbProperty val follower = property(_.follower, classOf[OwnerRule[RelationShip]])
+    @JsonbProperty val groups = property(_.groups, classOf[OwnerRule[RelationShip]])
   }
 
 }

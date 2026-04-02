@@ -332,9 +332,9 @@ object JsonMapper {
     val currentValue = accessor.get(instance)
 
     currentValue match {
-      case propertyValue: Property[Any] =>
-        propertyValue.set(value)
-      case propertyValue: ListProperty[Any] =>
+      case propertyValue: Property[?] =>
+        propertyValue.asInstanceOf[Property[Any]].set(value)
+      case propertyValue: ListProperty[?] =>
         val values =
           value match {
             case array: js.Array[?] => array.toSeq
@@ -344,7 +344,7 @@ object JsonMapper {
             case other =>
               throw new IllegalArgumentException(s"Expected sequence value for list property ${owner.typeName}.${property.name}, got ${other.getClass.getName}")
           }
-        propertyValue.setAll(values.asInstanceOf[Seq[Any]])
+        propertyValue.asInstanceOf[ListProperty[Any]].setAll(values.asInstanceOf[Seq[Any]])
       case _ =>
         if (accessor.hasSetter) {
           accessor.set(instance, value)

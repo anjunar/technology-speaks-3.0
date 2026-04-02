@@ -1,5 +1,6 @@
 package com.anjunar.technologyspeaks
 
+import com.anjunar.json.mapper.schema.{DefaultRule, DefaultWritableRule}
 import com.anjunar.technologyspeaks.rest.{EntityConverter, JsonHttpMessageConverter, MapperHttpMessageConverter}
 import com.anjunar.technologyspeaks.security.SecurityInterceptor
 import org.springframework.boot.web.servlet.FilterRegistrationBean
@@ -18,6 +19,12 @@ class WebConfig(val securityInterceptor: SecurityInterceptor, val entityConverte
     builder.addCustomConverter(new JsonHttpMessageConverter())
     builder.build()
   }
+
+  @Bean
+  def defaultRule() : DefaultRule[?] = new DefaultRule()
+
+  @Bean
+  def defaultWriteRule() : DefaultWritableRule[?] = new DefaultWritableRule()
 
   override def addFormatters(registry: FormatterRegistry): Unit = {
     registry.addConverter(entityConverter)

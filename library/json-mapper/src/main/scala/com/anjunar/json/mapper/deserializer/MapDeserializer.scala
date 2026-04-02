@@ -30,6 +30,7 @@ class MapDeserializer extends Deserializer[java.util.Map[String, ?]] {
             context.graph,
             context.loader,
             context.validator,
+            context.inject,
             context,
             context.name
           )

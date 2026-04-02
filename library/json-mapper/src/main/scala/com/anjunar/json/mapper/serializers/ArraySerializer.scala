@@ -19,6 +19,7 @@ class ArraySerializer extends Serializer[java.util.Collection[?]] {
       val javaContext = new JavaContext(
         context.resolvedClass.typeArguments(0),
         context.graph,
+        context.inject,
         context,
         context.name
       )

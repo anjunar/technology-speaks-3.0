@@ -45,10 +45,10 @@ class Address(@(NotBlank @field)
 object Address extends SchemaProvider[Schema] {
 
   class Schema extends AbstractEntitySchema[Address](SpringContext.entityManager()) {
-    @JsonbProperty val street = property(_.street, new ManagedRule[Address]())
-    @JsonbProperty val number = property(_.number, new ManagedRule[Address]())
-    @JsonbProperty val zipCode = property(_.zipCode, new ManagedRule[Address]())
-    @JsonbProperty val country = property(_.country, new ManagedRule[Address]())
+    @JsonbProperty val street = property(_.street, classOf[ManagedRule[Address]])
+    @JsonbProperty val number = property(_.number, classOf[ManagedRule[Address]])
+    @JsonbProperty val zipCode = property(_.zipCode, classOf[ManagedRule[Address]])
+    @JsonbProperty val country = property(_.country, classOf[ManagedRule[Address]])
   }
 
 }

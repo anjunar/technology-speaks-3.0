@@ -1,17 +1,19 @@
 package com.anjunar.technologyspeaks.timeline
 
 import com.anjunar.technologyspeaks.core.SchemaHateoas
+import com.anjunar.technologyspeaks.rest.EntityManagerProvider
 import com.anjunar.technologyspeaks.rest.types.Data
 import com.anjunar.technologyspeaks.security.IdentityHolder
 import com.anjunar.technologyspeaks.shared.commentable.FirstComment
 import jakarta.annotation.security.RolesAllowed
+import jakarta.persistence.EntityManager
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.{DeleteMapping, PathVariable, PostMapping, PutMapping, RequestBody, RestController}
 
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 
 @RestController
-class PostCommentController(val identityHolder: IdentityHolder) {
+class PostCommentController(val identityHolder: IdentityHolder, val entityManager : EntityManager) extends EntityManagerProvider {
 
   @PostMapping(value = Array("/timeline/posts/post/{id}/comment"), produces = Array("application/json"), consumes = Array("application/json"))
   @RolesAllowed(Array("User", "Administrator"))

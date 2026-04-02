@@ -3,6 +3,7 @@ package com.anjunar.technologyspeaks.rest
 import com.anjunar.json.mapper.JsonMapper
 import com.anjunar.scala.universe.TypeResolver
 import jakarta.persistence.EntityManager
+import org.springframework.context.ApplicationContext
 import org.springframework.core.MethodParameter
 import org.springframework.http.{MediaType, ResponseEntity}
 import org.springframework.http.converter.HttpMessageConverter
@@ -11,7 +12,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice
 
 @ControllerAdvice
-class MapperResponseBodyAdvice(val entityManager: EntityManager) extends ResponseBodyAdvice[Any] {
+class MapperResponseBodyAdvice(val entityManager: EntityManager, val applicationContext: ApplicationContext) extends ResponseBodyAdvice[Any] {
 
   override def supports(returnType: MethodParameter, converterType: Class[? <: HttpMessageConverter[?]]): Boolean =
     classOf[MapperHttpMessageConverter].isAssignableFrom(converterType)
@@ -35,7 +36,7 @@ class MapperResponseBodyAdvice(val entityManager: EntityManager) extends Respons
       if (annotation == null) null
       else entityManager.getEntityGraph(annotation.value)
 
-    JsonMapper.serialize(body, resolvedClass, entityGraph)
+    JsonMapper.serialize(body, resolvedClass, entityGraph, [T] => (clazz: Class[T]) => applicationContext.getBean(clazz))
   }
 
 }

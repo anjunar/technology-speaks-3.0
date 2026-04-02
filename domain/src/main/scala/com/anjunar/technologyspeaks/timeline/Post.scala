@@ -93,13 +93,13 @@ object Post extends RepositoryContext[Post] with SchemaProvider[Schema] {
 
   class Schema extends AbstractEntitySchema[Post](SpringContext.entityManager()) {
     @JsonbProperty
-    val user: Property[Post, User] = property(_.user, new OwnerRule[Post]())
+    val user: Property[Post, User] = property(_.user, classOf[OwnerRule[Post]])
 
     @JsonbProperty
-    val editor: Property[Post, Node] = property(_.editor, new OwnerRule[Post]())
+    val editor: Property[Post, Node] = property(_.editor, classOf[OwnerRule[Post]])
 
     @JsonbProperty
-    val likes: Property[Post, util.Set[Like]] = property(_.likes, new OwnerRule[Post]())
+    val likes: Property[Post, util.Set[Like]] = property(_.likes, classOf[OwnerRule[Post]])
   }
 
 }

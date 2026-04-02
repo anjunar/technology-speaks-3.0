@@ -1,6 +1,7 @@
 package com.anjunar.technologyspeaks.security
 
 import com.anjunar.technologyspeaks.core.{Credential, PasswordCredential, User}
+import com.anjunar.technologyspeaks.rest.EntityManagerProvider
 import com.typesafe.scalalogging.Logger
 import jakarta.annotation.PostConstruct
 import jakarta.persistence.EntityManager
@@ -12,7 +13,7 @@ import java.util
 
 @Component
 @RequestScope
-class IdentityHolder(val sessionHolder: SessionHolder, val entityManager: EntityManager) {
+class IdentityHolder(val sessionHolder: SessionHolder, val entityManager: EntityManager) extends EntityManagerProvider {
 
   val log = Logger[IdentityHolder]
   

@@ -5,10 +5,10 @@ import com.anjunar.json.mapper.schema.VisibilityRule
 import com.anjunar.scala.universe.introspector.AbstractProperty
 import com.anjunar.technologyspeaks.SpringContext
 import com.anjunar.technologyspeaks.security.IdentityHolder
+import org.springframework.stereotype.Component
 
-class OwnerRule[E <: OwnerProvider & EntityProvider] extends VisibilityRule[E] {
-
-  val holder = SpringContext.getBean(classOf[IdentityHolder])
+@Component
+class OwnerRule[E <: OwnerProvider & EntityProvider](val holder : IdentityHolder) extends VisibilityRule[E] {
 
   override def isVisible(instance: E, property: AbstractProperty): Boolean = true
 

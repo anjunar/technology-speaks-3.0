@@ -18,10 +18,12 @@ class BeanSerializer extends Serializer[Any] {
     val json = new JsonObject(nodes)
 
     val companion = TypeResolver.companionInstance[AnyRef](context.resolvedClass.raw)
-    val schemaProvider = companion match {
-      case value: SchemaProvider[EntitySchema[Any]] => value
-      case _ => null
-    }
+    val schemaProvider =
+      if (companion != null && classOf[SchemaProvider[?]].isInstance(companion)) {
+        companion.asInstanceOf[SchemaProvider[EntitySchema[Any]]]
+      } else {
+        null
+      }
 
     val properties = beanModel.properties
     var index = 0
@@ -43,7 +45,7 @@ class BeanSerializer extends Serializer[Any] {
           if (schemaProperty == null) {
             index += 1
           } else {
-            val visibilityRule = schemaProperty.rule.asInstanceOf[VisibilityRule[Any]]
+            val visibilityRule = context.inject(schemaProperty.rule)
             if (!visibilityRule.isVisible(input, property)) {
               index += 1
             } else {
@@ -134,6 +136,7 @@ class BeanSerializer extends Serializer[Any] {
     val javaContext = new JavaContext(
       propertyType,
       context.graph,
+      context.inject,
       context,
       property.name
     )

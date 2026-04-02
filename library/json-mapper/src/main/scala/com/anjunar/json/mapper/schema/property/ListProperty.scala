@@ -8,6 +8,6 @@ import jakarta.persistence.metamodel.ListAttribute
 class ListProperty[T,V](
   propertyAccessor: PropertyAccessor[T,V],
   propertyDescriptor: PropertyDescriptor,
-  rule: VisibilityRule[T],
+  rule: Class[? <: VisibilityRule[T]],
   collectionAttribute: ListAttribute[T,V]
 ) extends Property[T,V](propertyAccessor, propertyDescriptor, rule), JPAListAttribute[T,V](collectionAttribute)

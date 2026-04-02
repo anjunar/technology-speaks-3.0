@@ -1,13 +1,15 @@
 package com.anjunar.technologyspeaks.followers
 
 import com.anjunar.technologyspeaks.core.User
+import com.anjunar.technologyspeaks.rest.EntityManagerProvider
 import com.anjunar.technologyspeaks.security.IdentityHolder
 import jakarta.annotation.security.RolesAllowed
+import jakarta.persistence.EntityManager
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.{PathVariable, PostMapping, RestController}
 
 @RestController
-class FollowerController(val identityHolder: IdentityHolder) {
+class FollowerController(val identityHolder: IdentityHolder, val entityManager : EntityManager) extends EntityManagerProvider {
 
   @PostMapping(Array("/core/users/user/{id}/follow"))
   @RolesAllowed(Array("User", "Administrator"))

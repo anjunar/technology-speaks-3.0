@@ -1,11 +1,13 @@
 package com.anjunar.technologyspeaks
 
 import com.anjunar.technologyspeaks.core.Role
+import com.anjunar.technologyspeaks.rest.EntityManagerProvider
+import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 
 @Component
-class StartUpRunner {
+class StartUpRunner(val entityManager : EntityManager) extends EntityManagerProvider {
 
   @Transactional
   def run(args: String*): Unit = {

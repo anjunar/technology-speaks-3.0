@@ -3,6 +3,7 @@ package com.anjunar.technologyspeaks.security
 import com.anjunar.json.mapper.ErrorRequest
 import com.anjunar.json.mapper.intermediate.model.{JsonArray, JsonNode, JsonObject, JsonString}
 import com.anjunar.technologyspeaks.core.{EMail, Role, User}
+import com.anjunar.technologyspeaks.rest.EntityManagerProvider
 import com.anjunar.technologyspeaks.security.WebAuthnManagerProvider.{ORIGIN, RP_ID, RP_NAME, challengeStore, webAuthnManager}
 import com.webauthn4j.data.{PublicKeyCredentialParameters, PublicKeyCredentialType, RegistrationParameters}
 import com.webauthn4j.data.attestation.statement.COSEAlgorithmIdentifier
@@ -11,6 +12,7 @@ import com.webauthn4j.data.client.challenge.DefaultChallenge
 import com.webauthn4j.server.ServerProperty
 import com.webauthn4j.util.Base64UrlUtil
 import jakarta.annotation.security.RolesAllowed
+import jakarta.persistence.EntityManager
 import org.springframework.http.{HttpStatus, ResponseEntity}
 import org.springframework.web.ErrorResponse
 import org.springframework.web.bind.annotation.{PostMapping, RequestBody, RestController}
@@ -21,7 +23,7 @@ import java.util.Arrays
 import scala.jdk.CollectionConverters.*
 
 @RestController
-class WebAuthnRegisterController(val store: CredentialStore, val registerService: RegisterService, val sessionHolder: SessionHolder) {
+class WebAuthnRegisterController(val store: CredentialStore, val registerService: RegisterService, val sessionHolder: SessionHolder, val entityManager : EntityManager) extends EntityManagerProvider {
 
   @PostMapping(value = Array("/security/register/options"), produces = Array("application/json"), consumes = Array("application/json"))
   @RolesAllowed(Array("Anonymous"))
@@ -122,7 +124,11 @@ class WebAuthnRegisterController(val store: CredentialStore, val registerService
     val registrationData = webAuthnManager.parseRegistrationResponseJSON(publicKeyCredential.encode())
     val challenge = challengeStore.get(username)
 
-    val serverProperty = new ServerProperty(new Origin(ORIGIN), RP_ID, challenge)
+    val serverProperty = ServerProperty.builder()
+      .origin(new Origin(ORIGIN))
+      .rpId(RP_ID)
+      .challenge(challenge)
+      .build()
     val pubKeyCredParams = Arrays.asList(
       new PublicKeyCredentialParameters(PublicKeyCredentialType.PUBLIC_KEY, COSEAlgorithmIdentifier.ES256),
       new PublicKeyCredentialParameters(PublicKeyCredentialType.PUBLIC_KEY, COSEAlgorithmIdentifier.RS256)

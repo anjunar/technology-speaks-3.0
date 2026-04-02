@@ -1,10 +1,12 @@
 package com.anjunar.technologyspeaks.core
 
+import com.anjunar.technologyspeaks.rest.EntityManagerProvider
+import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.{Propagation, Transactional}
 
 @Service
-class ManagedPropertyBootstrapService {
+class ManagedPropertyBootstrapService(val entityManager : EntityManager) extends EntityManagerProvider{
 
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   def findOrCreateManagedProperty(ownerId: java.util.UUID, propertyName: String): ManagedProperty = {
