@@ -151,26 +151,7 @@ object ReflectMacros {
     import quotes.reflect.*
     
     val tpe = TypeRepr.of[T]
-    val descriptorExpr = buildTypeDescriptor(tpe)
-    val fullDescriptorExpr = reflectWithAccessorsImpl[T]
-    buildDefaultFactoryExpr[T] match {
-      case Some(factoryExpr) =>
-        '{
-          val descriptor = $fullDescriptorExpr
-          _root_.reflect.ReflectRegistry.registerByTypeName(
-            descriptor.typeName,
-            descriptor,
-            Some($factoryExpr.asInstanceOf[() => Any])
-          )
-          $descriptorExpr
-        }
-      case None =>
-        '{
-          val descriptor = $fullDescriptorExpr
-          _root_.reflect.ReflectRegistry.registerWithAccessors(descriptor)
-          $descriptorExpr
-        }
-    }
+    buildTypeDescriptor(tpe)
   }
   
   private def buildTypeDescriptor(using Quotes)(tpe: quotes.reflect.TypeRepr): Expr[TypeDescriptor] = {

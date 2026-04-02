@@ -2,6 +2,7 @@ package app.domain.core
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import reflect.ReflectRegistry
 
 import scala.scalajs.js
 import scala.scalajs.js.Dynamic.literal as jsObj
@@ -11,6 +12,8 @@ import reflect.macros.ReflectMacros.reflectType
 class SchemaSerializerSpec extends AnyFlatSpec with Matchers {
 
   "Schema" should "serialize with properties directly in object, not in entries field" in {
+    ReflectRegistry.register(() => new Schema())
+    ReflectRegistry.register(() => new SchemaProperty())
     reflectType[Schema]
     reflectType[SchemaProperty]
     
@@ -45,6 +48,8 @@ class SchemaSerializerSpec extends AnyFlatSpec with Matchers {
   }
 
   it should "deserialize from properties directly in object" in {
+    ReflectRegistry.register(() => new Schema())
+    ReflectRegistry.register(() => new SchemaProperty())
     reflectType[Schema]
     reflectType[SchemaProperty]
     
@@ -79,6 +84,8 @@ class SchemaSerializerSpec extends AnyFlatSpec with Matchers {
   }
 
   it should "serialize and deserialize nested schema" in {
+    ReflectRegistry.register(() => new Schema())
+    ReflectRegistry.register(() => new SchemaProperty())
     reflectType[Schema]
     reflectType[SchemaProperty]
     
@@ -111,6 +118,8 @@ class SchemaSerializerSpec extends AnyFlatSpec with Matchers {
   }
 
   it should "deserialize schema from backend JSON" in {
+    ReflectRegistry.register(() => new Schema())
+    ReflectRegistry.register(() => new SchemaProperty())
     reflectType[Schema]
     reflectType[SchemaProperty]
     

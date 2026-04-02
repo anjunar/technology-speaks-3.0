@@ -69,6 +69,8 @@ object JsonMapper {
     } else {
       val expectedType = context.resolve(context.expectedType)
       expectedType match {
+        case descriptor if isRawJsonType(descriptor) =>
+          value.asInstanceOf[js.Any]
         case descriptor if isPropertyType(descriptor) =>
           serializePropertyValue(value, context)
         case descriptor if isListPropertyType(descriptor) =>
@@ -82,7 +84,7 @@ object JsonMapper {
         case descriptor if isPrimitiveType(descriptor.typeName) =>
           serializePrimitive(value, descriptor.typeName)
         case descriptor: ParameterizedTypeDescriptor =>
-          serializeValue(value, context.copy(expectedType = descriptor.rawType))
+          serializeObject(value, descriptor.rawType, context.copy(expectedType = descriptor))
         case descriptor: ClassDescriptor if isPrimitiveType(descriptor.typeName) =>
           serializePrimitive(value, descriptor.typeName)
         case descriptor: ClassDescriptor =>
@@ -105,6 +107,8 @@ object JsonMapper {
       }
     } else {
       expectedType match {
+        case descriptor if isRawJsonType(descriptor) =>
+          value
         case descriptor if isPropertyType(descriptor) =>
           deserializePropertyValue(value, context)
         case descriptor if isListPropertyType(descriptor) =>
@@ -132,8 +136,8 @@ object JsonMapper {
   }
 
   private def serializeObject(model: Any, declaredDescriptor: ClassDescriptor, parentContext: JsonContext): js.Dynamic = {
-    val runtimeDescriptor = runtimeDescriptorForValue(model, declaredDescriptor)
-    val context = JsonContext(runtimeDescriptor, typeBindings(runtimeDescriptor))
+    val runtimeDescriptor = serializationDescriptorForValue(model, declaredDescriptor)
+    val context = JsonContext(declaredDescriptor, typeBindings(parentContext.resolve(parentContext.expectedType), declaredDescriptor))
     val obj = js.Dictionary.empty[js.Any]
 
     jsonTypeValue(runtimeDescriptor).foreach(typeName => obj(TypeField) = typeName)
@@ -342,7 +346,13 @@ object JsonMapper {
           }
         propertyValue.setAll(values.asInstanceOf[Seq[Any]])
       case _ =>
-        accessor.set(instance, value)
+        if (accessor.hasSetter) {
+          accessor.set(instance, value)
+        } else if (property.isWriteable) {
+          instance.asInstanceOf[js.Dynamic].updateDynamic(property.name)(value.asInstanceOf[js.Any])
+        } else {
+          throw new IllegalArgumentException(s"Property ${owner.typeName}.${property.name} is not writeable")
+        }
     }
   }
 
@@ -368,6 +378,15 @@ object JsonMapper {
     }
   }
 
+  private def serializationDescriptorForValue(value: Any, declaredDescriptor: ClassDescriptor): ClassDescriptor = {
+    val fullDeclared = fullDescriptor(declaredDescriptor)
+    if (!fullDeclared.isAbstract) {
+      fullDeclared
+    } else {
+      runtimeDescriptorForValue(value, fullDeclared)
+    }
+  }
+
   private def runtimeDescriptorForValue(value: Any, fallback: ClassDescriptor): ClassDescriptor = {
     val runtimeNames = candidateRuntimeNames(value)
     val registryMatch =
@@ -378,16 +397,11 @@ object JsonMapper {
 
     registryMatch
       .orElse {
-        if (fallback.isAbstract) {
-          subtypeCandidates(fallback).find { candidate =>
-            runtimeNames.contains(candidate.typeName) || runtimeNames.contains(candidate.simpleName)
-          }
-        } else {
-          None
+        subtypeCandidates(fallback).find { candidate =>
+          runtimeNames.contains(candidate.typeName) || runtimeNames.contains(candidate.simpleName)
         }
       }
-      .orElse(ReflectRegistry.loadClass(fallback.typeName))
-      .orElse(Option.when(fallback.properties.nonEmpty)(fallback))
+      .orElse(Option.when(!fallback.isAbstract)(fallback))
       .getOrElse(throw new IllegalArgumentException(s"Cannot resolve runtime descriptor for value of ${runtimeNames.headOption.getOrElse(value.getClass.getName)} as ${fallback.typeName}"))
   }
 
@@ -425,7 +439,15 @@ object JsonMapper {
   }
 
   private def serializableProperties(descriptor: ClassDescriptor): Array[PropertyDescriptor] =
-    fullDescriptor(descriptor).properties.filterNot(_.hasAnnotation(JsonIgnoreAnnotation))
+    fullDescriptor(descriptor).properties
+      .filterNot(_.hasAnnotation(JsonIgnoreAnnotation))
+      .filter(isSerializableProperty)
+
+  private def isSerializableProperty(property: PropertyDescriptor): Boolean =
+    property.isPublic &&
+      property.name.nonEmpty &&
+      !property.name.contains("$") &&
+      property.name.forall(ch => ch.isLetterOrDigit || ch == '_')
 
   private def jsonFieldName(property: PropertyDescriptor): String =
     annotationValue(property.annotations, JsonNameAnnotation).getOrElse(property.name)
@@ -435,6 +457,8 @@ object JsonMapper {
 
   private def propertyAccessor(owner: ClassDescriptor, property: PropertyDescriptor): PropertyAccessor[Any, Any] =
     property.accessor
+      .orElse(ReflectRegistry.getPropertyAccessor(owner.typeName, property.name))
+      .orElse(ReflectRegistry.getPropertyAccessor(owner.simpleName, property.name))
       .orElse(fullDescriptor(owner).getProperty(property.name).flatMap(_.accessor))
       .getOrElse(throw new IllegalArgumentException(s"Missing accessor for ${owner.typeName}.${property.name}"))
       .asInstanceOf[PropertyAccessor[Any, Any]]
@@ -445,10 +469,9 @@ object JsonMapper {
       .getOrElse(throw new IllegalArgumentException(s"Cannot instantiate ${descriptor.typeName}"))
 
   private def fullDescriptor(descriptor: ClassDescriptor): ClassDescriptor =
-    ReflectRegistry.loadClass(descriptor.typeName)
+    Option.when(descriptor.properties.nonEmpty || descriptor.typeParameters.nonEmpty)(descriptor)
+      .orElse(ReflectRegistry.loadClass(descriptor.typeName))
       .orElse(ReflectRegistry.loadClass(descriptor.simpleName))
-      .orElse(Option.when(descriptor.properties.nonEmpty)(descriptor))
-      .orElse(Option.when(descriptor.typeParameters.nonEmpty)(descriptor))
       .getOrElse(throw new IllegalArgumentException(s"Missing class descriptor for ${descriptor.typeName}"))
 
   private def childContext(parent: JsonContext, childType: TypeDescriptor): JsonContext = {
@@ -545,8 +568,13 @@ object JsonMapper {
     }
   }
 
-  private def isInlineMapShape(descriptor: ClassDescriptor, properties: Array[PropertyDescriptor]): Boolean =
-    properties.length == 1 && isMapType(properties.head.propertyType)
+  private def isInlineMapShape(descriptor: ClassDescriptor, properties: Array[PropertyDescriptor]): Boolean = {
+    val dataProperties = properties.filter(isInlineShapeProperty)
+    dataProperties.length == 1 && isMapType(dataProperties.head.propertyType)
+  }
+
+  private def isInlineShapeProperty(property: PropertyDescriptor): Boolean =
+    property.isWriteable || property.accessor.exists(_.hasSetter)
 
   private def isPropertyType(descriptor: TypeDescriptor): Boolean =
     rawTypeNameOf(descriptor) == "jfx.core.state.Property"
@@ -598,6 +626,13 @@ object JsonMapper {
     typeName == "scala.Char" ||
     typeName == "char" ||
     typeName == "java.util.UUID"
+
+  private def isRawJsonType(descriptor: TypeDescriptor): Boolean = {
+    val typeName = rawTypeNameOf(descriptor)
+    typeName == "scala.scalajs.js.Any" ||
+    typeName == "scala.Any" ||
+    typeName == "scala.scalajs.js.Object"
+  }
 
   private def asDictionary(value: js.Any): js.Dictionary[js.Any] =
     if (value != null && !js.isUndefined(value) && !js.Array.isArray(value) && js.typeOf(value) == "object") {

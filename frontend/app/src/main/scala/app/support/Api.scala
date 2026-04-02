@@ -36,10 +36,10 @@ object Api {
     requestText("POST", url, body)
 
   def invokeLink(link: Link, body: Any): Future[js.Any] =
-    requestJson(link.method, link.url, body)
+    requestJson(link.method, "/service" + link.url, body)
 
   def invokeLink(link: Link): Future[js.Any] =
-    requestJson(link.method, link.url, null)
+    requestJson(link.method, "/service" + link.url, null)
 
   inline def requestJson[E](method: String, url: String, body: Any): Future[js.Any] = {
     val bodyArg: js.Any = body match {
