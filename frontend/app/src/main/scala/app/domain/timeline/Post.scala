@@ -5,8 +5,8 @@ import app.domain.shared.{Like, OwnerProvider}
 import app.support.Api
 import app.support.Api.given
 import jfx.core.meta.Meta
-import com.anjunar.scala.enterprise.macros.validation.NotNull
 import jfx.core.state.{ListProperty, Property}
+import jfx.form.validators.*
 
 import java.util.UUID
 import scala.concurrent.Future
@@ -20,7 +20,7 @@ class Post extends AbstractEntity[Post] with OwnerProvider {
   val editor: Property[js.Any | Null] = Property(null)
   val likes: ListProperty[Like] = ListProperty()
 
-  override def meta: Meta[Post] = Post.meta
+
 
   def save(): Future[Data[Post]] =
     Api.post("/service/timeline/posts/post", this).map(raw => Api.deserialize[Data[Post]](raw))
@@ -33,7 +33,7 @@ class Post extends AbstractEntity[Post] with OwnerProvider {
 }
 
 object Post {
-  val meta: Meta[Post] = Meta(() => new Post())
+
   def read(id: String): Future[Data[Post]] =
     Api.get(s"/service/timeline/posts/post/$id").map(raw => Api.deserialize[Data[Post]](raw))
 

@@ -1,7 +1,5 @@
 package jfx.domain
 
-import jfx.core.meta.Meta
-import com.anjunar.scala.enterprise.macros.PropertyMacros.makePropertyAccess
 import jfx.core.state.Property
 import jfx.form.Model
 
@@ -13,11 +11,8 @@ class Thumbnail(
     val name: Property[String] = Property(""),
     val contentType: Property[String] = Property(""),
     val data: Property[String] = Property("")
-) extends Model[Thumbnail] {
-
-  override def meta: Meta[Thumbnail] = Thumbnail.meta
-}
+) extends Model[Thumbnail]
 
 object Thumbnail {
-  val meta: Meta[Thumbnail] = Meta(() => new Thumbnail())
+
 }

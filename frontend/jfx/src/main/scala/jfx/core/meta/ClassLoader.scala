@@ -1,6 +1,5 @@
 package jfx.core.meta
 
-import com.anjunar.scala.enterprise.macros.reflection.SimpleClass
 import scala.collection.mutable
 import scala.reflect.ClassTag
 
@@ -8,9 +7,9 @@ object ClassLoader {
 
   val classes : mutable.Map[String, (Class[?], () => Any)] = mutable.HashMap()
 
-  def register[E](factory: () => E, simpleClass: SimpleClass[E])(using ClassTag[E]): Unit = {
+  def register[E](factory: () => E)(using ClassTag[E]): Unit = {
     val clazz = summon[ClassTag[E]].runtimeClass
-    classes.put(simpleClass.typeName, (clazz, factory))
+    classes.put(clazz.getName, (clazz, factory))
   }
 
   def getFactory(typeName: String): Option[() => Any] = {

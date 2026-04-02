@@ -5,8 +5,8 @@ import app.domain.shared.OwnerProvider
 import app.support.Api
 import app.support.Api.given
 import jfx.core.meta.Meta
-import com.anjunar.scala.enterprise.macros.validation.{NotBlank, NotNull}
 import jfx.core.state.{ListProperty, Property}
+import jfx.form.validators.*
 
 import java.util.UUID
 import scala.concurrent.Future
@@ -25,8 +25,6 @@ class Document extends AbstractEntity[Document] with OwnerProvider {
 
   val editable: Property[Boolean] = Property(false)
 
-  override def meta: Meta[Document] = Document.meta
-
   def save(): Future[Data[Document]] =
     Api.post("/service/document/documents/document", this).map(raw => Api.deserialize[Data[Document]](raw))
 
@@ -38,7 +36,7 @@ class Document extends AbstractEntity[Document] with OwnerProvider {
 }
 
 object Document {
-  val meta: Meta[Document] = Meta(() => new Document())
+ 
   def root(): Future[Data[Document]] =
     Api.post("/service/document/documents/document/root").map(raw => Api.deserialize[Data[Document]](raw))
 

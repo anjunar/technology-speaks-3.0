@@ -11,8 +11,6 @@ class CreatePassword(
   val confirmPassword: Property[String] = Property("")
 ) extends JsonModel[CreatePassword] {
 
-  override def meta: Meta[CreatePassword] = CreatePassword.meta
+
 }
 
-object CreatePassword {
-  val meta : Meta[CreatePassword] = Meta(() => new CreatePassword())}

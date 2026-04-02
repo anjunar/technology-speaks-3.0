@@ -1,41 +1,45 @@
 package jfx.json
 
-import com.anjunar.scala.enterprise.macros.{Annotation, MetaClassLoader, PropertyAccess}
-import com.anjunar.scala.enterprise.macros.reflection.SimpleClass
+import reflect.macros.PropertySupport
+import reflect.{ClassDescriptor, PropertyAccessor, PropertyDescriptor}
 
 object JsonHelpers {
 
-  def getJsonFieldName(access: PropertyAccess[?, ?]): String =
-    access.annotations
+  def getJsonFieldName(prop: PropertyDescriptor): String =
+    prop.annotations
       .collectFirst {
-        case Annotation(className, params) if className == "com.anjunar.scala.enterprise.macros.validation.JsonName" =>
-          params.getOrElse("value", access.name).asInstanceOf[String]
+        case ann if ann.annotationClassName == "jfx.json.JsonName" =>
+          ann.parameters.getOrElse("value", prop.name).asInstanceOf[String]
       }
-      .getOrElse(access.name)
+      .getOrElse(prop.name)
 
-  def isIgnored(access: PropertyAccess[?, ?]): Boolean = {
-    val name = access.name
-    name == "meta" || name == "##" || name.startsWith("$") || access.annotations.exists {
-      case Annotation(className, _) => className == "jfx.json.JsonIgnore"
-      case null => false
+  def isIgnored(prop: PropertyDescriptor): Boolean = {
+    val name = prop.name
+    name == "meta" || name == "##" || name.startsWith("$") || prop.annotations.exists { ann =>
+      ann != null && ann.annotationClassName == "jfx.json.JsonIgnore"
     }
   }
 
-  def findFactory(jsonType: Option[String], expectedType: SimpleClass[?]): () => Any = {
+  def isIgnored(accessor: PropertyAccessor[?, ?]): Boolean = {
+    // Cannot check annotations on PropertyAccessor, need to use PropertyDescriptor
+    false
+  }
+
+  def findFactory(jsonType: Option[String], expectedType: ClassDescriptor): () => Any = {
     if (expectedType.typeName == "scala.scalajs.js.Array") return () => null
-    
+
     jsonType match {
       case Some(typeName) =>
-        MetaClassLoader.getByTypeName(typeName).flatMap(MetaClassLoader.factories.get)
-          .orElse(MetaClassLoader.factories.collectFirst { case (k, f) if k.typeName == typeName => f })
+        reflect.ReflectRegistry.factoriesByTypeName.get(typeName).flatMap(reflect.ReflectRegistry.factories.get)
+          .orElse(reflect.ReflectRegistry.factories.collectFirst { case (k, f) if k.typeName == typeName => f })
           .orElse {
             val simpleName = typeName.split('.').last
-            MetaClassLoader.factories.collectFirst { case (k, f) if k.typeName.split('.').last == simpleName => f }
+            reflect.ReflectRegistry.factories.collectFirst { case (k, f) if k.typeName.split('.').last == simpleName => f }
           }
           .getOrElse(throw IllegalArgumentException(s"No factory for '$typeName'"))
       case None =>
-        MetaClassLoader.factories.get(expectedType)
-          .orElse(expectedType.subTypes.collectFirst { case st if MetaClassLoader.factories.contains(st) => MetaClassLoader.factories(st) })
+        reflect.ReflectRegistry.factories.get(expectedType)
+          .orElse(expectedType.baseTypes.map(reflect.ReflectionSupport.resolveClass).collectFirst { case st if reflect.ReflectRegistry.factories.contains(st) => reflect.ReflectRegistry.factories(st) })
           .getOrElse(throw IllegalArgumentException(s"No factory for '${expectedType.typeName}'"))
     }
   }

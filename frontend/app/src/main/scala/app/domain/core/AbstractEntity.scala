@@ -1,9 +1,8 @@
 package app.domain.core
 
-import com.anjunar.scala.enterprise.macros.validation.JsonName
 import app.support.JsonModel
 import jfx.core.state.{ListProperty, Property}
-import jfx.json.JsonIgnore
+import jfx.json.{JsonIgnore, JsonName}
 
 import java.util.UUID
 

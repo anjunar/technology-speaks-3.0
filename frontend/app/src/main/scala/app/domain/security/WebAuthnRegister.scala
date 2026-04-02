@@ -13,9 +13,5 @@ class WebAuthnRegister(
   val nickName: Property[String] = Property("")
 ) extends JsonModel[WebAuthnRegister] {
 
-  override def meta: Meta[WebAuthnRegister] = WebAuthnRegister.meta
-}
 
-object WebAuthnRegister {
-  val meta: Meta[WebAuthnRegister] = Meta(() => new WebAuthnRegister())
 }

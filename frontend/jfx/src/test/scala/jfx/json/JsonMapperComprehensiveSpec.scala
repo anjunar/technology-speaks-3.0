@@ -7,7 +7,7 @@ import scala.scalajs.js
 import js.Dynamic.literal as jsObj
 import jfx.core.state.{ListProperty, Property}
 import jfx.core.meta.Meta
-import com.anjunar.scala.enterprise.macros.validation.JsonName
+import jfx.form.validators.JsonName
 import java.util.UUID
 
 class JsonMapperComprehensiveSpec extends AnyFlatSpec with Matchers {
@@ -537,53 +537,53 @@ class TestLevel1 extends jfx.form.Model[TestLevel1] {
   val title: Property[String] = Property("")
   val child: Property[TestLevel2 | Null] = Property(null)
 
-  override def meta: Meta[TestLevel1] = TestLevel1.meta
+
 }
 
 object TestLevel1 {
-  val meta: Meta[TestLevel1] = Meta(() => new TestLevel1())
+
 }
 
 class TestLevel2 extends jfx.form.Model[TestLevel2] {
   val name: Property[String] = Property("")
   val child: Property[TestLevel3 | Null] = Property(null)
 
-  override def meta: Meta[TestLevel2] = TestLevel2.meta
+
 }
 
 object TestLevel2 {
-  val meta: Meta[TestLevel2] = Meta(() => new TestLevel2())
+
 }
 
 class TestLevel3 extends jfx.form.Model[TestLevel3] {
   val value: Property[String] = Property("")
 
-  override def meta: Meta[TestLevel3] = TestLevel3.meta
+
 }
 
 object TestLevel3 {
-  val meta: Meta[TestLevel3] = Meta(() => new TestLevel3())
+
 }
 
 class TestParentWithChildren extends jfx.form.Model[TestParentWithChildren] {
   val name: Property[String] = Property("")
   val children: ListProperty[TestChild] = ListProperty()
 
-  override def meta: Meta[TestParentWithChildren] = TestParentWithChildren.meta
+
 }
 
 object TestParentWithChildren {
-  val meta: Meta[TestParentWithChildren] = Meta(() => new TestParentWithChildren())
+
 }
 
 class TestChild extends jfx.form.Model[TestChild] {
   val name: Property[String] = Property("")
 
-  override def meta: Meta[TestChild] = TestChild.meta
+
 }
 
 object TestChild {
-  val meta: Meta[TestChild] = Meta(() => new TestChild())
+
 }
 
 class TestMixedNumbers extends jfx.form.Model[TestMixedNumbers] {
@@ -592,11 +592,11 @@ class TestMixedNumbers extends jfx.form.Model[TestMixedNumbers] {
   val longVal: Property[Long] = Property(0L)
   val floatVal: Property[Float] = Property(0f)
 
-  override def meta: Meta[TestMixedNumbers] = TestMixedNumbers.meta
+
 }
 
 object TestMixedNumbers {
-  val meta: Meta[TestMixedNumbers] = Meta(() => new TestMixedNumbers())
+
 }
 
 class TestMultipleUuids extends jfx.form.Model[TestMultipleUuids] {
@@ -604,21 +604,21 @@ class TestMultipleUuids extends jfx.form.Model[TestMultipleUuids] {
   val id2: Property[UUID] = Property(null.asInstanceOf[UUID])
   val id3: Property[UUID] = Property(null.asInstanceOf[UUID])
 
-  override def meta: Meta[TestMultipleUuids] = TestMultipleUuids.meta
+
 }
 
 object TestMultipleUuids {
-  val meta: Meta[TestMultipleUuids] = Meta(() => new TestMultipleUuids())
+
 }
 
 class TestWithUuidList extends jfx.form.Model[TestWithUuidList] {
   val ids: ListProperty[UUID] = ListProperty()
 
-  override def meta: Meta[TestWithUuidList] = TestWithUuidList.meta
+
 }
 
 object TestWithUuidList {
-  val meta: Meta[TestWithUuidList] = Meta(() => new TestWithUuidList())
+
 }
 
 class TestMultipleJsonNames extends jfx.form.Model[TestMultipleJsonNames] {
@@ -631,11 +631,11 @@ class TestMultipleJsonNames extends jfx.form.Model[TestMultipleJsonNames] {
   @JsonName("json3")
   val field3: Property[String] = Property("")
 
-  override def meta: Meta[TestMultipleJsonNames] = TestMultipleJsonNames.meta
+
 }
 
 object TestMultipleJsonNames {
-  val meta: Meta[TestMultipleJsonNames] = Meta(() => new TestMultipleJsonNames())
+
 }
 
 class TestMultipleIgnores extends jfx.form.Model[TestMultipleIgnores] {
@@ -648,43 +648,43 @@ class TestMultipleIgnores extends jfx.form.Model[TestMultipleIgnores] {
   @JsonIgnore
   val hidden2: Property[String] = Property("")
 
-  override def meta: Meta[TestMultipleIgnores] = TestMultipleIgnores.meta
+
 }
 
 object TestMultipleIgnores {
-  val meta: Meta[TestMultipleIgnores] = Meta(() => new TestMultipleIgnores())
+
 }
 
 class TestComplexRoot extends jfx.form.Model[TestComplexRoot] {
   val title: Property[String] = Property("")
   val mainBranch: Property[TestComplexBranch | Null] = Property(null)
 
-  override def meta: Meta[TestComplexRoot] = TestComplexRoot.meta
+
 }
 
 object TestComplexRoot {
-  val meta: Meta[TestComplexRoot] = Meta(() => new TestComplexRoot())
+
 }
 
 class TestComplexBranch extends jfx.form.Model[TestComplexBranch] {
   val name: Property[String] = Property("")
   val leaves: ListProperty[TestComplexLeaf] = ListProperty()
 
-  override def meta: Meta[TestComplexBranch] = TestComplexBranch.meta
+
 }
 
 object TestComplexBranch {
-  val meta: Meta[TestComplexBranch] = Meta(() => new TestComplexBranch())
+
 }
 
 class TestComplexLeaf extends jfx.form.Model[TestComplexLeaf] {
   val value: Property[String] = Property("")
 
-  override def meta: Meta[TestComplexLeaf] = TestComplexLeaf.meta
+
 }
 
 object TestComplexLeaf {
-  val meta: Meta[TestComplexLeaf] = Meta(() => new TestComplexLeaf())
+
 }
 
 class TestAllIgnored extends jfx.form.Model[TestAllIgnored] {
@@ -694,11 +694,11 @@ class TestAllIgnored extends jfx.form.Model[TestAllIgnored] {
   @JsonIgnore
   val hidden2: Property[String] = Property("")
 
-  override def meta: Meta[TestAllIgnored] = TestAllIgnored.meta
+
 }
 
 object TestAllIgnored {
-  val meta: Meta[TestAllIgnored] = Meta(() => new TestAllIgnored())
+
 }
 
 class TestEdgeNumbers extends jfx.form.Model[TestEdgeNumbers] {
@@ -708,9 +708,9 @@ class TestEdgeNumbers extends jfx.form.Model[TestEdgeNumbers] {
   val maxInt: Property[Int] = Property(0)
   val minInt: Property[Int] = Property(0)
 
-  override def meta: Meta[TestEdgeNumbers] = TestEdgeNumbers.meta
+
 }
 
 object TestEdgeNumbers {
-  val meta: Meta[TestEdgeNumbers] = Meta(() => new TestEdgeNumbers())
+
 }

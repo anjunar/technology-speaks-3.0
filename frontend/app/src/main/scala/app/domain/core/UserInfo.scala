@@ -1,8 +1,8 @@
 package app.domain.core
 
 import jfx.core.meta.Meta
-import com.anjunar.scala.enterprise.macros.validation.{NotBlank, NotNull, Size}
 import jfx.core.state.Property
+import jfx.form.validators.*
 
 class UserInfo extends AbstractEntity[UserInfo] {
 
@@ -16,10 +16,5 @@ class UserInfo extends AbstractEntity[UserInfo] {
 
   @NotNull(message = "Geburtsdatum ist erforderlich")
   val birthDate: Property[String] = Property("")
-
-  override def meta: Meta[UserInfo] = UserInfo.meta
-}
-
-object UserInfo {
-  val meta: Meta[UserInfo] = Meta(() => new UserInfo())
+  
 }

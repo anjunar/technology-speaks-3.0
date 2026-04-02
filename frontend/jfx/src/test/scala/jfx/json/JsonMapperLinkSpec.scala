@@ -135,11 +135,11 @@ class TestLink extends jfx.form.Model[TestLink] {
   val method: Property[String] = Property("")
   val id: Property[String] = Property("")
 
-  override def meta: Meta[TestLink] = TestLink.meta
+
 }
 
 object TestLink {
-  val meta: Meta[TestLink] = Meta(() => new TestLink())
+
 }
 
 @JsonType("TestEntityWithLinks")
@@ -147,20 +147,20 @@ class TestEntityWithLinks extends jfx.form.Model[TestEntityWithLinks] {
   val name: Property[String] = Property("")
   val links: ListProperty[TestLink] = ListProperty()
 
-  override def meta: Meta[TestEntityWithLinks] = TestEntityWithLinks.meta
+
 }
 
 object TestEntityWithLinks {
-  val meta: Meta[TestEntityWithLinks] = Meta(() => new TestEntityWithLinks())
+
 }
 
 @JsonType("TestEntityWithUuid")
 class TestEntityWithUuid extends jfx.form.Model[TestEntityWithUuid] {
   val id: Property[UUID] = Property(null.asInstanceOf[UUID])
 
-  override def meta: Meta[TestEntityWithUuid] = TestEntityWithUuid.meta
+
 }
 
 object TestEntityWithUuid {
-  val meta: Meta[TestEntityWithUuid] = Meta(() => new TestEntityWithUuid())
+
 }

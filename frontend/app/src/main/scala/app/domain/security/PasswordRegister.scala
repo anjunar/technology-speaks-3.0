@@ -4,7 +4,7 @@ import app.domain.core.UserInfo
 import app.support.{Api, JsonModel, JsonResponse}
 import app.support.Api.given
 import jfx.core.meta.Meta
-import com.anjunar.scala.enterprise.macros.validation.{EmailConstraint, NotBlank, Size}
+import jfx.form.validators.{EmailConstraint, NotBlank, Size}
 import jfx.core.state.Property
 
 import scala.concurrent.Future
@@ -23,12 +23,12 @@ class PasswordRegister(
   val password: Property[String] = Property("")
 ) extends JsonModel[PasswordRegister] {
 
-  override def meta: Meta[PasswordRegister] = PasswordRegister.meta
+
 
   def save(): Future[JsonResponse] =
     Api.post("/service/security/register", this).map(raw => Api.deserialize[JsonResponse](raw))
 }
 
 object PasswordRegister {
-  val meta: Meta[PasswordRegister] = Meta(() => new PasswordRegister())
+
 }

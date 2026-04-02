@@ -14,7 +14,7 @@ class WebAuthnLoginLink(
   var method: String = "GET"
 ) extends JsonModel[WebAuthnLoginLink] with AbstractLink {
 
-  override def meta: Meta[WebAuthnLoginLink] = WebAuthnLoginLink.meta
+
 
   override def name: String = "Login mit WebAuthn"
 
@@ -22,5 +22,5 @@ class WebAuthnLoginLink(
 }
 
 object WebAuthnLoginLink {
-  val meta: Meta[WebAuthnLoginLink] = Meta(() => new WebAuthnLoginLink())
+
 }

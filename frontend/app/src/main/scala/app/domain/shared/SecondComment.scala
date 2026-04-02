@@ -20,7 +20,7 @@ class SecondComment extends AbstractEntity[SecondComment] with OwnerProvider {
 
   val editable: Property[Boolean] = Property(false)
 
-  override def meta: Meta[SecondComment] = SecondComment.meta
+
 
   def save(issue: Issue): Future[Data[FirstComment]] =
     Api.post(s"/service/document/documents/document/issues/issue/${issue.id.get}/comment", this).map(raw => Api.deserialize[Data[FirstComment]](raw))
@@ -36,5 +36,5 @@ class SecondComment extends AbstractEntity[SecondComment] with OwnerProvider {
 }
 
 object SecondComment {
-  val meta: Meta[SecondComment] = Meta(() => new SecondComment())
+
 }

@@ -14,12 +14,10 @@ class PostsLink(
   var method: String = "GET"
 ) extends JsonModel[PostsLink] with AbstractLink {
 
-  override def meta: Meta[PostsLink] = PostsLink.meta
-
   override def name: String = "Posts"
 
   override def icon: String = "timeline"
 }
 
-object PostsLink {
-  val meta : Meta[PostsLink] = Meta(() => new PostsLink())}
+
+  

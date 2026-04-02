@@ -7,7 +7,7 @@ import scala.scalajs.js
 import scala.scalajs.js.Dynamic.literal as jsObj
 import jfx.core.state.{ListProperty, Property}
 import jfx.core.meta.Meta
-import com.anjunar.scala.enterprise.macros.validation.JsonName
+import jfx.form.validators.JsonName
 import jfx.json.JsonIgnore
 
 import java.util.UUID
@@ -330,65 +330,65 @@ class TestPerson extends jfx.form.Model[TestPerson] {
   val name: Property[String] = Property("")
   val email: Property[String] = Property("")
 
-  override def meta: Meta[TestPerson] = TestPerson.meta
+
 }
 
 object TestPerson {
-  val meta: Meta[TestPerson] = Meta(() => new TestPerson())
+
 }
 
 @JsonType("TestPersonWithJsonType")
 class TestPersonWithJsonType extends jfx.form.Model[TestPersonWithJsonType] {
   val name: Property[String] = Property("")
 
-  override def meta: Meta[TestPersonWithJsonType] = TestPersonWithJsonType.meta
+
 }
 
 object TestPersonWithJsonType {
-  val meta: Meta[TestPersonWithJsonType] = Meta(() => new TestPersonWithJsonType())
+
 }
 
 class TestNumbers extends jfx.form.Model[TestNumbers] {
   val age: Property[Int] = Property(0)
   val salary: Property[Double] = Property(0.0)
 
-  override def meta: Meta[TestNumbers] = TestNumbers.meta
+
 }
 
 object TestNumbers {
-  val meta: Meta[TestNumbers] = Meta(() => new TestNumbers())
+
 }
 
 class TestFlags extends jfx.form.Model[TestFlags] {
   val active: Property[Boolean] = Property(false)
   val verified: Property[Boolean] = Property(false)
 
-  override def meta: Meta[TestFlags] = TestFlags.meta
+
 }
 
 object TestFlags {
-  val meta: Meta[TestFlags] = Meta(() => new TestFlags())
+
 }
 
 class TestWithUuid extends jfx.form.Model[TestWithUuid] {
   val id: Property[UUID] = Property(null.asInstanceOf[UUID])
 
-  override def meta: Meta[TestWithUuid] = TestWithUuid.meta
+
 }
 
 object TestWithUuid {
-  val meta: Meta[TestWithUuid] = Meta(() => new TestWithUuid())
+
 }
 
 class TestWithJsonName extends jfx.form.Model[TestWithJsonName] {
   @JsonName("renamedField")
   val customField: Property[String] = Property("")
 
-  override def meta: Meta[TestWithJsonName] = TestWithJsonName.meta
+
 }
 
 object TestWithJsonName {
-  val meta: Meta[TestWithJsonName] = Meta(() => new TestWithJsonName())
+
 }
 
 class TestWithJsonIgnore extends jfx.form.Model[TestWithJsonIgnore] {
@@ -397,80 +397,80 @@ class TestWithJsonIgnore extends jfx.form.Model[TestWithJsonIgnore] {
   @JsonIgnore
   val hidden: Property[String] = Property("")
 
-  override def meta: Meta[TestWithJsonIgnore] = TestWithJsonIgnore.meta
+
 }
 
 object TestWithJsonIgnore {
-  val meta: Meta[TestWithJsonIgnore] = Meta(() => new TestWithJsonIgnore())
+
 }
 
 class TestWithListProperty extends jfx.form.Model[TestWithListProperty] {
   val items: ListProperty[String] = ListProperty()
 
-  override def meta: Meta[TestWithListProperty] = TestWithListProperty.meta
+
 }
 
 object TestWithListProperty {
-  val meta: Meta[TestWithListProperty] = Meta(() => new TestWithListProperty())
+
 }
 
 class TestNestedChild extends jfx.form.Model[TestNestedChild] {
   val value: Property[String] = Property("")
 
-  override def meta: Meta[TestNestedChild] = TestNestedChild.meta
+
 }
 
 object TestNestedChild {
-  val meta: Meta[TestNestedChild] = Meta(() => new TestNestedChild())
+
 }
 
 class TestNestedParent extends jfx.form.Model[TestNestedParent] {
   val name: Property[String] = Property("")
   val child: Property[TestNestedChild | Null] = Property(null)
 
-  override def meta: Meta[TestNestedParent] = TestNestedParent.meta
+
 }
 
 object TestNestedParent {
-  val meta: Meta[TestNestedParent] = Meta(() => new TestNestedParent())
+
 }
 
 class TestWithMap extends jfx.form.Model[TestWithMap] {
   val entries: Property[Map[String, String]] = Property(Map.empty)
 
-  override def meta: Meta[TestWithMap] = TestWithMap.meta
+
 }
 
 object TestWithMap {
-  val meta: Meta[TestWithMap] = Meta(() => new TestWithMap())
+
 }
 
 class TestMapItem extends jfx.form.Model[TestMapItem] {
   val name: Property[String] = Property("")
 
-  override def meta: Meta[TestMapItem] = TestMapItem.meta
+
 }
 
 object TestMapItem {
-  val meta: Meta[TestMapItem] = Meta(() => new TestMapItem())
+
 }
 
 class TestWithNestedMap extends jfx.form.Model[TestWithNestedMap] {
   val items: Property[Map[String, TestMapItem]] = Property(Map.empty)
 
-  override def meta: Meta[TestWithNestedMap] = TestWithNestedMap.meta
+
 }
 
 object TestWithNestedMap {
-  val meta: Meta[TestWithNestedMap] = Meta(() => new TestWithNestedMap())
+
 }
 
 class TestUnregistered extends jfx.form.Model[TestUnregistered] {
   val value: Property[String] = Property("")
 
-  override def meta: Meta[TestUnregistered] = TestUnregistered.meta
+
 }
 
 object TestUnregistered {
-  val meta: Meta[TestUnregistered] = Meta(() => new TestUnregistered())
+
 }

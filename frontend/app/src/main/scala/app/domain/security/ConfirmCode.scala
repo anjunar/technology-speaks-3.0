@@ -10,8 +10,5 @@ class ConfirmCode(
   val confirm: Property[String] = Property("")
 ) extends JsonModel[ConfirmCode] {
 
-  override def meta: Meta[ConfirmCode] = ConfirmCode.meta
-}
 
-object ConfirmCode {
-  val meta : Meta[ConfirmCode] = Meta(() => new ConfirmCode())}
+}

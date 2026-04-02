@@ -12,7 +12,7 @@ class StringDeserializer extends Deserializer[String] {
 
 class NumberDeserializer extends Deserializer[Number] {
   override def deserialize(json: Dynamic, context: JsonContext): Any = {
-    val typeName = context.resolvedType.getTypeName
+    val typeName = context.resolvedType.typeName
     val doubleValue = json.asInstanceOf[Double]
     typeName match {
       case "scala.Long" | "Long" => doubleValue.toLong

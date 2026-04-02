@@ -1,6 +1,6 @@
 package jfx.json.deserializer
 
-import com.anjunar.scala.enterprise.macros.reflection.{ParameterizedType, SimpleClass, Type}
+import reflect.{ClassDescriptor, ParameterizedTypeDescriptor, TypeDescriptor}
 import jfx.core.state.{ListProperty, Property}
 import jfx.form.Model
 
@@ -21,8 +21,8 @@ object DeserializerFactory {
     case _ => throw new IllegalArgumentException(s"No deserializer for $clazz")
   }).asInstanceOf[Deserializer[E]]
 
-  def buildFromType(tpe: Type): Deserializer[?] = tpe match {
-    case sc: SimpleClass[?] => sc.typeName match {
+  def buildFromType(tpe: TypeDescriptor): Deserializer[?] = tpe match {
+    case cd: ClassDescriptor => cd.typeName match {
       case "java.lang.String" | "String" => new StringDeserializer()
       case "scala.Int" | "Int" | "scala.Double" | "Double" | "scala.Float" | "Float" | "scala.Long" | "Long" => new NumberDeserializer()
       case "scala.Boolean" | "Boolean" => new BooleanDeserializer()
@@ -32,12 +32,9 @@ object DeserializerFactory {
       case "jfx.core.state.ListProperty" | "ListProperty" => new ListPropertyDeserializer()
       case _ => new ModelDeserializer()
     }
-    case pt: ParameterizedType => pt.rawType match {
-      case sc: SimpleClass[?] => sc.typeName match {
-        case "jfx.core.state.Property" | "Property" => new PropertyDeserializer()
-        case "jfx.core.state.ListProperty" | "ListProperty" => new ListPropertyDeserializer()
-        case _ => new ModelDeserializer()
-      }
+    case pt: ParameterizedTypeDescriptor => pt.rawType.typeName match {
+      case "jfx.core.state.Property" | "Property" => new PropertyDeserializer()
+      case "jfx.core.state.ListProperty" | "ListProperty" => new ListPropertyDeserializer()
       case _ => new ModelDeserializer()
     }
     case _ => new ModelDeserializer()

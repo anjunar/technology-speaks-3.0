@@ -6,6 +6,7 @@ import app.support.{AppJson, JsonModel}
 import jfx.core.meta.Meta
 import jfx.core.state.ListProperty
 import org.scalajs.dom.{RequestInit, fetch}
+import reflect.macros.ReflectMacros.reflectType
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.scalajs.js
@@ -15,13 +16,13 @@ class Account(
   val links: ListProperty[Link] = ListProperty()
 ) extends JsonModel[Account] {
 
-  override def meta: Meta[Account] = Account.meta
+
 }
 
 object Account {
   private given ExecutionContext = ExecutionContext.global
 
-  val meta : Meta[Account] = Meta(() => new Account())
+
 
   def read(): Future[Data[Account]] =
     fetch(
@@ -36,7 +37,7 @@ object Account {
     ).toFuture.flatMap { response =>
       if (response.ok) {
         response.text().toFuture.map { text =>
-          AppJson.mapper.deserialize(js.JSON.parse(text).asInstanceOf[js.Dynamic], Data.meta[Account]).asInstanceOf[Data[Account]]
+          AppJson.mapper.deserialize(js.JSON.parse(text), reflectType[Data[Account]]).asInstanceOf[Data[Account]]
         }
       } else {
         Future.successful(legacy())

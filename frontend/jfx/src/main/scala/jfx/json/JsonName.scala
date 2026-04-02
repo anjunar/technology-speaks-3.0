@@ -1,4 +1,4 @@
-package com.anjunar.scala.enterprise.macros.validation
+package jfx.json
 
 import scala.annotation.StaticAnnotation
 

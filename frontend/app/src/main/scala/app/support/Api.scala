@@ -1,11 +1,11 @@
 package app.support
 
 import app.domain.core.Link
-import com.anjunar.scala.enterprise.macros.reflection.Type
-import com.anjunar.scala.enterprise.macros.reflection.TypeMacros.genericType
-import jfx.core.meta.Meta
-import jfx.form.{ErrorResponse, ErrorResponseException, Model}
+import reflect.TypeDescriptor
+import reflect.macros.ReflectMacros.reflectType
+import jfx.form.{ErrorResponse, ErrorResponseException}
 import jfx.json.JsonMapper
+import org.scalajs.dom
 import org.scalajs.dom.{RequestInit, fetch, window}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -18,77 +18,70 @@ object Api {
   given ExecutionContext = ExecutionContext.global
 
   def get(url: String): Future[js.Any] =
-    requestJson("GET", url)
+    requestJson("GET", url, null)
 
-  def post(url: String, body: Any = null): Future[js.Any] =
+  def post(url: String, body: Any): Future[js.Any] =
     requestJson("POST", url, body)
 
-  def put(url: String, body: Any = null): Future[js.Any] =
+  def post(url: String): Future[js.Any] =
+    requestJson("POST", url, null)
+
+  def put(url: String, body: Any): Future[js.Any] =
     requestJson("PUT", url, body)
 
-  def delete(url: String, body: Any = null): Future[Unit] =
+  def delete(url: String, body: Any): Future[Unit] =
     requestJson("DELETE", url, body).map(_ => ())
 
-  def invokeLink(link: Link, body: Any = null): Future[js.Any] =
-    requestJson(link.method, Navigation.prefixedServiceUrl(link.url), body)
-
   def postText(url: String, body: String): Future[String] =
-    requestText("POST", url, if (body == null) js.undefined else body.asInstanceOf[js.Any])
+    requestText("POST", url, body)
 
-  def requestJson(method: String, url: String, body: Any = null): Future[js.Any] =
-    requestText(method, url, serializeBody(body)).map { text =>
-      if (text.trim.isEmpty) null
+  def invokeLink(link: Link, body: Any): Future[js.Any] =
+    requestJson(link.method, link.url, body)
+
+  def invokeLink(link: Link): Future[js.Any] =
+    requestJson(link.method, link.url, null)
+
+  def requestJson(method: String, url: String, body: Any): Future[js.Any] =
+    requestText(method, url, body).map { text =>
+      if (text.isEmpty) null
       else js.JSON.parse(text)
     }
 
-  inline def deserialize[M <: Model[M]](raw: js.Any): M =
+  def requestJson(method: String, url: String): Future[js.Any] =
+    requestText(method, url, null).map { text =>
+      if (text.isEmpty) null
+      else js.JSON.parse(text)
+    }
+
+  inline def deserialize[M](raw: js.Any): M =
     if (raw == null || js.isUndefined(raw)) {
       null.asInstanceOf[M]
     } else {
-      AppJson.mapper.deserialize(raw.asInstanceOf[js.Dynamic], genericType[M]).asInstanceOf[M]
+      AppJson.mapper.deserialize(raw.asInstanceOf[js.Dynamic], reflectType[M]).asInstanceOf[M]
     }
 
-  private def serializeBody(body: Any): js.UndefOr[js.Any] =
+  private def serializeBody(body: Any): js.UndefOr[dom.BodyInit] =
     body match {
       case null =>
         js.undefined
       case text: String =>
-        text.asInstanceOf[js.Any]
-      case model: Model[?] =>
-        AppJson.mapper.serialize(model)
+        text.asInstanceOf[dom.BodyInit]
       case other =>
-        other.asInstanceOf[js.Any]
+        other.asInstanceOf[dom.BodyInit]
     }
-
-  private def serializeModel(model: Model[?]): js.Dynamic =
-    AppJson.mapper.serialize(model)
 
   private def requestText(
-    method: String,
-    url: String,
-    body: js.UndefOr[js.Any]
+    methodArg: String,
+    urlArg: String,
+    bodyArg: Any = null
   ): Future[String] = {
-    val headers = js.Dictionary(
-      "Content-Type" -> "application/json",
-      "Accept" -> "application/json"
-    )
-
-    val init = js.Dynamic.literal(
-      method = method,
-      headers = headers
-    )
-
-    if (!js.isUndefined(body)) {
-      val payload =
-        body.asInstanceOf[Any] match {
-          case text: String => text
-          case other        => js.JSON.stringify(other.asInstanceOf[js.Any])
-        }
-
-      init.updateDynamic("body")(payload)
+    val init = new RequestInit {
+      method = methodArg.asInstanceOf[dom.HttpMethod]
+      body = serializeBody(bodyArg)
+      headers = js.Dictionary("Accept" -> "application/json")
     }
 
-    fetch(url, init.asInstanceOf[RequestInit]).toFuture.flatMap { response =>
+    fetch(urlArg, init).toFuture.flatMap { response =>
       response.text().toFuture.flatMap { text =>
         if (response.ok) {
           Future.successful(text)
@@ -99,7 +92,7 @@ object Api {
           Navigation.redirectToLogin()
           Future.failed(RuntimeException("Request was rejected with 403"))
         } else if (response.status == 400) {
-          Future.failed(new ErrorResponseException(AppJson.mapper.deserializeArray(JSON.parse(text).asInstanceOf[js.Array[js.Dynamic]], ErrorResponse.meta)))
+          Future.failed(new ErrorResponseException(AppJson.mapper.deserializeArray(JSON.parse(text).asInstanceOf[js.Array[js.Dynamic]], reflectType[ErrorResponse])))
         } else {
           Future.failed(RuntimeException(s"HTTP ${response.status}: $text"))
         }

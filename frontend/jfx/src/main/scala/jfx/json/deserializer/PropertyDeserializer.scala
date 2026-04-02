@@ -1,6 +1,6 @@
 package jfx.json.deserializer
 
-import com.anjunar.scala.enterprise.macros.reflection.{ParameterizedType, Type}
+import reflect.{ParameterizedTypeDescriptor, TypeDescriptor}
 import jfx.core.state.Property
 
 import scala.scalajs.js.Dynamic
@@ -9,9 +9,9 @@ class PropertyDeserializer extends Deserializer[Property[?]] {
 
   override def deserialize(json: Dynamic, context: JsonContext): Any = {
     val propertyType = context.resolvedType match {
-      case pt: ParameterizedType =>
+      case pt: ParameterizedTypeDescriptor =>
         if (pt.typeArguments.isEmpty) throw new IllegalStateException("Property must have a generic type argument")
-        pt.typeArguments(0).asInstanceOf[Type]
+        pt.typeArguments(0).asInstanceOf[TypeDescriptor]
       case _ => throw new IllegalStateException("Property must have a generic type")
     }
 

@@ -21,7 +21,7 @@ class FirstComment extends AbstractEntity[FirstComment] with OwnerProvider {
 
   val editable: Property[Boolean] = Property(false)
 
-  override def meta: Meta[FirstComment] = FirstComment.meta
+
 
   def save(entity: AbstractEntity[?]): Future[Data[FirstComment]] =
     entity match {
@@ -55,7 +55,7 @@ class FirstComment extends AbstractEntity[FirstComment] with OwnerProvider {
 }
 
 object FirstComment {
-  val meta: Meta[FirstComment] = Meta(() => new FirstComment())
+
 
   def list(index: Int, limit: Int, post: Post): Future[Table[Data[FirstComment]]] =
     Api.get(s"/service/timeline/posts/post/${post.id.get}/comments?index=$index&limit=$limit&sort=created:desc").map(raw => Api.deserialize[Table[Data[FirstComment]]](raw))

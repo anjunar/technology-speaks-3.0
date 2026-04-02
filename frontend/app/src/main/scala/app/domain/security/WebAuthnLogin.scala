@@ -11,9 +11,6 @@ class WebAuthnLogin(
   val email: Property[String] = Property("")
 ) extends JsonModel[WebAuthnLogin] {
 
-  override def meta: Meta[WebAuthnLogin] = WebAuthnLogin.meta
+
 }
 
-object WebAuthnLogin {
-  val meta: Meta[WebAuthnLogin] = Meta(() => new WebAuthnLogin())
-}

@@ -16,17 +16,10 @@ class ManagedProperty extends AbstractEntity[ManagedProperty] {
   val visibleForAll: Property[Boolean] = Property(false)
   val users: ListProperty[User] = ListProperty()
   val groups: ListProperty[Group] = ListProperty()
-
-  override def meta: Meta[ManagedProperty] = ManagedProperty.meta
-
+  
   def updateFromLink(): Future[ManagedProperty] =
     links.find(_.rel == "update") match {
       case Some(link) => Api.invokeLink(link, this).map(raw => Api.deserialize[ManagedProperty](raw))
       case None       => Future.successful(this)
     }
-}
-
-object ManagedProperty {
-
-  val meta: Meta[ManagedProperty] = Meta(() => new ManagedProperty())
 }

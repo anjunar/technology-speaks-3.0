@@ -1,7 +1,6 @@
 package jfx.json.deserializer
 
-import com.anjunar.scala.enterprise.macros.MetaClassLoader
-import com.anjunar.scala.enterprise.macros.reflection.{ParameterizedType, SimpleClass}
+import reflect.{ClassDescriptor, ParameterizedTypeDescriptor, TypeDescriptor}
 import jfx.core.state.ListProperty
 
 import scala.scalajs.js
@@ -11,7 +10,7 @@ class ListPropertyDeserializer extends Deserializer[ListProperty[?]] {
 
   override def deserialize(json: Dynamic, context: JsonContext): Any = {
     val elemType = context.resolvedType match {
-      case pt: ParameterizedType => pt.typeArguments(0)
+      case pt: ParameterizedTypeDescriptor => pt.typeArguments(0)
       case _ => throw new IllegalStateException("ListProperty must have a generic type")
     }
 
@@ -31,18 +30,18 @@ class ListPropertyDeserializer extends Deserializer[ListProperty[?]] {
     new ListProperty(result)
   }
 
-  private def resolveElementType(json: Dynamic, declaredType: com.anjunar.scala.enterprise.macros.reflection.Type): JsonContext = {
+  private def resolveElementType(json: Dynamic, declaredType: TypeDescriptor): JsonContext = {
     val jsonType = readJsonType(json)
     jsonType match {
       case Some(typeName) =>
-        com.anjunar.scala.enterprise.macros.MetaClassLoader.getByTypeName(typeName) match {
+        reflect.ReflectRegistry.factoriesByTypeName.get(typeName) match {
           case Some(clazz) => new JsonContext(clazz)
           case None => new JsonContext(declaredType)
         }
       case None =>
         declaredType match {
-          case sc: SimpleClass[?] if sc.subTypes.nonEmpty =>
-            findConcreteSubType(sc, json) match {
+          case cd: ClassDescriptor if cd.baseTypes.nonEmpty =>
+            findConcreteSubType(cd, json) match {
               case Some(concreteType) => new JsonContext(concreteType)
               case None => new JsonContext(declaredType)
             }
@@ -51,11 +50,9 @@ class ListPropertyDeserializer extends Deserializer[ListProperty[?]] {
     }
   }
 
-  private def findConcreteSubType(declaredType: SimpleClass[?], json: Dynamic): Option[SimpleClass[?]] = {
-    val subTypes = declaredType.subTypes
-    subTypes.find { subType =>
-      MetaClassLoader.factories.contains(subType)
-    }
+  private def findConcreteSubType(declaredType: ClassDescriptor, json: Dynamic): Option[ClassDescriptor] = {
+    val jsonType = readJsonType(json)
+    jsonType.flatMap(typeName => reflect.ReflectRegistry.factoriesByTypeName.get(typeName))
   }
 
   private def readJsonType(json: Dynamic): Option[String] = {

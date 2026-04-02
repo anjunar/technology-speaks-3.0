@@ -129,6 +129,7 @@ trait Formular[M <: Model[M], N <: Node] extends NodeComponent[N], Editable {
   private def bindNow(control: AnyControl): jfx.core.state.Disposable = {
     val controlName = control.name
 
+/*
     val (modelPropertyOption, accessValidators) = control match {
       case subForm: SubForm[?] =>
         if (subForm.index > -1) {
@@ -142,19 +143,23 @@ trait Formular[M <: Model[M], N <: Node] extends NodeComponent[N], Editable {
           )
         } else {
           val accessOption = valueProperty.get.findPropertyAccessOption(controlName)
+          val descriptorOption = valueProperty.get.findPropertyDescriptorOption(controlName)
           (
             accessOption.map(_.get(valueProperty.get)),
-            accessOption.map(access => ValidatorFactory.createValidators(access.annotations)).getOrElse(Vector.empty)
+            descriptorOption.map(d => ValidatorFactory.createValidators(d.annotations)).getOrElse(Vector.empty)
           )
         }
       case _ =>
         val accessOption = valueProperty.get.findPropertyAccessOption(controlName)
+        val descriptorOption = valueProperty.get.findPropertyDescriptorOption(controlName)
         (
           accessOption.map(_.get(valueProperty.get)),
-          accessOption.map(access => ValidatorFactory.createValidators(access.annotations)).getOrElse(Vector.empty)
+          descriptorOption.map(d => ValidatorFactory.createValidators(d.annotations)).getOrElse(Vector.empty)
         )
     }
+*/
 
+/*
     if (modelPropertyOption.isEmpty) {
       console.warn(s"Skipping form binding for control '$controlName' because no matching model property was found.")
       return () => ()
@@ -171,6 +176,8 @@ trait Formular[M <: Model[M], N <: Node] extends NodeComponent[N], Editable {
     } else {
       Property.subscribeBidirectional(modelProperty.asInstanceOf[Property[Any]], controlProperty.asInstanceOf[Property[Any]])
     }
+*/
+    null.asInstanceOf[jfx.core.state.Disposable]
   }
 
   private def syncControlValidators(control: AnyControl, validators: Vector[Validator[Any]]): Unit = {

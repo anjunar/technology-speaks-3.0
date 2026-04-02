@@ -5,7 +5,6 @@ import app.domain.security.{Account, CreatePassword, PasswordChange}
 import app.services.ApplicationService
 import app.support.{Api, JsonResponse, Navigation}
 import app.ui.{CompositeSupport, PageComposite}
-import com.anjunar.scala.enterprise.macros.reflection.TypeMacros.genericType
 import jfx.action.Button.{button, buttonType_=, onClick}
 import jfx.control.Heading.heading
 import jfx.control.Image.{image, src_=}

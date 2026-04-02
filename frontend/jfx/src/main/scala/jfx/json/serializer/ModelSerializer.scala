@@ -1,7 +1,7 @@
 package jfx.json.serializer
 
-import com.anjunar.scala.enterprise.macros.{Annotation, PropertyAccess}
-import com.anjunar.scala.enterprise.macros.reflection.{ParameterizedType, SimpleClass}
+import reflect.macros.PropertySupport
+import reflect.{PropertyAccessor, PropertyDescriptor, TypeDescriptor}
 import jfx.core.state.{ListProperty, Property, ReadOnlyProperty}
 import jfx.form.Model
 import jfx.json.{JsonHelpers, JsonMapper}
@@ -15,36 +15,39 @@ class ModelSerializer extends Serializer[Model[?]] {
     val out = js.Dictionary[js.Any]()
     getJsonType(input).foreach(t => out.update("@type", t))
 
-    input.meta.properties.foreach { access =>
-      if (!JsonHelpers.isIgnored(access)) {
-        val value = access.asInstanceOf[PropertyAccess[Any, Any]].get(input)
-        access.genericType match {
-          case pt: ParameterizedType if isMapType(pt) =>
+    val properties = PropertySupport.extractPropertiesWithAccessors[Model[?]]
+    properties.foreach { prop =>
+      if (!JsonHelpers.isIgnored(prop.descriptor)) {
+        val value = prop.accessor.asInstanceOf[PropertyAccessor[Any, Any]].get(input)
+        prop.descriptor.propertyType match {
+          case pt: reflect.ParameterizedTypeDescriptor if isMapType(pt) =>
             value.asInstanceOf[Map[?, ?]].foreach { case (k, v) =>
               out.update(k.toString, serializeValue(v))
             }
           case _ =>
-            out.update(JsonHelpers.getJsonFieldName(access), serializeValue(value))
+            out.update(JsonHelpers.getJsonFieldName(prop.descriptor), serializeValue(value))
         }
       }
     }
     out.asInstanceOf[js.Dynamic]
   }
 
-  private def isMapType(tpe: com.anjunar.scala.enterprise.macros.reflection.Type): Boolean = tpe match {
-    case pt: ParameterizedType => pt.rawType match {
-      case sc: SimpleClass[?] => sc.typeName == "scala.collection.immutable.Map" || sc.typeName == "Map"
-      case _ => false
-    }
-    case sc: SimpleClass[?] => sc.typeName == "scala.collection.immutable.Map" || sc.typeName == "Map"
+  private def isMapType(tpe: TypeDescriptor): Boolean = tpe match {
+    case pt: reflect.ParameterizedTypeDescriptor => pt.rawType.typeName == "scala.collection.immutable.Map" || pt.rawType.typeName == "Map"
+    case cd: reflect.ClassDescriptor => cd.typeName == "scala.collection.immutable.Map" || cd.typeName == "Map"
     case _ => false
   }
 
-  private def getJsonType(model: Model[?]): Option[String] =
-    model.meta.annotations.collectFirst {
-      case Annotation(className, params) if className == "jfx.json.JsonType" =>
-        params.getOrElse("value", model.getClass.getSimpleName).asInstanceOf[String]
+  private def getJsonType(model: Model[?]): Option[String] = {
+    val clazz = model.getClass
+    val annotations = clazz.getAnnotations()
+    annotations.find(_.annotationType().getName == "jfx.json.JsonType") match {
+      case Some(jsonTypeAnn) =>
+        val method = jsonTypeAnn.annotationType().getMethod("value")
+        Some(method.invoke(jsonTypeAnn).asInstanceOf[String])
+      case None => Some(clazz.getSimpleName)
     }
+  }
 
   private def serializeValue(value: Any): js.Any = value match {
     case null => null

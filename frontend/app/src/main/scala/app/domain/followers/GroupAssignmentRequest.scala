@@ -9,8 +9,5 @@ class GroupAssignmentRequest(
   var groupIds: js.Array[String] = js.Array()
 ) extends JsonModel[GroupAssignmentRequest] {
 
-  override def meta: Meta[GroupAssignmentRequest] = GroupAssignmentRequest.meta
-}
 
-object GroupAssignmentRequest {
-  val meta : Meta[GroupAssignmentRequest] = Meta(() => new GroupAssignmentRequest())}
+}

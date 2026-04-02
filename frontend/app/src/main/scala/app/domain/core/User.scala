@@ -2,8 +2,6 @@ package app.domain.core
 
 import app.support.{Api, Navigation}
 import jfx.core.meta.Meta
-import com.anjunar.scala.enterprise.macros.PropertyMacros.makePropertyAccess
-import com.anjunar.scala.enterprise.macros.validation.{NotBlank, Size}
 import jfx.core.state.{ListProperty, Property}
 import jfx.domain.Media
 
@@ -11,6 +9,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import java.util.UUID
 import scala.concurrent.Future
 import scala.scalajs.js
+import jfx.form.validators.*
 import scala.scalajs.js.URIUtils.encodeURIComponent
 
 class User extends AbstractEntity[User] {
@@ -22,8 +21,6 @@ class User extends AbstractEntity[User] {
   val info: Property[UserInfo | Null] = Property(null)
   val address: Property[Address | Null] = Property(null)
   val emails: ListProperty[EMail] = ListProperty()
-
-  override def meta: Meta[User] = User.meta
 
   def save(): Future[Data[User]] =
     Api.post("/service/core/users/user", this).map(raw => Api.deserialize[Data[User]](raw))
@@ -62,8 +59,6 @@ class User extends AbstractEntity[User] {
 }
 
 object User {
-
-  val meta: Meta[User] = Meta(() => new User())
 
   def read(id: String): Future[Data[User]] =
     Api.get(s"/service/core/users/user/$id").map(raw => Api.deserialize[Data[User]](raw))

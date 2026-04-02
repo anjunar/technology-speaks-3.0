@@ -1,5 +1,5 @@
 package jfx.json.serializer
 
-import com.anjunar.scala.enterprise.macros.reflection.Type
+import reflect.TypeDescriptor
 
-class JavaContext(val resolvedType: Type)
+class JavaContext(val resolvedType: TypeDescriptor)

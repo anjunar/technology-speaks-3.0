@@ -1,8 +1,7 @@
 package jfx.control.cell
 
-import com.anjunar.scala.enterprise.macros.PropertyAccess
+import reflect.macros.PropertySupport
 import jfx.control.TableColumn
-import jfx.core.meta.Meta
 import jfx.core.state.{Property, ReadOnlyProperty}
 import jfx.form.Model
 
@@ -18,10 +17,10 @@ class PropertyValueFactory[S, T](val property: String)
   private def resolveValue(rowValue: S): ReadOnlyProperty[T] | Null =
     rowValue match {
       case model: Model[?] =>
-        val typedModel = model.asInstanceOf[Model[Any]]
-        val access = typedModel.meta.properties.find(_.name == property)
-        access match {
-          case Some(a) => wrapValue(a.asInstanceOf[PropertyAccess[Any, Any]].get(rowValue.asInstanceOf[Any]))
+        val allProps = PropertySupport.extractPropertiesWithAccessors[Model[?]]
+        val prop = allProps.find(_.name == property)
+        prop match {
+          case Some(p) => wrapValue(p.accessor.asInstanceOf[reflect.PropertyAccessor[Any, Any]].get(model.asInstanceOf[Any]))
           case None => null
         }
 

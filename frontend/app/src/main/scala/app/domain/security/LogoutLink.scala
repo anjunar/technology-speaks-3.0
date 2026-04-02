@@ -14,12 +14,9 @@ class LogoutLink(
   var method: String = "GET"
 ) extends JsonModel[LogoutLink] with AbstractLink {
 
-  override def meta: Meta[LogoutLink] = LogoutLink.meta
+
 
   override def name: String = "Logout"
 
   override def icon: String = "logout"
 }
-
-object LogoutLink {
-  val meta : Meta[LogoutLink] = Meta(() => new LogoutLink())}

@@ -5,8 +5,8 @@ import app.domain.shared.OwnerProvider
 import app.support.Api
 import app.support.Api.given
 import jfx.core.meta.Meta
-import com.anjunar.scala.enterprise.macros.validation.{NotBlank, NotNull}
 import jfx.core.state.{ListProperty, Property}
+import jfx.form.validators.{NotBlank, NotNull}
 
 import java.util.UUID
 import scala.concurrent.Future
@@ -22,12 +22,10 @@ class Issue extends AbstractEntity[Issue] with OwnerProvider {
   val editor: Property[js.Any | Null] = Property(null)
 
   val editable: Property[Boolean] = Property(false)
-
-  override def meta: Meta[Issue] = Issue.meta
 }
 
 object Issue {
-  val meta: Meta[Issue] = Meta(() => new Issue())
+ 
   def read(id: String): Future[Data[Issue]] =
     Api.get(s"/service/document/documents/document/$id/issues/issue").map(raw => Api.deserialize[Data[Issue]](raw))
 

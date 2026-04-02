@@ -1,7 +1,6 @@
 package jfx.json.serializer
 
-import com.anjunar.scala.enterprise.macros.{PropertyAccess, TypeHelper}
-import com.anjunar.scala.enterprise.macros.reflection.ParameterizedType
+import reflect.{ClassDescriptor, ParameterizedTypeDescriptor}
 import jfx.json.deserializer.JsonContext
 
 import scala.scalajs.js
@@ -11,13 +10,17 @@ class JsArraySerializer extends Serializer[js.Array[?]] {
 
   override def serialize(input: js.Array[?], context: JavaContext): js.Dynamic = {
     val elemType = context.resolvedType match {
-      case pt: ParameterizedType => TypeHelper.simpleRawType(pt.typeArguments(0))
+      case pt: ParameterizedTypeDescriptor => pt.typeArguments(0)
       case _ => throw new IllegalStateException("js.Array must have a generic type")
     }
 
+    val serializer = elemType match {
+      case cd: ClassDescriptor => SerializerFactory.build(cd.typeName)
+      case _ => SerializerFactory.buildFromType(elemType)
+    }
+    
     val arr = input.map { elem =>
-      SerializerFactory.build(TypeHelper.rawType(elemType).asInstanceOf[Class[Any]])
-        .serialize(elem, new JavaContext(elemType))
+      serializer.asInstanceOf[Serializer[Any]].serialize(elem, context)
     }
 
     arr.asInstanceOf[js.Dynamic]

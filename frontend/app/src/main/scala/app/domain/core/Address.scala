@@ -1,8 +1,8 @@
 package app.domain.core
 
 import jfx.core.meta.Meta
-import com.anjunar.scala.enterprise.macros.validation.{NotBlank, Size}
 import jfx.core.state.Property
+import jfx.form.validators.*
 
 class Address extends AbstractEntity[Address] {
 
@@ -21,10 +21,6 @@ class Address extends AbstractEntity[Address] {
   @NotBlank(message = "Land ist erforderlich")
   @Size(min = 2, max = 80, message = "Land muss zwischen 2 und 80 Zeichen haben")
   val country: Property[String] = Property("")
-
-  override def meta: Meta[Address] = Address.meta
+  
 }
 
-object Address {
-  val meta: Meta[Address] = Meta(() => new Address())
-}

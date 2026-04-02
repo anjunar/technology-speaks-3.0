@@ -2,7 +2,7 @@ package app.domain.security
 
 import app.support.JsonModel
 import jfx.core.meta.Meta
-import com.anjunar.scala.enterprise.macros.validation.{NotBlank, Size}
+import jfx.form.validators.{NotBlank, Size}
 import jfx.core.state.Property
 
 import scala.scalajs.js
@@ -19,8 +19,6 @@ class PasswordChange(
   val confirmPassword: Property[String] = Property("")
 ) extends JsonModel[PasswordChange] {
 
-  override def meta: Meta[PasswordChange] = PasswordChange.meta
+
 }
 
-object PasswordChange {
-  val meta : Meta[PasswordChange] = Meta(() => new PasswordChange())}

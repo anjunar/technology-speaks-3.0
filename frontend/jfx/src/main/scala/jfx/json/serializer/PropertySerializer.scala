@@ -1,7 +1,6 @@
 package jfx.json.serializer
 
-import com.anjunar.scala.enterprise.macros.TypeHelper
-import com.anjunar.scala.enterprise.macros.reflection.ParameterizedType
+import reflect.{ClassDescriptor, ParameterizedTypeDescriptor}
 import jfx.core.state.Property
 
 import scala.scalajs.js
@@ -11,7 +10,7 @@ class PropertySerializer extends Serializer[Property[?]]{
   override def serialize(input: Property[?], context: JavaContext): js.Dynamic = {
 
     val propertyType = context.resolvedType match {
-      case parameterizedType: ParameterizedType => TypeHelper.simpleRawType(parameterizedType.typeArguments(0))
+      case parameterizedType: ParameterizedTypeDescriptor => parameterizedType.typeArguments(0)
       case _ => throw new IllegalStateException("Property must have a generic Type")
     }
 
@@ -20,7 +19,11 @@ class PropertySerializer extends Serializer[Property[?]]{
       return null.asInstanceOf[js.Dynamic]
     }
 
-    SerializerFactory.build(TypeHelper.rawType(propertyType).asInstanceOf[Class[Any]])
-      .serialize(value, new JavaContext(propertyType))
+    val serializer = propertyType match {
+      case cd: ClassDescriptor => SerializerFactory.build(cd.typeName)
+      case _ => SerializerFactory.buildFromType(propertyType)
+    }
+    
+    serializer.asInstanceOf[Serializer[Any]].serialize(value, context)
   }
 }

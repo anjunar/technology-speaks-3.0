@@ -7,10 +7,8 @@ import scala.scalajs.js
 class ErrorResponse(
   var message: String = "",
   var path: js.Array[Any] = new js.Array[Any]()
-) extends Model[ErrorResponse] {
-  override def meta: Meta[ErrorResponse] = ErrorResponse.meta
-}
+) extends Model[ErrorResponse]
 
 object ErrorResponse {
-  val meta: Meta[ErrorResponse] = Meta(() => new ErrorResponse())
+
 }

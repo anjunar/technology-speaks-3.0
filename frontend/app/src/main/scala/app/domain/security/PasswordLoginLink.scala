@@ -14,12 +14,9 @@ class PasswordLoginLink(
   var method: String = "GET"
 ) extends JsonModel[PasswordLoginLink] with AbstractLink {
 
-  override def meta: Meta[PasswordLoginLink] = PasswordLoginLink.meta
+
 
   override def name: String = "Login mit Passwort"
 
   override def icon: String = "login"
 }
-
-object PasswordLoginLink {
-  val meta : Meta[PasswordLoginLink] = Meta(() => new PasswordLoginLink())}

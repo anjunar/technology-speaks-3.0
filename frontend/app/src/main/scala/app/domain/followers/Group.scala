@@ -4,8 +4,8 @@ import app.domain.core.{AbstractEntity, Data, Link, Table, User}
 import app.support.Api
 import app.support.Api.given
 import jfx.core.meta.Meta
-import com.anjunar.scala.enterprise.macros.validation.{NotBlank, Size}
 import jfx.core.state.{ListProperty, Property}
+import jfx.form.validators.*
 
 import java.util.UUID
 import scala.concurrent.Future
@@ -21,8 +21,6 @@ class Group extends AbstractEntity[Group] {
 
   val editable: Property[Boolean] = Property(false)
 
-  override def meta: Meta[Group] = Group.meta
-
   def save(): Future[Data[Group]] =
     Api.post("/service/followers/groups/groups", this).map(raw => Api.deserialize[Data[Group]](raw))
 
@@ -34,7 +32,7 @@ class Group extends AbstractEntity[Group] {
 }
 
 object Group {
-  val meta : Meta[Group] = Meta(() => new Group())
+ 
   def read(id: String): Future[Data[Group]] =
     Api.get(s"/service/followers/groups/groups/$id").map(raw => Api.deserialize[Data[Group]](raw))
 

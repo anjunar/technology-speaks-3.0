@@ -12,14 +12,9 @@ class DocumentsLink(
   var rel: String = "",
   var url: String = "",
   var method: String = "GET"
-) extends JsonModel[DocumentsLink] with AbstractLink {
-
-  override def meta: Meta[DocumentsLink] = DocumentsLink.meta
-
+) extends AbstractLink {
+  
   override def name: String = "Dokument"
 
   override def icon: String = "edit_document"
 }
-
-object DocumentsLink {
-  val meta : Meta[DocumentsLink] = Meta(() => new DocumentsLink())}
