@@ -30,12 +30,18 @@ class ModelDeserializer extends Deserializer[Model[?]] {
       case _ =>
     }
 
-    // Create instance directly from registry using type name
-    val model = reflect.ReflectRegistry.createInstance(modelType.typeName) match {
-      case Some(m) => m.asInstanceOf[Model[?]]
-      case None => throw new IllegalArgumentException(s"Cannot create instance for ${modelType.typeName}")
+    // Resolve polymorphic type using @type field in JSON
+    val actualTypeName = modelType match {
+      case cd: reflect.ClassDescriptor => resolvePolymorphicType(json, cd)
+      case _ => modelType.typeName
     }
-    populateModel(model, json, context.resolvedType)
+
+    // Create instance directly from registry using type name
+    val model = reflect.ReflectRegistry.createInstance(actualTypeName) match {
+      case Some(m) => m.asInstanceOf[Model[?]]
+      case None => throw new IllegalArgumentException(s"Cannot create instance for $actualTypeName")
+    }
+    populateModel(model, json, actualTypeName)
     model
   }
 
@@ -44,17 +50,33 @@ class ModelDeserializer extends Deserializer[Model[?]] {
       .filter(v => v != null && !js.isUndefined(v))
       .map(_.toString)
 
-  private def populateModel(model: Model[?], json: Dynamic, typeDescriptor: reflect.TypeDescriptor): Unit = {
+  private def resolvePolymorphicType(json: Dynamic, modelType: reflect.ClassDescriptor): String = {
+    readJsonType(json) match {
+      case Some(jsonTypeName) =>
+        jfx.json.JsonTypeRegistry.resolveType(jsonTypeName) match {
+          case Some(concreteDescriptor) => concreteDescriptor.typeName
+          case None =>
+            js.Dynamic.global.console.warn(s"Unknown JSON type: $jsonTypeName")
+            modelType.typeName
+        }
+      case None => modelType.typeName
+    }
+  }
+
+  private def populateModel(model: Model[?], json: Dynamic, typeName: String): Unit = {
     // Get properties from registry instead of typeDescriptor to avoid recursion issues
-    val typeName = typeDescriptor.typeName
     val classDescriptor = reflect.ReflectRegistry.loadClass(typeName).getOrElse(
       throw new IllegalArgumentException(s"Cannot find class descriptor for $typeName")
     )
     val properties = classDescriptor.properties
-    
+
     properties.foreach { prop =>
       if (!JsonHelpers.isIgnored(prop)) {
-        val fieldName = prop.name
+        // Use JsonName annotation if present, otherwise use the property name
+        val fieldName = prop.getAnnotation("jfx.json.JsonName") match {
+          case Some(ann) => ann.parameters.getOrElse("value", prop.name).toString
+          case None => prop.name
+        }
         val rawValue = json.selectDynamic(fieldName).asInstanceOf[js.Any]
         if (!js.isUndefined(rawValue) && rawValue != null) {
           val decoded = deserializeValue(rawValue, prop.propertyType)
