@@ -34,6 +34,15 @@ final case class ClassDescriptor(
 
   def createInstance(): Option[Any] =
     boundFactory.map(_())
+
+  def newInstance(): Option[Any] =
+    createInstance().orElse(ClassDescriptor.maybeResolve(this).flatMap(_.createInstance()))
+
+  def requireCreateInstance(): Any =
+    newInstance().getOrElse(throw new IllegalArgumentException(s"Cannot instantiate $typeName"))
+
+  def resolved: ClassDescriptor =
+    ClassDescriptor.resolve(this)
   
   lazy val propertyNames: Array[String] = properties.map(_.name)
   lazy val typeParameterNames: Array[String] =
@@ -41,6 +50,15 @@ final case class ClassDescriptor(
   
   def getProperty(name: String): Option[PropertyDescriptor] =
     properties.find(_.name == name)
+
+  def getPropertyAccessor(name: String): Option[PropertyAccessor[Any, Any]] =
+    getProperty(name).flatMap(_.accessor)
+      .orElse(resolved.getProperty(name).flatMap(_.accessor))
+
+  def requirePropertyAccessor(name: String): PropertyAccessor[Any, Any] =
+    getPropertyAccessor(name).getOrElse(
+      throw new IllegalArgumentException(s"Missing accessor for $typeName.$name")
+    )
   
   def getWriteableProperties: Array[PropertyDescriptor] =
     properties.filter(_.isWriteable)
@@ -51,7 +69,10 @@ final case class ClassDescriptor(
   def hasProperty(name: String): Boolean = propertyNames.contains(name)
   
   def isSubTypeOf(otherTypeName: String): Boolean =
-    baseTypes.contains(otherTypeName)
+    baseTypes.contains(otherTypeName) || ClassDescriptor.isAssignableFrom(typeName, otherTypeName)
+
+  def isAssignableTo(otherTypeName: String): Boolean =
+    ClassDescriptor.isAssignableFrom(typeName, otherTypeName)
 }
 
 object ClassDescriptor {
@@ -63,4 +84,31 @@ object ClassDescriptor {
 
   def maybeForName(typeName: String): Option[ClassDescriptor] =
     ReflectRegistry.loadClass(typeName)
+
+  def forSimpleName(simpleName: String): ClassDescriptor =
+    maybeForSimpleName(simpleName).getOrElse(
+      throw new IllegalArgumentException(s"Cannot load class descriptor by simple name: $simpleName")
+    )
+
+  def maybeForSimpleName(simpleName: String): Option[ClassDescriptor] =
+    ReflectRegistry.loadClassBySimpleName(simpleName)
+
+  def resolve(descriptor: ClassDescriptor): ClassDescriptor =
+    maybeResolve(descriptor).getOrElse(
+      throw new IllegalArgumentException(s"Missing class descriptor for ${descriptor.typeName}")
+    )
+
+  def maybeResolve(descriptor: ClassDescriptor): Option[ClassDescriptor] =
+    Option.when(descriptor.properties.nonEmpty || descriptor.typeParameters.nonEmpty)(descriptor)
+      .orElse(maybeForName(descriptor.typeName))
+      .orElse(maybeForName(descriptor.simpleName))
+
+  def all: Iterable[ClassDescriptor] =
+    ReflectRegistry.getAllRegistered
+
+  def subTypesOf(superTypeName: String): List[ClassDescriptor] =
+    ReflectRegistry.getSubTypes(superTypeName)
+
+  def isAssignableFrom(subType: String, superType: String): Boolean =
+    ReflectRegistry.isAssignableFrom(subType, superType)
 }

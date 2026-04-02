@@ -1,7 +1,7 @@
 package jfx.json
 
 import jfx.core.state.{ListProperty, Property}
-import reflect.{Annotation, ClassDescriptor, ParameterizedTypeDescriptor, PropertyAccessor, PropertyDescriptor, ReflectRegistry, TypeDescriptor, TypeVariableDescriptor}
+import reflect.{Annotation, ClassDescriptor, ParameterizedTypeDescriptor, PropertyAccessor, PropertyDescriptor, TypeDescriptor, TypeVariableDescriptor}
 import reflect.macros.ReflectMacros.reflectType
 
 import java.util.UUID
@@ -164,10 +164,10 @@ object JsonMapper {
   }
 
   private def deserializeObjectValue(value: js.Any, declaredDescriptor: ClassDescriptor, parentContext: JsonContext): Any = {
-    val resolvedDescriptor = resolvePolymorphicDescriptor(declaredDescriptor, value).getOrElse(fullDescriptor(declaredDescriptor))
+    val resolvedDescriptor = resolvePolymorphicDescriptor(declaredDescriptor, value).getOrElse(declaredDescriptor.resolved)
     val bindings = typeBindings(parentContext.resolve(parentContext.expectedType), resolvedDescriptor)
     val context = JsonContext(resolvedDescriptor, bindings)
-    val instance = createInstance(resolvedDescriptor)
+    val instance = resolvedDescriptor.requireCreateInstance()
     val properties = serializableProperties(resolvedDescriptor)
     val jsonObject = asDictionary(value)
 
@@ -374,12 +374,12 @@ object JsonMapper {
       case None if declaredDescriptor.isAbstract =>
         throw new IllegalArgumentException(s"Missing @type for abstract type ${declaredDescriptor.typeName}")
       case None =>
-        Some(fullDescriptor(declaredDescriptor))
+        Some(declaredDescriptor.resolved)
     }
   }
 
   private def serializationDescriptorForValue(value: Any, declaredDescriptor: ClassDescriptor): ClassDescriptor = {
-    val fullDeclared = fullDescriptor(declaredDescriptor)
+    val fullDeclared = declaredDescriptor.resolved
     if (!fullDeclared.isAbstract) {
       fullDeclared
     } else {
@@ -406,8 +406,8 @@ object JsonMapper {
   }
 
   private def subtypeCandidates(descriptor: ClassDescriptor): List[ClassDescriptor] =
-    (Option.when(ReflectRegistry.contains(descriptor.typeName))(fullDescriptor(descriptor)).toList ++
-      ReflectRegistry.getAllRegistered.filter(candidate => isAssignableTo(candidate, descriptor.typeName)).toList)
+    (ClassDescriptor.maybeResolve(descriptor).toList ++
+      ClassDescriptor.all.filter(candidate => isAssignableTo(candidate, descriptor.typeName)).toList)
       .distinctBy(_.typeName)
 
   private def matchesJsonType(descriptor: ClassDescriptor, jsonType: String): Boolean = {
@@ -422,7 +422,7 @@ object JsonMapper {
     annotationValue(descriptor.annotations, JsonTypeAnnotation)
 
   private def isAssignableTo(descriptor: ClassDescriptor, superTypeName: String): Boolean =
-    descriptor.typeName == superTypeName || descriptor.baseTypes.contains(superTypeName)
+    descriptor.typeName == superTypeName || descriptor.isAssignableTo(superTypeName)
 
   private def candidateRuntimeNames(value: Any): Vector[String] = {
     val javaClass = value.getClass
@@ -439,7 +439,7 @@ object JsonMapper {
   }
 
   private def serializableProperties(descriptor: ClassDescriptor): Array[PropertyDescriptor] =
-    fullDescriptor(descriptor).properties
+    descriptor.resolved.properties
       .filterNot(_.hasAnnotation(JsonIgnoreAnnotation))
       .filter(isSerializableProperty)
 
@@ -456,23 +456,7 @@ object JsonMapper {
     annotations.find(_.annotationClassName == annotationClassName).flatMap(_.parameters.get("value")).map(_.toString)
 
   private def propertyAccessor(owner: ClassDescriptor, property: PropertyDescriptor): PropertyAccessor[Any, Any] =
-    property.accessor
-      .orElse(ReflectRegistry.getPropertyAccessor(owner.typeName, property.name))
-      .orElse(ReflectRegistry.getPropertyAccessor(owner.simpleName, property.name))
-      .orElse(fullDescriptor(owner).getProperty(property.name).flatMap(_.accessor))
-      .getOrElse(throw new IllegalArgumentException(s"Missing accessor for ${owner.typeName}.${property.name}"))
-      .asInstanceOf[PropertyAccessor[Any, Any]]
-
-  private def createInstance(descriptor: ClassDescriptor): Any =
-    ReflectRegistry.createInstance(descriptor.typeName)
-      .orElse(ReflectRegistry.createInstance(descriptor.simpleName))
-      .getOrElse(throw new IllegalArgumentException(s"Cannot instantiate ${descriptor.typeName}"))
-
-  private def fullDescriptor(descriptor: ClassDescriptor): ClassDescriptor =
-    Option.when(descriptor.properties.nonEmpty || descriptor.typeParameters.nonEmpty)(descriptor)
-      .orElse(ClassDescriptor.maybeForName(descriptor.typeName))
-      .orElse(ClassDescriptor.maybeForName(descriptor.simpleName))
-      .getOrElse(throw new IllegalArgumentException(s"Missing class descriptor for ${descriptor.typeName}"))
+    owner.requirePropertyAccessor(property.name).asInstanceOf[PropertyAccessor[Any, Any]]
 
   private def childContext(parent: JsonContext, childType: TypeDescriptor): JsonContext = {
     val resolved = parent.resolve(childType)
@@ -521,7 +505,7 @@ object JsonMapper {
       case parameterized: ParameterizedTypeDescriptor =>
         parameterized.rawType
       case classDescriptor: ClassDescriptor =>
-        fullDescriptor(classDescriptor)
+        classDescriptor.resolved
       case variable: TypeVariableDescriptor =>
         variable.bounds.iterator.flatMap(ClassDescriptor.maybeForName).toSeq.headOption.getOrElse(
           throw new IllegalArgumentException(s"Cannot resolve type variable ${variable.name}")

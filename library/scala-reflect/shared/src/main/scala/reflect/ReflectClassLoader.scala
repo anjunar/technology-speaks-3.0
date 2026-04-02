@@ -8,6 +8,9 @@ class ReflectClassLoader(
   private val localRegistry: mutable.Map[String, ClassDescriptor] = mutable.Map.empty
 ) extends ClassLoaderLike {
 
+  private def localDescriptors: Iterable[ClassDescriptor] =
+    localRegistry.values.map(_.resolved)
+
   def register[T](descriptor: ClassDescriptor, factory: Option[() => T] = None)(using ClassTag[T]): Unit = {
     val typeName = descriptor.typeName
     descriptor.bindRuntimeClass(summon[ClassTag[T]].runtimeClass)
@@ -31,8 +34,9 @@ class ReflectClassLoader(
 
   def loadClass(typeName: String): Option[ClassDescriptor] = {
     localRegistry.get(typeName)
+      .map(_.resolved)
       .orElse(parent.flatMap(_.loadClass(typeName)))
-      .orElse(ReflectRegistry.loadClass(typeName))
+      .orElse(ClassDescriptor.maybeForName(typeName))
   }
 
   def loadClass[T](using Manifest[T]): Option[ClassDescriptor] =
@@ -40,42 +44,29 @@ class ReflectClassLoader(
 
   def loadClassBySimpleName(simpleName: String): Option[ClassDescriptor] = {
     localRegistry.values.find(_.simpleName == simpleName)
+      .map(_.resolved)
       .orElse(parent.flatMap(_.loadClassBySimpleName(simpleName)))
-      .orElse(ReflectRegistry.loadClassBySimpleName(simpleName))
+      .orElse(ClassDescriptor.maybeForSimpleName(simpleName))
   }
 
-  def createInstance(typeName: String): Option[Any] = {
-    localRegistry.get(typeName).flatMap(_.createInstance())
-      .orElse(localRegistry.values.find(_.simpleName == typeName).flatMap(_.createInstance()))
-      .orElse(parent.flatMap(_.createInstance(typeName)))
-      .orElse(ReflectRegistry.createInstance(typeName))
-  }
+  def createInstance(typeName: String): Option[Any] =
+    loadClass(typeName).flatMap(_.newInstance())
+      .orElse(loadClassBySimpleName(typeName).flatMap(_.newInstance()))
 
   def createInstanceAs[T](typeName: String): Option[T] =
     createInstance(typeName).map(_.asInstanceOf[T])
 
-  def isAssignableFrom(subType: String, superType: String): Boolean = {
-    if subType == superType then return true
-
-    (loadClass(subType), loadClass(superType)) match {
-      case (Some(subDescriptor), Some(superDescriptor)) =>
-        (subDescriptor.runtimeClass, superDescriptor.runtimeClass) match {
-          case (Some(subRuntimeClass), Some(superRuntimeClass)) =>
-            superRuntimeClass.isAssignableFrom(subRuntimeClass)
-          case _ =>
-            subDescriptor.baseTypes.contains(superType) || subDescriptor.baseTypes.exists(bt => isAssignableFrom(bt, superType))
-        }
-      case _ => false
-    }
-  }
+  def isAssignableFrom(subType: String, superType: String): Boolean =
+    if subType == superType then true
+    else loadClass(subType).exists(_.isAssignableTo(superType))
 
   def isAssignableFrom[T](subType: String)(using Manifest[T]): Boolean =
     isAssignableFrom(subType, manifest[T].runtimeClass.getName)
 
   def getSubTypes(superType: String): List[ClassDescriptor] = {
-    val local = localRegistry.values.filter(_.baseTypes.contains(superType)).toList
+    val local = localDescriptors.filter(_.isSubTypeOf(superType)).toList
     val parentSubs = parent.map(_.getSubTypes(superType)).getOrElse(Nil)
-    val registrySubs = ReflectRegistry.getSubTypes(superType)
+    val registrySubs = ClassDescriptor.subTypesOf(superType)
     (local ++ parentSubs ++ registrySubs).distinct
   }
 
@@ -83,15 +74,16 @@ class ReflectClassLoader(
     getSubTypes(manifest[T].runtimeClass.getName)
 
   def getAllRegistered: Iterable[ClassDescriptor] = {
-    val local = localRegistry.values
+    val local = localDescriptors
     val parentTypes = parent.map(_.getAllRegistered).getOrElse(Nil)
-    (local ++ parentTypes ++ ReflectRegistry.getAllRegistered).toList.distinctBy(_.typeName)
+    (local ++ parentTypes ++ ClassDescriptor.all).toList.distinctBy(_.typeName)
   }
 
   def contains(typeName: String): Boolean =
     localRegistry.contains(typeName) ||
     parent.exists(_.contains(typeName)) ||
-    ReflectRegistry.contains(typeName)
+    ClassDescriptor.maybeForName(typeName).nonEmpty ||
+    ClassDescriptor.maybeForSimpleName(typeName).nonEmpty
 
   def clearLocal(): Unit = {
     localRegistry.clear()
