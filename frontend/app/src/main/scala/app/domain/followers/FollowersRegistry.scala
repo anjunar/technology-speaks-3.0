@@ -7,8 +7,8 @@ object FollowersRegistry {
   def init(): Unit = {
     val loader = PackageClassLoader("app.domain.followers")
     
-    loader.register(() => new RelationShip())
-    loader.register(() => new Group())
-    loader.register(() => new GroupAssignmentRequest())
+    loader.register(() => new RelationShip(), classOf[RelationShip])
+    loader.register(() => new Group(), classOf[Group])
+    loader.register(() => new GroupAssignmentRequest(), classOf[GroupAssignmentRequest])
   }
 }

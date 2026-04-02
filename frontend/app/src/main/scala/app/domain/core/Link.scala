@@ -4,7 +4,7 @@ import jfx.core.meta.Meta
 
 import scala.scalajs.js
 
-case class Link(
+class Link(
   var rel: String = "",
   var url: String = "",
   var method: String = "GET",

@@ -7,7 +7,7 @@ object DocumentsRegistry {
   def init(): Unit = {
     val loader = PackageClassLoader("app.domain.documents")
     
-    loader.register(() => new Document())
-    loader.register(() => new Issue())
+    loader.register(() => new Document(), classOf[Document])
+    loader.register(() => new Issue(), classOf[Issue])
   }
 }

@@ -8,9 +8,9 @@ object TimelineRegistry {
   def init(): Unit = {
     val loader = PackageClassLoader("app.domain.timeline")
     
-    loader.register(() => new Post())
-    loader.register(() => new Like())
-    loader.register(() => new FirstComment())
-    loader.register(() => new SecondComment())
+    loader.register(() => new Post(), classOf[Post])
+    loader.register(() => new Like(), classOf[Like])
+    loader.register(() => new FirstComment(), classOf[FirstComment])
+    loader.register(() => new SecondComment(), classOf[SecondComment])
   }
 }

@@ -1,5 +1,7 @@
 package reflect
 
+import scala.compiletime.uninitialized
+
 final case class ClassDescriptor(
   typeName: String,
   simpleName: String,
@@ -12,6 +14,8 @@ final case class ClassDescriptor(
   isFinal: Boolean,
   isCaseClass: Boolean
 ) extends TypeDescriptor {
+
+  var runtimeClass : Class[?] = uninitialized
   
   lazy val propertyNames: Array[String] = properties.map(_.name)
   

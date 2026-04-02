@@ -8,8 +8,9 @@ class PackageClassLoader(val packageName: String, parent: ReflectClassLoader) {
 
   private val loader: ReflectClassLoader = ReflectClassLoader.createWithParent(parent)
 
-  inline def register[T](inline factory: () => T): ClassDescriptor = {
+  inline def register[T](inline factory: () => T, clazz : Class[T]): ClassDescriptor = {
     val descriptor = ReflectMacros.reflectWithAccessors[T]
+    descriptor.runtimeClass = clazz
     loader.register[T](descriptor, factory)
     reflect.ReflectRegistry.registerByTypeName(descriptor.typeName, descriptor, Some(factory.asInstanceOf[() => Any]))
     descriptor
