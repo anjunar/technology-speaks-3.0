@@ -36,7 +36,7 @@ Diese Datei beschreibt nicht nur Arbeitsregeln, sondern die tragenden Architektu
   - Eigenes UI-/State-/DSL-Framework fuer Scala.js.
 - `frontend/app`
   - Die eigentliche Web-App auf Basis von `jfx`.
-- `library/json-mapper`, `library/scala-enterprise`, `library/scala-universe`
+- `library/json-mapper`, `library/scala-reflect`, `library/scala-universe`
   - Interne Bibliotheken, auf denen Backend und Mapping aufbauen.
 
 ## Harte Architekturregeln
@@ -54,7 +54,7 @@ Diese Datei beschreibt nicht nur Arbeitsregeln, sondern die tragenden Architektu
 ### Serialisierungs-/Mapping-Architektur als harte Regel
 - Serialisierung ist in diesem Projekt kein Detail, sondern ein eigener Architekturpfeiler.
 - Backend-JSON laeuft ueber die interne Mapper-/DTO-Architektur, nicht ueber beliebige Standard-Case-Class-Serialisierung.
-- Frontend-Deserialisierung laeuft ueber `AppJson.mapper`.
+- Frontend-Serialisierung und -Deserialisierung laufen ueber `app.support.Api` und `jfx.json.JsonMapper`.
 - Frontend-Modelle muessen ihre `properties` explizit deklarieren.
 - Wenn ein Feld im Backend oder Frontend neu eingefuehrt wird, muss geprueft werden:
   - Backend-Entity/DTO
@@ -95,7 +95,16 @@ Diese Datei beschreibt nicht nur Arbeitsregeln, sondern die tragenden Architektu
 - `AbstractEntity` liefert `id`, `version`, `created`, `modified`.
 - Repositories sind nicht als klassische Spring Data Interfaces modelliert, sondern ueber `RepositoryContext[E]`.
 - Entitaetsinstanzen koennen ueber `EntityContext[E]` selbst `persist`, `merge` und `remove` ausfuehren.
+- Persistenzzugriffe sind zunehmend ueber explizit injizierte `EntityManager` plus `given EntityManager` modelliert, nicht mehr ueber globalen Zugriff.
+- Controller und Services koennen dafuer `EntityManagerProvider` nutzen, um den injizierten `EntityManager` als lokalen Kontext bereitzustellen.
 - Dieses Projekt nutzt also aktiv ein Active-Record-aehnliches Muster, nicht strikt Repository + Service pro Aggregate.
+
+### SpringContext-Regel
+- `SpringContext` ist Infrastruktur und kein bevorzugtes allgemeines Architekturpattern mehr.
+- Neue Implementierungen sollen Abhaengigkeiten moeglichst explizit per Konstruktor-Injektion erhalten.
+- Wenn ein `EntityManager` fuer `EntityContext` oder `RepositoryContext` benoetigt wird, soll er ueber `given EntityManager` in den lokalen Kontext gebracht werden statt ueber globalen Zugriff.
+- Verbleibende `SpringContext`-Nutzung ist als Altlast oder Infrastrukturgrenze zu behandeln, nicht als Vorlage fuer neue Stellen.
+- Agenten sollen neue `SpringContext.getBean(...)`- oder `SpringContext.entityManager()`-Nutzung nur dann einfuehren, wenn es wirklich eine technische Grenze gibt und kein sauberer expliziter Kontext moeglich ist.
 
 ### Schema- und Sichtbarkeitsmodell
 - Das Projekt nutzt Entity-Schemas als First-Class-Konzept.
@@ -169,9 +178,15 @@ Diese Datei beschreibt nicht nur Arbeitsregeln, sondern die tragenden Architektu
 
 ### API-Kopplung
 - Das Frontend spricht die API ueber `app.support.Api`.
-- Die API-Schicht serialisiert und deserialisiert nicht mit beliebigem JSON-Mapping, sondern ueber `AppJson.mapper`.
+- Die API-Schicht serialisiert und deserialisiert nicht mit beliebigem JSON-Mapping, sondern ueber `jfx.json.JsonMapper` und die typisierten Hilfspfade in `app.support.Api`.
 - Frontend-Modelle implementieren `JsonModel` oder `Model` und besitzen explizite `properties`.
 - Backend-DTOs wie `Data`, `Table`, `Schema`, `Link` und Fachentitaeten werden im Frontend erneut abgebildet.
+
+### Reflection- und Descriptor-Architektur
+- Die interne Reflection-Schicht ist descriptor-zentriert.
+- `ClassDescriptor` ist der zentrale Einstiegspunkt fuer Lookup, Runtime-Class-Bindung, Factory und Instanziierung.
+- Konsumenten sollen fuer Descriptor-Lookups bevorzugt `ClassDescriptor.forName(...)` bzw. `ClassDescriptor.maybeForName(...)` verwenden statt direkt auf `ReflectRegistry` zuzugreifen.
+- `ReflectRegistry` und Loader sind Infrastruktur; neue API-Oberflaechen sollen moeglichst um `ClassDescriptor` herum entworfen werden.
 
 ### HATEOAS im Frontend
 - UI-Aktionen sollen moeglichst von vorhandenen Links (`rel`) abhaengen, nicht nur von vermuteten URLs.
@@ -223,6 +238,7 @@ Diese Datei beschreibt nicht nur Arbeitsregeln, sondern die tragenden Architektu
 - Das Frontend rendert datengetrieben und linkgetrieben, nicht nur routegetrieben.
 - Das Projekt bevorzugt eigene Framework-Abstraktionen gegenueber Mainstream-Frameworks.
 - Persistenzoperationen liegen teilweise direkt auf Entities bzw. Repository-Contexts, nicht in einem strikten Service-Layer.
+- Explizite Injektion und lokale Kontextbereitstellung sind gegenueber globalem `SpringContext` zu bevorzugen.
 - Domain-, API- und UI-Modelle sind bewusst getrennt und duerfen nicht vermischt werden.
 - Dispose-/Observer-Disziplin ist Teil der Frontend-Architektur, nicht nur Cleanup-Kosmetik.
 - Mapping und Serialisierung sind bindende Architekturregeln.
@@ -241,6 +257,8 @@ Diese Datei beschreibt nicht nur Arbeitsregeln, sondern die tragenden Architektu
 - Keine neue Fremdbibliothek einfuehren, wenn das bestehende `jfx`- oder Mapping-System das Problem bereits loesen soll.
 - Bei UI-Aenderungen immer pruefen, ob die eigentliche Ursache im `jfx`-Framework statt in der konkreten Page liegt.
 - Bei Backend-Aenderungen immer beachten, dass Frontend-Modelle, JSON-Mapping und Schemas synchron bleiben muessen.
+- Bei Backend-Aenderungen `SpringContext` nicht als Standardabkuerzung verwenden, wenn Konstruktor-Injektion oder `given EntityManager` den Kontext sauberer ausdruecken.
+- Bei Reflection-/Mapper-Aenderungen zuerst pruefen, ob die API ueber `ClassDescriptor` ausgedrueckt werden kann, statt Registry-Details in Konsumenten zu verteilen.
 
 ## Test- und Laufzeitkontext
 - Vite-Frontend laeuft auf `localhost:5173`.
