@@ -8,7 +8,8 @@ final case class PropertyDescriptor(
   isReadable: Boolean,
   isPublic: Boolean,
   isPrivate: Boolean,
-  isProtected: Boolean
+  isProtected: Boolean,
+  accessor: Option[PropertyAccessor[Any, Any]]
 ) {
 
   def hasAnnotation(annotationClass: String): Boolean =

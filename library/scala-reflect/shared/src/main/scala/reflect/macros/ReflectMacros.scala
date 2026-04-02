@@ -13,6 +13,8 @@ object ReflectMacros {
 
   inline def extractConstructors[T]: Array[ConstructorDescriptor] = ${ extractConstructorsImpl[T] }
 
+  inline def reflectWithAccessors[T]: ClassDescriptor = ${ reflectWithAccessorsImpl[T] }
+
   inline def makeAccessor[E, V](inline selector: E => V): PropertyAccessor[E, V] =
     ${ makeAccessorImpl[E, V]('selector) }
 
@@ -49,6 +51,100 @@ object ReflectMacros {
         isCaseClass = $isCaseClassExpr
       )
     }
+  }
+
+  private[macros] def reflectWithAccessorsImpl[T: Type](using Quotes): Expr[ClassDescriptor] = {
+    import quotes.reflect.*
+
+    val tpe = TypeRepr.of[T]
+    val symbol = tpe.typeSymbol
+
+    val typeNameExpr = Expr(symbol.fullName)
+    val simpleNameExpr = Expr(symbol.name)
+    val annotationsExpr = extractAnnotations(symbol)
+    val propertiesExpr = extractPropertiesWithAccessorsImpl[T]
+    val baseTypesExpr = extractBaseTypes(tpe)
+    val typeParamsExpr = extractTypeParameters(symbol)
+    val constructorsExpr = extractConstructorsImpl[T]
+    val isAbstractExpr = Expr(symbol.flags.is(Flags.Abstract))
+    val isFinalExpr = Expr(symbol.flags.is(Flags.Final))
+    val isCaseClassExpr = Expr(symbol.flags.is(Flags.Case))
+
+    '{
+      ClassDescriptor(
+        typeName = $typeNameExpr,
+        simpleName = $simpleNameExpr,
+        annotations = $annotationsExpr,
+        properties = $propertiesExpr,
+        baseTypes = $baseTypesExpr,
+        typeParameters = $typeParamsExpr,
+        constructors = $constructorsExpr,
+        isAbstract = $isAbstractExpr,
+        isFinal = $isFinalExpr,
+        isCaseClass = $isCaseClassExpr
+      )
+    }
+  }
+
+  private[macros] def extractPropertiesWithAccessorsImpl[T: Type](using Quotes): Expr[Array[PropertyDescriptor]] = {
+    import quotes.reflect.*
+
+    val tpe = TypeRepr.of[T]
+    val propertySymbols = collectPropertySymbols(tpe)
+
+    val propertyDescriptors = propertySymbols.map { s =>
+      val nameExpr = Expr(s.name)
+      val propertyType = normalizeType(tpe.memberType(s))
+      val propertyTypeExpr = buildTypeDescriptorSimple(propertyType)
+      val annotationsExpr = extractAnnotations(s)
+
+      val isWriteable = tpe.typeSymbol.methodMember(s"${s.name}_=").nonEmpty ||
+        tpe.baseClasses.exists(_.methodMember(s"${s.name}_=").nonEmpty)
+      val isWriteableExpr = Expr(isWriteable)
+
+      val isPublicExpr = Expr(!s.flags.is(Flags.Private) && !s.flags.is(Flags.Protected))
+      val isPrivateExpr = Expr(s.flags.is(Flags.Private))
+      val isProtectedExpr = Expr(s.flags.is(Flags.Protected))
+      val isReadableExpr = Expr(!s.flags.is(Flags.Private))
+
+      propertyType.asType match {
+        case '[v] =>
+          val getterExpr = '{ (t: T) => ${ Select('{ t }.asTerm, s).asExprOf[v] } }
+
+          val setterName = s"${s.name}_="
+          val setterExists = isWriteable
+
+          val accessorExpr =
+            if setterExists then
+              val setterSym = tpe.typeSymbol.methodMember(setterName).headOption
+                .orElse(tpe.baseClasses.flatMap(_.methodMember(setterName)).headOption)
+              setterSym match {
+                case Some(sym) =>
+                  val setterExpr = '{ (t: T, vv: v) => ${ Select('{ t }.asTerm, sym).appliedTo('{ vv }.asTerm).asExprOf[Unit] } }
+                  '{ PropertyAccessor($getterExpr, $setterExpr) }
+                case None =>
+                  '{ PropertyAccessor.readOnly($getterExpr) }
+              }
+            else
+              '{ PropertyAccessor.readOnly($getterExpr) }
+
+          '{
+            PropertyDescriptor(
+              name = $nameExpr,
+              propertyType = $propertyTypeExpr,
+              annotations = $annotationsExpr,
+              isWriteable = $isWriteableExpr,
+              isReadable = $isReadableExpr,
+              isPublic = $isPublicExpr,
+              isPrivate = $isPrivateExpr,
+              isProtected = $isProtectedExpr,
+              accessor = Some($accessorExpr.asInstanceOf[PropertyAccessor[Any, Any]])
+            )
+          }
+      }
+    }
+
+    '{ Array(${ Varargs(propertyDescriptors) }*) }
   }
   
   private def reflectTypeImpl[T: Type](using Quotes): Expr[TypeDescriptor] = {
@@ -128,7 +224,8 @@ object ReflectMacros {
           isReadable = $isReadableExpr,
           isPublic = $isPublicExpr,
           isPrivate = $isPrivateExpr,
-          isProtected = $isProtectedExpr
+          isProtected = $isProtectedExpr,
+          accessor = None
         )
       }
     }
@@ -264,7 +361,8 @@ object ReflectMacros {
           isReadable = $isReadableExpr,
           isPublic = $isPublicExpr,
           isPrivate = $isPrivateExpr,
-          isProtected = $isProtectedExpr
+          isProtected = $isProtectedExpr,
+          accessor = None
         )
       }
     }

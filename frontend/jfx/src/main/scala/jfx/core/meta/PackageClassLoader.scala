@@ -1,7 +1,7 @@
 package jfx.core.meta
 
 import reflect.*
-import reflect.macros.{PropertySupport, ReflectMacros}
+import reflect.macros.ReflectMacros
 import scala.collection.mutable
 
 class PackageClassLoader(val packageName: String, parent: ReflectClassLoader) {
@@ -9,14 +9,8 @@ class PackageClassLoader(val packageName: String, parent: ReflectClassLoader) {
   private val loader: ReflectClassLoader = ReflectClassLoader.createWithParent(parent)
 
   inline def register[T](inline factory: () => T): ClassDescriptor = {
-    val descriptor = ReflectMacros.reflect[T]
+    val descriptor = ReflectMacros.reflectWithAccessors[T]
     loader.register[T](descriptor, factory)
-    
-    // Also register in ReflectRegistry with accessors for JSON serialization
-    val props = PropertySupport.extractPropertiesWithAccessors[T]
-    val accessors = props.map(p => p.name -> p.accessor.asInstanceOf[PropertyAccessor[T, Any]]).toMap
-    ReflectRegistry.registerWithAccessors(descriptor, factory, accessors)
-    
     descriptor
   }
 

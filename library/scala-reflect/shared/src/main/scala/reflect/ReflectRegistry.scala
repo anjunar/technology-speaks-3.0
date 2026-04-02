@@ -1,6 +1,5 @@
 package reflect
 
-import reflect.macros.PropertySupport
 import scala.collection.mutable
 
 object ReflectRegistry {
@@ -8,26 +7,21 @@ object ReflectRegistry {
   private val descriptorsByName: mutable.Map[String, ClassDescriptor] = mutable.Map.empty
   private val descriptorsBySimpleName: mutable.Map[String, ClassDescriptor] = mutable.Map.empty
   private val factories: mutable.Map[String, () => Any] = mutable.Map.empty
-  private val propertyAccessors: mutable.Map[String, Map[String, PropertyAccessor[Any, Any]]] = mutable.Map.empty
 
   inline def register[T](inline factory: () => T): ClassDescriptor = {
-    val descriptor = reflect.macros.ReflectMacros.reflect[T]
-    val props = PropertySupport.extractPropertiesWithAccessors[T]
-    val accessors = props.map(p => p.name -> p.accessor.asInstanceOf[PropertyAccessor[T, Any]]).toMap
-    registerWithAccessors(descriptor, factory, accessors)
+    val descriptor = reflect.macros.ReflectMacros.reflectWithAccessors[T]
+    factories += descriptor.typeName -> (factory.asInstanceOf[() => Any])
+    registerWithAccessors(descriptor)
     descriptor
   }
 
-  def registerWithAccessors[T](descriptor: ClassDescriptor, factory: () => T, accessors: Map[String, PropertyAccessor[T, Any]]): Unit = {
+  def registerWithAccessors[T](descriptor: ClassDescriptor): Unit = {
     val typeName = descriptor.typeName
     descriptorsByName += typeName -> descriptor
 
     val simpleName = descriptor.simpleName
     if !descriptorsBySimpleName.contains(simpleName) then
       descriptorsBySimpleName += simpleName -> descriptor
-
-    factories += typeName -> (factory.asInstanceOf[() => Any])
-    propertyAccessors += typeName -> accessors.asInstanceOf[Map[String, PropertyAccessor[Any, Any]]]
   }
 
   def registerByTypeName(typeName: String, descriptor: ClassDescriptor, factory: Option[() => Any] = None): Unit = {
@@ -52,7 +46,7 @@ object ReflectRegistry {
     factories.get(typeName).map(_())
 
   def getPropertyAccessor(typeName: String, propertyName: String): Option[PropertyAccessor[Any, Any]] =
-    propertyAccessors.get(typeName).flatMap(_.get(propertyName))
+    descriptorsByName.get(typeName).flatMap(_.properties.find(_.name == propertyName).flatMap(_.accessor))
 
   def isAssignableFrom(subType: String, superType: String): Boolean = {
     if subType == superType then return true
@@ -76,7 +70,6 @@ object ReflectRegistry {
     descriptorsByName.clear()
     descriptorsBySimpleName.clear()
     factories.clear()
-    propertyAccessors.clear()
   }
 
 }
