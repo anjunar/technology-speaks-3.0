@@ -2,9 +2,11 @@ package app.domain.security
 
 import app.domain.core.AbstractLink
 import jfx.core.meta.Meta
+import jfx.json.JsonType
 
 import scala.scalajs.js
 
+@JsonType("confirm-confirm")
 class ConfirmLink(
   var rel: String = "",
   var url: String = "",

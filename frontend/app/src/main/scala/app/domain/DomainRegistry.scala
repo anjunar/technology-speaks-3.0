@@ -26,7 +26,6 @@ object DomainRegistry {
     loader.register(() => new WebAuthnLoginLink())
     loader.register(() => new WebAuthnRegisterLink())
     loader.register(() => new LogoutLink())
-    loader.register(() => new AccountLink())
     loader.register(() => new ConfirmLink())
 
     loader.register(() => new Thumbnail())

@@ -7,90 +7,103 @@ import org.springframework.http.{HttpStatus, ResponseEntity}
 import org.springframework.web.bind.annotation.{PostMapping, RequestBody, RestController}
 
 import java.security.SecureRandom
+import scala.jdk.CollectionConverters.*
 
 @RestController
 class PasswordRegisterController(val registerService: RegisterService, val sessionHolder: SessionHolder) {
 
   @PostMapping(value = Array("/security/register"), produces = Array("application/json"), consumes = Array("application/json"))
   @RolesAllowed(Array("Anonymous"))
-  def register(@RequestBody jsonObject: JsonObject): ResponseEntity[JsonNode] = {
-    val nickName = jsonObject.getString("nickName")
-    val email = jsonObject.getString("email")
-    val password = jsonObject.getString("password")
+  def register(@RequestBody jsonObject: PasswordRegistration): ResponseEntity[JsonNode] = {
+    val nickName = jsonObject.nickName
+    val email = jsonObject.email
+    val password = jsonObject.password
 
-    var user = User.query("nickName" -> nickName)
+    val user = User.query("nickName" -> nickName)
+    val existingEmail = EMail.query("value" -> email)
+
+    if (user == null && existingEmail != null) {
+      return validationError("email", "Email ist bereits vergeben.")
+    }
+
+    if (user != null && existingEmail == null) {
+      return validationError("email", "Email wurde nicht gefunden.")
+    }
+
+    if (user != null && existingEmail.user != user) {
+      return validationError("email", "Email passt nicht zum Nickname.")
+    }
+
     val guestRole = Role.query("name" -> "Guest")
+    val verificationCode = generateCode()
 
-    if (user == null) {
+    val resolvedUser =
+      if (user != null) user
+      else new User(nickName)
 
-      user = new User(nickName)
-
-      val emailEntity = new EMail(email)
-      emailEntity.user = user
-      user.emails.add(emailEntity)
-
-      val secure = new SecureRandom()
-      val n = secure.nextInt(1000000)
-      val code = String.format(s"$n%06d", Int.box(n))
-
-      val passwordCredential = new PasswordCredential(password, code)
-      passwordCredential.email = emailEntity
-      passwordCredential.roles.add(guestRole)
-      emailEntity.credentials.add(passwordCredential)
-
-      user.persist()
-
-      registerService.register(email, code, nickName)
-
-      sessionHolder.user = passwordCredential.email.user.id
-      sessionHolder.credentials = passwordCredential.id
-
-      new ResponseEntity(new JsonObject()
-        .put("status", "success"), HttpStatus.OK)
-    } else {
-
-      val eMail = EMail.query("value" -> email)
-
-      if (eMail == null) {
-
-        return new ResponseEntity(new JsonArray()
-          .add(new JsonObject()
-            .put("path", new JsonArray().add(new JsonString("email")))
-            .put("message", "Email wurde nicht gefunden.")), HttpStatus.BAD_REQUEST)
-
-      } else {
-
-        if (user.emails.contains(eMail)) {
-
-          // New Registration of existing user with same email
-
-        } else {
-          return new ResponseEntity(new JsonArray()
-            .add(new JsonObject()
-              .put("path", new JsonArray().add(new JsonString("email")))
-              .put("message", "Email passt nicht zum Nickname.")), HttpStatus.BAD_REQUEST)
-        }
-
+    val resolvedEmail =
+      if (existingEmail != null) existingEmail
+      else {
+        val emailEntity = new EMail(email)
+        emailEntity.user = resolvedUser
+        resolvedUser.emails.add(emailEntity)
+        emailEntity
       }
 
-      val secure = new SecureRandom()
-      val n = secure.nextInt(1000000)
-      val code = String.format(s"$n%06d", Int.box(n))
+    val credential = upsertPasswordCredential(resolvedEmail, password, verificationCode, guestRole)
 
-      val passwordCredential = new PasswordCredential(password, code)
-      passwordCredential.email = eMail
-      passwordCredential.roles.add(guestRole)
-      eMail.credentials.add(passwordCredential)
+    if (resolvedUser.id == null) {
+      resolvedUser.persist()
+    } else if (credential.id == null) {
+      credential.persist()
+    }
 
-      registerService.register(email, code, nickName)
+    registerService.register(resolvedEmail.value, verificationCode, resolvedUser.nickName)
 
-      sessionHolder.user = passwordCredential.email.user.id
-      sessionHolder.credentials = passwordCredential.id
+    sessionHolder.user = resolvedUser.id
+    sessionHolder.credentials = credential.id
 
-      new ResponseEntity(new JsonObject()
-        .put("status", "success"), HttpStatus.OK)
+    success()
+  }
 
+  private def upsertPasswordCredential(email: EMail, password: String, verificationCode: String, guestRole: Role): PasswordCredential = {
+    val existingCredential = email.credentials.asScala.collectFirst { case credential: PasswordCredential => credential }.orNull
+
+    if (existingCredential != null) {
+      existingCredential.password = password
+      existingCredential.code = verificationCode
+      existingCredential.roles.add(guestRole)
+      existingCredential
+    } else {
+      val credential = new PasswordCredential(password, verificationCode)
+      credential.email = email
+      credential.roles.add(guestRole)
+      email.credentials.add(credential)
+      credential
     }
   }
 
+  private def generateCode(): String = {
+    val n = new SecureRandom().nextInt(1000000)
+    String.format(s"$n%06d", Int.box(n))
+  }
+
+  private def success(): ResponseEntity[JsonNode] =
+    new ResponseEntity(
+      new JsonObject()
+        .put("status", "success")
+        .put("message", ""),
+      HttpStatus.OK
+    )
+
+  private def validationError(path: String, message: String): ResponseEntity[JsonNode] =
+    new ResponseEntity(
+      new JsonArray()
+        .add(
+          new JsonObject()
+            .put("path", new JsonArray().add(new JsonString(path)))
+            .put("message", message)
+        ),
+      HttpStatus.BAD_REQUEST
+    )
 }

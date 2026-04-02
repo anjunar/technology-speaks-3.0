@@ -10,7 +10,7 @@ import scala.compiletime.uninitialized
 
 @Entity
 class PasswordCredential(@(NotBlank @field)
-                         @(Size @field)(min = 8, max = 128)
+                         @(Size @field)(min = 4, max = 128)
                          var password: String, code: String)
   extends Credential(code), EntityContext[PasswordCredential] {
 

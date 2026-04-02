@@ -54,7 +54,7 @@ class ApplicationController(val identityHolder: IdentityHolder) {
         .withRel("account")
         .build(),
 */
-      LinkBuilder.create[PasswordRegisterController](_.register(new JsonObject()))
+      LinkBuilder.create[PasswordRegisterController](_.register(null))
         .withId(true)
         .withRel("register")
         .build(),

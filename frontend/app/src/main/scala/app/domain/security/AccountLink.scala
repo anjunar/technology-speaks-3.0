@@ -6,7 +6,6 @@ import jfx.json.JsonType
 
 import scala.scalajs.js
 
-@JsonType("")
 class AccountLink(
   var rel: String = "",
   var url: String = "",
