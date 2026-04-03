@@ -296,6 +296,8 @@ object JsonMapper {
       items.toArray
     } else if (rawTypeName == "scala.collection.immutable.List") {
       items.toList
+    } else if (rawTypeName == "scala.collection.immutable.Seq" || rawTypeName == "scala.collection.Seq") {
+      items.toSeq
     } else if (rawTypeName == "scala.collection.immutable.Set" || rawTypeName == "scala.collection.Set") {
       items.toSet
     } else {
