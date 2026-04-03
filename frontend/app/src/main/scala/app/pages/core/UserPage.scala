@@ -407,7 +407,7 @@ class UserPage(val payload: Data[User]) extends PageComposite("User", pageResiza
                     classes = Seq("user-page-delete-btn", "destructive-action")
 
                     onClick { _ =>
-                      Api.delete("/service" + deleteLink.url, model).onComplete {
+                      Api.request("/service" + deleteLink.url).delete(model).unit.onComplete {
                         case Success(_) =>
                           Viewport.notify("Benutzer erfolgreich gelöscht.", Viewport.NotificationKind.Success)
                         // Example: Navigation.goto("/users")
@@ -749,7 +749,7 @@ private final class ManagedPropertyAccessControl(
   private def loadManagedProperty(): Unit = {
     busyProperty.set(true)
 
-    Api.invokeLink(propertyLink).map(raw => Api.deserialize[ManagedProperty](raw)).onComplete {
+    Api.link(propertyLink).invoke.read[ManagedProperty].onComplete {
       case Success(value) =>
         managedPropertyProperty.set(value)
         syncSelection(value, visibilityCatalogProperty.get)

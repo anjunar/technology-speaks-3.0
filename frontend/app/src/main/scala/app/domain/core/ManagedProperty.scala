@@ -19,7 +19,7 @@ class ManagedProperty extends AbstractEntity {
   
   def updateFromLink(): Future[ManagedProperty] =
     links.find(_.rel == "update") match {
-      case Some(link) => Api.invokeLink(link, this).map(raw => Api.deserialize[ManagedProperty](raw))
+      case Some(link) => Api.link(link).invoke(this).read[ManagedProperty]
       case None       => Future.successful(this)
     }
 }

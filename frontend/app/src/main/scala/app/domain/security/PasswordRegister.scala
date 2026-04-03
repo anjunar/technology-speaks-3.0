@@ -24,7 +24,7 @@ class PasswordRegister(
 ) {
 
   def save(): Future[JsonResponse] =
-    Api.post("/service/security/register", this).map(raw => Api.deserialize[JsonResponse](raw))
+    Api.request("/service/security/register").post(this).read[JsonResponse]
 }
 
 object PasswordRegister {

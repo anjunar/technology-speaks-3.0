@@ -19,11 +19,8 @@ import jfx.layout.HBox.hbox
 import jfx.layout.Span.span
 import jfx.layout.VBox.vbox
 import jfx.layout.Viewport
-import org.scalajs.dom
-import org.scalajs.dom.{RequestInit, fetch}
 
 import scala.concurrent.ExecutionContext
-import scala.scalajs.js
 
 class ConfirmPage extends PageComposite("Bestaetigen", pageResizable = false) {
 
@@ -44,18 +41,14 @@ class ConfirmPage extends PageComposite("Bestaetigen", pageResizable = false) {
         classes = "security-page__form"
 
         onSubmit_= { (event : Form[ConfirmCode])  =>
-
-          val init = js.Dynamic.literal(
-            method = "POST"
-          )
-
-
-          fetch(s"/service/security/confirm?code=${confirmForm.confirm.get}", init.asInstanceOf[RequestInit])
-            .`then`(response => {
+          Api.request(s"/service/security/confirm?code=${confirmForm.confirm.get}")
+            .post
+            .unit
+            .foreach { _ =>
               service.invoke()
               Viewport.notify("Bestaetigung erfolgreich.", Viewport.NotificationKind.Success)
               close()
-            })
+            }
         }
 
         vbox {

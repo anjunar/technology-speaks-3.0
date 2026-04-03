@@ -23,16 +23,16 @@ class SecondComment extends AbstractEntity with OwnerProvider {
 
 
   def save(issue: Issue): Future[Data[FirstComment]] =
-    Api.post(s"/service/document/documents/document/issues/issue/${issue.id.get}/comment", this).map(raw => Api.deserialize[Data[FirstComment]](raw))
+    Api.request(s"/service/document/documents/document/issues/issue/${issue.id.get}/comment").post(this).read[Data[FirstComment]]
 
   def save(post: Post): Future[Data[FirstComment]] =
-    Api.post(s"/service/timeline/posts/post/${post.id.get}/comment", this).map(raw => Api.deserialize[Data[FirstComment]](raw))
+    Api.request(s"/service/timeline/posts/post/${post.id.get}/comment").post(this).read[Data[FirstComment]]
 
   def update(issue: Issue): Future[Data[FirstComment]] =
-    Api.put(s"/service/document/documents/document/issues/issue/${issue.id.get}/comment", this).map(raw => Api.deserialize[Data[FirstComment]](raw))
+    Api.request(s"/service/document/documents/document/issues/issue/${issue.id.get}/comment").put(this).read[Data[FirstComment]]
 
   def update(post: Post): Future[Data[FirstComment]] =
-    Api.put(s"/service/timeline/posts/post/${post.id.get}/comment", this).map(raw => Api.deserialize[Data[FirstComment]](raw))
+    Api.request(s"/service/timeline/posts/post/${post.id.get}/comment").put(this).read[Data[FirstComment]]
 }
 
 object SecondComment {

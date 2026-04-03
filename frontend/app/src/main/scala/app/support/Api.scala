@@ -1,76 +1,74 @@
 package app.support
 
 import app.domain.core.Link
-import reflect.TypeDescriptor
-import reflect.macros.ReflectMacros.reflectType
 import jfx.form.{ErrorResponse, ErrorResponseException}
 import jfx.json.JsonMapper
 import org.scalajs.dom
 import org.scalajs.dom.{RequestInit, fetch, window}
+import reflect.TypeDescriptor
+import reflect.macros.ReflectMacros.reflectType
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.scalajs.js
-import scala.scalajs.js.JSConverters.*
 import scala.scalajs.js.JSON
 
 object Api {
 
   given ExecutionContext = ExecutionContext.global
 
-  def get(url: String): Future[js.Any] =
-    requestJson("GET", url, null)
+  def request(url: String): RequestBuilder =
+    new RequestBuilder(url)
 
-  inline def post[B](url: String, body: B): Future[js.Any] =
-    requestJson[B]("POST", url, body)
+  def link(link: Link): LinkRequestBuilder =
+    new LinkRequestBuilder(link)
 
-  def post(url: String): Future[js.Any] =
-    requestJson("POST", url, null)
+  final class RequestBuilder(val url: String) {
 
-  inline def put[B](url: String, body: B): Future[js.Any] =
-    requestJson[B]("PUT", url, body)
+    def get: PreparedRequest =
+      new PreparedRequest("GET", url, null)
 
-  inline def delete[B](url: String, body: B): Future[Unit] =
-    requestJson[B]("DELETE", url, body).map(_ => ())
+    def post: PreparedRequest =
+      new PreparedRequest("POST", url, null)
 
-  def postText(url: String, body: String): Future[String] =
-    requestText("POST", url, body)
+    inline def post[B](body: B): PreparedRequest =
+      new PreparedRequest("POST", url, encodeBody(body, reflectType[B]))
 
-  inline def invokeLink[B](link: Link, body: B): Future[js.Any] =
-    requestJson[B](link.method, "/service" + link.url, body)
+    inline def put[B](body: B): PreparedRequest =
+      new PreparedRequest("PUT", url, encodeBody(body, reflectType[B]))
 
-  def invokeLink(link: Link): Future[js.Any] =
-    requestJson(link.method, "/service" + link.url, null)
-
-  inline def requestJson[E](method: String, url: String, body: Any): Future[js.Any] = {
-    val bodyArg: js.Any = body match {
-      case null => null
-      case b: String => b.asInstanceOf[js.Any]
-      case b: Boolean => b.asInstanceOf[js.Any]
-      case b: Double => b.asInstanceOf[js.Any]
-      case b: Int => b.asInstanceOf[js.Any]
-      case b: Float => b.asInstanceOf[js.Any]
-      case b: Long => b.asInstanceOf[js.Any]
-      case b if js.Array.isArray(b.asInstanceOf[js.Any]) => b.asInstanceOf[js.Any]
-      case b => JsonMapper.serialize(b, reflectType[E])
-    }
-    requestText(method, url, bodyArg).map { text =>
-      if (text.isEmpty) null
-      else js.JSON.parse(text)
-    }
+    inline def delete[B](body: B): PreparedRequest =
+      new PreparedRequest("DELETE", url, encodeBody(body, reflectType[B]))
   }
 
-  def requestJson(method: String, url: String): Future[js.Any] =
-    requestText(method, url, null).map { text =>
-      if (text.isEmpty) null
-      else js.JSON.parse(text)
-    }
+  final class LinkRequestBuilder(link: Link) {
 
-  inline def deserialize[M](raw: js.Any): M =
-    if (raw == null || js.isUndefined(raw)) {
-      null.asInstanceOf[M]
-    } else {
-      JsonMapper.deserialize(raw.asInstanceOf[js.Dynamic], reflectType[M]).asInstanceOf[M]
-    }
+    private val url = "/service" + link.url
+
+    def invoke: PreparedRequest =
+      new PreparedRequest(link.method, url, null)
+
+    inline def invoke[B](body: B): PreparedRequest =
+      new PreparedRequest(link.method, url, encodeBody(body, reflectType[B]))
+  }
+
+  final class PreparedRequest(
+    val method: String,
+    val url: String,
+    val body: js.Any
+  ) {
+
+    inline def read[R]: Future[R] =
+      requestInternal[R](method, url, body, reflectType[R])
+
+    inline def raw[R]: Future[R] =
+      requestInternal[R](method, url, body, reflectType[R])
+
+    inline def unit: Future[Unit] =
+      requestInternal[Unit](method, url, body, reflectType[Unit])
+
+    def text: Future[String] =
+      requestText(method, url, body)
+  }
 
   private def requestText(
     methodArg: String,
@@ -82,20 +80,21 @@ object Api {
       "Accept" -> "application/json"
     )
 
-    val body = if (bodyArg == null || js.isUndefined(bodyArg)) {
-      null
-    } else if (js.typeOf(bodyArg) == "string") {
-      bodyArg
-    } else {
-      js.JSON.stringify(bodyArg)
-    }
+    val body =
+      if (bodyArg == null || js.isUndefined(bodyArg)) {
+        null
+      } else if (js.typeOf(bodyArg) == "string") {
+        bodyArg
+      } else {
+        js.JSON.stringify(bodyArg)
+      }
 
     val init = js.Dynamic.literal(
       method = methodArg.asInstanceOf[dom.HttpMethod],
       body = body.asInstanceOf[js.Any],
       headers = headers,
     )
-    
+
     fetch(urlArg, init.asInstanceOf[RequestInit]).toFuture.flatMap { response =>
       response.text().toFuture.flatMap { text =>
         if (response.ok) {
@@ -114,6 +113,66 @@ object Api {
       }
     }
   }
+
+  private def requestInternal[R](
+    method: String,
+    url: String,
+    body: js.Any,
+    responseType: TypeDescriptor
+  ): Future[R] =
+    requestText(method, url, body).map(text => decodeResponse[R](text, responseType))
+
+  private def encodeBody[B](body: B, bodyType: TypeDescriptor): js.Any =
+    if (body == null) {
+      null
+    } else if (isRawJsonType(bodyType) || isPrimitiveType(bodyType.typeName)) {
+      body.asInstanceOf[js.Any]
+    } else {
+      JsonMapper.serialize(body, bodyType)
+    }
+
+  private def decodeResponse[R](text: String, responseType: TypeDescriptor): R =
+    if (isUnitType(responseType)) {
+      ().asInstanceOf[R]
+    } else if (text.isEmpty) {
+      null.asInstanceOf[R]
+    } else {
+      val raw = JSON.parse(text)
+      if (isRawJsonType(responseType)) {
+        raw.asInstanceOf[R]
+      } else {
+        JsonMapper.deserialize(raw.asInstanceOf[js.Dynamic], responseType).asInstanceOf[R]
+      }
+    }
+
+  private def isUnitType(descriptor: TypeDescriptor): Boolean =
+    descriptor.typeName == "scala.Unit"
+
+  private def isPrimitiveType(typeName: String): Boolean =
+    typeName == "scala.Predef.String" ||
+      typeName == "java.lang.String" ||
+      typeName == "scala.Boolean" ||
+      typeName == "boolean" ||
+      typeName == "scala.Int" ||
+      typeName == "int" ||
+      typeName == "scala.Double" ||
+      typeName == "double" ||
+      typeName == "scala.Float" ||
+      typeName == "float" ||
+      typeName == "scala.Long" ||
+      typeName == "long" ||
+      typeName == "scala.Short" ||
+      typeName == "short" ||
+      typeName == "scala.Byte" ||
+      typeName == "byte" ||
+      typeName == "scala.Char" ||
+      typeName == "char"
+
+  private def isRawJsonType(descriptor: TypeDescriptor): Boolean =
+    descriptor.typeName == "scala.scalajs.js.Any" ||
+      descriptor.typeName == "scala.Any" ||
+      descriptor.typeName == "scala.scalajs.js.Object" ||
+      descriptor.typeName == "scala.scalajs.js.Dynamic"
 
   def logFailure(label: String, error: Throwable): Unit =
     window.console.error(s"$label failed: ${error.getMessage}")

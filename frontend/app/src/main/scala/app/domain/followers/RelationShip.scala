@@ -20,13 +20,13 @@ class RelationShip extends AbstractEntity {
   val groups: ListProperty[Group] = ListProperty()
 
   def save(): Future[Data[RelationShip]] =
-    Api.post("/service/followers/relationships/relationship", this).map(raw => Api.deserialize[Data[RelationShip]](raw))
+    Api.request("/service/followers/relationships/relationship").post(this).read[Data[RelationShip]]
 
   def update(): Future[Data[RelationShip]] =
-    Api.put("/service/followers/relationships/relationship", this).map(raw => Api.deserialize[Data[RelationShip]](raw))
+    Api.request("/service/followers/relationships/relationship").put(this).read[Data[RelationShip]]
 
   def delete(): Future[Unit] =
-    Api.delete("/service/followers/relationships/relationship", this)
+    Api.request("/service/followers/relationships/relationship").delete(this).unit
 
   def updateGroups(selectedGroups: IterableOnce[Group]): Future[RelationShip] = {
     val followerId = Option(follower.get).flatMap(user => Option(user.id.get)).map(_.toString)
@@ -37,7 +37,9 @@ class RelationShip extends AbstractEntity {
         )
 
         Api
-          .requestJson("PUT", s"/service/core/users/user/$id/groups", request)
+          .request(s"/service/core/users/user/$id/groups")
+          .put(request)
+          .raw[js.Array[js.Any]]
           .map { raw =>
             groups.setAll(RelationShip.deserializeAssignedGroups(raw))
             this
@@ -51,7 +53,7 @@ class RelationShip extends AbstractEntity {
 object RelationShip {
 
   def read(id: String): Future[Data[RelationShip]] =
-    Api.get(s"/service/followers/relationships/relationship/$id").map(raw => Api.deserialize[Data[RelationShip]](raw))
+    Api.request(s"/service/followers/relationships/relationship/$id").get.read[Data[RelationShip]]
 
   def list(
     index: Int,
@@ -76,7 +78,7 @@ object RelationShip {
       if (groupParameters.isEmpty) ""
       else s"&$groupParameters"
 
-    Api.get(s"/service/followers/relationships?index=$index&limit=$limit$sortParameter$queryParameter$groupsSuffix").map(raw => Api.deserialize[Table[Data[RelationShip]]](raw))
+    Api.request(s"/service/followers/relationships?index=$index&limit=$limit$sortParameter$queryParameter$groupsSuffix").get.read[Table[Data[RelationShip]]]
   }
 
   private def renderSortParameters(sorting: Seq[String]): String = {
@@ -85,12 +87,11 @@ object RelationShip {
     else normalizedSorting.map(value => s"&sort=${encodeURIComponent(value)}").mkString
   }
 
-  private def deserializeAssignedGroups(raw: js.Any): Seq[Group] =
+  private def deserializeAssignedGroups(raw: js.Array[js.Any]): Seq[Group] =
     if (raw == null || js.isUndefined(raw) || !js.Array.isArray(raw)) {
       Seq.empty
     } else {
       raw
-        .asInstanceOf[js.Array[js.Any]]
         .iterator
         .collect {
           case value if value != null && !js.isUndefined(value) =>

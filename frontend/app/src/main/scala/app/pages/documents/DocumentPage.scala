@@ -483,14 +483,15 @@ private final class DocumentImportPanel(document: Document, onImported: () => Un
 
     importingProperty.set(true)
 
-    Api.requestJson(
-      importLink.method,
-      Navigation.prefixedServiceUrl(importLink.url),
-      js.Dynamic.literal(
-        path = normalizedPath,
-        overwriteExisting = overwriteExistingProperty.get
+    Api.request(Navigation.prefixedServiceUrl(importLink.url))
+      .post(
+        js.Dynamic.literal(
+          path = normalizedPath,
+          overwriteExisting = overwriteExistingProperty.get
+        )
       )
-    ).onComplete {
+      .raw[js.Dynamic]
+      .onComplete {
       case Success(raw) =>
         importingProperty.set(false)
         val result = raw.asInstanceOf[js.Dynamic]

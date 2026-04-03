@@ -18,5 +18,5 @@ class PasswordLogin(
 ) {
 
   def save(): Future[JsonResponse] =
-    Api.post("/service/security/login", this).map(raw => Api.deserialize[JsonResponse](raw))
+    Api.request("/service/security/login").post(this).read[JsonResponse]
 }

@@ -21,7 +21,7 @@ object WebAuthnRegistrationClient {
     )
 
     for {
-      optionsJsonText <- Api.postText(optionsUrl, js.JSON.stringify(request))
+      optionsJsonText <- Api.request(optionsUrl).post(js.JSON.stringify(request)).text
       optionsDyn = js.JSON.parse(optionsJsonText)
       
       registrationResponse <- SimpleWebAuthnBrowser
@@ -38,7 +38,7 @@ object WebAuthnRegistrationClient {
           nickName = nickName
         )
       )
-      result <- Api.postText(finishUrl, finishBody)
+      result <- Api.request(finishUrl).post(finishBody).text
     } yield result
   }
 }

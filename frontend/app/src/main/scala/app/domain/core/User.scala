@@ -23,13 +23,13 @@ class User extends AbstractEntity {
   val emails: ListProperty[EMail] = ListProperty()
 
   def save(): Future[Data[User]] =
-    Api.post("/service/core/users/user", this).map(raw => Api.deserialize[Data[User]](raw))
+    Api.request("/service/core/users/user").post(this).read[Data[User]]
 
   def update(): Future[Data[User]] =
-    Api.put("/service/core/users/user", this).map(raw => Api.deserialize[Data[User]](raw))
+    Api.request("/service/core/users/user").put(this).read[Data[User]]
 
   def delete(): Future[Unit] =
-    Api.delete("/service/core/users/user", this)
+    Api.request("/service/core/users/user").delete(this).unit
 
   def followLink: Option[Link] =
     links.find(_.rel == "follow")
@@ -47,8 +47,10 @@ class User extends AbstractEntity {
     followActionLink match {
       case Some(link) if id.get != null =>
         Api
-          .requestJson(link.method, Navigation.prefixedServiceUrl(link.url))
-          .flatMap(raw => User.read(id.get.toString))
+          .link(link)
+          .invoke
+          .unit
+          .flatMap(_ => User.read(id.get.toString))
           .map { response =>
             links.setAll(response.data.links)
             this
@@ -61,7 +63,7 @@ class User extends AbstractEntity {
 object User {
 
   def read(id: String): Future[Data[User]] =
-    Api.get(s"/service/core/users/user/$id").map(raw => Api.deserialize[Data[User]](raw))
+    Api.request(s"/service/core/users/user/$id").get.read[Data[User]]
 
   def list(index: Int, limit: Int, query: String = "", sorting: Seq[String] = Seq("created:desc")): Future[Table[Data[User]]] = {
     val normalizedQuery = Option(query).map(_.trim).getOrElse("")
@@ -70,7 +72,7 @@ object User {
       else s"&name=${encodeURIComponent(normalizedQuery)}"
     val sortParameter = renderSortParameters(sorting)
 
-    Api.get(s"/service/core/users?index=$index&limit=$limit$sortParameter$queryParameter").map(raw => Api.deserialize[Table[Data[User]]](raw))
+    Api.request(s"/service/core/users?index=$index&limit=$limit$sortParameter$queryParameter").get.read[Table[Data[User]]]
   }
 
   private def renderSortParameters(sorting: Seq[String]): String = {

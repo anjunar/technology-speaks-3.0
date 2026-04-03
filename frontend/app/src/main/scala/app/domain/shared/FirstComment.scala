@@ -26,9 +26,9 @@ class FirstComment extends AbstractEntity with OwnerProvider {
   def save(entity: AbstractEntity): Future[Data[FirstComment]] =
     entity match {
       case issue: Issue =>
-        Api.post(s"/service/document/documents/document/issues/issue/${issue.id.get}/comment", this).map(raw => Api.deserialize[Data[FirstComment]](raw))
+        Api.request(s"/service/document/documents/document/issues/issue/${issue.id.get}/comment").post(this).read[Data[FirstComment]]
       case post: Post =>
-        Api.post(s"/service/timeline/posts/post/${post.id.get}/comment", this).map(raw => Api.deserialize[Data[FirstComment]](raw))
+        Api.request(s"/service/timeline/posts/post/${post.id.get}/comment").post(this).read[Data[FirstComment]]
       case _ =>
         Future.failed(RuntimeException("Unknown document type"))
     }
@@ -36,9 +36,9 @@ class FirstComment extends AbstractEntity with OwnerProvider {
   def update(entity: AbstractEntity): Future[Data[FirstComment]] =
     entity match {
       case issue: Issue =>
-        Api.put(s"/service/document/documents/document/issues/issue/${issue.id.get}/comment", this).map(raw => Api.deserialize[Data[FirstComment]](raw))
+        Api.request(s"/service/document/documents/document/issues/issue/${issue.id.get}/comment").put(this).read[Data[FirstComment]]
       case post: Post =>
-        Api.put(s"/service/timeline/posts/post/${post.id.get}/comment", this).map(raw => Api.deserialize[Data[FirstComment]](raw))
+        Api.request(s"/service/timeline/posts/post/${post.id.get}/comment").put(this).read[Data[FirstComment]]
       case _ =>
         Future.failed(RuntimeException("Unknown document type"))
     }
@@ -46,9 +46,9 @@ class FirstComment extends AbstractEntity with OwnerProvider {
   def delete(entity: AbstractEntity): Future[Unit] =
     entity match {
       case issue: Issue =>
-        Api.delete(s"/service/document/documents/document/issues/issue/${issue.id.get}/comment", this)
+        Api.request(s"/service/document/documents/document/issues/issue/${issue.id.get}/comment").delete(this).unit
       case post: Post =>
-        Api.delete(s"/service/timeline/posts/post/${post.id.get}/comment", this)
+        Api.request(s"/service/timeline/posts/post/${post.id.get}/comment").delete(this).unit
       case _ =>
         Future.failed(RuntimeException("Unknown document type"))
     }
@@ -58,8 +58,8 @@ object FirstComment {
 
 
   def list(index: Int, limit: Int, post: Post): Future[Table[Data[FirstComment]]] =
-    Api.get(s"/service/timeline/posts/post/${post.id.get}/comments?index=$index&limit=$limit&sort=created:desc").map(raw => Api.deserialize[Table[Data[FirstComment]]](raw))
+    Api.request(s"/service/timeline/posts/post/${post.id.get}/comments?index=$index&limit=$limit&sort=created:desc").get.read[Table[Data[FirstComment]]]
 
   def list(index: Int, limit: Int, issue: Issue): Future[Table[Data[FirstComment]]] =
-    Api.get(s"/service/document/documents/document/issues/issue/${issue.id.get}/comments?index=$index&limit=$limit&sort=created:desc").map(raw => Api.deserialize[Table[Data[FirstComment]]](raw))
+    Api.request(s"/service/document/documents/document/issues/issue/${issue.id.get}/comments?index=$index&limit=$limit&sort=created:desc").get.read[Table[Data[FirstComment]]]
 }

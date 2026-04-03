@@ -54,7 +54,9 @@ class LikeButton(val likes: ListProperty[Like], val links: ListProperty[Link], v
               Navigation.linkByRel(rel, links).foreach { link =>
                 busyProperty.set(true)
                 Api
-                  .requestJson(link.method, Navigation.prefixedServiceUrl(link.url))
+                  .link(link)
+                  .invoke
+                  .raw[js.Any]
                   .onComplete {
                     case Success(raw) =>
                       likes.setAll(deserializeLikes(raw))

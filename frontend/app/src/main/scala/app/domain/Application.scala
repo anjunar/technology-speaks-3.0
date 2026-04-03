@@ -22,6 +22,6 @@ class Application(
 
 object Application {
 
-  def read(): Future[Application] = Api.get("/service").map(raw => Api.deserialize[Application](raw))
+  def read(): Future[Application] = Api.request("/service").get.read[Application]
 
 }

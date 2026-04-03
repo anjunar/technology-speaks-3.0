@@ -26,22 +26,22 @@ class Document extends AbstractEntity with OwnerProvider {
   val editable: Property[Boolean] = Property(false)
 
   def save(): Future[Data[Document]] =
-    Api.post("/service/document/documents/document", this).map(raw => Api.deserialize[Data[Document]](raw))
+    Api.request("/service/document/documents/document").post(this).read[Data[Document]]
 
   def update(): Future[Data[Document]] =
-    Api.put("/service/document/documents/document", this).map(raw => Api.deserialize[Data[Document]](raw))
+    Api.request("/service/document/documents/document").put(this).read[Data[Document]]
 
   def delete(): Future[Unit] =
-    Api.delete("/service/document/documents/document", this)
+    Api.request("/service/document/documents/document").delete(this).unit
 }
 
 object Document {
  
   def root(): Future[Data[Document]] =
-    Api.post("/service/document/documents/document/root").map(raw => Api.deserialize[Data[Document]](raw))
+    Api.request("/service/document/documents/document/root").post.read[Data[Document]]
 
   def read(id: String): Future[Data[Document]] =
-    Api.get(s"/service/document/documents/document/$id").map(raw => Api.deserialize[Data[Document]](raw))
+    Api.request(s"/service/document/documents/document/$id").get.read[Data[Document]]
 
   def list(index: Int, limit: Int, query: String = "", sorting: Seq[String] = Seq("created:desc")): Future[Table[Data[Document]]] = {
     val normalizedQuery = Option(query).map(_.trim).getOrElse("")
@@ -50,7 +50,7 @@ object Document {
       else s"&name=${encodeURIComponent(normalizedQuery)}"
     val sortParameter = renderSortParameters(sorting)
 
-    Api.get(s"/service/document/documents?index=$index&limit=$limit$sortParameter$queryParameter").map(raw => Api.deserialize[Table[Data[Document]]](raw))
+    Api.request(s"/service/document/documents?index=$index&limit=$limit$sortParameter$queryParameter").get.read[Table[Data[Document]]]
   }
 
   private def renderSortParameters(sorting: Seq[String]): String = {

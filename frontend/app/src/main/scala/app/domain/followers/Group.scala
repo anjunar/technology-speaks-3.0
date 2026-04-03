@@ -22,22 +22,22 @@ class Group extends AbstractEntity {
   val editable: Property[Boolean] = Property(false)
 
   def save(): Future[Data[Group]] =
-    Api.post("/service/followers/groups/groups", this).map(raw => Api.deserialize[Data[Group]](raw))
+    Api.request("/service/followers/groups/groups").post(this).read[Data[Group]]
 
   def update(): Future[Data[Group]] =
-    Api.put("/service/followers/groups/groups", this).map(raw => Api.deserialize[Data[Group]](raw))
+    Api.request("/service/followers/groups/groups").put(this).read[Data[Group]]
 
   def delete(): Future[Unit] =
-    Api.delete("/service/followers/groups/groups", this)
+    Api.request("/service/followers/groups/groups").delete(this).unit
 }
 
 object Group {
  
   def read(id: String): Future[Data[Group]] =
-    Api.get(s"/service/followers/groups/groups/$id").map(raw => Api.deserialize[Data[Group]](raw))
+    Api.request(s"/service/followers/groups/groups/$id").get.read[Data[Group]]
 
   def list(index: Int, limit: Int, sorting: Seq[String] = Seq("created:desc")): Future[Table[Data[Group]]] =
-    Api.get(s"/service/followers/groups?index=$index&limit=$limit${renderSortParameters(sorting)}").map(raw => Api.deserialize[Table[Data[Group]]](raw))
+    Api.request(s"/service/followers/groups?index=$index&limit=$limit${renderSortParameters(sorting)}").get.read[Table[Data[Group]]]
 
   private def renderSortParameters(sorting: Seq[String]): String = {
     val normalizedSorting = sorting.iterator.map(_.trim).filter(_.nonEmpty).toVector
