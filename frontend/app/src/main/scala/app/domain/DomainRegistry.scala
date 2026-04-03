@@ -6,6 +6,7 @@ import app.domain.documents.{DocumentsLink, DocumentsRegistry}
 import app.domain.followers.{FollowersRegistry, RelationShipLink}
 import app.domain.security.*
 import app.domain.shared.SharedRegistry
+import app.support.JsonResponse
 import jfx.core.meta.PackageClassLoader
 import jfx.domain.{Media, Thumbnail}
 import jfx.form.ErrorResponse
@@ -32,6 +33,7 @@ object DomainRegistry {
     loader.register(() => new Thumbnail(), classOf[Thumbnail])
     loader.register(() => new Media(), classOf[Media])
     loader.register(() => new ErrorResponse(), classOf[ErrorResponse])
+    loader.register(() => new JsonResponse(), classOf[JsonResponse])
 
     CoreRegistry.init()
     TimelineRegistry.init()

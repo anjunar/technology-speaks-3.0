@@ -10,7 +10,7 @@ import jfx.control.Heading.heading
 import jfx.control.Image.{image, src, src_=}
 import jfx.core.component.ElementComponent.*
 import jfx.dsl.*
-import jfx.form.Form
+import jfx.form.{ErrorResponseException, Form}
 import jfx.form.Form.{form, onSubmit_=}
 import jfx.form.Input.{input, inputType_=}
 import jfx.form.InputContainer.inputContainer
@@ -18,8 +18,10 @@ import jfx.layout.Div.div
 import jfx.layout.HBox.hbox
 import jfx.layout.Span.span
 import jfx.layout.VBox.vbox
+import jfx.layout.Viewport
 
 import scala.concurrent.ExecutionContext
+import scala.util.{Failure, Success}
 
 class WebAuthnLoginPage extends PageComposite("Login mit WebAuthn", pageResizable = false) {
 
@@ -42,12 +44,20 @@ class WebAuthnLoginPage extends PageComposite("Login mit WebAuthn", pageResizabl
         onSubmit_= { (event : Form[WebAuthnLogin])  =>
           WebAuthnLoginClient
             .login(loginForm.email.get)
-            .flatMap(_ => {
-              service.invoke()
-            })
-            .foreach { _ =>
-              close()
-              Navigation.queryParam("redirect").foreach(path => Navigation.navigate(path, replace = true))
+            .onComplete {
+              case Success(saved) =>
+                Viewport.notify("Login erfolgreich!", Viewport.NotificationKind.Success)
+                close()
+                service.invoke()
+                val target = Navigation.queryParam("redirect").filter(_.trim.nonEmpty).getOrElse("/")
+                Navigation.navigate(target, replace = true)
+
+              case Failure(e: ErrorResponseException) =>
+                Viewport.notify("Fehler beim Anmelden!", Viewport.NotificationKind.Error)
+                event.setErrorResponses(e.errors)
+
+              case Failure(e: Throwable) =>
+                Viewport.notify(s"Fehler im Server ${e.getMessage}", Viewport.NotificationKind.Error)
             }
         }
 

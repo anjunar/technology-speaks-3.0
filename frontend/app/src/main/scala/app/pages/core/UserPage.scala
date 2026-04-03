@@ -1,10 +1,10 @@
 package app.pages.core
 
-import app.domain.core.{Address, Data, Link, ManagedProperty, Schema, SchemaProperty, User, UserInfo, UserUpdated}
+import app.domain.core.*
 import app.domain.followers.{Group, RelationShip}
 import app.services.ApplicationService
+import app.support.Api
 import app.support.Navigation.renderByRel
-import app.support.{Api, Navigation}
 import app.ui.{CompositeSupport, DivComposite, PageComposite}
 import jfx.action.Button
 import jfx.action.Button.{button, buttonType, onClick}
@@ -12,16 +12,15 @@ import jfx.control.Link.link
 import jfx.core.component.ElementComponent.*
 import jfx.core.state.{ListProperty, Property}
 import jfx.dsl.*
-import jfx.form.ComboBox
 import jfx.form.ComboBox.*
 import jfx.form.Control.placeholder
 import jfx.form.Editable.{editable, editable_=}
-import jfx.form.{ErrorResponseException, Form, SubForm}
 import jfx.form.Form.{form, onSubmit}
-import jfx.form.ImageCropper.{aspectRatio, imageCropper, outputMaxHeight, outputMaxWidth, outputQuality, outputType}
+import jfx.form.ImageCropper.*
 import jfx.form.Input.{input, inputType}
 import jfx.form.InputContainer.inputContainer
 import jfx.form.SubForm.{factory, subForm}
+import jfx.form.{ComboBox, ErrorResponseException, Form, SubForm}
 import jfx.layout.Div.div
 import jfx.layout.HBox.hbox
 import jfx.layout.Span.span
@@ -37,12 +36,13 @@ import scala.util.{Failure, Success}
 class UserPage(val payload: Data[User]) extends PageComposite("User", pageResizable = false) {
 
   println(s"UserPage constructor - payload: $payload")
-  println (s"UserPage constructor - payload.schema: ${payload.schema.entries}")
-  println (s"UserPage constructor - payload.data: ${payload.data}")
+  println(s"UserPage constructor - payload.schema: ${payload.schema.entries}")
+  println(s"UserPage constructor - payload.data: ${payload.data}")
 
   val model: User = payload.data
 
   override def pageWidth: Int = 1240
+
   override def pageHeight: Int = 760
 
   private given ExecutionContext = ExecutionContext.global
@@ -66,17 +66,20 @@ class UserPage(val payload: Data[User]) extends PageComposite("User", pageResiza
 
           onSubmit = { (event: Form[User]) =>
 
-            model.update().onComplete {
-              case Success(saved) =>
-                service.messageBus.publish(new UserUpdated(saved))
-                Viewport.notify("Benutzer gespeichert!", Viewport.NotificationKind.Success)
+            model
+              .update()
+              .onComplete {
+                case Success(saved) =>
+                  service.messageBus.publish(new UserUpdated(saved))
+                  Viewport.notify("Benutzer gespeichert!", Viewport.NotificationKind.Success)
 
-              case Failure(e: ErrorResponseException) =>
-                Viewport.notify("Fehler im Benutzer", Viewport.NotificationKind.Error)
-                event.setErrorResponses(e.errors)
+                case Failure(e: ErrorResponseException) =>
+                  Viewport.notify("Fehler im Benutzer", Viewport.NotificationKind.Error)
+                  event.setErrorResponses(e.errors)
 
-              case _ => ()
-            }
+                case Failure(e: Throwable) =>
+                  Viewport.notify(s"Fehler im Server ${e.getMessage}", Viewport.NotificationKind.Error)
+              }
           }
 
           vbox {
@@ -461,10 +464,10 @@ object UserPage {
     CompositeSupport.buildPage(new UserPage(payload))(init)
 
   private def accessControl(
-    fieldKey: String,
-    property: SchemaProperty | Null,
-    visibilityCatalogProperty: Property[VisibilityCatalog]
-  )(using Scope): ManagedPropertyAccessControl =
+                             fieldKey: String,
+                             property: SchemaProperty | Null,
+                             visibilityCatalogProperty: Property[VisibilityCatalog]
+                           )(using Scope): ManagedPropertyAccessControl =
     CompositeSupport.buildComposite(new ManagedPropertyAccessControl(fieldKey, property, visibilityCatalogProperty))
 
   private def loadVisibilityCatalog()(using ExecutionContext): scala.concurrent.Future[VisibilityCatalog] = {
@@ -476,9 +479,9 @@ object UserPage {
   }
 
   private def buildVisibilityCatalog(
-    relationShips: Vector[RelationShip],
-    groups: Vector[Group]
-  ): VisibilityCatalog = {
+                                      relationShips: Vector[RelationShip],
+                                      groups: Vector[Group]
+                                    ): VisibilityCatalog = {
     val followersById =
       relationShips
         .iterator
@@ -553,19 +556,19 @@ object UserPage {
     userId(user).map(_.toString).getOrElse(userDisplayName(user))
 
   final case class VisibilityTarget(
-    key: String,
-    label: String,
-    kind: String,
-    users: Vector[User],
-    user: User | Null = null,
-    group: Group | Null = null
-  )
+                                     key: String,
+                                     label: String,
+                                     kind: String,
+                                     users: Vector[User],
+                                     user: User | Null = null,
+                                     group: Group | Null = null
+                                   )
 
   final case class VisibilityCatalog(
-    allTarget: VisibilityTarget,
-    groupTargets: Vector[VisibilityTarget],
-    userTargets: Vector[VisibilityTarget]
-  ) {
+                                      allTarget: VisibilityTarget,
+                                      groupTargets: Vector[VisibilityTarget],
+                                      userTargets: Vector[VisibilityTarget]
+                                    ) {
     val targets: Vector[VisibilityTarget] =
       Vector(allTarget) ++ groupTargets ++ userTargets
 
@@ -626,10 +629,10 @@ object UserPage {
 }
 
 private final class ManagedPropertyAccessControl(
-  fieldKey: String,
-  property: SchemaProperty | Null,
-  visibilityCatalogProperty: Property[UserPage.VisibilityCatalog]
-) extends DivComposite {
+                                                  fieldKey: String,
+                                                  property: SchemaProperty | Null,
+                                                  visibilityCatalogProperty: Property[UserPage.VisibilityCatalog]
+                                                ) extends DivComposite {
 
   private given ExecutionContext = ExecutionContext.global
 
@@ -704,8 +707,8 @@ private final class ManagedPropertyAccessControl(
                   if (selected) "check_circle"
                   else option.kind match {
                     case "group" => "groups"
-                    case "all"   => "public"
-                    case _       => "person"
+                    case "all" => "public"
+                    case _ => "person"
                   }
               }
 

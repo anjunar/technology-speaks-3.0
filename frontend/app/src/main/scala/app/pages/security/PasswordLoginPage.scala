@@ -1,5 +1,6 @@
 package app.pages.security
 
+import app.domain.core.UserUpdated
 import app.domain.documents.Document
 import app.domain.security.PasswordLogin
 import app.services.ApplicationService
@@ -10,7 +11,7 @@ import jfx.control.Heading.heading
 import jfx.control.Image.{image, src_=}
 import jfx.core.component.ElementComponent.*
 import jfx.dsl.*
-import jfx.form.Form
+import jfx.form.{ErrorResponseException, Form}
 import jfx.form.Form.{form, onSubmit_=}
 import jfx.form.Input.{input, inputType_=}
 import jfx.form.InputContainer.inputContainer
@@ -21,6 +22,7 @@ import jfx.layout.VBox.vbox
 import jfx.layout.Viewport
 
 import scala.concurrent.ExecutionContext
+import scala.util.{Failure, Success}
 
 class PasswordLoginPage extends PageComposite("Login", pageResizable = false) {
 
@@ -43,23 +45,20 @@ class PasswordLoginPage extends PageComposite("Login", pageResizable = false) {
         onSubmit_= { (event : Form[PasswordLogin])  =>
           loginForm
             .save()
-            .flatMap(response => {
-              if (response == null || response.status != "success") {
-                Viewport.notify(
-                  Option(response)
-                    .flatMap(value => Option(value.message))
-                    .getOrElse("Login fehlgeschlagen."),
-                  Viewport.NotificationKind.Error
-                )
-                scala.concurrent.Future.failed(RuntimeException("Password login failed"))
-              } else {
+            .onComplete {
+              case Success(saved) =>
+                Viewport.notify("Login erfolgreich!", Viewport.NotificationKind.Success)
+                close()
                 service.invoke()
-              }
-            })
-            .foreach { _ =>
-              close()
-              val target = Navigation.queryParam("redirect").filter(_.trim.nonEmpty).getOrElse("/")
-              Navigation.navigate(target, replace = true)
+                val target = Navigation.queryParam("redirect").filter(_.trim.nonEmpty).getOrElse("/")
+                Navigation.navigate(target, replace = true)
+
+              case Failure(e: ErrorResponseException) =>
+                Viewport.notify("Fehler beim Anmelden!", Viewport.NotificationKind.Error)
+                event.setErrorResponses(e.errors)
+
+              case Failure(e: Throwable) =>
+                Viewport.notify(s"Fehler im Server ${e.getMessage}", Viewport.NotificationKind.Error)
             }
         }
 
