@@ -1,6 +1,7 @@
 package jfx.router
 
 import jfx.core.component.ManagedElementComponent
+import jfx.core.state.Property
 import jfx.dsl.{ComponentContext, DslRuntime, Scope}
 import jfx.layout.Viewport
 import org.scalajs.dom.{Event, HTMLDivElement, window}
@@ -19,6 +20,7 @@ final class WindowRouter(val routes: js.Array[Route])
   private var initialized = false
   private val windowsByUrl = mutable.Map.empty[String, Viewport.WindowConf]
   private var injectedScope: Scope | Null = null
+  val loadingProperty: Property[Boolean] = Property(false)
 
   override val element: HTMLDivElement = {
     val divElement = newElement("div")
@@ -65,6 +67,7 @@ final class WindowRouter(val routes: js.Array[Route])
             routeMatch = routeMatch
           )
 
+          loadingProperty.set(true)
           routeMatch.route.factory(context, summon[Scope]).toFuture.onComplete {
             case Success(component) if component != null =>
               val pageInfo =
@@ -101,11 +104,13 @@ final class WindowRouter(val routes: js.Array[Route])
 
               windowsByUrl.put(url, conf)
               Viewport.addWindow(conf)
+              loadingProperty.set(false)
 
             case Success(_) =>
-              ()
+              loadingProperty.set(false)
 
             case Failure(error) =>
+              loadingProperty.set(false)
               window.console.error(error)
           }
       }
@@ -176,4 +181,7 @@ object WindowRouter {
       DslRuntime.attach(component, currentContext)
       component
     }
+
+  def windowRouterLoading(using router: WindowRouter): Property[Boolean] =
+    router.loadingProperty
 }

@@ -13,7 +13,7 @@ import jfx.layout.Span.span
 import jfx.layout.VBox.vbox
 import jfx.layout.Viewport
 import jfx.layout.Viewport.viewport
-import jfx.router.WindowRouter.windowRouter
+import jfx.router.WindowRouter.{windowRouter, windowRouterLoading}
 import jfx.statement.ForEach.forEach
 import jfx.statement.ObserveRender.observeRender
 
@@ -39,6 +39,8 @@ class AppShell extends DivComposite {
           viewport {}
 
           div {
+            classes = Seq("glass", "app-shell-nav", "app-shell-nav-center")
+
             addDisposable(Viewport.windows.observe(windows => {
               if (windows.nonEmpty) {
                 classes = Seq("glass", "app-shell-nav", "app-shell-nav-left")
@@ -95,8 +97,49 @@ class AppShell extends DivComposite {
               }
 
             }
+          }
 
-            windowRouter(Routes.routes) {}
+          div {
+            classes = "app-shell-router-host"
+
+            given router: jfx.router.WindowRouter = windowRouter(Routes.routes) {}
+
+            observeRender(windowRouterLoading) { isLoading =>
+              if (isLoading) {
+                div {
+                  classes = "glass-border"
+                  style {
+                    position = "fixed"
+                    top = "24px"
+                    left = "50%"
+                    transform = "translateX(-50%)"
+                    display = "flex"
+                    zIndex = "1400"
+                  }
+
+                  vbox {
+                    classes = "glass"
+                    style {
+                      alignItems = "center"
+                      justifyContent = "center"
+                      rowGap = "12px"
+                      padding = "22px 26px"
+                      borderRadius = "20px"
+                      minWidth = "220px"
+                    }
+
+                    span {
+                      classes = Seq("material-icons", "icon")
+                      text = "hourglass_top"
+                    }
+
+                    span {
+                      text = "Ansicht wird geladen..."
+                    }
+                  }
+                }
+              }
+            }
           }
         }
 
