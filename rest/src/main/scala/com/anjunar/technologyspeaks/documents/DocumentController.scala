@@ -7,7 +7,7 @@ import com.anjunar.technologyspeaks.rest.types.Data
 import com.anjunar.technologyspeaks.security.{IdentityHolder, LinkBuilder}
 import com.anjunar.technologyspeaks.shared.editor.Node
 import jakarta.annotation.security.RolesAllowed
-import jakarta.persistence.EntityManager
+import jakarta.persistence.{EntityManager, FlushModeType}
 import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.bind.annotation.{GetMapping, PathVariable, PostMapping, PutMapping, RequestBody, RestController}
@@ -40,7 +40,7 @@ class DocumentController(val identityHolder: IdentityHolder, val documentImportS
   @RolesAllowed(Array("Anonymous", "Guest", "User", "Administrator"))
   @EntityGraph("Document.full")
   def root(): Data[Document] = {
-    var entity = Document.query("title" -> "Technology Speaks")
+    var entity = loadRootDocument()
 
     if (entity == null) {
       entity = new Document("Technology Speaks")
@@ -84,6 +84,16 @@ class DocumentController(val identityHolder: IdentityHolder, val documentImportS
 
     form
   }
+
+  private def loadRootDocument(): Document =
+    entityManager
+      .createQuery("select d from Document d where d.title = :title", classOf[Document])
+      .setParameter("title", "Technology Speaks")
+      .setFlushMode(FlushModeType.COMMIT)
+      .getResultList
+      .stream()
+      .findFirst()
+      .orElse(null)
 
   @GetMapping(value = Array("/document/documents/document/{id}"), produces = Array("application/json"))
   @RolesAllowed(Array("Anonymous", "Guest", "User", "Administrator"))
