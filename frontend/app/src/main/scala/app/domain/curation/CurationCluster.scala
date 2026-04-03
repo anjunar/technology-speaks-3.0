@@ -6,7 +6,6 @@ import app.support.Api.given
 import jfx.core.state.{ListProperty, Property}
 
 import scala.concurrent.Future
-import scala.scalajs.js
 import scala.scalajs.js.URIUtils.encodeURIComponent
 
 class CurationCluster extends AbstractEntity {
@@ -22,34 +21,34 @@ class CurationCluster extends AbstractEntity {
 
   def addCandidate(candidateId: String): Future[Data[CurationCluster]] =
     Api.request(s"/service/curation/clusters/${id.get}/add-candidate")
-      .post(js.Dynamic.literal(candidateId = candidateId))
+      .post(new AddCandidateRequest(candidateId))
       .read[Data[CurationCluster]]
 
   def writeSummary(value: String): Future[Data[CurationCluster]] =
     Api.request(s"/service/curation/clusters/${id.get}/write-summary")
-      .post(js.Dynamic.literal(summary = value))
+      .post(new WriteSummaryRequest(value))
       .read[Data[CurationCluster]]
 
   def accept(note: String = ""): Future[Data[CurationCluster]] =
     Api.request(s"/service/curation/clusters/${id.get}/accept")
-      .post(js.Dynamic.literal(note = note))
+      .post(new DecisionNoteRequest(note))
       .read[Data[CurationCluster]]
 
   def defer(note: String = ""): Future[Data[CurationCluster]] =
     Api.request(s"/service/curation/clusters/${id.get}/defer")
-      .post(js.Dynamic.literal(note = note))
+      .post(new DecisionNoteRequest(note))
       .read[Data[CurationCluster]]
 
   def reject(note: String = ""): Future[Data[CurationCluster]] =
     Api.request(s"/service/curation/clusters/${id.get}/reject")
-      .post(js.Dynamic.literal(note = note))
+      .post(new DecisionNoteRequest(note))
       .read[Data[CurationCluster]]
 }
 
 object CurationCluster {
   def create(title: String): Future[Data[CurationCluster]] =
     Api.request("/service/curation/clusters")
-      .post(js.Dynamic.literal(title = title))
+      .post(new CreateClusterRequest(title))
       .read[Data[CurationCluster]]
 
   def list(index: Int, limit: Int, status: String = "", query: String = ""): Future[Table[Data[CurationCluster]]] =

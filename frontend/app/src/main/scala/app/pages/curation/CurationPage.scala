@@ -3,7 +3,7 @@ package app.pages.curation
 import app.domain.core.Data
 import app.domain.curation.*
 import app.domain.documents.Document
-import app.support.{RemotePageQuery, RemoteTableList}
+import app.support.{Navigation, RemotePageQuery, RemoteTableList, TimeAgo}
 import app.ui.{CompositeSupport, DivComposite, PageComposite}
 import jfx.action.Button.{button, buttonType, onClick}
 import jfx.control.virtualList
@@ -34,7 +34,7 @@ class CurationPage(
   override def pageWidth: Int = 1320
   override def pageHeight: Int = 860
 
-  private val pageSize = 50
+  private val pageSize = 10
 
   private val selectedCandidateProperty: Property[Data[CurationCandidate] | Null] = Property(null)
   private val selectedClusterProperty: Property[Data[CurationCluster] | Null] = Property(null)
@@ -45,6 +45,9 @@ class CurationPage(
 
   override protected def compose(using DslContext): Unit = {
     classProperty += "curation-page"
+    style {
+      height = "100%"
+    }
 
     addDisposable(
       statusFilterProperty.observeWithoutInitial { _ =>
@@ -61,6 +64,7 @@ class CurationPage(
       hbox {
         classes = "documents-layout"
         style {
+          alignItems = "stretch"
           height = "100%"
           width = "100%"
           overflow = "hidden"
@@ -80,10 +84,14 @@ class CurationPage(
       style {
         width = "300px"
         minWidth = "300px"
+        height = "100%"
+        overflowY = "auto"
+        overflowX = "hidden"
         rowGap = "16px"
       }
 
       panel("Eingang") {
+        filterButton("Alle", "", statusFilterProperty)
         filterButton("Eingang", CandidateStatus.Eingang, statusFilterProperty)
         filterButton("In Pruefung", CandidateStatus.InPruefung, statusFilterProperty)
         filterButton("Spannungen", CandidateStatus.Zugeordnet, statusFilterProperty)
@@ -126,8 +134,11 @@ class CurationPage(
     vbox {
       classes = "doc-editor-stage"
       style {
+        alignSelf = "stretch"
         flex = "1"
+        height = "100%"
         minWidth = "0px"
+        overflow = "hidden"
         rowGap = "16px"
       }
 
@@ -156,6 +167,9 @@ class CurationPage(
       style {
         width = "320px"
         minWidth = "320px"
+        height = "100%"
+        overflowY = "auto"
+        overflowX = "hidden"
         rowGap = "16px"
       }
 
@@ -176,69 +190,95 @@ class CurationPage(
             summaryLine("Ziel-Dokument", if (candidate == null || candidate.target.get == null) "Noch offen" else candidate.target.get.nn.documentId)
             summaryLine("Abschnitt", if (candidate == null || candidate.target.get == null || candidate.target.get.nn.sectionId == null) "Noch offen" else candidate.target.get.nn.sectionId.nn)
 
-            val documentRef = comboBox[Data[Document]]("curationTargetDocument", standalone = true) {
-              ComboBox.items = documentsProperty
-              placeholder = "Ziel-Dokument waehlen"
-              identityBy = { (item: Data[Document]) => Option(item.data.id.get).getOrElse(item) }
-              multipleSelection = false
-              rowHeightPx = 42.0
-              dropdownHeightPx = 260.0
+            if (candidate != null) {
+              val documentRef = comboBox[Data[Document]]("curationTargetDocument", standalone = true) {
+                ComboBox.items = documentsProperty
+                placeholder = "Ziel-Dokument waehlen"
+                identityBy = { (item: Data[Document]) => Option(item.data.id.get).getOrElse(item) }
+                multipleSelection = false
+                rowHeightPx = 42.0
+                dropdownHeightPx = 260.0
 
-              valueRenderer = {
-                div {
-                  text =
-                    Option(selectedItem)
-                      .map(_.data.title.get)
-                      .filter(_.trim.nonEmpty)
-                      .getOrElse("Ziel-Dokument waehlen")
+                valueRenderer = {
+                  div {
+                    text =
+                      Option(selectedItem)
+                        .map(_.data.title.get)
+                        .filter(_.trim.nonEmpty)
+                        .getOrElse("Ziel-Dokument waehlen")
+                  }
+                }
+
+                itemRenderer = {
+                  val item = comboItem[Data[Document]]
+                  div {
+                    text = Option(item.data.title.get).filter(_.trim.nonEmpty).getOrElse("Unbenanntes Dokument")
+                  }
                 }
               }
 
-              itemRenderer = {
-                val item = comboItem[Data[Document]]
-                div {
-                  text = Option(item.data.title.get).filter(_.trim.nonEmpty).getOrElse("Unbenanntes Dokument")
+              addDisposable(
+                selectedDocumentProperty.observeWithoutInitial { selectedDocument =>
+                  documentRef.setSelectedItem(selectedDocument)
+                }
+              )
+              addDisposable(
+                documentRef.selectedItemProperty.observe { item =>
+                  selectedDocumentProperty.set(item)
+                }
+              )
+
+              input("curationSection") {
+                placeholder = "Ziel-Abschnitt"
+                inputType = "text"
+                subscribeBidirectional(selectedSectionProperty, stringValueProperty)
+              }
+
+              actionButton("Als Impuls lesen") {
+                classifySelectedCandidate(ResonanceType.Impuls)
+              }
+              actionButton("Als Widerspruch markieren") {
+                classifySelectedCandidate(ResonanceType.Einwand)
+              }
+              actionButton("Als offene Frage markieren") {
+                classifySelectedCandidate(ResonanceType.Frage)
+              }
+              actionButton("Ziel uebernehmen") {
+                assignSelectedTarget()
+              }
+            } else {
+              span {
+                style {
+                  opacity = "0.72"
+                }
+                text = "Waehle zuerst einen Kandidaten, um Typ und Ziel zu bearbeiten."
+              }
+            }
+
+            observeRender(selectedClusterProperty) { selectedCluster =>
+              if (selectedCluster != null) {
+                vbox {
+                  style {
+                    rowGap = "10px"
+                  }
+                  actionButton("Uebernehmen") {
+                    acceptSelectedCluster()
+                  }
+                  actionButton("Zurueckstellen") {
+                    deferSelectedCluster()
+                  }
+                  actionButton("Verwerfen") {
+                    rejectSelectedCluster()
+                  }
+                }
+              } else {
+                span {
+                  style {
+                    opacity = "0.72"
+                  }
+                  text = "Waehle einen Cluster, um Entscheidungen zu treffen."
                 }
               }
-            }
-
-            addDisposable(
-              selectedDocumentProperty.observeWithoutInitial { selectedDocument =>
-                documentRef.setSelectedItem(selectedDocument)
-              }
-            )
-            addDisposable(
-              documentRef.selectedItemProperty.observe { item =>
-                selectedDocumentProperty.set(item)
-              }
-            )
-
-            input("curationSection") {
-              placeholder = "Ziel-Abschnitt"
-              inputType = "text"
-              subscribeBidirectional(selectedSectionProperty, stringValueProperty)
-            }
-
-            actionButton("Als Impuls lesen") {
-              classifySelectedCandidate(ResonanceType.Impuls)
-            }
-            actionButton("Als Widerspruch markieren") {
-              classifySelectedCandidate(ResonanceType.Einwand)
-            }
-            actionButton("Als offene Frage markieren") {
-              classifySelectedCandidate(ResonanceType.Frage)
-            }
-            actionButton("Ziel uebernehmen") {
-              assignSelectedTarget()
-            }
-            actionButton("Uebernehmen") {
-              acceptSelectedCluster()
-            }
-            actionButton("Zurueckstellen") {
-              deferSelectedCluster()
-            }
-            actionButton("Verwerfen") {
-              rejectSelectedCluster()
             }
           }
         }
@@ -259,17 +299,38 @@ class CurationPage(
             summaryLine("Uebernommen", if (cluster == null) "0" else cluster.acceptedCount.get.toString)
             summaryLine("Verworfen", if (cluster == null) "0" else cluster.rejectedCount.get.toString)
 
-            input("clusterSummary") {
-              placeholder = "Verdichtungsnotiz"
-              inputType = "text"
-              subscribeBidirectional(clusterSummaryProperty, stringValueProperty)
-            }
+            if (cluster != null) {
+              input("clusterSummary") {
+                placeholder = "Verdichtungsnotiz"
+                inputType = "text"
+                subscribeBidirectional(clusterSummaryProperty, stringValueProperty)
+              }
 
-            actionButton("Mit Cluster verbinden") {
-              addSelectedCandidateToCluster()
-            }
-            actionButton("Verdichtungsnotiz schreiben") {
-              writeSelectedClusterSummary()
+              observeRender(selectedCandidateProperty) { selectedCandidate =>
+                if (selectedCandidate != null) {
+                  actionButton("Mit Cluster verbinden") {
+                    addSelectedCandidateToCluster()
+                  }
+                } else {
+                  span {
+                    style {
+                      opacity = "0.72"
+                    }
+                    text = "Waehle einen Kandidaten, um ihn mit dem Cluster zu verbinden."
+                  }
+                }
+              }
+
+              actionButton("Verdichtungsnotiz schreiben") {
+                writeSelectedClusterSummary()
+              }
+            } else {
+              span {
+                style {
+                  opacity = "0.72"
+                }
+                text = "Waehle zuerst einen Cluster, um Spannung und Verdichtungsnotiz zu bearbeiten."
+              }
             }
           }
         }
@@ -458,8 +519,10 @@ private final class EmptyCard(label: String) extends DivComposite {
       padding = "14px"
       borderRadius = "14px"
     }
-    span {
-      text = label
+    withDslContext {
+      span {
+        text = label
+      }
     }
   }
 }
@@ -474,20 +537,29 @@ private final class ClusterCard(entry: Data[CurationCluster], selected: Property
     }
     element.onclick = _ => selected.set(entry)
 
-    vbox {
-      style {
-        rowGap = "8px"
-      }
-
-      span {
+    withDslContext {
+      vbox {
         style {
-          fontWeight = "600"
+          rowGap = "8px"
         }
-        text = if (entry.data.title.get.isBlank) "Offener Cluster" else entry.data.title.get
-      }
 
-      span {
-        text = s"${entry.data.contradictionCount.get} Widersprueche, ${entry.data.questionCount.get} Fragen"
+        span {
+          style {
+            fontWeight = "600"
+          }
+          text = if (entry.data.title.get.isBlank) "Offener Cluster" else entry.data.title.get
+        }
+
+        span {
+          text = s"${entry.data.candidateIds.size} Eintraege"
+        }
+
+        span {
+          style {
+            opacity = "0.66"
+          }
+          text = s"${entry.data.contradictionCount.get} Widersprueche, ${entry.data.questionCount.get} Fragen"
+        }
       }
     }
   }
@@ -503,39 +575,103 @@ private final class CandidateCard(entry: Data[CurationCandidate], selected: Prop
     }
     element.onclick = _ => selected.set(entry)
 
-    vbox {
-      style {
-        rowGap = "10px"
-      }
-
-      hbox {
+    withDslContext {
+      vbox {
         style {
-          columnGap = "8px"
-          alignItems = "center"
+          rowGap = "10px"
+        }
+
+        hbox {
+          style {
+            columnGap = "8px"
+            alignItems = "center"
+          }
+
+          span {
+            style {
+              fontWeight = "600"
+            }
+            text = entry.data.resonanceType.get
+          }
+
+          span {
+            style {
+              opacity = "0.66"
+            }
+            text = entry.data.status.get
+          }
         }
 
         span {
           style {
             fontWeight = "600"
           }
-          text = entry.data.resonanceType.get
+          text = displayTitle(entry)
         }
 
         span {
           style {
-            opacity = "0.66"
+            opacity = "0.72"
+            fontSize = "13px"
           }
-          text = entry.data.status.get
+          text = displayMeta(entry)
         }
-      }
 
-      span {
-        text = Option(entry.data.title.get).filter(_.trim.nonEmpty).getOrElse("Unbenannter Impuls")
-      }
+        span {
+          text = displayBody(entry)
+        }
 
-      span {
-        text = entry.data.excerpt.get
+        Navigation.renderByRel("source", entry.data.links) { () =>
+          button("Original") {
+            buttonType = "button"
+            classes = "home-page__button home-page__button--ghost"
+            onClick { _ =>
+              Navigation.linkByRel("source", entry.data.links).foreach(link => Navigation.navigate(link.url))
+            }
+          }
+        }
       }
     }
   }
+
+  private def displayTitle(entry: Data[CurationCandidate]): String =
+    Option(entry.data.title.get)
+      .map(_.trim)
+      .filter(_.nonEmpty)
+      .orElse(Option(entry.data.excerpt.get).map(_.trim).filter(_.nonEmpty).map(_.take(96)))
+      .orElse(Option(entry.data.normalizedText.get).map(_.trim).filter(_.nonEmpty).map(_.take(96)))
+      .getOrElse(defaultTitle(entry))
+
+  private def displayMeta(entry: Data[CurationCandidate]): String = {
+    val author = Option(entry.data.author.get).map(_.nickName.get).map(_.trim).filter(_.nonEmpty).getOrElse("Unbekannt")
+    val source = Option(entry.data.source.get).map(_.sourceType).map(normalizeSourceType).getOrElse("Eintrag")
+    val created = Option(entry.data.created.get).filter(_ != null).map(TimeAgo.format).getOrElse("")
+    if (created.nonEmpty) s"$source von $author - $created" else s"$source von $author"
+  }
+
+  private def displayBody(entry: Data[CurationCandidate]): String =
+    Option(entry.data.excerpt.get)
+      .map(_.trim)
+      .filter(_.nonEmpty)
+      .orElse(Option(entry.data.normalizedText.get).map(_.trim).filter(_.nonEmpty))
+      .map(_.take(240))
+      .getOrElse(displaySourceReference(entry))
+
+  private def displaySourceReference(entry: Data[CurationCandidate]): String =
+    Option(entry.data.source.get)
+      .map(source => s"${normalizeSourceType(source.sourceType)} ${source.sourceId.take(8)}")
+      .getOrElse("Keine Quelle verfuegbar")
+
+  private def defaultTitle(entry: Data[CurationCandidate]): String =
+    Option(entry.data.source.get)
+      .map(source => s"${normalizeSourceType(source.sourceType)} ohne Auszug")
+      .getOrElse("Unbenannter Impuls")
+
+  private def normalizeSourceType(value: String): String =
+    Option(value).map(_.trim.toLowerCase).filter(_.nonEmpty) match {
+      case Some("post") => "Post"
+      case Some("document") => "Dokument"
+      case Some(other) => other.capitalize
+      case None => "Eintrag"
+    }
 }

@@ -1,14 +1,17 @@
 package com.anjunar.technologyspeaks.curation
 
 import com.anjunar.technologyspeaks.core.SchemaHateoas
+import com.anjunar.technologyspeaks.documents.DocumentController
 import com.anjunar.technologyspeaks.rest.EntityManagerProvider
 import com.anjunar.technologyspeaks.rest.types.{Data, Table}
 import com.anjunar.technologyspeaks.security.{IdentityHolder, LinkBuilder}
+import com.anjunar.technologyspeaks.timeline.{Post, PostController}
 import jakarta.annotation.security.RolesAllowed
 import jakarta.json.bind.annotation.JsonbSubtype
 import jakarta.persistence.EntityManager
 import org.springframework.web.bind.annotation.{GetMapping, RestController}
 
+import java.util.UUID
 import scala.jdk.CollectionConverters.*
 
 @RestController
@@ -39,6 +42,7 @@ class CurationCandidatesController(val identityHolder: IdentityHolder, val entit
             .withRel("assign-target")
             .build()
         )
+        appendSourceLink(entity)
         new CurationCandidatesController.CandidateRow(entity)
       }
       .toList
@@ -58,6 +62,40 @@ class CurationCandidatesController(val identityHolder: IdentityHolder, val entit
       value.isBlank ||
       Option(candidate.title).exists(_.toLowerCase.contains(value.trim.toLowerCase)) ||
       Option(candidate.excerpt).exists(_.toLowerCase.contains(value.trim.toLowerCase))
+
+  private def appendSourceLink(candidate: CurationCandidate): Unit =
+    Option(candidate.source).foreach { source =>
+      Option(parseUuid(source.sourceId)).foreach { id =>
+        Option(source.sourceType).map(_.trim.toLowerCase) match {
+          case Some("post") =>
+            val post = Post.find(id)
+            if (post != null) {
+              candidate.addLinks(
+                LinkBuilder.create[PostController](_.read(post))
+                  .withRel("source")
+                  .build()
+              )
+            }
+          case Some("document") =>
+            val document = com.anjunar.technologyspeaks.documents.Document.find(id)
+            if (document != null) {
+              candidate.addLinks(
+                LinkBuilder.create[DocumentController](_.read(document))
+                  .withRel("source")
+                  .build()
+              )
+            }
+          case _ =>
+            ()
+        }
+      }
+    }
+
+  private def parseUuid(value: String): UUID =
+    try UUID.fromString(value)
+    catch {
+      case _: IllegalArgumentException => null
+    }
 }
 
 object CurationCandidatesController {

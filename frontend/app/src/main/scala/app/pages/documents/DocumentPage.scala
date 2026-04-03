@@ -41,8 +41,8 @@ class DocumentPage(val model: Document) extends PageComposite("Dokument") {
 
   private given ExecutionContext = ExecutionContext.global
 
-  private val documentsPageSize = 50
-  private val issuesPageSize = 50
+  private val documentsPageSize = 10
+  private val issuesPageSize = 10
 
   private val currentDocumentProperty: Property[Document] = Property(if (model != null) model else new Document())
   private val searchQueryProperty: Property[String] = Property("")
@@ -61,7 +61,7 @@ class DocumentPage(val model: Document) extends PageComposite("Dokument") {
         Future.successful(new Table[Data[Issue]]())
       }
     }(_.data)
-  private val provenancePageSize = 20
+  private val provenancePageSize = 10
   private val curationCandidatesProperty: RemoteListProperty[Data[CurationCandidate], RemotePageQuery] =
     RemoteTableList.create[Data[CurationCandidate]](pageSize = provenancePageSize) { query =>
       val document = currentDocumentProperty.get

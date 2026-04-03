@@ -8,7 +8,6 @@ import app.support.Navigation
 import jfx.core.state.{ListProperty, Property}
 
 import scala.concurrent.Future
-import scala.scalajs.js
 import scala.scalajs.js.URIUtils.encodeURIComponent
 
 class CurationCandidate extends AbstractEntity {
@@ -26,12 +25,12 @@ class CurationCandidate extends AbstractEntity {
 
   def classify(nextType: String): Future[Data[CurationCandidate]] =
     Api.request(s"/service/curation/candidates/${id.get}/classify")
-      .post(js.Dynamic.literal(resonanceType = nextType))
+      .post(new ClassifyCandidateRequest(nextType))
       .read[Data[CurationCandidate]]
 
   def assignTarget(documentId: String, sectionId: String | Null): Future[Data[CurationCandidate]] =
     Api.request(s"/service/curation/candidates/${id.get}/assign-target")
-      .post(js.Dynamic.literal(documentId = documentId, sectionId = sectionId))
+      .post(new AssignTargetRequest(documentId, sectionId))
       .read[Data[CurationCandidate]]
 }
 

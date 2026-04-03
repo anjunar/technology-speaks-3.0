@@ -31,7 +31,7 @@ class PostViewPage(val model: Post) extends PageComposite("Post") {
   override def pageHeight: Int = 860
 
   private given ExecutionContext = ExecutionContext.global
-  private val pageSize = 40
+  private val pageSize = 10
 
   private val itemsProperty: ListProperty[Data[? <: AbstractEntity]] = ListProperty()
   private val commentsProperty: RemoteListProperty[FirstComment, RemotePageQuery] =

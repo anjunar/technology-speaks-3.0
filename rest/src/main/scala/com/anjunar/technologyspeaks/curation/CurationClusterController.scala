@@ -9,6 +9,7 @@ import jakarta.persistence.EntityManager
 import jakarta.annotation.security.RolesAllowed
 import org.springframework.web.bind.annotation.{PathVariable, PostMapping, RequestBody, RestController}
 
+import java.util.UUID
 import scala.jdk.CollectionConverters.*
 
 @RestController
@@ -26,8 +27,8 @@ class CurationClusterController(val entityManager: EntityManager, val identityHo
 
   @PostMapping(value = Array("/curation/clusters/{id}/add-candidate"), produces = Array("application/json"), consumes = Array("application/json"))
   @RolesAllowed(Array("User", "Administrator"))
-  def addCandidate(@PathVariable("id") entity: CurationCluster, @RequestBody request: AddCandidateRequest): Data[CurationCluster] = {
-    val managed = CurationCluster.find(entity.id)
+  def addCandidate(@PathVariable("id") id: UUID, @RequestBody request: AddCandidateRequest): Data[CurationCluster] = {
+    val managed = CurationCluster.find(id)
     if request != null && request.candidateId != null && request.candidateId.nonEmpty && !managed.candidateIds.contains(request.candidateId) then
       managed.candidateIds.add(request.candidateId)
     refreshMetrics(managed)
@@ -36,8 +37,8 @@ class CurationClusterController(val entityManager: EntityManager, val identityHo
 
   @PostMapping(value = Array("/curation/clusters/{id}/write-summary"), produces = Array("application/json"), consumes = Array("application/json"))
   @RolesAllowed(Array("User", "Administrator"))
-  def writeSummary(@PathVariable("id") entity: CurationCluster, @RequestBody request: WriteSummaryRequest): Data[CurationCluster] = {
-    val managed = CurationCluster.find(entity.id)
+  def writeSummary(@PathVariable("id") id: UUID, @RequestBody request: WriteSummaryRequest): Data[CurationCluster] = {
+    val managed = CurationCluster.find(id)
     if request != null then
       managed.summary = request.summary
     clusterData(managed)
@@ -45,8 +46,8 @@ class CurationClusterController(val entityManager: EntityManager, val identityHo
 
   @PostMapping(value = Array("/curation/clusters/{id}/accept"), produces = Array("application/json"), consumes = Array("application/json"))
   @RolesAllowed(Array("User", "Administrator"))
-  def accept(@PathVariable("id") entity: CurationCluster, @RequestBody request: DecisionNoteRequest): Data[CurationCluster] = {
-    val managed = CurationCluster.find(entity.id)
+  def accept(@PathVariable("id") id: UUID, @RequestBody request: DecisionNoteRequest): Data[CurationCluster] = {
+    val managed = CurationCluster.find(id)
     applyStatus(managed, CandidateStatus.Uebernommen, DecisionType.Uebernommen, request)
     managed.status = ClusterStatus.Abgeschlossen
     managed.acceptedCount = managed.acceptedCount + 1
@@ -55,8 +56,8 @@ class CurationClusterController(val entityManager: EntityManager, val identityHo
 
   @PostMapping(value = Array("/curation/clusters/{id}/defer"), produces = Array("application/json"), consumes = Array("application/json"))
   @RolesAllowed(Array("User", "Administrator"))
-  def defer(@PathVariable("id") entity: CurationCluster, @RequestBody request: DecisionNoteRequest): Data[CurationCluster] = {
-    val managed = CurationCluster.find(entity.id)
+  def defer(@PathVariable("id") id: UUID, @RequestBody request: DecisionNoteRequest): Data[CurationCluster] = {
+    val managed = CurationCluster.find(id)
     applyStatus(managed, CandidateStatus.Zurueckgestellt, DecisionType.Zurueckgestellt, request)
     managed.status = ClusterStatus.InBearbeitung
     clusterData(managed)
@@ -64,8 +65,8 @@ class CurationClusterController(val entityManager: EntityManager, val identityHo
 
   @PostMapping(value = Array("/curation/clusters/{id}/reject"), produces = Array("application/json"), consumes = Array("application/json"))
   @RolesAllowed(Array("User", "Administrator"))
-  def reject(@PathVariable("id") entity: CurationCluster, @RequestBody request: DecisionNoteRequest): Data[CurationCluster] = {
-    val managed = CurationCluster.find(entity.id)
+  def reject(@PathVariable("id") id: UUID, @RequestBody request: DecisionNoteRequest): Data[CurationCluster] = {
+    val managed = CurationCluster.find(id)
     applyStatus(managed, CandidateStatus.Verworfen, DecisionType.Verworfen, request)
     managed.status = ClusterStatus.Abgeschlossen
     managed.rejectedCount = managed.rejectedCount + 1
@@ -75,19 +76,19 @@ class CurationClusterController(val entityManager: EntityManager, val identityHo
   private def clusterData(cluster: CurationCluster): Data[CurationCluster] = {
     refreshMetrics(cluster)
     cluster.addLinks(
-      LinkBuilder.create[CurationClusterController](_.addCandidate(cluster, null))
+      LinkBuilder.create[CurationClusterController](_.addCandidate(cluster.id, null))
         .withRel("add-candidate")
         .build(),
-      LinkBuilder.create[CurationClusterController](_.writeSummary(cluster, null))
+      LinkBuilder.create[CurationClusterController](_.writeSummary(cluster.id, null))
         .withRel("write-summary")
         .build(),
-      LinkBuilder.create[CurationClusterController](_.accept(cluster, null))
+      LinkBuilder.create[CurationClusterController](_.accept(cluster.id, null))
         .withRel("accept")
         .build(),
-      LinkBuilder.create[CurationClusterController](_.defer(cluster, null))
+      LinkBuilder.create[CurationClusterController](_.defer(cluster.id, null))
         .withRel("defer")
         .build(),
-      LinkBuilder.create[CurationClusterController](_.reject(cluster, null))
+      LinkBuilder.create[CurationClusterController](_.reject(cluster.id, null))
         .withRel("reject")
         .build()
     )

@@ -27,7 +27,7 @@ import scala.scalajs.js.timers.{SetTimeoutHandle, clearTimeout, setTimeout}
 
 class UsersPage(usersProperty: RemoteListProperty[Data[User], RemotePageQuery], searchQuery: Property[String]) extends PageComposite("Users") {
 
-  private val pageSize = 50
+  private val pageSize = 10
   private var pendingReload: SetTimeoutHandle | Null = null
 
   override def pageWidth: Int = 1040

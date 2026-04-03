@@ -30,7 +30,7 @@ class PostsPage(postsProperty : RemoteListProperty[Data[Post], RemotePageQuery])
   override def pageWidth: Int = 980
   override def pageHeight: Int = 860
 
-  private val pageSize = 50
+  private val pageSize = 10
 
   override protected def compose(using DslContext): Unit = {
     classes = "posts-page"

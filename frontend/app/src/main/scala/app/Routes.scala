@@ -44,27 +44,27 @@ object Routes {
       homePage()
     },
     asyncRoute("/curation/space") {
-      val statusFilterProperty = Property(CandidateStatus.Eingang)
+      val statusFilterProperty = Property("")
       val typeFilterProperty = Property("")
 
       val candidatesProperty: RemoteListProperty[Data[CurationCandidate], RemotePageQuery] =
-        RemoteTableList.create[Data[CurationCandidate]](pageSize = 50) { query =>
+        RemoteTableList.create[Data[CurationCandidate]](pageSize = 10) { query =>
           CurationCandidate.list(query.index, query.limit, statusFilterProperty.get, typeFilterProperty.get)
         }
 
       val clustersProperty: RemoteListProperty[Data[CurationCluster], RemotePageQuery] =
-        RemoteTableList.create[Data[CurationCluster]](pageSize = 50) { query =>
+        RemoteTableList.create[Data[CurationCluster]](pageSize = 10) { query =>
           CurationCluster.list(query.index, query.limit)
         }
 
       val documentsProperty: RemoteListProperty[Data[Document], RemotePageQuery] =
-        RemoteTableList.create[Data[Document]](pageSize = 100) { query =>
+        RemoteTableList.create[Data[Document]](pageSize = 10) { query =>
           Document.list(query.index, query.limit)
         }
 
-      candidatesProperty.reload(RemotePageQuery.first(50)).toFuture.flatMap { _ =>
-        clustersProperty.reload(RemotePageQuery.first(50)).toFuture.flatMap { _ =>
-          documentsProperty.reload(RemotePageQuery.first(100)).toFuture.map { _ =>
+      candidatesProperty.reload(RemotePageQuery.first(10)).toFuture.flatMap { _ =>
+        clustersProperty.reload(RemotePageQuery.first(10)).toFuture.flatMap { _ =>
+          documentsProperty.reload(RemotePageQuery.first(10)).toFuture.map { _ =>
             CurationPage.curationPage(statusFilterProperty, typeFilterProperty, candidatesProperty, clustersProperty, documentsProperty)
           }
         }
@@ -99,7 +99,7 @@ object Routes {
       val searchQueryProperty = Property("")
       val selectedGroupsProperty = ListProperty[Group]()
       val relationShipsProperty: RemoteListProperty[Data[RelationShip], RemotePageQuery] =
-        RemoteTableList.create[Data[RelationShip]](pageSize = 200) { query =>
+        RemoteTableList.create[Data[RelationShip]](pageSize = 10) { query =>
           RelationShip.list(
             query.index,
             query.limit,
@@ -109,7 +109,7 @@ object Routes {
           )
         }
 
-      relationShipsProperty.reload(RemotePageQuery.first(200)).toFuture.map(_ => {
+      relationShipsProperty.reload(RemotePageQuery.first(10)).toFuture.map(_ => {
         RelationShipsPage.relationShipsPage(relationShipsProperty, searchQueryProperty, selectedGroupsProperty) {}
       })
     },
@@ -118,11 +118,11 @@ object Routes {
     },
     asyncRoute("/timeline/posts") {
       val postsProperty: RemoteListProperty[Data[Post], RemotePageQuery] =
-        RemoteTableList.create[Data[Post]](pageSize = 50) { query =>
+        RemoteTableList.create[Data[Post]](pageSize = 10) { query =>
           Post.list(query.index, query.limit)
         }
 
-      postsProperty.reload(RemotePageQuery.first(50)).toFuture.map(_ => {
+      postsProperty.reload(RemotePageQuery.first(10)).toFuture.map(_ => {
         PostsPage.postsPage(postsProperty) {}
       })
     },
@@ -167,11 +167,11 @@ object Routes {
     asyncRoute("/core/users") {
       val searchQueryProperty = Property("")
       val usersProperty: RemoteListProperty[Data[User], RemotePageQuery] =
-        RemoteTableList.create[Data[User]](pageSize = 50) { query =>
+        RemoteTableList.create[Data[User]](pageSize = 10) { query =>
           User.list(query.index, query.limit, searchQueryProperty.get, sorting = query.effectiveSortSpecs(Seq("created:desc")))
         }
 
-      usersProperty.reload(RemotePageQuery.first(50)).toFuture.map(_ => {
+      usersProperty.reload(RemotePageQuery.first(10)).toFuture.map(_ => {
         UsersPage.usersPage(usersProperty, searchQueryProperty)
       })
     },

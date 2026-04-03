@@ -37,7 +37,7 @@ class IssuePage(val model: Issue) extends PageComposite("Aufgabe", pageResizable
   override def pageHeight: Int = 860
 
   private given ExecutionContext = ExecutionContext.global
-  private val pageSize = 50
+  private val pageSize = 10
   private val itemsProperty: ListProperty[Data[? <: AbstractEntity]] = ListProperty()
 
   private val commentsProperty: RemoteListProperty[FirstComment, RemotePageQuery] =

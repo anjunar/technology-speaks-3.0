@@ -1,15 +1,17 @@
 package com.anjunar.technologyspeaks.curation
 
 import com.anjunar.technologyspeaks.core.SchemaHateoas
+import com.anjunar.technologyspeaks.documents.DocumentController
 import com.anjunar.technologyspeaks.rest.EntityManagerProvider
 import com.anjunar.technologyspeaks.rest.types.Data
 import com.anjunar.technologyspeaks.security.{IdentityHolder, LinkBuilder}
 import com.anjunar.technologyspeaks.shared.editor.Node
-import com.anjunar.technologyspeaks.timeline.Post
+import com.anjunar.technologyspeaks.timeline.{Post, PostController}
 import jakarta.annotation.security.RolesAllowed
 import jakarta.persistence.EntityManager
 import org.springframework.web.bind.annotation.{PathVariable, PostMapping, RequestBody, RestController}
 
+import java.util.UUID
 import scala.jdk.CollectionConverters.*
 
 @RestController
@@ -69,6 +71,7 @@ class CurationCandidateController(val identityHolder: IdentityHolder, val entity
         .withRel("assign-target")
         .build()
     )
+    appendSourceLink(candidate)
     new Data(candidate, SchemaHateoas.enhance(candidate, CurationCandidate.schema))
   }
 
@@ -87,5 +90,39 @@ class CurationCandidateController(val identityHolder: IdentityHolder, val entity
       val current = Option(node.text).getOrElse("")
       val nested = Option(node.content).map(_.asScala.map(extractText).mkString(" ")).getOrElse("")
       s"$current $nested".trim.replaceAll("\\s+", " ")
+    }
+
+  private def appendSourceLink(candidate: CurationCandidate): Unit =
+    Option(candidate.source).foreach { source =>
+      Option(parseUuid(source.sourceId)).foreach { id =>
+        Option(source.sourceType).map(_.trim.toLowerCase) match {
+          case Some("post") =>
+            val post = Post.find(id)
+            if (post != null) {
+              candidate.addLinks(
+                LinkBuilder.create[PostController](_.read(post))
+                  .withRel("source")
+                  .build()
+              )
+            }
+          case Some("document") =>
+            val document = com.anjunar.technologyspeaks.documents.Document.find(id)
+            if (document != null) {
+              candidate.addLinks(
+                LinkBuilder.create[DocumentController](_.read(document))
+                  .withRel("source")
+                  .build()
+              )
+            }
+          case _ =>
+            ()
+        }
+      }
+    }
+
+  private def parseUuid(value: String): UUID =
+    try UUID.fromString(value)
+    catch {
+      case _: IllegalArgumentException => null
     }
 }

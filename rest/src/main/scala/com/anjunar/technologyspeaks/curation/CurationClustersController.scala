@@ -28,19 +28,19 @@ class CurationClustersController(val identityHolder: IdentityHolder, val entityM
       .map { entity =>
         refreshMetrics(entity)
         entity.addLinks(
-          LinkBuilder.create[CurationClusterController](_.addCandidate(entity, null))
+          LinkBuilder.create[CurationClusterController](_.addCandidate(entity.id, null))
             .withRel("add-candidate")
             .build(),
-          LinkBuilder.create[CurationClusterController](_.writeSummary(entity, null))
+          LinkBuilder.create[CurationClusterController](_.writeSummary(entity.id, null))
             .withRel("write-summary")
             .build(),
-          LinkBuilder.create[CurationClusterController](_.accept(entity, null))
+          LinkBuilder.create[CurationClusterController](_.accept(entity.id, null))
             .withRel("accept")
             .build(),
-          LinkBuilder.create[CurationClusterController](_.defer(entity, null))
+          LinkBuilder.create[CurationClusterController](_.defer(entity.id, null))
             .withRel("defer")
             .build(),
-          LinkBuilder.create[CurationClusterController](_.reject(entity, null))
+          LinkBuilder.create[CurationClusterController](_.reject(entity.id, null))
             .withRel("reject")
             .build()
         )

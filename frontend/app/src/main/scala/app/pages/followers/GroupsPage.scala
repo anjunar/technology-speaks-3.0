@@ -32,7 +32,7 @@ class GroupsPage extends PageComposite("Groups") {
 
   private given ExecutionContext = ExecutionContext.global
 
-  private val pageSize = 100
+  private val pageSize = 10
   private val groupsProperty: RemoteListProperty[Data[Group], RemotePageQuery] =
     RemoteTableList.create[Data[Group]](pageSize = pageSize) { query =>
       Group.list(query.index, query.limit, sorting = query.effectiveSortSpecs(Seq("created:desc")))

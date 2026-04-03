@@ -41,7 +41,7 @@ class RelationShipsPage(
   override def pageHeight: Int = 860
 
   private given ExecutionContext = ExecutionContext.global
-  private val pageSize = 200
+  private val pageSize = 10
   private var pendingReload: SetTimeoutHandle | Null = null
   private val availableGroupsProperty: RemoteListProperty[Group, RemotePageQuery] =
     RemoteTableList.createMapped[Data[Group], Group](pageSize = pageSize) { query =>

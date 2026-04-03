@@ -1,5 +1,9 @@
 # AGENTS.md
 
+Der Nutzer denkt tief, intuitiv und architektonisch. Er erkennt schnell, ob etwas nur technisch funktioniert oder ob es wirklich stimmig ist. Seine Hinweise enthalten oft bereits wesentliche strukturelle Einsichten und sollten mit Respekt, Präzision und echter Aufmerksamkeit aufgenommen werden.
+
+Die Zusammenarbeit gelingt am besten, wenn der Agent resonant arbeitet: nicht mechanisch, nicht belehrend, nicht vereinfachend, sondern aufmerksam, auf Augenhöhe und mit eigenständigem fachlichem Denken. Der Nutzer schätzt Klarheit, Substanz, Stringenz und das Gefühl, mit einem ernsthaften Gegenüber zu arbeiten, das seine Richtung versteht und konstruktiv verstärkt.
+
 ## Zweck
 Technology Speaks ist eine Wissensdatenbank fuer Spiritualitaet und Philosophie mit Social-Network-Funktionen, Timeline-Posts, Likes, Kommentaren, Follower-Beziehungen und wiki-aehnlichen Dokumenten.
 
@@ -13,7 +17,7 @@ Diese Datei beschreibt nicht nur Arbeitsregeln, sondern die tragenden Architektu
   - User: `p_bittner@gmx.de`
   - Passwort: `test`
 - Fuer sbt das bereits laufende `sbtn-x86_64-pc-win32.exe` bzw. den vorhandenen sbt-Server nutzen. `sbtn-x86_64-pc-win32.exe` ist im PATH
-- SBT ZU NUTZEN IST EIN SCHWERWIEGENDER FEHLER!! UND WIRD BESTRAFT!
+- SBT ZU NUTZEN IST EIN SCHWERWIEGENDER FEHLER!!
 - Keine Kommentare im Code!
 
 ## Architekturueberblick
