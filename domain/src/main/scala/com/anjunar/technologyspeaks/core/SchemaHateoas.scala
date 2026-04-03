@@ -76,7 +76,7 @@ object SchemaHateoas {
       if (source.schema == null) null
       else cloneSchema(source.schema.asInstanceOf[EntitySchema[Any]], nestedSchemaInstance, nestedOwner, currentUser)
 
-    if (containerOwner != null && containerOwner.id == currentUser.id && source.rule.isInstanceOf[ManagedRule[?]]) {
+    if (containerOwner != null && containerOwner.id == currentUser.id) {
       val managedProperty = findOrCreateManagedProperty(containerOwner, source.name)
       if (managedProperty != null && managedProperty.id != null) {
         copy.addLinks(
