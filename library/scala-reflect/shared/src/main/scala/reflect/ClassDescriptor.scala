@@ -100,8 +100,42 @@ object ClassDescriptor {
 
   def maybeResolve(descriptor: ClassDescriptor): Option[ClassDescriptor] =
     maybeForName(descriptor.typeName)
-      .orElse(maybeForName(descriptor.simpleName))
+      .orElse(maybeForSimpleName(descriptor.simpleName))
+      .map(registered => merge(descriptor, registered))
       .orElse(Option.when(descriptor.properties.nonEmpty || descriptor.typeParameters.nonEmpty)(descriptor))
+
+  private def merge(descriptor: ClassDescriptor, registered: ClassDescriptor): ClassDescriptor = {
+    val merged = ClassDescriptor(
+      typeName = registered.typeName,
+      simpleName = registered.simpleName,
+      annotations = if descriptor.annotations.nonEmpty then descriptor.annotations else registered.annotations,
+      properties = mergeProperties(descriptor.properties, registered.properties),
+      baseTypes = if descriptor.baseTypes.nonEmpty then descriptor.baseTypes else registered.baseTypes,
+      typeParameters = if descriptor.typeParameters.nonEmpty then descriptor.typeParameters else registered.typeParameters,
+      constructors = if descriptor.constructors.nonEmpty then descriptor.constructors else registered.constructors,
+      isAbstract = descriptor.isAbstract || registered.isAbstract,
+      isFinal = descriptor.isFinal || registered.isFinal,
+      isCaseClass = descriptor.isCaseClass || registered.isCaseClass
+    )
+
+    registered.runtimeClass.foreach(merged.bindRuntimeClass)
+    registered.factory.foreach(merged.bindFactory)
+    merged
+  }
+
+  private def mergeProperties(descriptorProperties: Array[PropertyDescriptor], registeredProperties: Array[PropertyDescriptor]): Array[PropertyDescriptor] =
+    if descriptorProperties.isEmpty then registeredProperties
+    else
+      descriptorProperties.map { property =>
+        registeredProperties.find(_.name == property.name) match {
+          case Some(registeredProperty) =>
+            property.copy(
+              accessor = property.accessor.orElse(registeredProperty.accessor)
+            )
+          case None =>
+            property
+        }
+      }
 
   def all: Iterable[ClassDescriptor] =
     ReflectRegistry.getAllRegistered
