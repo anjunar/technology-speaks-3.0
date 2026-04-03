@@ -2,6 +2,7 @@ package com.anjunar.technologyspeaks
 
 import com.anjunar.json.mapper.intermediate.model.JsonObject
 import com.anjunar.technologyspeaks.core.{UserSearch, UsersController}
+import com.anjunar.technologyspeaks.curation.{CandidateSearch, CurationCandidatesController, CurationController}
 import com.anjunar.technologyspeaks.documents.{DocumentController, DocumentsController}
 import com.anjunar.technologyspeaks.followers.{FollowersController, RelationShipSearch}
 import com.anjunar.technologyspeaks.rest.EntityGraph
@@ -27,6 +28,10 @@ class ApplicationController(val identityHolder: IdentityHolder) {
       LinkBuilder.create[PostsController](_.list(new PostSearch()))
         .withId(true)
         .withRel("posts")
+        .build(),
+      LinkBuilder.create[CurationController](_.space())
+        .withId(true)
+        .withRel("curation")
         .build(),
       LinkBuilder.create[UsersController](_.list(new UserSearch("")))
         .withId(true)

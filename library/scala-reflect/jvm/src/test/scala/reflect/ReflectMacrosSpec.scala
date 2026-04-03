@@ -63,18 +63,31 @@ class ReflectMacrosSpec extends AnyFlatSpec with Matchers {
   "ReflectRegistry" should "register and load class descriptors" in {
     val descriptor = ReflectMacros.reflect[Person]
 
-    ReflectRegistry.register[Person](descriptor)
+    ReflectRegistry.clear()
+    ReflectRegistry.registerByTypeName(
+      descriptor.typeName,
+      descriptor.bindRuntimeClass(classOf[Person])
+    )
 
     ReflectRegistry.loadClass("reflect.Person") shouldBe Some(descriptor)
     ReflectRegistry.loadClassBySimpleName("Person") shouldBe Some(descriptor)
+    ReflectRegistry.clear()
   }
 
   it should "check type assignability" in {
-    ReflectRegistry.register[Person](ReflectMacros.reflect[Person])
-    ReflectRegistry.register[Employee](ReflectMacros.reflect[Employee])
+    ReflectRegistry.clear()
+
+    val personDescriptor =
+      ReflectMacros.reflect[Person].bindRuntimeClass(classOf[Person])
+    val employeeDescriptor =
+      ReflectMacros.reflect[Employee].bindRuntimeClass(classOf[Employee])
+
+    ReflectRegistry.registerByTypeName(personDescriptor.typeName, personDescriptor)
+    ReflectRegistry.registerByTypeName(employeeDescriptor.typeName, employeeDescriptor)
 
     ReflectRegistry.isAssignableFrom("reflect.Employee", "reflect.Person") shouldBe true
     ReflectRegistry.isAssignableFrom("reflect.Person", "reflect.Employee") shouldBe false
+    ReflectRegistry.clear()
   }
 
   "PropertyAccessor" should "create read-only accessor for val" in {

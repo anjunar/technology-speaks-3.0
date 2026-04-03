@@ -179,7 +179,18 @@ object PropertySupport {
         else false
       }
     }
-    allSymbols.distinctBy(_.name)
+    allSymbols
+      .groupBy(_.name)
+      .values
+      .map { symbols =>
+        symbols.maxBy { symbol =>
+          (
+            if symbol.annotations.nonEmpty then 1 else 0,
+            if !symbol.isDefDef then 1 else 0
+          )
+        }
+      }
+      .toList
   }
 }
 

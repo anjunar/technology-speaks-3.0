@@ -12,7 +12,10 @@ class ReflectClassLoaderSpec extends AnyFlatSpec with Matchers {
 
     loader.register[Person](descriptor)
 
-    loader.loadClass("reflect.Person") shouldBe Some(descriptor)
+    val loaded = loader.loadClass("reflect.Person")
+    loaded shouldBe defined
+    loaded.map(_.typeName) shouldBe Some(descriptor.typeName)
+    loaded.map(_.simpleName) shouldBe Some(descriptor.simpleName)
   }
 
   it should "delegate to parent classloader" in {
@@ -22,7 +25,10 @@ class ReflectClassLoaderSpec extends AnyFlatSpec with Matchers {
     val descriptor = ReflectMacros.reflect[Person]
     parent.register[Person](descriptor)
 
-    child.loadClass("reflect.Person") shouldBe Some(descriptor)
+    val loaded = child.loadClass("reflect.Person")
+    loaded shouldBe defined
+    loaded.map(_.typeName) shouldBe Some(descriptor.typeName)
+    loaded.map(_.simpleName) shouldBe Some(descriptor.simpleName)
   }
 
   it should "check type assignability" in {

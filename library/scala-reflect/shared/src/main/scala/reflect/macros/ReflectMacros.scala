@@ -548,13 +548,40 @@ object ReflectMacros {
         else false
       }
     }
-    allSymbols.distinctBy(_.name)
+    allSymbols
+      .groupBy(_.name)
+      .values
+      .map { symbols =>
+        symbols.maxBy { symbol =>
+          (
+            if symbol.annotations.nonEmpty then 1 else 0,
+            if !symbol.isDefDef then 1 else 0
+          )
+        }
+      }
+      .toList
   }
   
   private[macros] def extractAnnotations(using Quotes)(symbol: quotes.reflect.Symbol): Expr[Array[Annotation]] = {
     import quotes.reflect.*
-    
-    val annotationExprs = symbol.annotations.flatMap { ann =>
+
+    val owner =
+      try symbol.owner
+      catch {
+        case _: AssertionError => Symbol.noSymbol
+      }
+
+    val annotationOwnerCandidates =
+      if owner == Symbol.noSymbol then
+        List(symbol)
+      else
+        (symbol :: owner.declarations.filter(candidate => candidate.name == symbol.name).toList)
+          .distinct
+
+    val annotationSource =
+      annotationOwnerCandidates.find(_.annotations.nonEmpty).getOrElse(symbol)
+
+    val annotationExprs = annotationSource.annotations.flatMap { ann =>
       val className = ann.tpe.typeSymbol.fullName
       val params = extractAnnotationParams(ann)
       

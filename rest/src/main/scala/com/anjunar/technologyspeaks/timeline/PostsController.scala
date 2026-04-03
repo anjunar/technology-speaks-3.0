@@ -36,6 +36,9 @@ class PostsController(val query: HibernateSearch, val identityHolder: IdentityHo
       post.data.addLinks(
         LinkBuilder.create[PostLikeController](_.likePost(post.data))
           .withRel("like")
+          .build(),
+        LinkBuilder.create[com.anjunar.technologyspeaks.curation.CurationCandidateController](_.createFromPost(post.data))
+          .withRel("send-to-curation")
           .build()
       )
 

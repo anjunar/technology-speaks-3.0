@@ -50,7 +50,13 @@ class ReflectClassLoaderApiSpec extends AnyFlatSpec with Matchers {
   "ReflectRegistry" should "allow registration without Manifest" in {
     val descriptor = ReflectMacros.reflect[Query]
 
-    ReflectRegistry.register[Query](descriptor, () => Query("select *"))
+    ReflectRegistry.clear()
+    ReflectRegistry.registerByTypeName(
+      descriptor.typeName,
+      descriptor
+        .bindRuntimeClass(classOf[Query])
+        .bindFactory(() => Query("select *"))
+    )
 
     ReflectRegistry.loadClass(descriptor.typeName) shouldBe defined
     ReflectRegistry.createInstance(descriptor.typeName).map(_.asInstanceOf[Query].sql) shouldBe Some("select *")

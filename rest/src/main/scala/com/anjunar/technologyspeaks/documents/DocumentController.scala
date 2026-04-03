@@ -1,6 +1,7 @@
 package com.anjunar.technologyspeaks.documents
 
 import com.anjunar.technologyspeaks.core.SchemaHateoas
+import com.anjunar.technologyspeaks.curation.DocumentCurationCandidatesController
 import com.anjunar.technologyspeaks.rest.{EntityGraph, EntityManagerProvider}
 import com.anjunar.technologyspeaks.rest.types.Data
 import com.anjunar.technologyspeaks.security.{IdentityHolder, LinkBuilder}
@@ -56,6 +57,9 @@ class DocumentController(val identityHolder: IdentityHolder, val documentImportS
       LinkBuilder.create[DocumentController](_.create())
         .withRel("create-document")
         .build(),
+      LinkBuilder.create[DocumentCurationCandidatesController](_.list(entity))
+        .withRel("curation-candidates")
+        .build(),
       LinkBuilder.create[IssuesController](_.list(new IssueSearch(entity)))
         .build(),
       LinkBuilder.create[IssueController](_.create(entity))
@@ -88,6 +92,9 @@ class DocumentController(val identityHolder: IdentityHolder, val documentImportS
     val form = new Data(entity, SchemaHateoas.enhance(entity, Document.schema))
 
     entity.addLinks(
+      LinkBuilder.create[DocumentCurationCandidatesController](_.list(entity))
+        .withRel("curation-candidates")
+        .build(),
       LinkBuilder.create[IssuesController](_.list(new IssueSearch(entity)))
         .build(),
       LinkBuilder.create[IssueController](_.create(entity))
@@ -124,6 +131,9 @@ class DocumentController(val identityHolder: IdentityHolder, val documentImportS
     entity.addLinks(
       LinkBuilder.create[DocumentController](_.update(null))
         .build(),
+      LinkBuilder.create[DocumentCurationCandidatesController](_.list(entity))
+        .withRel("curation-candidates")
+        .build(),
       LinkBuilder.create[IssuesController](_.list(new IssueSearch(entity)))
         .build(),
       LinkBuilder.create[IssueController](_.create(entity))
@@ -153,6 +163,9 @@ class DocumentController(val identityHolder: IdentityHolder, val documentImportS
 
     managed.addLinks(
       LinkBuilder.create[DocumentController](_.update(null))
+        .build(),
+      LinkBuilder.create[DocumentCurationCandidatesController](_.list(managed))
+        .withRel("curation-candidates")
         .build(),
       LinkBuilder.create[IssuesController](_.list(new IssueSearch(managed)))
         .build(),

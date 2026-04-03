@@ -1,6 +1,7 @@
 package jfx.test
 
 import jfx.core.state.{ListProperty, Property}
+import jfx.json.JsonName
 import reflect.ReflectRegistry
 
 class SimpleModel {
@@ -68,6 +69,19 @@ class Table[E] {
   val size: Property[Int] = Property(0)
 }
 
+class TestJsonLink {
+  val rel: Property[String] = Property("")
+}
+
+abstract class TestJsonEntity {
+  @JsonName("$links")
+  val links: ListProperty[TestJsonLink] = ListProperty()
+}
+
+class TestPost extends TestJsonEntity {
+  val title: Property[String] = Property("")
+}
+
 object TestModelRegistry {
   println("=== Registering Test Models ===")
   val simpleDesc = ReflectRegistry.register(() => new SimpleModel())
@@ -89,6 +103,8 @@ object TestModelRegistry {
   ReflectRegistry.register(() => new User())
   ReflectRegistry.register(() => new Data[User]())
   ReflectRegistry.register(() => new Table[Data[User]]())
+  ReflectRegistry.register(() => new TestJsonLink())
+  ReflectRegistry.register(() => new TestPost())
 
   println("=== Done Registering ===")
 }

@@ -10,7 +10,7 @@ class ClassLoaderIntegrationSpec extends AnyFlatSpec with Matchers {
     // Hier simulieren wir das für den Test
     
     val coreLoader = PackageClassLoader("app.domain.core")
-    coreLoader.register(() => new jfx.test.TestEntity())
+    coreLoader.register(() => new jfx.test.TestEntity(), classOf[jfx.test.TestEntity])
     
     // Act: Klasse laden
     val descriptor = coreLoader.loadClass("jfx.test.TestEntity")
@@ -23,7 +23,7 @@ class ClassLoaderIntegrationSpec extends AnyFlatSpec with Matchers {
   it should "create instances of registered classes" in {
     // Arrange
     val coreLoader = PackageClassLoader("app.domain.core")
-    coreLoader.register(() => new jfx.test.TestEntity())
+    coreLoader.register(() => new jfx.test.TestEntity(), classOf[jfx.test.TestEntity])
     
     // Act: Instanz erstellen
     val instance = coreLoader.createInstance("jfx.test.TestEntity")
@@ -36,8 +36,8 @@ class ClassLoaderIntegrationSpec extends AnyFlatSpec with Matchers {
   it should "list all registered classes" in {
     // Arrange
     val loader = PackageClassLoader("app.domain.test")
-    loader.register(() => new jfx.test.TestEntity())
-    loader.register(() => new jfx.test.TestComponent())
+    loader.register(() => new jfx.test.TestEntity(), classOf[jfx.test.TestEntity])
+    loader.register(() => new jfx.test.TestComponent(), classOf[jfx.test.TestComponent])
     
     // Act: Alle registrierten Klassen holen
     val allClasses = loader.getAllRegistered
@@ -50,8 +50,8 @@ class ClassLoaderIntegrationSpec extends AnyFlatSpec with Matchers {
   it should "find subtypes" in {
     // Arrange
     val loader = PackageClassLoader("app.domain.test")
-    loader.register(() => new jfx.test.TestEntity())
-    loader.register(() => new jfx.test.TestComponent())
+    loader.register(() => new jfx.test.TestEntity(), classOf[jfx.test.TestEntity])
+    loader.register(() => new jfx.test.TestComponent(), classOf[jfx.test.TestComponent])
     
     // Act: Subtypes von TestBase finden
     val subTypes = loader.getSubTypes("jfx.test.TestBase")

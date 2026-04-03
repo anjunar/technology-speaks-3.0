@@ -20,6 +20,9 @@ class PostController(val identityHolder: IdentityHolder, val entityManager : Ent
     post.addLinks(
       LinkBuilder.create[PostLikeController](_.likePost(post))
         .withRel("like")
+        .build(),
+      LinkBuilder.create[com.anjunar.technologyspeaks.curation.CurationCandidateController](_.createFromPost(post))
+        .withRel("send-to-curation")
         .build()
     )
 
@@ -53,6 +56,9 @@ class PostController(val identityHolder: IdentityHolder, val entityManager : Ent
     post.addLinks(
       LinkBuilder.create[PostLikeController](_.likePost(post))
         .withRel("like")
+        .build(),
+      LinkBuilder.create[com.anjunar.technologyspeaks.curation.CurationCandidateController](_.createFromPost(post))
+        .withRel("send-to-curation")
         .build()
     )
 
@@ -85,6 +91,9 @@ class PostController(val identityHolder: IdentityHolder, val entityManager : Ent
     managedPost.addLinks(
       LinkBuilder.create[PostLikeController](_.likePost(managedPost))
         .withRel("like")
+        .build(),
+      LinkBuilder.create[com.anjunar.technologyspeaks.curation.CurationCandidateController](_.createFromPost(managedPost))
+        .withRel("send-to-curation")
         .build()
     )
 

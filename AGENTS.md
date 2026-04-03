@@ -7,7 +7,7 @@ Diese Datei beschreibt nicht nur Arbeitsregeln, sondern die tragenden Architektu
 
 ## Arbeitsregeln
 - Fuehre Headless-Tests mit `1980x1080` aus.
-- Frontend-Dev-Server ist `localhost:5173`.
+- Frontend-Dev-Server ist `localhost:80`.
 - Fuer Server-Neustarts immer erst den Nutzer fragen.
 - Test-Login:
   - User: `p_bittner@gmx.de`
@@ -79,7 +79,7 @@ Diese Datei beschreibt nicht nur Arbeitsregeln, sondern die tragenden Architektu
 
 ### Request-Fluss
 - Spring Boot laeuft unter `/service`.
-- Vite proxyt `/service` auf den Backend-Server `localhost:8080`.
+- Vite proxyt `/service` auf den Backend-Server `localhost:80`.
 - `TransactionPerRequestFilter` spannt fuer jeden `/service`-Request eine Transaktion auf.
 - `GET` und `HEAD` werden als read-only behandelt.
 
@@ -261,7 +261,7 @@ Diese Datei beschreibt nicht nur Arbeitsregeln, sondern die tragenden Architektu
 - Bei Reflection-/Mapper-Aenderungen zuerst pruefen, ob die API ueber `ClassDescriptor` ausgedrueckt werden kann, statt Registry-Details in Konsumenten zu verteilen.
 
 ## Test- und Laufzeitkontext
-- Vite-Frontend laeuft auf `localhost:5173`.
+- Vite-Frontend laeuft auf `localhost:80`.
 - Backend-Endpunkte liegen unter `/service` und werden im Devbetrieb nach `localhost:8080` proxied.
 - Playwright ist als Dependency vorhanden, aber Tests sind nicht prominent ausgebaut; Browserchecks deshalb gezielt und pragmatisch einsetzen.
 - Vor Eingriffen, die einen Server-Neustart brauchen, immer den Nutzer fragen.

@@ -1,8 +1,9 @@
 package app.domain.timeline
 
 import app.domain.core.{AbstractEntity, Data, Link, Table, User}
+import app.domain.curation.CurationCandidate
 import app.domain.shared.{Like, OwnerProvider}
-import app.support.Api
+import app.support.{Api, Navigation}
 import app.support.Api.given
 import jfx.core.meta.Meta
 import jfx.core.state.{ListProperty, Property}
@@ -30,6 +31,11 @@ class Post extends AbstractEntity with OwnerProvider {
 
   def delete(): Future[Unit] =
     Api.request("/service/timeline/posts/post").delete(this).unit
+
+  def sendToCuration(): Future[Data[CurationCandidate]] =
+    Navigation.linkByRel("send-to-curation", links)
+      .map(Api.link(_).invoke.read[Data[CurationCandidate]])
+      .getOrElse(Api.request(s"/service/timeline/posts/post/${id.get}/curation-candidates").post.read[Data[CurationCandidate]])
 }
 
 object Post {

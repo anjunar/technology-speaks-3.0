@@ -3,6 +3,7 @@ package reflect
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import reflect.macros.PropertySupport
+import reflect.macros.ReflectMacros
 
 class PropertySupportSpec extends AnyFlatSpec with Matchers {
 
@@ -158,5 +159,19 @@ class PropertySupportSpec extends AnyFlatSpec with Matchers {
     schema.baseProp shouldBe "base"
     schema.prop2Prop shouldBe "prop2"
     schema.localProp shouldBe "local"
+  }
+
+  it should "restore missing registered properties during descriptor resolution" in {
+    case class MergeEntity(id: String, links: List[String], name: String)
+
+    val registered = ReflectMacros.reflectWithAccessors[MergeEntity]
+    ReflectRegistry.registerByTypeName(registered.typeName, registered)
+
+    val partial = registered.copy(properties = registered.properties.filterNot(_.name == "links"))
+    val resolved = ClassDescriptor.resolve(partial)
+
+    resolved.properties.map(_.name) should contain("id")
+    resolved.properties.map(_.name) should contain("name")
+    resolved.properties.map(_.name) should contain("links")
   }
 }

@@ -72,6 +72,12 @@ class HomePage extends PageComposite("Home") {
                 onClick(_ => Navigation.navigate("/timeline/posts"))
               }
 
+              button("Verdichtungsraum") {
+                buttonType = "button"
+                classes = "home-page__button home-page__button--secondary"
+                onClick(_ => Navigation.navigate("/curation/space"))
+              }
+
               button("Anmelden") {
                 buttonType = "button"
                 classes = "home-page__button home-page__button--ghost"
@@ -176,6 +182,13 @@ class HomePage extends PageComposite("Home") {
                 title = "Timeline",
                 copy = "Kurze Gedanken, Reaktionen und Anschlussdiskussionen.",
                 action = () => Navigation.navigate("/timeline/posts")
+              )
+
+              quickLink(
+                icon = "grain",
+                title = "Verdichtungsraum",
+                copy = "Rohes Resonanzmaterial prüfen, bündeln und gezielt dem Wissensraum zuführen.",
+                action = () => Navigation.navigate("/curation/space")
               )
 
               quickLink(

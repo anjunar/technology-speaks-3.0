@@ -1,6 +1,6 @@
 package jfx.json
 
-import jfx.test.{SimpleModel, NestedModel, ParentModel, ListModel, BooleanModel, DoubleModel, OptionModel, MapModel, Item, GenericContainer, TestModelRegistry}
+import jfx.test.{SimpleModel, NestedModel, ParentModel, ListModel, BooleanModel, DoubleModel, OptionModel, MapModel, Item, GenericContainer, TestModelRegistry, TestPost}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import reflect.macros.ReflectMacros
@@ -336,5 +336,23 @@ class JsonMapperSpec extends AnyFlatSpec with Matchers {
     container.score.get shouldBe 0.87
     container.data.get.itemName.get shouldBe "Deserialized Item"
     container.data.get.price.get shouldBe 29.99
+  }
+
+  it should "eine geerbte Property mit JsonName deserialisieren" in {
+    val mapper = new JsonMapper
+    val json = Dynamic.literal(title = "Timeline")
+    json.updateDynamic("$links")(
+      js.Array(
+        Dynamic.literal(rel = "like"),
+        Dynamic.literal(rel = "send-to-curation")
+      )
+    )
+
+    val post = mapper.deserialize[TestPost](json, ReflectMacros.reflectType[TestPost])
+
+    post.title.get shouldBe "Timeline"
+    post.links.size shouldBe 2
+    post.links.get(0).rel.get shouldBe "like"
+    post.links.get(1).rel.get shouldBe "send-to-curation"
   }
 }

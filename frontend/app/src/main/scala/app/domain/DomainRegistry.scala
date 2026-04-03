@@ -1,6 +1,7 @@
 package app.domain
 
 import app.domain.core.{CoreRegistry, Link, UsersLink}
+import app.domain.curation.{CurationLink, CurationRegistry}
 import app.domain.timeline.{PostsLink, TimelineRegistry}
 import app.domain.documents.{DocumentsLink, DocumentsRegistry}
 import app.domain.followers.{FollowersRegistry, RelationShipLink}
@@ -21,6 +22,7 @@ object DomainRegistry {
     loader.register(() => new Link(), classOf[Link])
     loader.register(() => new UsersLink(), classOf[UsersLink])
     loader.register(() => new PostsLink(), classOf[PostsLink])
+    loader.register(() => new CurationLink(), classOf[CurationLink])
     loader.register(() => new DocumentsLink(), classOf[DocumentsLink])
     loader.register(() => new RelationShipLink(), classOf[RelationShipLink])
     loader.register(() => new PasswordLoginLink(), classOf[PasswordLoginLink])
@@ -36,6 +38,7 @@ object DomainRegistry {
     loader.register(() => new JsonResponse(), classOf[JsonResponse])
 
     CoreRegistry.init()
+    CurationRegistry.init()
     TimelineRegistry.init()
     DocumentsRegistry.init()
     FollowersRegistry.init()

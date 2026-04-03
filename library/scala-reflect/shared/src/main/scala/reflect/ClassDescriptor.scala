@@ -126,16 +126,24 @@ object ClassDescriptor {
   private def mergeProperties(descriptorProperties: Array[PropertyDescriptor], registeredProperties: Array[PropertyDescriptor]): Array[PropertyDescriptor] =
     if descriptorProperties.isEmpty then registeredProperties
     else
-      descriptorProperties.map { property =>
+      val mergedDeclared = descriptorProperties.map { property =>
         registeredProperties.find(_.name == property.name) match {
           case Some(registeredProperty) =>
             property.copy(
+              annotations =
+                if property.annotations.nonEmpty then property.annotations
+                else registeredProperty.annotations,
               accessor = property.accessor.orElse(registeredProperty.accessor)
             )
           case None =>
             property
         }
       }
+
+      val missingRegistered =
+        registeredProperties.filterNot(registered => descriptorProperties.exists(_.name == registered.name))
+
+      mergedDeclared ++ missingRegistered
 
   def all: Iterable[ClassDescriptor] =
     ReflectRegistry.getAllRegistered

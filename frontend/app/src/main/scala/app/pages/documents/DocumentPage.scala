@@ -3,6 +3,7 @@ package app.pages.documents
 import app.components.shared.ComponentHeader.componentHeader
 import app.components.shared.LoadingCard.loadingCard
 import app.domain.core.{Data, Link, Table}
+import app.domain.curation.CurationCandidate
 import app.domain.documents.{Document, Issue, IssueCreated, IssueUpdated}
 import app.editor.plugins.{DocumentLinkPlugin, DocumentLinkSuggestion}
 import app.editor.plugins.DocumentLinkPlugin.documentLinkPlugin
@@ -60,6 +61,16 @@ class DocumentPage(val model: Document) extends PageComposite("Dokument") {
         Future.successful(new Table[Data[Issue]]())
       }
     }(_.data)
+  private val provenancePageSize = 20
+  private val curationCandidatesProperty: RemoteListProperty[Data[CurationCandidate], RemotePageQuery] =
+    RemoteTableList.create[Data[CurationCandidate]](pageSize = provenancePageSize) { query =>
+      val document = currentDocumentProperty.get
+      if (document.id.get != null) {
+        CurationCandidate.listForDocument(document, query.index, query.limit)
+      } else {
+        Future.successful(new Table[Data[CurationCandidate]]())
+      }
+    }
 
   override protected def compose(using DslContext): Unit = {
     classProperty += "document-page"
@@ -137,11 +148,11 @@ class DocumentPage(val model: Document) extends PageComposite("Dokument") {
           }
 
           observeRender(currentDocumentProperty) { document =>
-            DocumentEditorPanel.panel(document, handleDocumentSaved, openDocumentByHref)
+            DocumentEditorPanel.panel(document, curationCandidatesProperty, handleDocumentSaved, openDocumentByHref)
           }
         }
 
-        IssuesPanel.panel(currentDocumentProperty, issuesProperty, rightSidebarExpandedProperty)
+        IssuesPanel.panel(currentDocumentProperty, issuesProperty, curationCandidatesProperty, rightSidebarExpandedProperty)
       }
     }
   }
@@ -215,8 +226,10 @@ class DocumentPage(val model: Document) extends PageComposite("Dokument") {
   private def reloadIssues(): Unit =
     if (currentDocumentProperty.get != null && currentDocumentProperty.get.id != null && currentDocumentProperty.get.id.get != null) {
       RemoteTableList.reloadFirstPage(issuesProperty, pageSize = issuesPageSize)
+      RemoteTableList.reloadFirstPage(curationCandidatesProperty, pageSize = provenancePageSize)
     } else {
       issuesProperty.clear()
+      curationCandidatesProperty.clear()
     }
 }
 
@@ -587,6 +600,7 @@ private final class DocumentSummaryCell extends TableCell[Data[Document], String
 
 private final class DocumentEditorPanel(
                                          document: Document,
+                                         provenance: ListProperty[Data[CurationCandidate]],
                                          onSaved: Data[Document] => Unit,
                                          onOpenDocumentLink: String => Unit
                                        ) extends DivComposite {
@@ -663,6 +677,8 @@ private final class DocumentEditorPanel(
           }
         }
 
+        SectionProvenancePanel.panel(document, provenance)
+
         val editorField = editor("editor") {
           classes = Seq("doc-editor", "glass")
           style {
@@ -703,13 +719,14 @@ private final class DocumentEditorPanel(
 }
 
 private object DocumentEditorPanel {
-  def panel(document: Document, onSaved: Data[Document] => Unit, onOpenDocumentLink: String => Unit)(using Scope): DocumentEditorPanel =
-    CompositeSupport.buildComposite(new DocumentEditorPanel(document, onSaved, onOpenDocumentLink))
+  def panel(document: Document, provenance: ListProperty[Data[CurationCandidate]], onSaved: Data[Document] => Unit, onOpenDocumentLink: String => Unit)(using Scope): DocumentEditorPanel =
+    CompositeSupport.buildComposite(new DocumentEditorPanel(document, provenance, onSaved, onOpenDocumentLink))
 }
 
 private final class IssuesPanel(
                                  currentDocument: Property[Document],
                                  issues: ListProperty[Issue],
+                                 provenance: ListProperty[Data[CurationCandidate]],
                                  expanded: Property[Boolean]
                                ) extends DivComposite {
 
@@ -804,8 +821,8 @@ private final class IssuesPanel(
 }
 
 private object IssuesPanel {
-  def panel(currentDocument: Property[Document], issues: ListProperty[Issue], expanded: Property[Boolean])(using Scope): IssuesPanel =
-    CompositeSupport.buildComposite(new IssuesPanel(currentDocument, issues, expanded))
+  def panel(currentDocument: Property[Document], issues: ListProperty[Issue], provenance: ListProperty[Data[CurationCandidate]], expanded: Property[Boolean])(using Scope): IssuesPanel =
+    CompositeSupport.buildComposite(new IssuesPanel(currentDocument, issues, provenance, expanded))
 }
 
 private final class IssueListItem(currentDocument: Property[Document], issue: Issue) extends DivComposite {
@@ -853,3 +870,211 @@ private object IssueListItem {
   def item(currentDocument: Property[Document], issue: Issue)(using Scope): IssueListItem =
     CompositeSupport.buildComposite(new IssueListItem(currentDocument, issue))
 }
+
+private final class ProvenanceListItem(entry: Data[CurationCandidate]) extends DivComposite {
+
+  override protected def compose(using DslContext): Unit = {
+    classes = Seq("glass-border", "issue-card")
+    style {
+      padding = "12px"
+      borderRadius = "14px"
+    }
+
+    withDslContext {
+      vbox {
+        style {
+          rowGap = "8px"
+        }
+
+        hbox {
+          style {
+            columnGap = "8px"
+            alignItems = "center"
+          }
+
+          span {
+            style {
+              fontWeight = "600"
+            }
+            text = entry.data.resonanceType.get
+          }
+
+          span {
+            style {
+              opacity = "0.66"
+            }
+            text = entry.data.status.get
+          }
+        }
+
+        span {
+          text = Option(entry.data.title.get).filter(_.trim.nonEmpty).getOrElse("Resonanz")
+        }
+
+        span {
+          text = entry.data.excerpt.get
+        }
+
+        entry.data.decisions.iterator.toSeq.headOption.foreach { decision =>
+          vbox {
+            style {
+              rowGap = "4px"
+            }
+
+            span {
+              style {
+                fontSize = "12px"
+                opacity = "0.66"
+              }
+              text = s"${decision.decisionType.get} - ${decision.decidedBy.get}"
+            }
+
+            if (decision.note.get != null && decision.note.get.nn.trim.nonEmpty) {
+              span {
+                text = decision.note.get.nn
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+private object ProvenanceListItem {
+  def item(entry: Data[CurationCandidate])(using Scope): ProvenanceListItem =
+    CompositeSupport.buildComposite(new ProvenanceListItem(entry))
+}
+
+private final class SectionProvenancePanel(document: Document, provenance: ListProperty[Data[CurationCandidate]]) extends DivComposite {
+
+  override protected def compose(using DslContext): Unit = {
+    classes = Seq("glass-border", "issue-card")
+    style {
+      padding = "14px"
+      borderRadius = "16px"
+      marginBottom = "14px"
+    }
+
+    observeRender(document.editor) { _ =>
+      val grouped = groupBySection(document, provenance.iterator.toSeq)
+
+      if (grouped.nonEmpty) {
+        vbox {
+          style {
+            rowGap = "12px"
+          }
+
+          span {
+            style {
+              fontWeight = "600"
+            }
+            text = "Entstanden aus Resonanzen"
+          }
+
+          grouped.foreach { group =>
+            vbox {
+              style {
+                rowGap = "8px"
+              }
+
+              span {
+                style {
+                  fontSize = "13px"
+                  opacity = "0.72"
+                }
+                text = group.label
+              }
+
+              group.entries.foreach { entry =>
+                ProvenanceListItem.item(entry)
+              }
+            }
+          }
+        }
+      } else {
+        div {
+          style {
+            display = "none"
+          }
+        }
+      }
+    }
+  }
+
+  private def groupBySection(document: Document, entries: Seq[Data[CurationCandidate]]): Seq[SectionGroup] = {
+    val sections = extractSections(document.editor.get)
+    val groupedEntries = entries.groupBy { entry =>
+      Option(entry.data.target.get)
+        .flatMap(target => Option(target.sectionId))
+        .map(_.trim)
+        .filter(_.nonEmpty)
+        .getOrElse("")
+    }
+
+    val sectionGroups = sections.flatMap { section =>
+      groupedEntries.get(section.id).filter(_.nonEmpty).map(entries => SectionGroup(section.label, entries))
+    }
+
+    val unmatched = groupedEntries.iterator
+      .filter { case (key, value) => key.nonEmpty && value.nonEmpty && !sections.exists(_.id == key) }
+      .map { case (key, value) => SectionGroup(s"Abschnitt: $key", value) }
+      .toSeq
+
+    val root = groupedEntries.get("").filter(_.nonEmpty).map(entries => SectionGroup("Dokument", entries)).toSeq
+
+    sectionGroups ++ unmatched ++ root
+  }
+
+  private def extractSections(editorValue: Any): Seq[SectionRef] = {
+    val root = editorValue.asInstanceOf[js.Dynamic]
+    if (root == null || js.isUndefined(root)) {
+      Seq.empty
+    } else {
+      readChildren(root).flatMap(readSection)
+    }
+  }
+
+  private def readSection(node: js.Dynamic): Option[SectionRef] = {
+    val nodeType = readString(node, "type")
+    if (nodeType != "heading") {
+      None
+    } else {
+      val title = readText(node).trim
+      if (title.isEmpty) None
+      else Some(SectionRef(slug(title), title))
+    }
+  }
+
+  private def readChildren(node: js.Dynamic): Seq[js.Dynamic] = {
+    val content = node.selectDynamic("content")
+    if (js.isUndefined(content) || content == null) Seq.empty
+    else content.asInstanceOf[js.Array[js.Dynamic]].toSeq
+  }
+
+  private def readText(node: js.Dynamic): String = {
+    val text = readString(node, "text")
+    val nested = readChildren(node).map(readText).mkString(" ")
+    s"$text $nested".trim.replaceAll("\\s+", " ")
+  }
+
+  private def readString(node: js.Dynamic, field: String): String = {
+    val value = node.selectDynamic(field)
+    if (js.isUndefined(value) || value == null) ""
+    else value.toString
+  }
+
+  private def slug(value: String): String =
+    value.toLowerCase
+      .replaceAll("[^a-z0-9]+", "-")
+      .replaceAll("(^-+|-+$)", "")
+}
+
+private object SectionProvenancePanel {
+  def panel(document: Document, provenance: ListProperty[Data[CurationCandidate]])(using Scope): SectionProvenancePanel =
+    CompositeSupport.buildComposite(new SectionProvenancePanel(document, provenance))
+}
+
+private final case class SectionRef(id: String, label: String)
+
+private final case class SectionGroup(label: String, entries: Seq[Data[CurationCandidate]])

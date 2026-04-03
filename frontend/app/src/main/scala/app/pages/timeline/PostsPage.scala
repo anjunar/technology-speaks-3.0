@@ -9,6 +9,7 @@ import app.pages.timeline.PostsPage.PostFeedCard
 import app.services.ApplicationService
 import app.support.{Navigation, RemotePageQuery, RemoteTableList}
 import app.ui.{CompositeSupport, DivComposite, PageComposite}
+import jfx.action.Button.{button, buttonType, onClick}
 import jfx.control.virtualList
 import jfx.core.component.ElementComponent.*
 import jfx.core.state.Property.subscribeBidirectional
@@ -22,7 +23,7 @@ import jfx.layout.Div.div
 import jfx.layout.HBox.hbox
 import jfx.layout.VBox.vbox
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class PostsPage(postsProperty : RemoteListProperty[Data[Post], RemotePageQuery]) extends PageComposite("Posts") {
 
@@ -154,6 +155,18 @@ object PostsPage {
             }
 
             likeButton(data.data.likes, data.data.links) {}
+
+            Navigation.renderByRel("send-to-curation", data.data.links) { () =>
+              button("Verdichten") {
+                buttonType = "button"
+                classes = "home-page__button home-page__button--secondary"
+                onClick { _ =>
+                  data.data.sendToCuration().foreach { _ =>
+                    Navigation.navigate("/curation/space")
+                  }
+                }
+              }
+            }
 
             val commentPrompt = input("comment") {
               classes = "post-card__comment-input"

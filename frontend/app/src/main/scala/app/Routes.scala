@@ -1,8 +1,10 @@
 package app
 
 import app.domain.core.{Data, Link, User}
+import app.domain.curation.{CandidateStatus, CurationCandidate, CurationCluster}
 import app.domain.documents.{Document, Issue}
 import app.domain.followers.{Group, RelationShip}
+import app.pages.curation.CurationPage
 import app.domain.security.Account
 import app.domain.timeline.Post
 import app.pages.HomePage.homePage
@@ -40,6 +42,33 @@ object Routes {
   val routes: js.Array[Route] = js.Array(
     route("/") {
       homePage()
+    },
+    asyncRoute("/curation/space") {
+      val statusFilterProperty = Property(CandidateStatus.Eingang)
+      val typeFilterProperty = Property("")
+
+      val candidatesProperty: RemoteListProperty[Data[CurationCandidate], RemotePageQuery] =
+        RemoteTableList.create[Data[CurationCandidate]](pageSize = 50) { query =>
+          CurationCandidate.list(query.index, query.limit, statusFilterProperty.get, typeFilterProperty.get)
+        }
+
+      val clustersProperty: RemoteListProperty[Data[CurationCluster], RemotePageQuery] =
+        RemoteTableList.create[Data[CurationCluster]](pageSize = 50) { query =>
+          CurationCluster.list(query.index, query.limit)
+        }
+
+      val documentsProperty: RemoteListProperty[Data[Document], RemotePageQuery] =
+        RemoteTableList.create[Data[Document]](pageSize = 100) { query =>
+          Document.list(query.index, query.limit)
+        }
+
+      candidatesProperty.reload(RemotePageQuery.first(50)).toFuture.flatMap { _ =>
+        clustersProperty.reload(RemotePageQuery.first(50)).toFuture.flatMap { _ =>
+          documentsProperty.reload(RemotePageQuery.first(100)).toFuture.map { _ =>
+            CurationPage.curationPage(statusFilterProperty, typeFilterProperty, candidatesProperty, clustersProperty, documentsProperty)
+          }
+        }
+      }
     },
     asyncRoute("/document/documents/document/root") {
       Document.root().map { root =>
