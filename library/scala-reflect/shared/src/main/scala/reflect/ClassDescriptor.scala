@@ -99,9 +99,9 @@ object ClassDescriptor {
     )
 
   def maybeResolve(descriptor: ClassDescriptor): Option[ClassDescriptor] =
-    Option.when(descriptor.properties.nonEmpty || descriptor.typeParameters.nonEmpty)(descriptor)
-      .orElse(maybeForName(descriptor.typeName))
+    maybeForName(descriptor.typeName)
       .orElse(maybeForName(descriptor.simpleName))
+      .orElse(Option.when(descriptor.properties.nonEmpty || descriptor.typeParameters.nonEmpty)(descriptor))
 
   def all: Iterable[ClassDescriptor] =
     ReflectRegistry.getAllRegistered

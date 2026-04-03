@@ -8,7 +8,3 @@ class ErrorResponse(
   var message: String = "",
   var path: js.Array[Any] = new js.Array[Any]()
 )
-
-object ErrorResponse {
-
-}

@@ -106,7 +106,7 @@ object Api {
           Navigation.redirectToLogin()
           Future.failed(RuntimeException("Request was rejected with 403"))
         } else if (response.status == 400) {
-          Future.failed(new ErrorResponseException(JsonMapper.deserialize(JSON.parse(text), reflectType[ErrorResponse])))
+          Future.failed(new ErrorResponseException(JsonMapper.deserialize(JSON.parse(text), reflectType[Seq[ErrorResponse]])))
         } else {
           Future.failed(RuntimeException(s"HTTP ${response.status}: $text"))
         }
