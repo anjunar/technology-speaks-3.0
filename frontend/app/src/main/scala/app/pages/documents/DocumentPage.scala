@@ -619,14 +619,26 @@ private final class DocumentImportPanel(document: Document, onImported: () => Un
     importingProperty.set(true)
 
     Api.link(importLink)
-      .invoke(new DocumentImportRequest(normalizedPath, overwriteExistingProperty.get))
-      .read[DocumentImportResult]
+      .invoke(
+        js.JSON.stringify(
+          js.Dynamic.literal(
+            path = normalizedPath,
+            overwriteExisting = overwriteExistingProperty.get
+          )
+        )
+      )
+      .raw[js.Dynamic]
       .onComplete {
-      case Success(result) =>
+      case Success(raw) =>
         importingProperty.set(false)
+        val result = raw.asInstanceOf[js.Dynamic]
+        val files = readInt(result, "files")
+        val created = readInt(result, "created")
+        val updated = readInt(result, "updated")
+        val skipped = readInt(result, "skipped")
 
         Viewport.notify(
-          s"Import abgeschlossen: ${result.files} Dateien, ${result.created} neu, ${result.updated} aktualisiert, ${result.skipped} uebersprungen.",
+          s"Import abgeschlossen: $files Dateien, $created neu, $updated aktualisiert, $skipped uebersprungen.",
           Viewport.NotificationKind.Success
         )
         expandedProperty.set(false)
@@ -639,25 +651,18 @@ private final class DocumentImportPanel(document: Document, onImported: () => Un
     }
   }
 
+  private def readInt(dynamic: js.Dynamic, key: String): Int = {
+    val value = dynamic.selectDynamic(key)
+    if (js.isUndefined(value) || value == null) 0
+    else value.asInstanceOf[Int]
+  }
+
 }
 
 private object DocumentImportPanel {
   def panel(document: Document, onImported: () => Unit)(using Scope): DocumentImportPanel =
     CompositeSupport.buildComposite(new DocumentImportPanel(document, onImported))
 }
-
-class DocumentImportRequest(
-  var path: String = "",
-  var overwriteExisting: Boolean = false
-)
-
-class DocumentImportResult(
-  var path: String = "",
-  var files: Int = 0,
-  var created: Int = 0,
-  var updated: Int = 0,
-  var skipped: Int = 0
-)
 
 private final class DocumentSummaryCell extends TableCell[Data[Document], String] {
   private val titleProperty = Property("")

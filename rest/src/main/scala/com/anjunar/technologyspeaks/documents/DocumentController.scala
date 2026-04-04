@@ -8,6 +8,8 @@ import com.anjunar.technologyspeaks.security.{IdentityHolder, LinkBuilder}
 import com.anjunar.technologyspeaks.shared.editor.Node
 import jakarta.annotation.security.RolesAllowed
 import jakarta.persistence.{EntityManager, FlushModeType}
+
+import java.util.UUID
 import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.bind.annotation.{GetMapping, PathVariable, PostMapping, PutMapping, RequestBody, RestController}
@@ -86,14 +88,17 @@ class DocumentController(val identityHolder: IdentityHolder, val documentImportS
   }
 
   private def loadRootDocument(): Document =
-    entityManager
-      .createQuery("select d from Document d where d.title = :title", classOf[Document])
-      .setParameter("title", "Technology Speaks")
-      .setFlushMode(FlushModeType.COMMIT)
-      .getResultList
-      .stream()
-      .findFirst()
-      .orElse(null)
+    Option(
+      entityManager
+        .createQuery("select d.id from Document d where d.title = :title order by d.created asc", classOf[UUID])
+        .setParameter("title", "Technology Speaks")
+        .setFlushMode(FlushModeType.COMMIT)
+        .setMaxResults(1)
+        .getResultList
+        .stream()
+        .findFirst()
+        .orElse(null)
+    ).map(id => entityManager.find(classOf[Document], id)).orNull
 
   @GetMapping(value = Array("/document/documents/document/{id}"), produces = Array("application/json"))
   @RolesAllowed(Array("Anonymous", "Guest", "User", "Administrator"))
