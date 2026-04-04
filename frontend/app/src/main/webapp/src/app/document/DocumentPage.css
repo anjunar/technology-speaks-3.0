@@ -117,6 +117,7 @@
 .document-page .documents-layout--desktop .documents-drawer-right > .jfx-drawer__content {
     min-width: 0;
     min-height: 0;
+    box-sizing: border-box;
 }
 
 .document-page .documents-layout--desktop > .jfx-drawer__panel-shell,
@@ -128,9 +129,24 @@
     min-height: 0;
 }
 
+.document-page .documents-layout--desktop > .jfx-drawer__panel-shell,
+.document-page .documents-layout--desktop .documents-drawer-right > .jfx-drawer__panel-shell {
+    box-sizing: border-box;
+}
+
+.document-page .documents-layout--desktop > .jfx-drawer__content {
+    padding-left: 18px;
+}
+
+.document-page .documents-layout--desktop .documents-drawer-right > .jfx-drawer__content {
+    padding-right: 18px;
+}
+
 .document-page .documents-layout--desktop > .jfx-drawer__panel-shell > .jfx-drawer__panel,
 .document-page .documents-layout--desktop .documents-drawer-right > .jfx-drawer__panel-shell > .jfx-drawer__panel {
     position: relative;
+    width: 100%;
+    overflow-x: hidden;
 }
 
 .document-page .documents-layout--desktop .jfx-drawer__navigation {
@@ -156,6 +172,7 @@
     flex-direction: column;
     width: 100% !important;
     height: 100%;
+    overflow: hidden;
     padding: 12px;
     gap: 10px;
     box-sizing: border-box;
@@ -304,6 +321,8 @@
 .document-page .doc-table-shell,
 .document-page .issues-list-shell {
     position: relative;
+    display: flex;
+    flex-direction: column;
     min-height: 0;
     flex: 1 1 auto;
     background: transparent !important;
@@ -317,6 +336,7 @@
 
 .document-page .doc-table {
     flex: 1 1 auto;
+    height: 100%;
     min-height: 0;
 }
 
@@ -806,6 +826,11 @@
     }
 
     .document-page .documents-layout--mobile {
+        overflow: hidden;
+    }
+
+    .document-page .documents-layout--mobile > .jfx-drawer__panel-shell > .jfx-drawer__panel,
+    .document-page .documents-layout--mobile .documents-drawer-right > .jfx-drawer__panel-shell > .jfx-drawer__panel {
         overflow: hidden;
     }
 
