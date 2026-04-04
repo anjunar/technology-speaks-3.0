@@ -1,7 +1,7 @@
 package com.anjunar.technologyspeaks.rest
 
 import com.anjunar.json.mapper.intermediate.JsonParser
-import com.anjunar.json.mapper.intermediate.model.JsonObject
+import com.anjunar.json.mapper.intermediate.model.{JsonNull, JsonObject}
 import com.anjunar.json.mapper.provider.DTO
 import com.anjunar.json.mapper.{EntityLoader, JsonMapper}
 import com.anjunar.scala.universe.TypeResolver
@@ -48,7 +48,7 @@ class MapperRequestBodyAdvice(val entityManager: EntityManager, val validator: V
             val idNode = jsonObject.value.get("id")
 
             val instance =
-              if (idNode == null) {
+              if (idNode == null || idNode.isInstanceOf[JsonNull]) {
                 resolvedClass.raw.getConstructor().newInstance()
               } else {
                 val primaryKey = UUID.fromString(idNode.value.toString)

@@ -495,7 +495,7 @@
 
 @media (max-width: 980px) {
     .user-page .user-page-content {
-        padding: 18px 18px 14px;
+        padding: 18px 0 14px;
     }
 
     .user-page .user-page-main {

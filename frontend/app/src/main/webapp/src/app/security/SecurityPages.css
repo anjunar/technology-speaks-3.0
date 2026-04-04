@@ -252,7 +252,7 @@
 @media (max-width: 640px) {
     .security-page__layout,
     .security-page__layout--compact {
-        padding: 14px 12px 12px;
+        padding: 14px 0 12px;
         gap: 14px;
     }
 

@@ -645,3 +645,35 @@
 .post-view-page .glass-border > .vbox {
     row-gap: 12px !important;
 }
+
+@media (max-width: 767px) {
+    .posts-page__layout,
+    .post-edit-page__layout,
+    .post-view-page__layout {
+        padding: 18px 0 14px;
+    }
+
+    .posts-page__composer,
+    .posts-page__feed,
+    .post-edit-page__layout,
+    .post-view-page__layout {
+        width: 100%;
+    }
+
+    .posts-page__composer {
+        padding: 0 0 24px !important;
+    }
+
+    .post-card,
+    .post-view-page__post-card,
+    .post-view-page .glass-border {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+
+    .post-view-page__prompt,
+    .post-view-page input[name="newComment"] {
+        width: 100% !important;
+        margin: 0;
+    }
+}

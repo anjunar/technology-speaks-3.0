@@ -238,3 +238,21 @@
 .issue-page input[name="newComment"]::placeholder {
     color: color-mix(in srgb, var(--color-text-faint) 78%, white 22%) !important;
 }
+
+@media (max-width: 767px) {
+    .issue-page__layout {
+        padding: 18px 0 14px;
+    }
+
+    .issue-page__issue-card,
+    .issue-page .glass-border {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+
+    .issue-page__prompt,
+    .issue-page input[name="newComment"] {
+        width: 100% !important;
+        margin: 0;
+    }
+}
