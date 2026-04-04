@@ -1,10 +1,26 @@
 /* DocumentPage */
 .document-page {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
     height: 100%;
+    min-height: 0;
     width: 100%;
     box-sizing: border-box;
     padding: 26px 34px 22px;
     overflow: hidden;
+}
+
+.jfx-window:has(.document-page) .jfx-window__container {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.document-page > .documents-layout,
+.document-page > .documents-layout--mobile {
+    flex: 1 1 auto;
+    min-height: 0;
 }
 
 .document-page .documents-layout {
@@ -118,11 +134,11 @@
 }
 
 .document-page .documents-layout--desktop .jfx-drawer__navigation {
-    position: absolute;
-    inset: 0;
     display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
     min-height: 0;
-    height: auto;
+    height: 100%;
 }
 
 .document-page .documents-mobile-main {

@@ -40,8 +40,14 @@ class PasswordRegisterController(val registerService: RegisterService, val sessi
     val verificationCode = generateCode()
 
     val resolvedUser =
-      if (user != null) user
-      else new User(nickName)
+      if (user != null) {
+        user
+      }
+      else {
+        val user = new User(nickName)
+        user.persist()
+        user
+      }
 
     val resolvedEmail =
       if (existingEmail != null) existingEmail
