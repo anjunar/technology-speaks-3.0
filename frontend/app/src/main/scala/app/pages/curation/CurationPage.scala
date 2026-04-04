@@ -3,7 +3,7 @@ package app.pages.curation
 import app.domain.core.Data
 import app.domain.curation.*
 import app.domain.documents.Document
-import app.support.{Navigation, RemotePageQuery, RemoteTableList, TimeAgo}
+import app.support.{LayoutMode, LayoutResolver, Navigation, RemotePageQuery, RemoteTableList, TimeAgo}
 import app.ui.{CompositeSupport, DivComposite, PageComposite}
 import jfx.action.Button.{button, buttonType, onClick}
 import jfx.control.virtualList
@@ -15,6 +15,8 @@ import jfx.form.ComboBox
 import jfx.form.ComboBox.*
 import jfx.form.Control.placeholder
 import jfx.form.Input.{input, inputType, stringValueProperty}
+import jfx.layout.Drawer
+import jfx.layout.Drawer.{drawer, drawerContent, drawerNavigation}
 import jfx.layout.Div.div
 import jfx.layout.HBox.hbox
 import jfx.layout.Span.span
@@ -35,6 +37,7 @@ class CurationPage(
   override def pageHeight: Int = 860
 
   private val pageSize = 10
+  private val mobileLayout = LayoutResolver.queryOverrideFromNavigation.getOrElse(LayoutResolver.autoDetect()) == LayoutMode.Mobile
 
   private val selectedCandidateProperty: Property[Data[CurationCandidate] | Null] = Property(null)
   private val selectedClusterProperty: Property[Data[CurationCluster] | Null] = Property(null)
@@ -42,6 +45,8 @@ class CurationPage(
   private val selectedSectionProperty: Property[String] = Property("")
   private val clusterSummaryProperty: Property[String] = Property("")
   private val newClusterTitleProperty: Property[String] = Property("")
+  private val leftSidebarExpandedProperty: Property[Boolean] = Property(!mobileLayout)
+  private val rightSidebarExpandedProperty: Property[Boolean] = Property(!mobileLayout)
 
   override protected def compose(using DslContext): Unit = {
     classProperty += "curation-page"
@@ -61,19 +66,114 @@ class CurationPage(
     )
 
     withDslContext {
-      hbox {
-        classes = "documents-layout"
-        style {
-          alignItems = "stretch"
-          height = "100%"
-          width = "100%"
-          overflow = "hidden"
-          columnGap = "18px"
-        }
+      if (mobileLayout) {
+        renderMobileLayout()
+      } else {
+        renderDesktopLayout()
+      }
+    }
+  }
 
-        leftColumn()
-        centerColumn()
-        rightColumn()
+  private def renderDesktopLayout()(using DslContext): Unit = {
+    hbox {
+      classes = "documents-layout"
+      style {
+        alignItems = "stretch"
+        height = "100%"
+        width = "100%"
+        overflow = "hidden"
+        columnGap = "18px"
+      }
+
+      leftColumn()
+      centerColumn()
+      rightColumn()
+    }
+  }
+
+  private def renderMobileLayout()(using DslContext): Unit = {
+    drawer {
+      classes = "documents-layout documents-layout--mobile curation-drawer curation-drawer-left"
+      summon[Drawer].width = "320px"
+
+      addDisposable(leftSidebarExpandedProperty.observe(isOpen => summon[Drawer].isOpen = isOpen))
+      addDisposable(summon[Drawer].openProperty.observe(isOpen => leftSidebarExpandedProperty.set(isOpen)))
+
+      drawerNavigation {
+        div {
+          classes = "curation-mobile-sidebar"
+          style {
+            height = "100%"
+            overflowY = "auto"
+            overflowX = "hidden"
+          }
+          leftColumn()
+        }
+      }
+
+      drawerContent {
+        drawer {
+          classes = "curation-drawer curation-drawer-right"
+          summon[Drawer].width = "320px"
+          summon[Drawer].side = Drawer.Side.End
+
+          addDisposable(rightSidebarExpandedProperty.observe(isOpen => summon[Drawer].isOpen = isOpen))
+          addDisposable(summon[Drawer].openProperty.observe(isOpen => rightSidebarExpandedProperty.set(isOpen)))
+
+          drawerNavigation {
+            div {
+              classes = "curation-mobile-sidebar"
+              style {
+                height = "100%"
+                overflowY = "auto"
+                overflowX = "hidden"
+              }
+              rightColumn()
+            }
+          }
+
+          drawerContent {
+            div {
+              classes = "curation-mobile-main"
+              style {
+                minWidth = "0px"
+                position = "relative"
+                height = "100%"
+              }
+
+              renderDockToggles()
+              centerColumn()
+            }
+          }
+        }
+      }
+    }
+  }
+
+  private def renderDockToggles()(using DslContext): Unit = {
+    button("reopen-left-sidebar") {
+      buttonType = "button"
+      classes = Seq("material-icons", "doc-icon-btn", "doc-dock-toggle", "doc-dock-toggle-left")
+      text = "left_panel_open"
+      style {
+        display <-- leftSidebarExpandedProperty.map(isExpanded => if (isExpanded) "none" else "inline-flex")
+      }
+      onClick { _ =>
+        rightSidebarExpandedProperty.set(false)
+        leftSidebarExpandedProperty.set(true)
+      }
+    }
+
+    button("reopen-right-sidebar") {
+      buttonType = "button"
+      classes = Seq("material-icons", "doc-icon-btn", "doc-dock-toggle", "doc-dock-toggle-right")
+      text = "right_panel_open"
+      style {
+        display <-- rightSidebarExpandedProperty.map(isExpanded => if (isExpanded) "none" else "inline-flex")
+      }
+      onClick { _ =>
+        leftSidebarExpandedProperty.set(false)
+        rightSidebarExpandedProperty.set(true)
       }
     }
   }

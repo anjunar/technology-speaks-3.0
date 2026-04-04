@@ -1,4 +1,5 @@
 .curation-page {
+    height: 100%;
     min-height: 100%;
     overflow-x: hidden;
 }
@@ -7,16 +8,15 @@
     min-height: 100%;
 }
 
+.curation-page .curation-mobile-main {
+    height: 100%;
+    min-height: 0;
+}
+
 @media (max-width: 980px) {
     .curation-page .documents-layout {
-        flex-direction: column !important;
-        align-items: stretch !important;
-        overflow-x: hidden !important;
-        overflow-y: auto !important;
-        row-gap: 14px;
-        column-gap: 0 !important;
-        padding: 14px 0 18px;
-        box-sizing: border-box;
+        height: 100%;
+        min-height: 0;
     }
 
     .curation-page .doc-editor-stage,
@@ -30,16 +30,24 @@
         box-sizing: border-box;
     }
 
-    .curation-page .doc-editor-stage {
-        order: 1;
+    .curation-page .curation-mobile-sidebar {
+        height: 100%;
+        padding: 14px 0 18px;
+        box-sizing: border-box;
     }
 
-    .curation-page .documents-layout > .documents-sidebar:first-child {
-        order: 2;
+    .curation-page .curation-mobile-sidebar > .documents-sidebar {
+        width: 100% !important;
+        min-width: 0 !important;
+        row-gap: 14px;
     }
 
-    .curation-page .documents-layout > .documents-sidebar:last-child {
-        order: 3;
+    .curation-page .curation-mobile-main > .doc-editor-stage {
+        height: 100%;
+        min-height: 0;
+        row-gap: 14px;
+        padding: 14px 0 18px;
+        box-sizing: border-box;
     }
 
     .curation-page .glass-border,
@@ -50,5 +58,32 @@
 
     .curation-page .home-page__button {
         min-width: 0;
+    }
+
+    .curation-page .doc-icon-btn {
+        width: 34px;
+        height: 34px;
+        padding: 0 !important;
+        border-radius: 999px;
+        border: 1px solid color-mix(in srgb, var(--glass-border) 12%, transparent);
+        background: var(--glass-bg) !important;
+        box-shadow: inset 0 1px 0 color-mix(in srgb, white 4%, transparent);
+        backdrop-filter: blur(8px) saturate(180%);
+        -webkit-backdrop-filter: blur(8px) saturate(180%);
+        color: var(--color-text-primary);
+    }
+
+    .curation-page .doc-dock-toggle {
+        position: absolute;
+        top: 10px;
+        z-index: 6;
+    }
+
+    .curation-page .doc-dock-toggle-left {
+        left: 0;
+    }
+
+    .curation-page .doc-dock-toggle-right {
+        right: 0;
     }
 }
