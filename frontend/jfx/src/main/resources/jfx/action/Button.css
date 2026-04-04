@@ -5,7 +5,7 @@ button {
     border-radius: 10px;
     font-size: 14px;
     font-weight: 600;
-    padding: 10px 14px;
+    /*padding: 10px 14px;*/
 
     color: var(--color-text);
     transition: background-color 0.18s ease, border-color 0.18s ease, transform 0.18s ease, color 0.18s ease;
