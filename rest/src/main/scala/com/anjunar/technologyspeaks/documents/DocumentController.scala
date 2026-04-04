@@ -174,8 +174,7 @@ class DocumentController(val identityHolder: IdentityHolder, val documentImportS
     managed.title = entity.title
     managed.editor = entity.editor
 
-    val document = managed.merge()
-    val form = new Data(document, SchemaHateoas.enhance(document, Document.schema))
+    val form = new Data(managed, SchemaHateoas.enhance(managed, Document.schema))
 
     managed.addLinks(
       LinkBuilder.create[DocumentController](_.update(null))
