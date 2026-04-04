@@ -2,8 +2,9 @@ package app
 
 import app.components.security.LoggedInUser.loggedInUser
 import app.services.ApplicationService
+import app.support.{LayoutMode, LayoutResolver}
 import app.ui.{CompositeSupport, DivComposite}
-import jfx.action.Button.{button, buttonType, buttonType_=, onClick}
+import jfx.action.Button.{button, buttonType, onClick}
 import jfx.control.Link.link
 import jfx.core.component.ElementComponent.*
 import jfx.dsl.*
@@ -13,11 +14,12 @@ import jfx.layout.Span.span
 import jfx.layout.VBox.vbox
 import jfx.layout.Viewport
 import jfx.layout.Viewport.viewport
+import jfx.router.Router.router
 import jfx.router.WindowRouter.{windowRouter, windowRouterLoading}
 import jfx.statement.ForEach.forEach
 import jfx.statement.ObserveRender.observeRender
 
-class AppShell extends DivComposite {
+class DesktopAppShell extends DivComposite {
 
   override protected def compose(using DslContext): Unit = {
     classes = "app-shell"
@@ -192,7 +194,106 @@ class AppShell extends DivComposite {
   }
 }
 
+class MobileAppShell extends DivComposite {
+
+  override protected def compose(using DslContext): Unit = {
+    classes = "app-shell"
+
+    withDslContext {
+      val service = inject[ApplicationService]
+
+      vbox {
+        style {
+          display = "flex"
+          flexDirection = "column"
+          minHeight = "100vh"
+        }
+
+        div {
+          classes = "app-shell-router-host"
+          style {
+            flex = "1"
+            minHeight = "0px"
+            overflow = "auto"
+          }
+
+          val mobileRouter = router(Routes.routes) {}
+          given jfx.router.Router = mobileRouter
+
+          observeRender(mobileRouter.loadingProperty) { isLoading =>
+            if (isLoading) {
+              div {
+                classes = "glass-border"
+                style {
+                  position = "fixed"
+                  top = "24px"
+                  left = "50%"
+                  transform = "translateX(-50%)"
+                  display = "flex"
+                  zIndex = "1400"
+                }
+
+                vbox {
+                  classes = "glass"
+                  style {
+                    alignItems = "center"
+                    justifyContent = "center"
+                    rowGap = "12px"
+                    padding = "22px 26px"
+                    borderRadius = "20px"
+                    minWidth = "220px"
+                  }
+
+                  span {
+                    classes = Seq("material-icons", "icon")
+                    text = "hourglass_top"
+                  }
+
+                  span {
+                    text = "Ansicht wird geladen..."
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        hbox {
+          classes = "app-footer-bar glass"
+          style {
+            justifyContent = "flex-end"
+          }
+
+          hbox {
+            classes = "app-footer-actions"
+            style {
+              justifyContent = "flex-end"
+              gap = "10px"
+            }
+
+            button("dark_mode") {
+              classes = Seq("material-icons", "app-footer-control")
+              onClick { _ =>
+                service.darkMode.set(!service.darkMode.get)
+              }
+            }
+
+            loggedInUser {
+              classes += "app-header-user"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
 object AppShell {
-  def appShell()(using Scope): AppShell =
-    CompositeSupport.buildComposite(new AppShell())({})
+  def appShell()(using Scope): DivComposite =
+    LayoutResolver.queryOverrideFromNavigation.getOrElse(LayoutResolver.autoDetect()) match {
+      case LayoutMode.Desktop =>
+        CompositeSupport.buildComposite(new DesktopAppShell())
+      case LayoutMode.Mobile =>
+        CompositeSupport.buildComposite(new MobileAppShell())
+    }
 }
