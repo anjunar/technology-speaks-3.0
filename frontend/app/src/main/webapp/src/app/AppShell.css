@@ -113,6 +113,39 @@
     background: var(--color-surface-hover);
 }
 
+@media (max-width: 900px) {
+    .app-footer-bar {
+        padding: 0 10px;
+        gap: 8px;
+    }
+
+    .app-footer-tabs {
+        min-width: 0;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding-bottom: 2px;
+    }
+
+    .app-footer-window {
+        min-width: 132px;
+        max-width: 172px;
+        flex: 0 0 auto;
+    }
+
+    .logged-in-user {
+        min-width: 0;
+        max-width: calc(100vw - 72px);
+    }
+
+    .logged-in-user-label {
+        display: block;
+        max-width: 140px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
+
 .app-shell-nav {
     display: flex;
     position: absolute;

@@ -5,6 +5,7 @@
 @import "core/UsersPage.css";
 @import "document/DocumentPage.css";
 @import "document/IssuePage.css";
+@import "curation/CurationPage.css";
 @import "followers/RelationShipsPage.css";
 @import "followers/GroupsPage.css";
 @import "security/SecurityPages.css";

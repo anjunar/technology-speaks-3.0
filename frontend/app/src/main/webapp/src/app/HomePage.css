@@ -64,6 +64,7 @@
 .home-page__panel-shell {
     position: relative;
     z-index: 1;
+    box-sizing: border-box;
 }
 
 .home-page__hero-copy {
@@ -260,6 +261,8 @@
 
 .home-page__quick-link-row {
     width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
     align-items: center;
     gap: 14px;
     padding: 14px 16px;
@@ -336,5 +339,61 @@
 
     .home-page__title {
         max-width: 100%;
+    }
+}
+
+@media (max-width: 640px) {
+    .home-page__layout {
+        padding: 14px 12px 18px;
+        gap: 14px;
+    }
+
+    .home-page__hero {
+        padding: 18px 14px;
+        gap: 16px;
+    }
+
+    .home-page__hero-copy,
+    .home-page__hero-panel-shell,
+    .home-page__panel-shell {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .home-page__signal-row,
+    .home-page__grid,
+    .home-page__actions {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+
+    .home-page__actions {
+        gap: 10px;
+    }
+
+    .home-page__button,
+    .home-page__signal-card,
+    .home-page__panel,
+    .home-page__hero-panel {
+        width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+    }
+
+    .home-page__button {
+        justify-content: center;
+    }
+
+    .home-page__hero-panel-shell,
+    .home-page__panel-shell {
+        padding: 16px 14px;
+    }
+
+    .home-page__quick-link-row {
+        align-items: flex-start;
+    }
+
+    .home-page__quick-link-arrow {
+        margin-left: auto;
     }
 }

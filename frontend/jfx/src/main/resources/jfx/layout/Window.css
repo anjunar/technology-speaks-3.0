@@ -161,3 +161,35 @@ html[data-theme="light"] .jfx-window .jfx-window__header {
 html[data-theme="light"] .jfx-window .jfx-window__title {
     color: color-mix(in srgb, var(--color-text-soft) 88%, black 12%);
 }
+
+@media (max-width: 900px) {
+    .jfx-window {
+        top: 8px !important;
+        left: 8px !important;
+        width: calc(100vw - 16px) !important;
+        height: calc(100dvh - 16px) !important;
+        min-width: 0 !important;
+        min-height: 0 !important;
+        max-width: calc(100vw - 16px) !important;
+        max-height: calc(100dvh - 16px) !important;
+    }
+
+    .jfx-window .jfx-window__surface {
+        border-radius: 14px;
+    }
+
+    .jfx-window .jfx-window__header {
+        cursor: default;
+    }
+
+    .jfx-window.jfx-window--resizable .jfx-window__handle--nw,
+    .jfx-window.jfx-window--resizable .jfx-window__handle--ne,
+    .jfx-window.jfx-window--resizable .jfx-window__handle--se,
+    .jfx-window.jfx-window--resizable .jfx-window__handle--sw,
+    .jfx-window.jfx-window--resizable .jfx-window__handle--n,
+    .jfx-window.jfx-window--resizable .jfx-window__handle--s,
+    .jfx-window.jfx-window--resizable .jfx-window__handle--w,
+    .jfx-window.jfx-window--resizable .jfx-window__handle--e {
+        display: none;
+    }
+}

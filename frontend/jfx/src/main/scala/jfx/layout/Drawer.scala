@@ -9,6 +9,7 @@ final class Drawer extends ManagedElementComponent[HTMLDivElement] {
 
   val openProperty: Property[Boolean] = Property(false)
   val widthProperty: Property[String] = Property("280px")
+  val sideProperty: Property[Drawer.Side] = Property(Drawer.Side.Start)
   val closeOnScrimClickProperty: Property[Boolean] = Property(true)
 
   private val scrim = new Div()
@@ -33,6 +34,9 @@ final class Drawer extends ManagedElementComponent[HTMLDivElement] {
 
   private val widthObserver = widthProperty.observe(_ => syncPanelWidth())
   addDisposable(widthObserver)
+
+  private val sideObserver = sideProperty.observe(syncSideState)
+  addDisposable(sideObserver)
 
   private val scrimClickListener: Event => Unit = _ => {
     if (closeOnScrimClickProperty.get && openProperty.get) {
@@ -68,6 +72,12 @@ final class Drawer extends ManagedElementComponent[HTMLDivElement] {
   def closeOnScrimClick_=(value: Boolean): Unit =
     closeOnScrimClickProperty.set(value)
 
+  def side: Drawer.Side =
+    sideProperty.get
+
+  def side_=(value: Drawer.Side): Unit =
+    sideProperty.set(value)
+
   def open(): Unit =
     openProperty.set(true)
 
@@ -87,6 +97,11 @@ final class Drawer extends ManagedElementComponent[HTMLDivElement] {
       navigationHost.classProperty += "jfx-drawer__navigation"
       contentHost.classProperty += "jfx-drawer__content"
 
+      panelShell.element.style.height = "100%"
+      panel.element.style.height = "100%"
+      navigationHost.element.style.height = "100%"
+      contentHost.element.style.height = "100%"
+
       addChild(scrim)
       addChild(panelShell)
       addChild(contentHost)
@@ -95,6 +110,7 @@ final class Drawer extends ManagedElementComponent[HTMLDivElement] {
       panel.addChild(navigationHost)
 
       syncPanelWidth()
+      syncSideState(sideProperty.get)
     }
 
   private[jfx] def navigationHostComponent: Div =
@@ -114,14 +130,29 @@ final class Drawer extends ManagedElementComponent[HTMLDivElement] {
 
   private def syncPanelWidth(): Unit = {
     val widthValue = widthProperty.get
-    val responsiveWidth = s"min(84vw, $widthValue)"
+    val responsiveWidth = s"min(92vw, $widthValue)"
     panel.element.style.width = widthValue
     panelShell.element.style.width =
       if (openProperty.get) responsiveWidth else "0px"
   }
+
+  private def syncSideState(side: Drawer.Side): Unit = {
+    element.classList.remove("jfx-drawer--start")
+    element.classList.remove("jfx-drawer--end")
+    element.classList.add(
+      side match {
+        case Drawer.Side.Start => "jfx-drawer--start"
+        case Drawer.Side.End => "jfx-drawer--end"
+      }
+    )
+  }
 }
 
 object Drawer {
+
+  enum Side {
+    case Start, End
+  }
 
   def drawer(init: Drawer ?=> Unit = {}): Drawer =
     DslRuntime.currentScope { currentScope =>
@@ -161,6 +192,12 @@ object Drawer {
 
   def closeOnScrimClick_=(value: Boolean)(using drawer: Drawer): Unit =
     drawer.closeOnScrimClick = value
+
+  def drawerSide(using drawer: Drawer): Drawer.Side =
+    drawer.side
+
+  def drawerSide_=(value: Drawer.Side)(using drawer: Drawer): Unit =
+    drawer.side = value
 
   def openDrawer(using drawer: Drawer): Unit =
     drawer.open()

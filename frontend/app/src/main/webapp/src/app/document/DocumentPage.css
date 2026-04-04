@@ -14,6 +14,10 @@
     align-items: stretch;
 }
 
+.document-page .documents-layout--desktop {
+    gap: 0;
+}
+
 .document-page .doc-panel {
     position: relative;
     min-height: 0;
@@ -51,12 +55,12 @@
 
 .document-page .doc-sidebar {
     width: 288px;
-    flex: 0 0 288px;
+    flex: 1 1 288px;
 }
 
 .document-page .doc-sidebar-left {
     width: 420px;
-    flex: 0 0 420px;
+    flex: 1 1 420px;
 }
 
 .document-page .doc-editor-panel {
@@ -81,6 +85,52 @@
 .document-page .doc-editor-stage {
     position: relative;
     min-width: 0;
+}
+
+.document-page .documents-layout--mobile {
+    display: block;
+    height: 100%;
+    width: 100%;
+}
+
+.document-page .documents-drawer {
+    height: 100%;
+}
+
+.document-page .documents-layout--desktop > .jfx-drawer__content,
+.document-page .documents-layout--desktop .documents-drawer-right > .jfx-drawer__content {
+    min-width: 0;
+    min-height: 0;
+}
+
+.document-page .documents-layout--desktop > .jfx-drawer__panel-shell,
+.document-page .documents-layout--desktop .documents-drawer-right > .jfx-drawer__panel-shell,
+.document-page .documents-layout--desktop > .jfx-drawer__panel-shell > .jfx-drawer__panel,
+.document-page .documents-layout--desktop .documents-drawer-right > .jfx-drawer__panel-shell > .jfx-drawer__panel,
+.document-page .documents-layout--desktop .doc-sidebar {
+    height: 100%;
+    min-height: 0;
+}
+
+.document-page .documents-layout--desktop > .jfx-drawer__panel-shell > .jfx-drawer__panel,
+.document-page .documents-layout--desktop .documents-drawer-right > .jfx-drawer__panel-shell > .jfx-drawer__panel {
+    position: relative;
+}
+
+.document-page .documents-layout--desktop .jfx-drawer__navigation {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    min-height: 0;
+    height: auto;
+}
+
+.document-page .documents-mobile-main {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    height: 100%;
 }
 
 .document-page .doc-panel-shell {
@@ -719,5 +769,115 @@
     .document-page .doc-table-shell,
     .document-page .issues-list-shell {
         min-height: 320px;
+    }
+}
+
+@media (max-width: 767px) {
+    .document-page {
+        padding: 0;
+        overflow: hidden;
+    }
+
+    .document-page .documents-layout,
+    .document-page .documents-layout--mobile,
+    .document-page .documents-drawer,
+    .document-page .documents-mobile-main,
+    .document-page .doc-editor-stage,
+    .document-page .doc-editor-panel,
+    .document-page .doc-editor-panel form {
+        height: 100%;
+        min-height: 0;
+    }
+
+    .document-page .documents-layout--mobile {
+        overflow: hidden;
+    }
+
+    .document-page .doc-panel {
+        border-radius: 0;
+    }
+
+    .document-page .doc-panel::before {
+        inset: 6px;
+        border-radius: 12px;
+    }
+
+    .document-page .doc-panel-shell {
+        padding: 12px 10px calc(12px + env(safe-area-inset-bottom, 0px));
+        gap: 10px;
+    }
+
+    .document-page .doc-sidebar,
+    .document-page .doc-sidebar-left,
+    .document-page .doc-sidebar-right {
+        width: 100%;
+        flex: 0 0 auto;
+    }
+
+    .document-page .doc-titlebar {
+        width: 100%;
+        margin: 0;
+        padding: 56px 12px 10px;
+        gap: 10px;
+    }
+
+    .document-page .doc-title-input input,
+    .document-page .doc-titlebar input {
+        font-size: clamp(22px, 8.5vw, 34px);
+    }
+
+    .document-page .doc-editor {
+        width: 100%;
+        margin: 0;
+        padding: 0 12px 24px;
+    }
+
+    .document-page .doc-editor .ProseMirror {
+        padding: 14px 0 24px;
+        font-size: 16px;
+        line-height: 1.72;
+    }
+
+    .document-page .doc-editor .ProseMirror p {
+        max-width: none;
+    }
+
+    .document-page .doc-dock-toggle {
+        top: 10px;
+        z-index: 6;
+    }
+
+    .document-page .doc-dock-toggle-left {
+        left: 12px;
+    }
+
+    .document-page .doc-dock-toggle-right {
+        right: 12px;
+    }
+
+    .document-page .doc-search,
+    .document-page .doc-import,
+    .document-page .doc-table-shell,
+    .document-page .issues-list-shell,
+    .document-page .issue-card,
+    .document-page .doc-import__path {
+        border-radius: 14px;
+    }
+
+    .document-page .doc-table-shell,
+    .document-page .issues-list-shell {
+        min-height: 240px;
+    }
+
+    .document-page .doc-table .jfx-table-header-viewport {
+        height: 52px !important;
+    }
+
+    .document-page .doc-table .jfx-table-header-cell {
+        font-size: 12px;
+    }
+
+    .document-page .doc-table .jfx-table-cell-host {
+        padding: 0 10px;
     }
 }

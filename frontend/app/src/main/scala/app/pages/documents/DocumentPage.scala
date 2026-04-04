@@ -8,7 +8,7 @@ import app.domain.documents.{Document, Issue, IssueCreated, IssueUpdated}
 import app.editor.plugins.{DocumentLinkPlugin, DocumentLinkSuggestion}
 import app.editor.plugins.DocumentLinkPlugin.documentLinkPlugin
 import app.services.ApplicationService
-import app.support.{Api, Navigation, RemotePageQuery, RemoteTableList, TimeAgo}
+import app.support.{Api, LayoutMode, LayoutResolver, Navigation, RemotePageQuery, RemoteTableList, TimeAgo}
 import app.ui.{CompositeSupport, DivComposite, PageComposite}
 import jfx.action.Button.{button, buttonType, onClick}
 import jfx.control.TableColumn.{cellFactory, cellValueFactory, column, prefWidth}
@@ -25,6 +25,8 @@ import jfx.form.Form
 import jfx.form.Form.{form, onSubmit}
 import jfx.form.Input.{booleanValueProperty, input, inputType, placeholder, standaloneInput, stringValueProperty}
 import jfx.form.editor.plugins.*
+import jfx.layout.Drawer
+import jfx.layout.Drawer.{drawer, drawerContent, drawerNavigation}
 import jfx.layout.Div.div
 import jfx.layout.HBox.hbox
 import jfx.layout.Span.span
@@ -40,14 +42,15 @@ import scala.util.{Failure, Success}
 class DocumentPage(val model: Document) extends PageComposite("Dokument") {
 
   private given ExecutionContext = ExecutionContext.global
+  private val mobileLayout = LayoutResolver.queryOverrideFromNavigation.getOrElse(LayoutResolver.autoDetect()) == LayoutMode.Mobile
 
   private val documentsPageSize = 10
   private val issuesPageSize = 10
 
   private val currentDocumentProperty: Property[Document] = Property(if (model != null) model else new Document())
   private val searchQueryProperty: Property[String] = Property("")
-  private val leftSidebarExpandedProperty: Property[Boolean] = Property(true)
-  private val rightSidebarExpandedProperty: Property[Boolean] = Property(true)
+  private val leftSidebarExpandedProperty: Property[Boolean] = Property(!mobileLayout)
+  private val rightSidebarExpandedProperty: Property[Boolean] = Property(!mobileLayout)
   private val documentsProperty: RemoteListProperty[Data[Document], RemotePageQuery] =
     RemoteTableList.create[Data[Document]](pageSize = documentsPageSize) { query =>
       Document.list(query.index, query.limit, searchQueryProperty.get, sorting = query.effectiveSortSpecs(Seq("bookname:asc", "title:asc")))
@@ -101,14 +104,24 @@ class DocumentPage(val model: Document) extends PageComposite("Dokument") {
         }
       )
 
-      hbox {
-        classes = "documents-layout"
-        style {
-          height = "100%"
-          width = "100%"
-          overflow = "hidden"
-        }
+      if (mobileLayout) {
+        renderMobileLayout()
+      } else {
+        renderDesktopLayout()
+      }
+    }
+  }
 
+  private def renderDesktopLayout()(using DslContext): Unit = {
+    drawer {
+      classes = "documents-layout documents-layout--desktop documents-drawer documents-drawer-left"
+      summon[Drawer].width = "420px"
+      summon[Drawer].isOpen = leftSidebarExpandedProperty.get
+
+      addDisposable(leftSidebarExpandedProperty.observe(isOpen => summon[Drawer].isOpen = isOpen))
+      addDisposable(summon[Drawer].openProperty.observe(isOpen => leftSidebarExpandedProperty.set(isOpen)))
+
+      drawerNavigation {
         DocumentListPanel.panel(
           documentsProperty,
           currentDocumentProperty,
@@ -118,41 +131,130 @@ class DocumentPage(val model: Document) extends PageComposite("Dokument") {
           openDocument,
           handleDocumentsImported
         )
+      }
 
-        div {
-          classes = "doc-editor-stage"
-          style {
-            flex = "1"
-            minWidth = "0px"
-            position = "relative"
+      drawerContent {
+        drawer {
+          classes = "documents-drawer documents-drawer-right"
+          summon[Drawer].width = "304px"
+          summon[Drawer].side = Drawer.Side.End
+          summon[Drawer].isOpen = rightSidebarExpandedProperty.get
+
+          addDisposable(rightSidebarExpandedProperty.observe(isOpen => summon[Drawer].isOpen = isOpen))
+          addDisposable(summon[Drawer].openProperty.observe(isOpen => rightSidebarExpandedProperty.set(isOpen)))
+
+          drawerNavigation {
+            IssuesPanel.panel(currentDocumentProperty, issuesProperty, curationCandidatesProperty, rightSidebarExpandedProperty)
           }
 
-          button("reopen-left-sidebar") {
-            buttonType = "button"
-            classes = Seq("material-icons", "doc-icon-btn", "doc-dock-toggle", "doc-dock-toggle-left")
-            text = "left_panel_open"
-            style {
-              display <-- leftSidebarExpandedProperty.map(isExpanded => if (isExpanded) "none" else "inline-flex")
-            }
-            onClick(_ => leftSidebarExpandedProperty.set(true))
-          }
-
-          button("reopen-right-sidebar") {
-            buttonType = "button"
-            classes = Seq("material-icons", "doc-icon-btn", "doc-dock-toggle", "doc-dock-toggle-right")
-            text = "right_panel_open"
-            style {
-              display <-- rightSidebarExpandedProperty.map(isExpanded => if (isExpanded) "none" else "inline-flex")
-            }
-            onClick(_ => rightSidebarExpandedProperty.set(true))
-          }
-
-          observeRender(currentDocumentProperty) { document =>
-            DocumentEditorPanel.panel(document, curationCandidatesProperty, handleDocumentSaved, openDocumentByHref)
+          drawerContent {
+            renderEditorStage()
           }
         }
+      }
+    }
+  }
 
-        IssuesPanel.panel(currentDocumentProperty, issuesProperty, curationCandidatesProperty, rightSidebarExpandedProperty)
+  private def renderMobileLayout()(using DslContext): Unit = {
+    drawer {
+      classes = "documents-layout documents-layout--mobile documents-drawer documents-drawer-left"
+      summon[Drawer].width = "320px"
+
+      addDisposable(leftSidebarExpandedProperty.observe(isOpen => summon[Drawer].isOpen = isOpen))
+      addDisposable(summon[Drawer].openProperty.observe(isOpen => leftSidebarExpandedProperty.set(isOpen)))
+
+      drawerNavigation {
+        DocumentListPanel.panel(
+          documentsProperty,
+          currentDocumentProperty,
+          searchQueryProperty,
+          leftSidebarExpandedProperty,
+          createNewDocument,
+          openDocument,
+          handleDocumentsImported
+        )
+      }
+
+      drawerContent {
+        drawer {
+          classes = "documents-drawer documents-drawer-right"
+          summon[Drawer].width = "304px"
+          summon[Drawer].side = Drawer.Side.End
+
+          addDisposable(rightSidebarExpandedProperty.observe(isOpen => summon[Drawer].isOpen = isOpen))
+          addDisposable(summon[Drawer].openProperty.observe(isOpen => rightSidebarExpandedProperty.set(isOpen)))
+
+          drawerNavigation {
+            IssuesPanel.panel(currentDocumentProperty, issuesProperty, curationCandidatesProperty, rightSidebarExpandedProperty)
+          }
+
+          drawerContent {
+            div {
+              classes = Seq("documents-mobile-main", "doc-editor-stage")
+              style {
+                minWidth = "0px"
+                position = "relative"
+                height = "100%"
+              }
+
+              renderDockToggles()
+
+              observeRender(currentDocumentProperty) { document =>
+                DocumentEditorPanel.panel(document, curationCandidatesProperty, handleDocumentSaved, openDocumentByHref)
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  private def renderEditorStage()(using DslContext): Unit = {
+    div {
+      classes = "doc-editor-stage"
+      style {
+        flex = "1"
+        minWidth = "0px"
+        position = "relative"
+        height = "100%"
+      }
+
+      renderDockToggles()
+
+      observeRender(currentDocumentProperty) { document =>
+        DocumentEditorPanel.panel(document, curationCandidatesProperty, handleDocumentSaved, openDocumentByHref)
+      }
+    }
+  }
+
+  private def renderDockToggles()(using DslContext): Unit = {
+    button("reopen-left-sidebar") {
+      buttonType = "button"
+      classes = Seq("material-icons", "doc-icon-btn", "doc-dock-toggle", "doc-dock-toggle-left")
+      text = "left_panel_open"
+      style {
+        display <-- leftSidebarExpandedProperty.map(isExpanded => if (isExpanded) "none" else "inline-flex")
+      }
+      onClick { _ =>
+        if (mobileLayout) {
+          rightSidebarExpandedProperty.set(false)
+        }
+        leftSidebarExpandedProperty.set(true)
+      }
+    }
+
+    button("reopen-right-sidebar") {
+      buttonType = "button"
+      classes = Seq("material-icons", "doc-icon-btn", "doc-dock-toggle", "doc-dock-toggle-right")
+      text = "right_panel_open"
+      style {
+        display <-- rightSidebarExpandedProperty.map(isExpanded => if (isExpanded) "none" else "inline-flex")
+      }
+      onClick { _ =>
+        if (mobileLayout) {
+          leftSidebarExpandedProperty.set(false)
+        }
+        rightSidebarExpandedProperty.set(true)
       }
     }
   }
@@ -176,6 +278,9 @@ class DocumentPage(val model: Document) extends PageComposite("Dokument") {
     val document = new Document()
     document.editable.set(true)
     currentDocumentProperty.set(document)
+    if (mobileLayout) {
+      leftSidebarExpandedProperty.set(false)
+    }
   }
 
   private def openDocument(document: Document): Unit = {
@@ -187,6 +292,9 @@ class DocumentPage(val model: Document) extends PageComposite("Dokument") {
 
     if (selectedId == null) {
       currentDocumentProperty.set(document)
+      if (mobileLayout) {
+        leftSidebarExpandedProperty.set(false)
+      }
     } else if (selectedId == currentId) {
       if (currentDocumentProperty.get.links.isEmpty && document.links.nonEmpty) {
         currentDocumentProperty.set(document)
@@ -195,7 +303,12 @@ class DocumentPage(val model: Document) extends PageComposite("Dokument") {
       Document
         .read(selectedId.toString)
         .map(_.data)
-        .foreach(currentDocumentProperty.set)
+        .foreach { loaded =>
+          currentDocumentProperty.set(loaded)
+          if (mobileLayout) {
+            leftSidebarExpandedProperty.set(false)
+          }
+        }
     }
   }
 
@@ -207,7 +320,12 @@ class DocumentPage(val model: Document) extends PageComposite("Dokument") {
         Document
           .read(documentId)
           .map(_.data)
-          .foreach(currentDocumentProperty.set)
+          .foreach { loaded =>
+            currentDocumentProperty.set(loaded)
+            if (mobileLayout) {
+              leftSidebarExpandedProperty.set(false)
+            }
+          }
       }
     }
   }
@@ -217,6 +335,9 @@ class DocumentPage(val model: Document) extends PageComposite("Dokument") {
     if (saved != null && saved.data != null) {
       saved.data.editable.set(false)
       currentDocumentProperty.set(saved.data)
+      if (mobileLayout) {
+        leftSidebarExpandedProperty.set(false)
+      }
     }
   }
 
@@ -251,6 +372,7 @@ private final class DocumentListPanel(
   override protected def compose(using DslContext): Unit = {
     classes = Seq("doc-panel", "glass", "doc-sidebar", "doc-sidebar-left")
     style {
+      height = "100%"
       display <-- expanded.map(isExpanded => if (isExpanded) "block" else "none")
     }
 
@@ -677,7 +799,7 @@ private final class DocumentEditorPanel(
           }
         }
 
-        SectionProvenancePanel.panel(document, provenance)
+//        SectionProvenancePanel.panel(document, provenance)
 
         val editorField = editor("editor") {
           classes = Seq("doc-editor", "glass")
@@ -733,6 +855,7 @@ private final class IssuesPanel(
   override protected def compose(using DslContext): Unit = {
     classes = Seq("doc-panel", "glass", "doc-sidebar", "doc-sidebar-right")
     style {
+      height = "100%"
       display <-- expanded.map(isExpanded => if (isExpanded) "block" else "none")
     }
 
