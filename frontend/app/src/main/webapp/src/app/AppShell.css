@@ -113,6 +113,144 @@
     background: var(--color-surface-hover);
 }
 
+.app-shell-mobile-drawer:not(.jfx-drawer--open) > .jfx-drawer__panel-shell {
+    overflow: hidden;
+}
+
+div.jfx-drawer.app-shell-mobile-drawer .app-shell-nav-mobile {
+    position: relative;
+    top: auto;
+    left: auto;
+    inset: auto;
+    transform: none;
+    box-shadow: none;
+}
+
+.app-shell-mobile {
+    height: 100%;
+}
+
+.app-shell-mobile-drawer {
+    flex: 1;
+    min-height: 0;
+}
+
+div.jfx-drawer.app-shell-mobile-drawer > .jfx-drawer__panel-shell > .jfx-drawer__panel {
+    background: var(--glass-bg);
+    border: 0;
+    box-shadow: none;
+    backdrop-filter: blur(18px) saturate(180%);
+    -webkit-backdrop-filter: blur(18px) saturate(180%);
+}
+
+div.jfx-drawer.app-shell-mobile-drawer.jfx-drawer--open > .jfx-drawer__panel-shell > .jfx-drawer__panel {
+    box-shadow: none;
+}
+
+.app-shell-nav-mobile {
+    position: relative;
+    inset: auto;
+    transform: none;
+    width: 100%;
+    min-width: 100%;
+    height: 100%;
+    gap: 10px;
+    padding: 18px 14px 16px;
+    border: 0;
+    border: 0;
+    border-radius: 0;
+    box-sizing: border-box;
+    box-shadow: none;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: transparent;
+    scrollbar-width: none;
+}
+
+.app-shell-nav-mobile::-webkit-scrollbar {
+    display: none;
+}
+
+.app-shell-nav-mobile::before {
+    content: "Navigation";
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--color-text-soft) 84%, white 16%);
+    opacity: 0.9;
+    padding: 4px 12px 10px;
+}
+
+.app-shell-nav-mobile .app-shell-nav-link {
+    width: 100%;
+    border-radius: 18px;
+}
+
+.app-shell-nav-mobile .app-shell-nav-link:hover {
+    background: color-mix(in srgb, var(--color-surface-scrim) 68%, transparent);
+    border-color: var(--color-border-strong);
+    transform: none;
+}
+
+.app-shell-nav-mobile .app-shell-nav-item {
+    flex-direction: row;
+    align-items: center !important;
+    justify-content: flex-start;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 16px;
+}
+
+.app-shell-nav-mobile .icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    min-width: 42px;
+    height: 42px;
+    font-size: 24px;
+    border-radius: 11px;
+    color: var(--color-text-soft);
+    box-shadow: inset 0 1px 0 var(--color-border-subtle);
+}
+
+.app-shell-nav-mobile .app-shell-nav-text {
+    color: var(--color-text-soft);
+    font-size: 14px;
+    font-weight: 600;
+    text-align: left;
+    line-height: 1.2;
+}
+
+.app-footer-control-nav {
+    flex: 0 0 auto;
+}
+
+.app-shell-mobile-drawer .app-shell-nav-mobile .icon {
+    font-size: 24px;
+}
+
+@media (max-width: 900px) {
+    .app-shell-mobile .app-footer-bar {
+        width: 100%;
+        padding: 0 10px;
+        margin: 0;
+        border-left: 0;
+        border-right: 0;
+        border-bottom: 0;
+        border-radius: 0;
+    }
+
+    .app-shell-mobile .app-footer-actions {
+        min-width: 0;
+    }
+
+    .app-shell-mobile .logged-in-user {
+        max-width: calc(100vw - 136px);
+    }
+}
+
 @media (max-width: 900px) {
     .app-footer-bar {
         padding: 0 10px;

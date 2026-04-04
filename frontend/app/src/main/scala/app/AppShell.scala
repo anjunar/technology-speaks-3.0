@@ -5,9 +5,13 @@ import app.services.ApplicationService
 import app.support.{LayoutMode, LayoutResolver}
 import app.ui.{CompositeSupport, DivComposite}
 import jfx.action.Button.{button, buttonType, onClick}
-import jfx.control.Link.link
+import jfx.control.Link.{link, onClick as onLinkClick}
+import jfx.core.component.CompositeComponent.DslContext
 import jfx.core.component.ElementComponent.*
+import jfx.core.state.Property
 import jfx.dsl.*
+import jfx.layout.Drawer
+import jfx.layout.Drawer.{drawer, drawerContent, drawerNavigation}
 import jfx.layout.Div.div
 import jfx.layout.HBox.hbox
 import jfx.layout.Span.span
@@ -18,6 +22,67 @@ import jfx.router.Router.router
 import jfx.router.WindowRouter.{windowRouter, windowRouterLoading}
 import jfx.statement.ForEach.forEach
 import jfx.statement.ObserveRender.observeRender
+
+object AppShellNavigation {
+
+  def render(service: ApplicationService, variant: String, closeNavigation: () => Unit = () => {})(using DslContext): Unit = {
+    link("/") {
+      classes = Seq("app-shell-nav-link", s"app-shell-nav-link--$variant")
+
+      onLinkClick { _ =>
+        closeNavigation()
+      }
+
+      vbox {
+        classes = Seq("app-shell-nav-item", s"app-shell-nav-item--$variant")
+
+        style {
+          alignItems = "center"
+        }
+
+        span {
+          classes = Seq("material-icons", "icon")
+          text = "home"
+        }
+
+        span {
+          classes = "app-shell-nav-text"
+          text = "Home"
+        }
+      }
+    }
+
+    observeRender(service.app) { app =>
+      app.links.foreach { currentLink =>
+        link(currentLink.url) {
+          classes = Seq("app-shell-nav-link", s"app-shell-nav-link--$variant")
+
+          onLinkClick { _ =>
+            closeNavigation()
+          }
+
+          vbox {
+            classes = Seq("app-shell-nav-item", s"app-shell-nav-item--$variant")
+
+            style {
+              alignItems = "center"
+            }
+
+            span {
+              classes = Seq("material-icons", "icon")
+              text = currentLink.icon
+            }
+
+            span {
+              classes = "app-shell-nav-text"
+              text = currentLink.name
+            }
+          }
+        }
+      }
+    }
+  }
+}
 
 class DesktopAppShell extends DivComposite {
 
@@ -51,54 +116,7 @@ class DesktopAppShell extends DivComposite {
               }
             }))
 
-            link("/") {
-              classes = "app-shell-nav-link"
-
-              vbox {
-                classes = "app-shell-nav-item"
-
-                style {
-                  alignItems = "center"
-                }
-
-                span {
-                  classes = Seq("material-icons", "icon")
-                  text = "home"
-                }
-
-                span {
-                  classes = "app-shell-nav-text"
-                  text = "Home"
-                }
-              }
-            }
-
-            observeRender(service.app) { app =>
-              app.links.foreach { currentLink =>
-                link(currentLink.url) {
-                  classes = "app-shell-nav-link"
-
-                  vbox {
-                    classes = "app-shell-nav-item"
-
-                    style {
-                      alignItems = "center"
-                    }
-
-                    span {
-                      classes = Seq("material-icons", "icon")
-                      text = currentLink.icon
-                    }
-
-                    span {
-                      classes = "app-shell-nav-text"
-                      text = currentLink.name
-                    }
-                  }
-                }
-              }
-
-            }
+            AppShellNavigation.render(service, "desktop")
           }
 
           div {
@@ -201,56 +219,77 @@ class MobileAppShell extends DivComposite {
 
     withDslContext {
       val service = inject[ApplicationService]
+      val mobileNavigationOpen = Property(false)
 
       vbox {
+        classes = "app-shell-mobile"
+
         style {
           display = "flex"
           flexDirection = "column"
           minHeight = "100vh"
         }
 
-        div {
-          classes = "app-shell-router-host"
-          style {
-            flex = "1"
-            minHeight = "0px"
-            overflow = "auto"
+        drawer {
+          classes = "app-shell-mobile-drawer"
+
+          val mobileDrawer = summon[Drawer]
+          mobileDrawer.width = "296px"
+          addDisposable(Property.subscribeBidirectional(mobileNavigationOpen, mobileDrawer.openProperty))
+
+          drawerNavigation {
+            div {
+              classes = Seq("app-shell-nav", "app-shell-nav-mobile")
+
+              AppShellNavigation.render(service, "mobile", () => mobileNavigationOpen.set(false))
+            }
           }
 
-          val mobileRouter = router(Routes.routes) {}
-          given jfx.router.Router = mobileRouter
+          drawerContent {
+            div {
+              classes = "app-shell-router-host"
+              style {
+                flex = "1"
+                minHeight = "0px"
+                overflow = "auto"
+              }
 
-          observeRender(mobileRouter.loadingProperty) { isLoading =>
-            if (isLoading) {
-              div {
-                classes = "glass-border"
-                style {
-                  position = "fixed"
-                  top = "24px"
-                  left = "50%"
-                  transform = "translateX(-50%)"
-                  display = "flex"
-                  zIndex = "1400"
-                }
+              val mobileRouter = router(Routes.routes) {}
+              given jfx.router.Router = mobileRouter
 
-                vbox {
-                  classes = "glass"
-                  style {
-                    alignItems = "center"
-                    justifyContent = "center"
-                    rowGap = "12px"
-                    padding = "22px 26px"
-                    borderRadius = "20px"
-                    minWidth = "220px"
-                  }
+              observeRender(mobileRouter.loadingProperty) { isLoading =>
+                if (isLoading) {
+                  div {
+                    classes = "glass-border"
+                    style {
+                      position = "fixed"
+                      top = "24px"
+                      left = "50%"
+                      transform = "translateX(-50%)"
+                      display = "flex"
+                      zIndex = "1400"
+                    }
 
-                  span {
-                    classes = Seq("material-icons", "icon")
-                    text = "hourglass_top"
-                  }
+                    vbox {
+                      classes = "glass"
+                      style {
+                        alignItems = "center"
+                        justifyContent = "center"
+                        rowGap = "12px"
+                        padding = "22px 26px"
+                        borderRadius = "20px"
+                        minWidth = "220px"
+                      }
 
-                  span {
-                    text = "Ansicht wird geladen..."
+                      span {
+                        classes = Seq("material-icons", "icon")
+                        text = "hourglass_top"
+                      }
+
+                      span {
+                        text = "Ansicht wird geladen..."
+                      }
+                    }
                   }
                 }
               }
@@ -261,25 +300,41 @@ class MobileAppShell extends DivComposite {
         hbox {
           classes = "app-footer-bar glass"
           style {
-            justifyContent = "flex-end"
+            justifyContent = "space-between"
           }
 
           hbox {
             classes = "app-footer-actions"
             style {
-              justifyContent = "flex-end"
               gap = "10px"
             }
 
-            button("dark_mode") {
-              classes = Seq("material-icons", "app-footer-control")
-              onClick { _ =>
-                service.darkMode.set(!service.darkMode.get)
+            observeRender(mobileNavigationOpen) { isOpen =>
+              button(if (isOpen) "close" else "menu") {
+                classes = Seq("material-icons", "app-footer-control", "app-footer-control-nav")
+                onClick { _ =>
+                  mobileNavigationOpen.set(!mobileNavigationOpen.get)
+                }
               }
             }
 
-            loggedInUser {
-              classes += "app-header-user"
+            hbox {
+              classes = "app-footer-actions"
+              style {
+                justifyContent = "flex-end"
+                gap = "10px"
+              }
+
+              button("dark_mode") {
+                classes = Seq("material-icons", "app-footer-control")
+                onClick { _ =>
+                  service.darkMode.set(!service.darkMode.get)
+                }
+              }
+
+              loggedInUser {
+                classes += "app-header-user"
+              }
             }
           }
         }
